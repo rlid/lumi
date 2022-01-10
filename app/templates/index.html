@@ -4,7 +4,7 @@
     <div class="container-fluid vh-100 d-flex flex-column">
         <nav class="navbar navbar-expand-xxl navbar-dark bg-dark flex-shrink-0">
             <a class='navbar-brand' href='{{ url_for('index') }}'>
-                <img src='{{ url_for('static', filename='favicon.ico') }}' width='30' height='30'
+                <img src='{{ url_for('static', filename='favicon.png') }}' width='32' height='32'
                      class='d-inline-block align-top' alt=''>
                 Knowble
             </a>
@@ -19,7 +19,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
                     <li class="nav-item btn-outline-success rounded">
                         <a class="nav-link me-1" aria-current="page" href="#">
                             <i class="bi bi-plus-square mx-1"></i>Post a Request
@@ -39,11 +39,11 @@
                     </li>
                     <li class="nav-item btn-outline-success rounded">
                         <a class="nav-link me-1" href="#">
-                            <i class="bi bi-box-arrow-up-right mx-1"></i>About Us</a>
+                            <i class="bi bi-camera-video-off mx-1"></i>Privacy Policy</a>
                     </li>
                     <li class="nav-item btn-outline-success rounded">
                         <a class="nav-link me-1" href="#">
-                            <i class="bi bi-camera-video-off mx-1"></i>Privacy Policy</a>
+                            <i class="bi bi-box-arrow-up-right mx-1"></i>About Us</a>
                     </li>
                     <!--
                     <li class="nav-item dropdown">
@@ -83,28 +83,62 @@
             </div>
         </nav>
 
-        <div class="row flex-grow-1 align-items-center justify-content-center">
-            <div class="col-sm-8 col-md-6 col-lg-4 bg-white rounded p-4 shadow">
-                <div class="mb-3">
-                    <form>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password">
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember">
-                            <label for="remember" class="form-label">Remember Me</label>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Login</button>
-                    </form>
+        <div class="container flex-grow-1">
+            <div class="row h-100 align-items-center justify-content-center">
+                <div class="col-sm-8 col-md-6 col-lg-4 bg-white rounded p-4 shadow">
+                    <div class="mb-3">
+                        <form>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password">
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember">
+                                <label for="remember" class="form-label">Remember Me</label>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Login</button>
+                        </form>
+                    </div>
+                    <p class="mb-0 text-center text-muted">Don't have an account? <a href="#"
+                                                                                     class="text-decoration-none">Sign
+                        Up</a></p>
                 </div>
-                <p class="mb-0 text-center text-muted">Don't have an account? <a href="#" class="text-decoration-none">Sign
-                    Up</a></p>
             </div>
         </div>
     </div>
+
+    <!--
+    <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center">
+                <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+                    <img src='{{ url_for('static', filename='favicon-32x32.png') }}' width='32' height='32'
+                         class='d-inline-block align-top' alt=''>
+                </a>
+                <span class="text-muted">&copy; 2022 Knowble Ltd.</span>
+            </div>
+
+            <ul class="nav col-md-4 justify-content-end">
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Privacy Policy</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About Us</a></li>
+            </ul>
+        </footer>
+    </div>
+    -->
+    <!--
+    <footer class='footer text-center text-muted flex-shrink-0'>
+        <div class='soc pt-3'>
+            <a href='https://fb.me/KnowbleApp' class='soc-facebook' title='Facebook'></a>
+            <a href='https://twitter.com/KnowbleApp' class='soc-twitter' title='Twitter'></a>
+            <a href='https://www.linkedin.com/company/knowbleapp' class='soc-linkedin' title='LinkedIn'></a>
+        </div>
+        <small>Copyright &copy; 2022 Knowble Ltd. All Rights Reserved.
+            <br/>Version: {{ config['APP_VERSION'] }}</small>
+    </footer>
+    -->
 {% endblock %}
