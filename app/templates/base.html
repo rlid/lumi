@@ -23,12 +23,14 @@
     {% endblock %}
 </head>
 
-<body class="bg-dark container-fluid vh-100 d-flex flex-column">
+<body class="{% if False %} bg-dark {% else %} bg-light {% endif %}">
 {% block body %}
-    {{ macros.render_navbar() }}
+    {{ macros.render_navbar(True) }}
 
-    {% block body_appended %}
-    {% endblock %}
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
 
     {% block scripts %}
         {{ macros.bootstrap_js() }}

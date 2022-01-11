@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 
-{% block body_appended %}
-    <main class="jumbotron text-light">
-        <h1 class="display-4">Welcome to Knowble</h1>
-        <p class="lead">Knowble is currently in private beta (invitation-only). You are more than welcome to sign up
-            below, and we will send you an invite code as soon as we are ready.</p>
-    </main>
+{% block main %}
+    <div class="container vh-100">
+        <div class="row vh-100 align-items-center">
+            <div class="jumbotron {% if False %} text-light {% else %} {% endif %}">
+                <h1>Welcome to Knowble</h1>
+                <p class="lead">Knowble is currently in private beta (invitation-only). You are more than welcome to
+                    sign up
+                    below, and we will send you an invite code as soon as we are ready.</p>
+            </div>
+        </div>
+    </div>
 {% endblock %}
