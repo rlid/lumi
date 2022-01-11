@@ -5,29 +5,35 @@
 
 <head>
     {% block head %}
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% block meta %}
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            {{ macros.ios_meta(app_title="Knowble") }}
+        {% endblock %}
 
-        {{ macros.bootstrap_css() }}
-        {{ macros.favicon_meta() }}
-        {{ macros.ios_meta(app_title="Knowble") }}
+        {% block links %}
+            {{ macros.bootstrap_css() }}
+            {{ macros.favicon_meta() }}
+        {% endblock %}
 
         <title>{% block title %}Knowble - Casual knowledge discovery and sharing{% endblock %}</title>
 
-        {% block head_append %}
+        {% block head_appended %}
         {% endblock %}
     {% endblock %}
 </head>
 
 <body class="bg-dark container-fluid vh-100 d-flex flex-column">
-    {% block body %}
-        {{ macros.render_navbar() }}
+{% block body %}
+    {{ macros.render_navbar() }}
 
-        {% block body_append %}
-        {% endblock %}
+    {% block body_appended %}
+    {% endblock %}
 
+    {% block scripts %}
         {{ macros.bootstrap_js() }}
     {% endblock %}
+{% endblock %}
 </body>
 
 </html>

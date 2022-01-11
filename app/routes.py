@@ -6,4 +6,14 @@ from app import app
 @app.route('/')
 def index():
     user = {'username': 'World'}
-    return render_template("index.html", title="Home", user=user)
+    return render_template("login.html", title="Home", user=user)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template("500.html"), 500
