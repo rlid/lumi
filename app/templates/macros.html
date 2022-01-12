@@ -37,9 +37,8 @@
 {% endmacro %}
 
 
-{% macro render_navbar(is_dark) %}
-    <nav class="navbar sticky-top navbar-expand-lg
-    {% if is_dark %} navbar-dark bg-dark {% else %} navbar navbar-light bg-light {% endif %} flex-shrink-0">
+{% macro render_navbar() %}
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class='navbar-brand' href='{{ url_for('index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='32' height='32'
@@ -53,33 +52,31 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-0 my-1 px-1">
-                    <li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %} {% endif %}">
-                        <a class="nav-link text-center" aria-current="page" href="#">
-                            <i class="bi bi-plus-square me-1"></i>Create a Request
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" aria-current="page" href="#">
+                            <i class="bi bi-plus-square me-1"></i>Make a Request
                         </a>
                     </li>
-                    <!--<li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %}
-                         btn-outline-success {% endif %}">
-                        <a class="nav-link text-center" href="#">
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-search me-1"></i>Browse</a>
-                    </li>-->
-                    <li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %} {% endif %}">
-                        <a class="nav-link text-center" href="#">
+                    </li>
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-signpost-split me-1"></i>How It Works</a>
                     </li>
-                    <li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %} {% endif %}">
-                        <a class="nav-link text-center" href="#">
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-chat me-1"></i>Support</a>
                     </li>
-                    <!--<li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %}
-                         {% endif %}">
-                        <a class="nav-link text-center" href="#">
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-camera-video-off me-1"></i>Privacy Policy</a>
                     </li>
-                    <li class="nav-item text-nowrap rounded {% if is_dark %} btn-outline-success {% else %} {% endif %}">
-                        <a class="nav-link text-center" href="#">
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-info-circle me-1"></i>About Us</a>
-                    </li>-->
+                    </li>
                 </ul>
                 <form class="ms-auto">
                     <ul class="navbar-nav">
@@ -90,11 +87,11 @@
                         <li class="nav-item px-1 my-1">
                             <div class="btn-group d-flex" role="group" aria-label="Sign Up or Log In">
                                 <button type="button"
-                                        class="btn {% if is_dark %} btn-outline-success {% else %} btn-outline-success {% endif %} text-nowrap">
+                                        class="btn btn-outline-success text-nowrap">
                                     Log In
                                 </button>
                                 <button type="button"
-                                        class="btn {% if is_dark %} btn-success text-dark {% else %} btn-success text-light {% endif %} text-nowrap">
+                                        class="btn btn-success text-dark text-nowrap">
                                     Sign Up
                                 </button>
                             </div>
@@ -107,8 +104,8 @@
 {% endmacro %}
 
 
-{% macro render_footer() %}
-    <div class="container">
+{% macro render_footer(is_fixed) %}
+    <div class="container {% if is_fixed %} fixed-bottom {% endif %}">
         <footer>
             <ul class="nav justify-content-center mb-2">
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">How It Works</a></li>
@@ -135,5 +132,28 @@
                 </ul>
             </div>
         </footer>
+    </div>
+{% endmacro %}
+
+
+{% macro render_navbar_bottom() %}
+    <div class="container-fluid fixed-bottom bg-secondary">
+        <ul class="nav justify-content-center">
+            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
+                <a href="#" class="nav-link text-light">
+                    <i class="bi bi-bell"></i><br>Alerts
+                </a>
+            </li>
+            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
+                <a href="#" class="nav-link text-light">
+                    <i class="bi bi-chat-text"></i><br>Conversations
+                </a>
+            </li>
+            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
+                <a href="#" class="nav-link text-light">
+                    <i class="bi bi-person-circle"></i><br>Account
+                </a>
+            </li>
+        </ul>
     </div>
 {% endmacro %}

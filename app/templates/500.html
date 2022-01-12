@@ -3,13 +3,11 @@
 {% block title %}Knowble - Internal Server Error{% endblock %}
 
 {% block main %}
-    <main class="container">
-        <div class="row vh-100 align-items-center">
-            <div class="text-center {% if False %} text-light {% else %} {% endif %}">
-                <h1>Internal Server Error</h1>
-                <p>Your request cannot be processed currently due to technical issues. Please try again later or contact
-                    support for assistance.</p>
-            </div>
+    <div class="container vh-100">
+        <div class="text-center mt-5">
+            <h1>Internal Server Error</h1>
+            <p>Your request cannot be processed currently due to technical issues. Please try again later or contact
+                support for assistance.</p>
         </div>
-    </main>
+    </div>
 {% endblock %}

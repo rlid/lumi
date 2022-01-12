@@ -23,16 +23,20 @@
     {% endblock %}
 </head>
 
-<body class="{% if False %} bg-dark {% else %} bg-light {% endif %}">
+<body>
 {% block body %}
-    {{ macros.render_navbar(True) }}
+    {{ macros.render_navbar() }}
 
     <main>
         {% block main %}
         {% endblock %}
     </main>
 
-    {{ macros.render_footer() }}
+    <footer>
+        {% block footer %}
+            {{ macros.render_navbar_bottom() }}
+        {% endblock %}
+    </footer>
 
     {% block scripts %}
         {{ macros.bootstrap_js() }}
