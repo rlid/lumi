@@ -38,7 +38,7 @@
 
 
 {% macro render_navbar() %}
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar sticky-top navbar-expand-xl navbar-dark bg-dark">
         <div class="container-fluid">
             <a class='navbar-brand' href='{{ url_for('index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='32' height='32'
@@ -53,6 +53,10 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-0 my-1 px-1">
                     <li class="nav-item text-nowrap rounded btn-outline-success">
+                        <a class="nav-link text-center text-light" href="#">
+                            <i class="bi bi-signpost-split me-1"></i>Guided Tour</a>
+                    </li>
+                    <li class="nav-item text-nowrap rounded btn-outline-success">
                         <a class="nav-link text-center text-light" aria-current="page" href="#">
                             <i class="bi bi-plus-square me-1"></i>Make a Request
                         </a>
@@ -60,10 +64,6 @@
                     <li class="nav-item text-nowrap rounded btn-outline-success">
                         <a class="nav-link text-center text-light" href="#">
                             <i class="bi bi-search me-1"></i>Browse</a>
-                    </li>
-                    <li class="nav-item text-nowrap rounded btn-outline-success">
-                        <a class="nav-link text-center text-light" href="#">
-                            <i class="bi bi-signpost-split me-1"></i>How It Works</a>
                     </li>
                     <li class="nav-item text-nowrap rounded btn-outline-success">
                         <a class="nav-link text-center text-light" href="#">
