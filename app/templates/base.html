@@ -16,7 +16,7 @@
             {{ macros.favicon_meta() }}
         {% endblock %}
 
-        <title>{% block title %}Knowble - Casual knowledge discovery and sharing{% endblock %}</title>
+        <title>{% block title %}Knowble - {% if title %} {{ title }} {% else %} Casual knowledge discovery and sharing {% endif %} {% endblock %}</title>
 
         {% block head_appended %}
         {% endblock %}
