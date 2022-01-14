@@ -128,24 +128,21 @@
 {% endmacro %}
 
 
+{% macro render_nav_item_bottom(endpoint, text, icon) %}
+    {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
+    <li class="btn-sm btn-secondary text-center py-0 rounded-0 {% if active %}active{% endif %}">
+        <a href="{{ url_for(endpoint, **kwargs) }}" class="nav-link text-light">{% if icon %}
+            <i class="bi {{ icon }}"></i>{% endif %}<br>{{ text }}</a>
+    </li>
+{% endmacro %}
+
+
 {% macro render_navbar_bottom() %}
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
-            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
-                <a href="#" class="nav-link text-light">
-                    <i class="bi bi-bell"></i><br>Alerts
-                </a>
-            </li>
-            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
-                <a href="#" class="nav-link text-light">
-                    <i class="bi bi-chat-text"></i><br>Conversations
-                </a>
-            </li>
-            <li class="btn-sm btn-secondary text-center py-0 rounded-0">
-                <a href="#" class="nav-link text-light">
-                    <i class="bi bi-person-circle"></i><br>Account
-                </a>
-            </li>
+            {{ render_nav_item_bottom("alerts", "Alerts", "bi-bell") }}
+            {{ render_nav_item_bottom("conversations", "Conversations", "bi-chat-text") }}
+            {{ render_nav_item_bottom("account", "Account", "bi-person-circle") }}
         </ul>
     </div>
 {% endmacro %}

@@ -43,6 +43,21 @@ def about_us():
     return render_template("index.html", title="About Us")
 
 
+@app.route('/alerts')
+def alerts():
+    return render_template("index.html", title="Alerts")
+
+
+@app.route('/conversations')
+def conversations():
+    return render_template("index.html", title="Conversations")
+
+
+@app.route('/account')
+def account():
+    return render_template("index.html", title="Account")
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html", title="Page Not Found"), 404
