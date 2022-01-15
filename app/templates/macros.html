@@ -128,9 +128,10 @@
 {% endmacro %}
 
 
-{% macro render_nav_item_bottom(endpoint, text, icon) %}
+{# only visible if screen width is visible_from or more #}
+{% macro render_nav_item_bottom(endpoint, text, icon, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="btn-sm btn-secondary text-center py-0 rounded-0 {% if active %}active{% endif %}">
+    <li class="btn-sm btn-secondary text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
         <a href="{{ url_for(endpoint, **kwargs) }}" class="nav-link text-light">{% if icon %}
             <i class="bi {{ icon }}"></i>{% endif %}<br>{{ text }}</a>
     </li>
@@ -141,8 +142,10 @@
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {{ render_nav_item_bottom("alerts", "Alerts", "bi-bell") }}
-            {{ render_nav_item_bottom("conversations", "Conversations", "bi-chat-text") }}
-            {{ render_nav_item_bottom("account", "Account", "bi-person-circle") }}
+            {{ render_nav_item_bottom("conversations", "Conversations", "bi-chat-square-text") }}
+            {{ render_nav_item_bottom("saved", "Saved", "bi-bookmarks") }}
+            {{ render_nav_item_bottom("search", "Search", "bi-search", "sm") }}
+            {{ render_nav_item_bottom("account", "Account", "bi-person-circle", "md") }}
         </ul>
     </div>
 {% endmacro %}

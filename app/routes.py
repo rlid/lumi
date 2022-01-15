@@ -53,6 +53,16 @@ def conversations():
     return render_template("index.html", title="Conversations")
 
 
+@app.route('/saved')
+def saved():
+    return render_template("index.html", title="Saved")
+
+
+@app.route('/search')
+def search():
+    return render_template("index.html", title="Search")
+
+
 @app.route('/account')
 def account():
     return render_template("index.html", title="Account")
