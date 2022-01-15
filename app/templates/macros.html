@@ -37,11 +37,11 @@
 {% endmacro %}
 
 
-{% macro render_nav_item(endpoint, text, icon) %}
+{% macro render_nav_item(endpoint, text, icon=None, link=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="nav-item text-nowrap rounded btn-outline-success">
         <a class="nav-link text-center {% if active %}text-light{% endif %}"
-           href="{{ url_for(endpoint, **kwargs) }}">
+           href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}">
             {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ text }}</a>
 
     </li>
@@ -54,7 +54,7 @@
             <a class='navbar-brand' href='{{ url_for('index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='32' height='32'
                      class='d-inline-block align-top' alt=''>
-                Knowble
+                UniAsk
             </a>
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent"
@@ -66,9 +66,9 @@
                     {{ render_nav_item("guided_tour", "Guided Tour", "bi-signpost-split") }}
                     {{ render_nav_item("make_request", "Make a Request", "bi-plus-square") }}
                     {{ render_nav_item("browse", "Browse", "bi-search") }}
-                    {{ render_nav_item("support", "Support", "bi-chat") }}
+                    {{ render_nav_item("support", "Support", "bi-chat", link="https://discord.gg/xtXCScr9") }}
                     {{ render_nav_item("privacy_policy", "Privacy Policy", "bi-camera-video-off") }}
-                    {{ render_nav_item("about_us", "About Us", "bi-info-circle") }}
+                    {{ render_nav_item("about_us", "About Us", "bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
                 </ul>
                 <form class="ms-auto">
                     <ul class="navbar-nav">
@@ -101,13 +101,13 @@
         <footer>
             <ul class="nav justify-content-center mb-2">
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">How It Works</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Why Use Knowble?</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Why Use UniAsk?</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Community Guidelines</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Privacy Policy</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About Us</a></li>
             </ul>
             <div class="d-flex justify-content-between py-3 border-top">
-                <p class="text-muted">&copy; 2022 Knowble Ltd.</p>
+                <p class="text-muted">&copy; 2022 UniAsk by Knowble</p>
                 <ul class="list-unstyled d-flex">
                     <li class="ms-3"><a class="link-dark" href="#">
                         <i class="bi bi-twitter"></i>
@@ -129,11 +129,12 @@
 
 
 {# only visible if screen width is visible_from or more #}
-{% macro render_nav_item_bottom(endpoint, text, icon, visible_from=None) %}
+{% macro render_nav_item_bottom(endpoint, text=None, icon=None, visible_from=None, link=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="btn-sm btn-secondary text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
-        <a href="{{ url_for(endpoint, **kwargs) }}" class="nav-link text-light">{% if icon %}
-            <i class="bi {{ icon }}"></i>{% endif %}<br>{{ text }}</a>
+    <li class="btn-secondary {% if text %}btn-sm{% endif %} text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
+        <a href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
+           class="nav-link text-light">{% if icon %}
+            <i class="bi {{ icon }}"></i><br>{% endif %}{% if text %}{{ text }}{% endif %}</a>
     </li>
 {% endmacro %}
 
@@ -141,11 +142,17 @@
 {% macro render_navbar_bottom() %}
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
+            {{ render_nav_item_bottom("twitter", link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
+            {{ render_nav_item_bottom("facebook", link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
+            {{ render_nav_item_bottom("discord", link="https://discord.gg/xtXCScr9", icon="bi-discord") }}
+            {{ render_nav_item_bottom("linkedin", link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
+            {#
             {{ render_nav_item_bottom("alerts", "Alerts", "bi-bell") }}
             {{ render_nav_item_bottom("conversations", "Conversations", "bi-chat-square-text") }}
-            {{ render_nav_item_bottom("saved", "Saved", "bi-bookmarks") }}
+            {{ render_nav_item_bottom("saved", "Saved", "bi-bookmark-check") }}
             {{ render_nav_item_bottom("search", "Search", "bi-search", "sm") }}
             {{ render_nav_item_bottom("account", "Account", "bi-person-circle", "md") }}
+            #}
         </ul>
     </div>
 {% endmacro %}

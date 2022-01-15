@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, redirect
 
 from app import app
 
@@ -30,7 +30,7 @@ def browse():
 
 @app.route('/support')
 def support():
-    return render_template("index.html", title="Support")
+    return redirect("https://discord.gg/xtXCScr9")
 
 
 @app.route('/privacy-policy')
@@ -40,7 +40,7 @@ def privacy_policy():
 
 @app.route('/about-us')
 def about_us():
-    return render_template("index.html", title="About Us")
+    return redirect("https://www.linkedin.com/company/knowbleapp")
 
 
 @app.route('/alerts')
@@ -66,6 +66,26 @@ def search():
 @app.route('/account')
 def account():
     return render_template("index.html", title="Account")
+
+
+@app.route('/facebook')
+def facebook():
+    return redirect("https://fb.me/KnowbleApp")
+
+
+@app.route('/twitter')
+def twitter():
+    return redirect("https://twitter.com/KnowbleApp")
+
+
+@app.route('/linkedin')
+def linkedin():
+    return redirect("https://www.linkedin.com/company/knowbleapp")
+
+
+@app.route('/discord')
+def discord():
+    return redirect("https://discord.gg/xtXCScr9")
 
 
 @app.errorhandler(404)
