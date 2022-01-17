@@ -39,7 +39,7 @@
 
 {% macro render_nav_item(endpoint, text, icon=None, link=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="nav-item text-nowrap rounded btn-outline-success">
+    <li class="nav-item text-nowrap{#rounded btn-outline-success#}">
         <a class="nav-link text-center {% if active %}text-light{% endif %}"
            href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}">
             {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ text }}</a>
@@ -51,10 +51,10 @@
 {% macro render_navbar() %}
     <nav class="navbar sticky-top navbar-expand-xl navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class='navbar-brand' href='{{ url_for('index') }}'>
+            <a class='navbar-brand' href='{{ url_for('main.index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='32' height='32'
                      class='d-inline-block align-top' alt=''>
-                UniAsk
+                {{ config["APP_NAME"] }}
             </a>
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent"
@@ -63,12 +63,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-0 my-1 px-1">
-                    {{ render_nav_item("guided_tour", "Guided Tour", "bi-signpost-split") }}
-                    {{ render_nav_item("make_request", "Make a Request", "bi-plus-square") }}
-                    {{ render_nav_item("browse", "Browse", "bi-search") }}
-                    {{ render_nav_item("support", "Support", "bi-chat", link="https://discord.gg/xtXCScr9") }}
-                    {{ render_nav_item("privacy_policy", "Privacy Policy", "bi-camera-video-off") }}
-                    {{ render_nav_item("about_us", "About Us", "bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
+                    {{ render_nav_item("main.guided_tour", "Guided Tour", "bi-signpost-split") }}
+                    {{ render_nav_item("main.make_request", "Make a Request", "bi-plus-square") }}
+                    {{ render_nav_item("main.browse", "Browse", "bi-search") }}
+                    {{ render_nav_item("main.support", "Support", "bi-chat", link="https://discord.gg/xtXCScr9") }}
+                    {{ render_nav_item("main.privacy_policy", "Privacy Policy", "bi-camera-video-off") }}
+                    {{ render_nav_item("main.about_us", "About Us", "bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
                 </ul>
                 <form class="ms-auto">
                     <ul class="navbar-nav">
@@ -101,13 +101,13 @@
         <footer>
             <ul class="nav justify-content-center mb-2">
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">How It Works</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Why Use UniAsk?</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Why Use {{ config["APP_NAME"] }}?</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Community Guidelines</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Privacy Policy</a></li>
                 <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About Us</a></li>
             </ul>
             <div class="d-flex justify-content-between py-3 border-top">
-                <p class="text-muted">&copy; 2022 UniAsk by Knowble</p>
+                <p class="text-muted">&copy; 2022 {{ config["APP_NAME"] }} by Knowble</p>
                 <ul class="list-unstyled d-flex">
                     <li class="ms-3"><a class="link-dark" href="#">
                         <i class="bi bi-twitter"></i>
@@ -142,17 +142,17 @@
 {% macro render_navbar_bottom() %}
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
-            {{ render_nav_item_bottom("twitter", link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
-            {{ render_nav_item_bottom("facebook", link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
-            {{ render_nav_item_bottom("discord", link="https://discord.gg/xtXCScr9", icon="bi-discord") }}
-            {{ render_nav_item_bottom("linkedin", link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
             {#
-            {{ render_nav_item_bottom("alerts", "Alerts", "bi-bell") }}
-            {{ render_nav_item_bottom("conversations", "Conversations", "bi-chat-square-text") }}
-            {{ render_nav_item_bottom("saved", "Saved", "bi-bookmark-check") }}
-            {{ render_nav_item_bottom("search", "Search", "bi-search", "sm") }}
-            {{ render_nav_item_bottom("account", "Account", "bi-person-circle", "md") }}
+            {{ render_nav_item_bottom("main.twitter", link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
+            {{ render_nav_item_bottom("main.facebook", link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
+            {{ render_nav_item_bottom("main.discord", link="https://discord.gg/xtXCScr9", icon="bi-discord") }}
+            {{ render_nav_item_bottom("main.linkedin", link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
             #}
+            {{ render_nav_item_bottom("main.search", "Search", "bi-search", "sm") }}
+            {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell") }}
+            {{ render_nav_item_bottom("main.conversations", "Conversations", "bi-chat-square-text") }}
+            {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check") }}
+            {{ render_nav_item_bottom("main.account", "Account", "bi-person-circle", "md") }}
         </ul>
     </div>
 {% endmacro %}
