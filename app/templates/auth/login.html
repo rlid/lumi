@@ -2,12 +2,20 @@
 
 {% extends "base.html" %}
 
+{% block head_appended %}
+    <style>
+        .form-check-input:checked {
+            background-color: #198754;
+        }
+    </style>
+{% endblock %}
+
 {% block main %}
     <div class="container">
         <div class="row vh-100 align-items-center justify-content-center">
             <div class="col-sm-8 col-md-6 col-lg-4 rounded p-3 shadow">
 
-                {{ render_form(form, floating_input_label=True) }}
+                {{ render_form(form, button_style="success", floating_input_label=True) }}
 {#                <form class="mb-3" method="POST">#}
 {#                    {{ form.hidden_tag() }}#}
 {#                    <div class="form-floating mb-3">#}
