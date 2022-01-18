@@ -4,16 +4,17 @@
     <div class="container">
         <div class="row vh-100 align-items-center justify-content-center">
             <div class="col-sm-8 col-md-6 col-lg-4 bg-white rounded p-4 shadow">
-                <form class="mb-3">
+                <form class="mb-3" method="POST">
+                    {{ form.hidden_tag() }}
                     <div class="form-floating mb-3">
-                        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                        <label for="floatingInput">Email address</label>
+                        {{ form.email(class="form-control", placeholder="name@example.com") }}
+                        {{ form.email.label }}
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-                        <label for="floatingPassword">Password</label>
+                        {{ form.password(class="form-control", placeholder="Password") }}
+                        {{ form.password.label }}
                     </div>
-                    <button class="w-100 btn btn-success" type="submit">Log In</button>
+                    {{ form.submit(class="w-100 btn btn-success") }}
                 </form>
                 <p class="mb-0 text-center text-muted">Don't have an account? <a href="#" class="text-decoration-none">Sign
                     Up</a></p>

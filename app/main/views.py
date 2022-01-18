@@ -1,4 +1,5 @@
 from flask import render_template, redirect
+from flask_login import login_required
 
 from . import main
 
@@ -10,7 +11,7 @@ def index():
 
 @main.route('/login')
 def login():
-    return render_template("login.html")
+    return render_template("auth/login.html")
 
 
 @main.route('/how-it-works')
@@ -19,6 +20,7 @@ def guided_tour():
 
 
 @main.route('/make-request')
+@login_required
 def make_request():
     return render_template("index.html", title="Make a Request")
 
@@ -44,16 +46,19 @@ def about_us():
 
 
 @main.route('/alerts')
+@login_required
 def alerts():
     return render_template("index.html", title="Alerts")
 
 
 @main.route('/conversations')
+@login_required
 def conversations():
     return render_template("index.html", title="Conversations")
 
 
 @main.route('/saved')
+@login_required
 def saved():
     return render_template("index.html", title="Saved")
 
@@ -64,6 +69,7 @@ def search():
 
 
 @main.route('/account')
+@login_required
 def account():
     return render_template("index.html", title="Account")
 
