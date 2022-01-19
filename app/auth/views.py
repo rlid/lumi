@@ -22,11 +22,14 @@ def login():
                 if next_url is None or not next_url.startwith("/"):
                     next_url = url_for("main.index")
                 return redirect(next_url)
-            elif not form.password.data:
-                cookie_key = secrets.token_urlsafe()
-                token = user.generate_token(action="login", cookie_key=cookie_key)
+            elif not form.password.data:  # passwordless login:
                 response = redirect(url_for("main.index"))
-                response.set_cookie("login_key", cookie_key)
+                # add login_key for extra safety - the key is stored as a cookie on the client side, which means that
+                # if the login link is opened in a different browser environment (e.g. on a different PC / phone), it
+                # will be invalid as the cookie does not exist:
+                # login_key = secrets.token_urlsafe()
+                token = user.generate_token(action="login")  # , client_key=login_key
+                # response.set_cookie("login_key", login_key)
                 print(url_for("auth.login_by_token", token=token, remember=1, _external=True))
                 flash("An email with login link has been sent to your email address.", category="info")
                 return response
@@ -36,18 +39,19 @@ def login():
 
 @auth.route("/login/<token>/<int:remember>")
 def login_by_token(token, remember):
-    cookie_key = request.cookies.get("login_key")
-    token_user_id, token_cookie_key = User.decode_token(token, "login")
-    if cookie_key is not None and cookie_key == token_cookie_key:
-        user = User.query.get(int(token_user_id))
+    data = User.decode_token(token)
+    user = User.query.get(int(data.get("login")))
+    # client_key = request.cookies.get("login_key")
+    if user.verify_token_data(data, action="login"):  # , client_key=client_key
         login_user(user, remember=remember)
         response = redirect(url_for("main.index"))
-        response.delete_cookie("login_key")
-        flash("You have logged in.", category="success")
-        return response
+        flash("You have logged in using a login link.", category="success")
     else:
+        response = redirect(url_for("main.index"))
         flash("The login link is invalid or has expired.", category="danger")
-        return redirect(url_for("main.index"))
+    # if client_key == data.get("client_key"):
+    #     response.delete_cookie("login_key")
+    return response
 
 
 @auth.route("/logout", methods=["GET", "POST"])
@@ -66,11 +70,10 @@ def signup():
     if form.validate_on_submit():
         if form.password.data:
             user = User(email=form.email.data, password=form.password.data)
-        else:  # do not generate password hash if no password given:
+        else:  # do not generate password hash if no password given (passwordless account):
             user = User(email=form.email.data)
         db.session.add(user)
         db.session.commit()
-        login_user(user, remember=False)
         token = user.generate_token(action="confirm")
         print(url_for("auth.confirm", token=token, remember=1, _external=True))
         flash("An email with confirmation link has been sent to the email address you provided.", category="info")
@@ -80,14 +83,17 @@ def signup():
 
 @auth.route("/confirm/<token>/<int:remember>")
 def confirm(token, remember):
-    user_id, cookie_key = User.decode_token(token, "confirm")
-    user = User.query.get(int(user_id))
-    if not user.confirmed:
-        user.confirmed = True
-        db.session.add(user)
-        db.session.commit()
-        login_user(user, remember=remember)
-        flash("Your email address has been verified.", category="success")
+    data = User.decode_token(token)
+    user = User.query.get(int(data.get("confirm")))
+    if user.verify_token_data(data, action="confirm"):
+        if not user.confirmed:
+            user.confirmed = True
+            db.session.add(user)
+            db.session.commit()
+            login_user(user, remember=remember)
+            flash("Your email address has been verified.", category="success")
+        else:
+            flash("Your email address has already been verified.", category="warning")  # TODO: should never reach here
     else:
         flash("The confirmation link is invalid or has expired.", category="danger")
     return redirect(url_for("main.index"))
