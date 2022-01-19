@@ -16,7 +16,16 @@
             {{ macros.favicon_meta() }}
         {% endblock %}
 
-        <title>{% block title %}{{ config["APP_NAME"] }} - {% if title %}{{ title }}{% else %}Ask Anything You Need{% endif %}{% endblock %}</title>
+        {% block style %}
+            <style>
+                .form-check-input:checked {
+                    background-color: #198754;
+                }
+            </style>
+        {% endblock %}
+
+        <title>{% block title %}{{ config["APP_NAME"] }} -
+            {% if title %}{{ title }}{% else %}Ask Anything You Need{% endif %}{% endblock %}</title>
 
         {% block head_appended %}
         {% endblock %}
@@ -25,7 +34,7 @@
 
 <body>
 {% block body %}
-    {{ macros.render_navbar() }}
+    {{ macros.render_navbar(current_user) }}
 
     <main>
         {% block main %}
@@ -34,7 +43,7 @@
 
     <footer>
         {% block footer %}
-            {{ macros.render_navbar_bottom() }}
+            {{ macros.render_navbar_bottom(current_user) }}
         {% endblock %}
     </footer>
 
