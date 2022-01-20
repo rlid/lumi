@@ -1,4 +1,5 @@
 import os
+from sqlalchemy.engine.url import URL
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,27 +20,45 @@ class Config:
 class DevConfig(Config):
     APP_VER = "DEV-" + Config.APP_VER
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI") or \
-        "sqlite:///" + os.path.join(basedir, "db-dev.sqlite")
-    DEBUG = True
+                              "{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}".format(
+                                  server_type="postgresql",
+                                  driver="pg8000",
+                                  username="postgres",
+                                  password=os.environ.get('DB_PASSWORD'),
+                                  hostname="localhost",
+                                  port="3306",
+                                  database="devdb")
+
+
+class GoogleCloudConfig(Config):
+    APP_VER = "GCLOUD-" + Config.APP_VER
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI") or \
+                              URL.create(
+                                  drivername="postgresql+pg8000",
+                                  username="postgres",
+                                  password=os.environ.get('DB_PASSWORD'),
+                                  database="devdb",
+                                  query={"unix_sock": "{socket_path}/{instance_name}/.s.PGSQL.5432".format(
+                                      socket_path="/cloudsql",
+                                      instance_name="lumiask:europe-west2:devins")})
 
 
 class TestConfig(Config):
     APP_VER = "TEST-" + Config.APP_VER
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URI") or "sqlite://"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI") or \
-        "sqlite:///" + os.path.join(basedir, "db-prod.sqlite")
-    TESTING = True
 
 
 class ProdConfig(Config):
     APP_VER = "PROD" + Config.APP_VER
-    PRODUCTION = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI") or \
+                              "sqlite:///" + os.path.join(basedir, "db-prod.sqlite")
 
 
 config = {
-    "development": DevConfig,
-    "testing": TestConfig,
-    "production": ProdConfig,
+    "DEV": DevConfig,
+    "TEST": TestConfig,
+    "PROD": ProdConfig,
+    "GCLOUD": GoogleCloudConfig,
 
-    "default": DevConfig
+    "DEFAULT": DevConfig
 }

@@ -85,6 +85,9 @@ class User(UserMixin, db.Model):
             db.session.commit()
         return verified
 
+    def verify_token(self, token, action, client_key=None):
+        return self.verify_token_data(data=User.decode_token(token), action=action, client_key=client_key)
+
 
 @login_manager.user_loader
 def load_user(user_id):

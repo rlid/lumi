@@ -22,6 +22,11 @@
                 .form-check-input:checked {
                     background-color: #198754;
                 }
+
+                .btn-outline-success:hover {
+                    color: white;
+                    border-color: white;
+                }
             </style>
         {% endblock %}
 
@@ -38,16 +43,8 @@
     {{ macros.render_navbar(current_user) }}
 
     <div class="container-fluid mt-3">
-    {{ render_messages(container=False, dismissible=True, dismiss_animate=True) }}
+        {{ render_messages(container=False, dismissible=True, dismiss_animate=True) }}
     </div>
-
-{#    {% block flashed_messages %}#}
-{#        <div class="container">#}
-{#        {% for message in get_flashed_messages() %}#}
-{#            <div class=""#}
-{#        {% endfor %}#}
-{#        </div>#}
-{#    {% endblock %}#}
 
     <main>
         {% block main %}

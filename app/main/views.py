@@ -1,6 +1,7 @@
 from flask import render_template, redirect, flash
 from flask_login import login_required, current_user
 
+from app import db
 from . import main
 
 
@@ -93,3 +94,10 @@ def linkedin():
 @main.route('/discord')
 def discord():
     return redirect("https://discord.gg/xtXCScr9")
+
+
+@main.route("/reset")
+def reset():
+    db.drop_all()
+    db.create_all()
+    return {"success": True}, 200

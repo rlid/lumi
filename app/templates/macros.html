@@ -51,9 +51,9 @@
 {% macro render_navbar(current_user=None) %}
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class='navbar-brand' href='{{ url_for('main.index') }}'>
+            <a class='navbar-brand mb-0 h1' href='{{ url_for('main.index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='36' height='36'
-                     class='d-inline-block' alt=''>
+                     class='d-inline-block ' alt=''>
                 {{ config["APP_NAME"] }}
             </a>
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
@@ -73,8 +73,9 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item my-1">
                         <div class="btn-group d-flex" role="group">
+
                             {% if current_user and current_user.is_authenticated %}
-                                <a class="btn text-nowrap btn-success text-dark" href="{{ url_for('auth.logout') }}">
+                                <a class="btn text-nowrap btn-success" href="{{ url_for('auth.logout') }}">
                                     Log Out</a>
                             {% else %}
                                 <a class="btn text-nowrap btn-outline-success" href="{{ url_for('auth.login') }}">

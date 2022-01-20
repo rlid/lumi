@@ -19,7 +19,7 @@ def login():
             if user.password_hash and user.verify_password(form.password.data):
                 login_user(user, form.remember_me.data)
                 next_url = request.args.get("next")
-                if next_url is None or not next_url.startwith("/"):
+                if next_url is None or not next_url.startswith("/"):
                     next_url = url_for("main.index")
                 return redirect(next_url)
             elif not form.password.data:  # passwordless login:

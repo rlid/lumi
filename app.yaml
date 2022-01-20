@@ -14,3 +14,6 @@
 
 runtime: python39
 instance_class: F1
+
+includes:
+  - env_variables.yaml
