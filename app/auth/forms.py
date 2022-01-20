@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import EmailField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, ValidationError
+from wtforms import EmailField, PasswordField, BooleanField, SubmitField, StringField
+from wtforms.validators import InputRequired, EqualTo, ValidationError, AnyOf
 
 from app.models import User
 
 
 class LogInForm(FlaskForm):
-    email = EmailField("Email address", validators=[DataRequired()], render_kw={"placeholder": "name@example.com"})
+    email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
     password = PasswordField("Password(*)", validators=[],
                              render_kw={"placeholder": "Password"})
     remember_me = BooleanField("Remember me", default=True)
@@ -14,7 +14,8 @@ class LogInForm(FlaskForm):
 
 
 class SignUpForm(FlaskForm):
-    email = EmailField("Email address", validators=[DataRequired()], render_kw={"placeholder": "name@example.com"})
+    invite_code = StringField("Invite Code", validators=[InputRequired()], render_kw={"placeholder": "Invite Code"})
+    email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
     password = PasswordField("Password(*)",
                              validators=[EqualTo("confirm_password", message="Passwords must match.")],
                              render_kw={"placeholder": "Password"})
@@ -29,4 +30,8 @@ class SignUpForm(FlaskForm):
     def validate_password(self, field):
         n = len(field.data)
         if 0 < n < 8:
-            raise ValidationError("Password must be at least 8 characters long.")
+            raise ValidationError("Password must be at least 8 characters long or empty.")
+
+    def validate_invite_code(self, field):
+        if field.data != "LetMeIn":
+            raise ValidationError("Invalid invite code")

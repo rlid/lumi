@@ -1,5 +1,5 @@
-from flask import render_template, redirect
-from flask_login import login_required
+from flask import render_template, redirect, flash
+from flask_login import login_required, current_user
 
 from . import main
 
@@ -71,6 +71,7 @@ def search():
 @main.route('/account')
 @login_required
 def account():
+    flash(f"current_user is {current_user}", category="info")
     return render_template("index.html", title="Account")
 
 
