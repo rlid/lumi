@@ -62,6 +62,14 @@ def logout():
     return redirect(url_for("main.index"))
 
 
+@auth.route("/logout-everywhere")
+@login_required
+def logout_all():
+    current_user.reset_remember_id()
+    flash("You have been logged out on all devices.", category="success")
+    return redirect(url_for("main.index"))
+
+
 @auth.route("/signup", methods=["GET", "POST"])
 def signup():
     if current_user.is_authenticated:

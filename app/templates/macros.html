@@ -52,8 +52,8 @@
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class='navbar-brand' href='{{ url_for('main.index') }}'>
-                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='32' height='32'
-                     class='d-inline-block align-top' alt=''>
+                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='36' height='36'
+                     class='d-inline-block' alt=''>
                 {{ config["APP_NAME"] }}
             </a>
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
@@ -77,10 +77,10 @@
                                 <a class="btn text-nowrap btn-success text-dark" href="{{ url_for('auth.logout') }}">
                                     Log Out</a>
                             {% else %}
-                                <a class="btn text-nowrap btn-success text-dark" href="{{ url_for('auth.login') }}">
+                                <a class="btn text-nowrap btn-outline-success" href="{{ url_for('auth.login') }}">
                                     Log In
                                 </a>
-                                <a class="btn text-nowrap btn-outline-success" href="{{ url_for('auth.signup') }}">
+                                <a class="btn text-nowrap btn-success" href="{{ url_for('auth.signup') }}">
                                     Sign Up
                                 </a>
                             {% endif %}

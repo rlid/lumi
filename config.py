@@ -4,8 +4,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    APP_VER = "20220117_1254"
-    APP_NAME = "UniAsk"
+    APP_VER = "20220120_1430"
+    APP_NAME = "LumiAsk"
 
     SECRET_KEY = os.environ.get("SECRET_KEY") or "zorVef-buwpof-9rowta"
 
