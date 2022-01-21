@@ -51,11 +51,9 @@
 {% macro render_navbar(current_user=None) %}
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class='navbar-brand mb-0 h1' href='{{ url_for('main.index') }}'>
-                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='36' height='36'
-                     class='d-inline-block ' alt=''>
-                {{ config["APP_NAME"] }}
-            </a>
+            <a class='navbar-brand mb-0 h1 fs-2' href='{{ url_for('main.index') }}'>
+                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='38' height='38'
+                     class='d-inline-block align-text-bottom'>{{ config["APP_NAME"][1:] }}</a>
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
