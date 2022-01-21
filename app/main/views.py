@@ -15,14 +15,14 @@ def login():
     return render_template("auth/login.html")
 
 
-@main.route('/how-it-works')
-def guided_tour():
+@main.route('/guide')
+def guide():
     return render_template("index.html", title="Guided Tour")
 
 
-@main.route('/make-request')
+@main.route('/new')
 @login_required
-def make_request():
+def new():
     return render_template("index.html", title="Make a Request")
 
 
@@ -36,13 +36,18 @@ def support():
     return redirect("https://discord.gg/xtXCScr9")
 
 
-@main.route('/privacy-policy')
-def privacy_policy():
+@main.route('/privacy')
+def privacy():
     return render_template("index.html", title="Privacy Policy")
 
 
-@main.route('/about-us')
-def about_us():
+@main.route('/terms')
+def terms():
+    return render_template("index.html", title="Terms Of Service")
+
+
+@main.route('/about')
+def about():
     return redirect("https://www.linkedin.com/company/knowbleapp")
 
 
@@ -98,6 +103,7 @@ def discord():
 
 @main.route("/reset")
 def reset():
+    db.session.remove()
     db.drop_all()
     db.create_all()
     return {"success": True}, 200
