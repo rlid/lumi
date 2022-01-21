@@ -1,16 +1,23 @@
-from flask import render_template, redirect, request, url_for, flash, Markup
+import json
+import requests
+from flask import render_template, redirect, request, url_for, flash, Markup, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from oauthlib.oauth2 import WebApplicationClient
 
+from config import Config
 from app import db
 from app.auth import auth
 from app.models import User
 from app.auth.forms import LogInForm, SignUpForm
+
+client = WebApplicationClient(Config.GOOGLE_OAUTH_ID)
 
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
+
     form = LogInForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -124,3 +131,79 @@ def resend_confirmation():
     print(url_for("auth.confirm", token=token, remember=1, _external=True))
     flash("A new email with confirmation link has been sent to the email address you provided.", category="info")
     return redirect(url_for("main.index"))
+
+
+@auth.route("/login-google")
+def login_google():
+    provider_config = requests.get(current_app.config["GOOGLE_OAUTH_URL"]).json()
+    authorization_endpoint = provider_config["authorization_endpoint"]
+
+    request_base_url = request.base_url
+    if request_base_url.startswith("http:"):
+        print(f"request.base_url = {request.base_url}")
+        request_base_url = "https" + request_base_url[4:]
+
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request_base_url + "/callback",
+        scope=["openid", "email", "profile"])
+    return redirect(request_uri)
+
+
+@auth.route("/login-google/callback")
+def callback_google():
+    authorization_code = request.args.get("code")
+    print(f"authorization_request.args = {request.args}")
+
+    provider_config = requests.get(current_app.config["GOOGLE_OAUTH_URL"]).json()
+    token_endpoint = provider_config["token_endpoint"]
+
+    request_url = request.url
+    if request_url.startswith("http:"):
+        print(f"request.url = {request.url}")
+        request_url = "https" + request_url[4:]
+    request_base_url = request.base_url
+    if request_base_url.startswith("http:"):
+        print(f"request.base_url = {request.base_url}")
+        request_base_url = "https" + request_base_url[4:]
+
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request_url,
+        redirect_url=request_base_url,
+        code=authorization_code)
+    print(f"token_url = {token_url}")
+
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(Config.GOOGLE_OAUTH_ID, Config.GOOGLE_OAUTH_SECRET))
+    print(f"token_response = {token_response.json()}")
+
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    userinfo_endpoint = provider_config["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    print(f"userinfo_response = {userinfo_response.json()}")
+
+    if userinfo_response.json().get("email_verified"):
+        sub = userinfo_response.json()["sub"]
+        email = userinfo_response.json()["email"]
+
+        user = User.query.filter_by(email=email).first()
+        if user is not None:
+            login_user(user, remember=True)
+            flash("You have logged in with Google.", category="success")
+        else:
+            user = User(email=email, confirmed=True)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user, remember=True)
+            flash("You have signed up with Google.", category="success")
+        return redirect(url_for("main.index"))
+    else:
+        flash("User email not available or not verified by Google.", category="danger")
+    return redirect(url_for("auth.login"))

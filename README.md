@@ -3,5 +3,8 @@
  - `python -m unittest [test dir].[test file]` to run unit tests in a specific file
 
 # Database
- - gcloud beta sql connect devins
- - ./cloud_sql_proxy -instances=lumiask:europe-west2:devins=tcp:9470
+ - `gcloud beta sql connect devins`
+ - `./cloud_sql_proxy -instances=lumiask:europe-west2:devins=tcp:9470`
+
+# Google Cloud
+ - `gcloud app logs tail -s default`

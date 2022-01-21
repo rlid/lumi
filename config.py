@@ -12,6 +12,12 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    APPLE_OAUTH_URL = "https://appleid.apple.com/.well-known/openid-configuration"
+
+    GOOGLE_OAUTH_URL = "https://accounts.google.com/.well-known/openid-configuration"
+    GOOGLE_OAUTH_ID = os.environ.get("GOOGLE_OAUTH_ID")
+    GOOGLE_OAUTH_SECRET = os.environ.get("GOOGLE_OAUTH_SECRET")
+
     @staticmethod
     def init_app(app):
         pass
