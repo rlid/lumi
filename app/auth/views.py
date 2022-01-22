@@ -1,5 +1,3 @@
-import secrets
-
 import jwt
 import json
 import requests
@@ -8,11 +6,12 @@ from flask import render_template, redirect, request, url_for, flash, Markup, ab
 from flask_login import login_user, logout_user, login_required, current_user
 from oauthlib.oauth2 import WebApplicationClient
 
-from config import Config
 from app import db
 from app.auth import auth
 from app.models import User
 from app.auth.forms import LogInForm, SignUpForm
+from config import Config
+from utils import security_utils
 
 google_oauth_client = WebApplicationClient(Config.OAUTH_GOOGLE_CLIENT_ID)
 apple_oauth_client = WebApplicationClient(Config.OAUTH_APPLE_CLIENT_ID)
@@ -35,12 +34,17 @@ def login():
                 return redirect(next_url)
             elif not form.password.data:  # passwordless login:
                 response = redirect(url_for("main.index"))
-                # add login_key for extra safety - the key is stored as a cookie on the client side, which means that
-                # if the login link is opened in a different browser environment (e.g. on a different PC / phone), it
-                # will be invalid as the cookie does not exist:
-                # login_key = secrets.token_urlsafe()
-                token = user.generate_token(action="login")  # , client_key=login_key
-                # response.set_cookie("login_key", login_key)
+                # add client_nonce for extra safety - the nonce is stored as a cookie on the client side, which means
+                # that if the login link is opened in a different browser environment (e.g. on a different PC / phone),
+                # it will be invalid as the cookie does not exist, and only the hashed nonce is included in the token
+                # for security reasons:
+                client_nonce = security_utils.random_urlsafe(nbytes=Config.CLIENT_NONCE_NBYTES)
+                token = user.generate_token(
+                    action="login",
+                    client_nonce_hash=security_utils.hash_string(client_nonce,
+                                                                 digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE))
+                response.set_cookie("client_nonce", client_nonce, httponly=True)
+                print(f"client_nonce is set to [{client_nonce}].")
                 print(url_for("auth.login_by_token", token=token, remember=1, _external=True))
                 flash("An email with login link has been sent to your email address.", category="info")
                 return response
@@ -50,18 +54,24 @@ def login():
 
 @auth.route("/login/<token>/<int:remember>")
 def login_by_token(token, remember):
-    data = User.decode_token(token)
-    user = User.query.get(int(data.get("login")))
-    # client_key = request.cookies.get("login_key")
-    if user.verify_token_data(data, action="login"):  # , client_key=client_key
-        login_user(user, remember=remember)
-        response = redirect(url_for("main.index"))
+    client_nonce_hash = request.cookies.get("client_nonce")
+    # client_nonce_hash is just client_nonce at this point, hash it if it is not None:
+    if client_nonce_hash is not None:
+        client_nonce_hash = security_utils.hash_string(client_nonce_hash,
+                                                       digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE)
+
+    token_data = User.decode_token(token)
+    token_user = User.query.get(int(token_data.get("login")))
+
+    response = redirect(url_for("main.index"))
+    if token_user.verify_token_data(token_data, action="login", client_nonce_hash=client_nonce_hash):
+        login_user(token_user, remember=remember)
         flash("You have logged in using a login link.", category="success")
     else:
-        response = redirect(url_for("main.index"))
         flash("The login link is invalid or has expired.", category="danger")
-    # if client_key == data.get("client_key"):
-    #     response.delete_cookie("login_key")
+    if client_nonce_hash == token_data.get("client_nonce_hash") and client_nonce_hash is not None:
+        response.delete_cookie("client_nonce")
+        print(f"client_nonce [{request.cookies.get('client_nonce')}] is deleted.")
     return response
 
 
@@ -112,7 +122,8 @@ def confirm(token, remember):
             login_user(user, remember=remember)
             flash("Your email address has been verified.", category="success")
         else:
-            flash("Your email address has already been verified.", category="warning")  # TODO: should never reach here
+            flash("Your email address has already been verified.",
+                  category="warning")  # TODO: should never reach here
     else:
         flash("The confirmation link is invalid or has expired.", category="danger")
     return redirect(url_for("main.index"))
@@ -143,7 +154,7 @@ def google():
     provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     authorization_endpoint = provider_config["authorization_endpoint"]
 
-    state = secrets.token_urlsafe(Config.OAUTH_STATE_NBYTES)
+    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_STATE_NBYTES)
     session["oauth_state"] = state
     request_uri = google_oauth_client.prepare_request_uri(
         uri=authorization_endpoint,
@@ -159,7 +170,7 @@ def google_callback():
     authorization_code = request.args.get("code")
     print(f"request.args = {json.dumps(request.args, indent=4)}")
     if session.get("oauth_state") != request.args.get("state"):
-        abort(Response("Authorization server returned an invalid state parameter.", 500))
+        abort(500)
 
     provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     token_endpoint = provider_config["token_endpoint"]
@@ -213,7 +224,7 @@ def apple():
     provider_config = requests.get(Config.OAUTH_APPLE_URL).json()
     authorization_endpoint = provider_config["authorization_endpoint"]
 
-    state = secrets.token_urlsafe(Config.OAUTH_STATE_NBYTES)
+    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_STATE_NBYTES)
     session["oauth_state"] = state
     request_uri = apple_oauth_client.prepare_request_uri(
         uri=authorization_endpoint,

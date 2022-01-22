@@ -27,6 +27,9 @@ class Config:
     OAUTH_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
     OAUTH_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
 
+    CLIENT_NONCE_NBYTES = 32
+    CLIENT_NONCE_HASH_DIGEST_SIZE = 32
+
     @staticmethod
     def init_app(app):
         pass
