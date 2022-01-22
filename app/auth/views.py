@@ -1,6 +1,10 @@
+import secrets
+
+import jwt
 import json
 import requests
-from flask import render_template, redirect, request, url_for, flash, Markup, current_app
+import time
+from flask import render_template, redirect, request, url_for, flash, Markup, abort, session, Response
 from flask_login import login_user, logout_user, login_required, current_user
 from oauthlib.oauth2 import WebApplicationClient
 
@@ -10,7 +14,8 @@ from app.auth import auth
 from app.models import User
 from app.auth.forms import LogInForm, SignUpForm
 
-client = WebApplicationClient(Config.GOOGLE_OAUTH_ID)
+google_oauth_client = WebApplicationClient(Config.OAUTH_GOOGLE_CLIENT_ID)
+apple_oauth_client = WebApplicationClient(Config.OAUTH_APPLE_CLIENT_ID)
 
 
 @auth.route("/login", methods=["GET", "POST"])
@@ -133,64 +138,58 @@ def resend_confirmation():
     return redirect(url_for("main.index"))
 
 
-@auth.route("/login-google")
-def login_google():
-    provider_config = requests.get(current_app.config["GOOGLE_OAUTH_URL"]).json()
+@auth.route("/google")
+def google():
+    provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     authorization_endpoint = provider_config["authorization_endpoint"]
 
-    request_base_url = request.base_url
-    if request_base_url.startswith("http:"):
-        print(f"request.base_url = {request.base_url}")
-        request_base_url = "https" + request_base_url[4:]
-
-    request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request_base_url + "/callback",
-        scope=["openid", "email", "profile"])
+    state = secrets.token_urlsafe(Config.OAUTH_STATE_NBYTES)
+    session["oauth_state"] = state
+    request_uri = google_oauth_client.prepare_request_uri(
+        uri=authorization_endpoint,
+        redirect_uri=f"{request.base_url}/callback",
+        scope=["openid", "email", "profile"],
+        state=state)
+    print(f"request_uri = {request_uri}")
     return redirect(request_uri)
 
 
-@auth.route("/login-google/callback")
-def callback_google():
+@auth.route("/google/callback")
+def google_callback():
     authorization_code = request.args.get("code")
-    print(f"authorization_request.args = {request.args}")
+    print(f"request.args = {json.dumps(request.args, indent=4)}")
+    if session.get("oauth_state") != request.args.get("state"):
+        abort(Response("Authorization server returned an invalid state parameter.", 500))
 
-    provider_config = requests.get(current_app.config["GOOGLE_OAUTH_URL"]).json()
+    provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     token_endpoint = provider_config["token_endpoint"]
 
-    request_url = request.url
-    if request_url.startswith("http:"):
-        print(f"request.url = {request.url}")
-        request_url = "https" + request_url[4:]
-    request_base_url = request.base_url
-    if request_base_url.startswith("http:"):
-        print(f"request.base_url = {request.base_url}")
-        request_base_url = "https" + request_base_url[4:]
-
-    token_url, headers, body = client.prepare_token_request(
-        token_endpoint,
-        authorization_response=request_url,
-        redirect_url=request_base_url,
+    token_url, headers, body = google_oauth_client.prepare_token_request(
+        token_url=token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
         code=authorization_code)
     print(f"token_url = {token_url}")
-
+    print(f"headers = {headers}")
+    print(f"body = {body}")
     token_response = requests.post(
-        token_url,
+        url=token_url,
         headers=headers,
         data=body,
-        auth=(Config.GOOGLE_OAUTH_ID, Config.GOOGLE_OAUTH_SECRET))
-    print(f"token_response = {token_response.json()}")
+        auth=(Config.OAUTH_GOOGLE_CLIENT_ID, Config.OAUTH_GOOGLE_CLIENT_SECRET))
 
-    client.parse_request_body_response(json.dumps(token_response.json()))
+    # parse the token and raise OAuth2Error if response is invalid
+    parsed_token = google_oauth_client.parse_request_body_response(json.dumps(token_response.json()))
+    print(f"parsed_token = {json.dumps(parsed_token, indent=4)}")
 
     userinfo_endpoint = provider_config["userinfo_endpoint"]
-    uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
-
-    print(f"userinfo_response = {userinfo_response.json()}")
+    userinfo_url, headers, body = google_oauth_client.add_token(userinfo_endpoint)
+    print(f"userinfo_url = {userinfo_url}")
+    print(f"headers = {headers}")
+    print(f"body = {body}")
+    userinfo_response = requests.get(userinfo_url, headers=headers, data=body)
 
     if userinfo_response.json().get("email_verified"):
-        sub = userinfo_response.json()["sub"]
         email = userinfo_response.json()["email"]
 
         user = User.query.filter_by(email=email).first()
@@ -206,4 +205,99 @@ def callback_google():
         return redirect(url_for("main.index"))
     else:
         flash("User email not available or not verified by Google.", category="danger")
+    return redirect(url_for("auth.login"))
+
+
+@auth.route("/apple")
+def apple():
+    provider_config = requests.get(Config.OAUTH_APPLE_URL).json()
+    authorization_endpoint = provider_config["authorization_endpoint"]
+
+    state = secrets.token_urlsafe(Config.OAUTH_STATE_NBYTES)
+    session["oauth_state"] = state
+    request_uri = apple_oauth_client.prepare_request_uri(
+        uri=authorization_endpoint,
+        redirect_uri=f"{request.base_url}/callback",
+        scope=["openid", "email", "name"],
+        response_mode="form_post",
+        state=state)
+    print(f"request_uri = {request_uri}")
+    return redirect(request_uri)
+
+
+def _apple_secret():
+    headers = {"kid": Config.OAUTH_APPLE_KEY_ID}
+
+    payload = {
+        "iss": Config.OAUTH_APPLE_TEAM_ID,
+        "iat": int(time.time()),
+        "exp": int(time.time()) + 15777000,  # 6 months in seconds
+        "aud": "https://appleid.apple.com",
+        "sub": Config.OAUTH_APPLE_CLIENT_ID}
+
+    return jwt.encode(
+        payload=payload,
+        key=Config.OAUTH_APPLE_PRIVATE_KEY,
+        algorithm='ES256',
+        headers=headers)
+
+
+@auth.route("/apple/callback", methods=["GET", "POST"])
+def apple_callback():
+    authorization_code = request.form.get("code")
+    print(f"request.form = {json.dumps(request.form, indent=4)}")
+
+    if session.get("oauth_state") != request.form.get("state"):
+        abort(Response("Authorization server returned an invalid state parameter.", 500))
+
+    provider_config = requests.get(Config.OAUTH_APPLE_URL).json()
+    token_endpoint = provider_config["token_endpoint"]
+
+    client_secret = _apple_secret()
+    token_url, headers, body = apple_oauth_client.prepare_token_request(
+        token_url=token_endpoint,
+        # authorization_response=request.url,
+        redirect_url=request.base_url,
+        client_id=Config.OAUTH_APPLE_CLIENT_ID,
+        client_secret=client_secret,
+        code=authorization_code)
+    print(f"token_url = {token_url}")
+    print(f"headers = {headers}")
+    print(f"body = {body}")
+    token_response = requests.post(
+        url=token_url,
+        headers=headers,
+        data=body)
+
+    # parse the token and raise OAuth2Error if response is invalid
+    parsed_token = apple_oauth_client.parse_request_body_response(json.dumps(token_response.json()))
+    print(f"parsed_token = {json.dumps(parsed_token, indent=4)}")
+
+    id_token = parsed_token.get("id_token")
+    id_token_data = jwt.decode(id_token, options={"verify_signature": False})
+    print(f"id_token_data = {json.dumps(id_token_data, indent=4)}")
+
+    # userinfo_endpoint = provider_config["userinfo_endpoint"]
+    # userinfo_url, headers, body = apple_oauth_client.add_token(userinfo_endpoint)
+    # print(f"userinfo_url = {userinfo_url}")
+    # print(f"headers = {headers}")
+    # print(f"body = {body}")
+    # userinfo_response = requests.get(url=userinfo_url, headers=headers, data=body)
+
+    if id_token_data.get("email_verified"):
+        email = id_token_data["email"]
+
+        user = User.query.filter_by(email=email).first()
+        if user is not None:
+            login_user(user, remember=True)
+            flash("You have logged in with Apple.", category="success")
+        else:
+            user = User(email=email, confirmed=True)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user, remember=True)
+            flash("You have signed up with Apple.", category="success")
+        return redirect(url_for("main.index"))
+    else:
+        flash("User email not available or not verified by Apple.", category="danger")
     return redirect(url_for("auth.login"))

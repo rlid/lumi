@@ -12,11 +12,20 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    APPLE_OAUTH_URL = "https://appleid.apple.com/.well-known/openid-configuration"
+    OAUTH_STATE_NBYTES = 32
 
-    GOOGLE_OAUTH_URL = "https://accounts.google.com/.well-known/openid-configuration"
-    GOOGLE_OAUTH_ID = os.environ.get("GOOGLE_OAUTH_ID")
-    GOOGLE_OAUTH_SECRET = os.environ.get("GOOGLE_OAUTH_SECRET")
+    OAUTH_APPLE_URL = "https://appleid.apple.com/.well-known/openid-configuration"
+    OAUTH_APPLE_CLIENT_ID = os.environ.get("OAUTH_APPLE_CLIENT_ID")
+    OAUTH_APPLE_TEAM_ID = os.environ.get("OAUTH_APPLE_TEAM_ID")
+    OAUTH_APPLE_KEY_ID = os.environ.get("OAUTH_APPLE_KEY_ID")
+
+    OAUTH_APPLE_PRIVATE_KEY = None
+    with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "rt") as file:
+        OAUTH_APPLE_PRIVATE_KEY = file.read()
+
+    OAUTH_GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
+    OAUTH_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
+    OAUTH_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
 
     @staticmethod
     def init_app(app):

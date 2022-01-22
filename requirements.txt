@@ -16,3 +16,4 @@ Werkzeug==2.0.2
 WTForms==3.0.1
 requests
 pyOpenSSL
+pyjwt
