@@ -12,7 +12,8 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    OAUTH_STATE_NBYTES = 32
+    OAUTH_RANDOM_NBYTES = 32
+    OAUTH_NONCE_HASH_DIGEST_SIZE = 32
 
     OAUTH_APPLE_URL = "https://appleid.apple.com/.well-known/openid-configuration"
     OAUTH_APPLE_CLIENT_ID = os.environ.get("OAUTH_APPLE_CLIENT_ID")

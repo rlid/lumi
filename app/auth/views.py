@@ -2,7 +2,7 @@ import jwt
 import json
 import requests
 import time
-from flask import render_template, redirect, request, url_for, flash, Markup, abort, session, Response
+from flask import render_template, redirect, request, url_for, flash, Markup, abort, session, Response, make_response
 from flask_login import login_user, logout_user, login_required, current_user
 from oauthlib.oauth2 import WebApplicationClient
 
@@ -154,13 +154,17 @@ def google():
     provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     authorization_endpoint = provider_config["authorization_endpoint"]
 
-    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_STATE_NBYTES)
+    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_RANDOM_NBYTES)
+    nonce = security_utils.random_urlsafe(nbytes=Config.OAUTH_RANDOM_NBYTES)
+    nonce_hash = security_utils.hash_string(nonce, digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE)
     session["oauth_state"] = state
+    session["oauth_nonce"] = nonce
     request_uri = google_oauth_client.prepare_request_uri(
         uri=authorization_endpoint,
         redirect_uri=f"{request.base_url}/callback",
         scope=["openid", "email", "profile"],
-        state=state)
+        state=state,
+        nonce=nonce_hash)
     print(f"request_uri = {request_uri}")
     return redirect(request_uri)
 
@@ -169,8 +173,9 @@ def google():
 def google_callback():
     authorization_code = request.args.get("code")
     print(f"request.args = {json.dumps(request.args, indent=4)}")
-    if session.get("oauth_state") != request.args.get("state"):
+    if request.args.get("state", "") != session["oauth_state"]:
         abort(500)
+    session.pop("oauth_state")
 
     provider_config = requests.get(Config.OAUTH_GOOGLE_URL).json()
     token_endpoint = provider_config["token_endpoint"]
@@ -193,15 +198,27 @@ def google_callback():
     parsed_token = google_oauth_client.parse_request_body_response(json.dumps(token_response.json()))
     print(f"parsed_token = {json.dumps(parsed_token, indent=4)}")
 
-    userinfo_endpoint = provider_config["userinfo_endpoint"]
-    userinfo_url, headers, body = google_oauth_client.add_token(userinfo_endpoint)
-    print(f"userinfo_url = {userinfo_url}")
-    print(f"headers = {headers}")
-    print(f"body = {body}")
-    userinfo_response = requests.get(userinfo_url, headers=headers, data=body)
+    id_token = parsed_token.get("id_token")
+    jwks_client = jwt.PyJWKClient(provider_config["jwks_uri"])
+    signing_key = jwks_client.get_signing_key_from_jwt(id_token)
+    # id_token_data = jwt.decode(id_token, options={"verify_signature": False})
+    id_token_data = jwt.decode(id_token, signing_key.key, algorithms=["RS256"], audience=Config.OAUTH_GOOGLE_CLIENT_ID)
+    print(f"id_token_data = {json.dumps(id_token_data, indent=4)}")
 
-    if userinfo_response.json().get("email_verified"):
-        email = userinfo_response.json()["email"]
+    if id_token_data["nonce"] != security_utils.hash_string(session["oauth_nonce"],
+                                                            digest_size=Config.OAUTH_NONCE_HASH_DIGEST_SIZE):
+        abort(500)
+    session.pop("oauth_nonce")
+
+    # userinfo_endpoint = provider_config["userinfo_endpoint"]
+    # userinfo_url, headers, body = google_oauth_client.add_token(userinfo_endpoint)
+    # print(f"userinfo_url = {userinfo_url}")
+    # print(f"headers = {headers}")
+    # print(f"body = {body}")
+    # userinfo_response = requests.get(userinfo_url, headers=headers, data=body)
+
+    if id_token_data.get("email_verified"):
+        email = id_token_data["email"]
 
         user = User.query.filter_by(email=email).first()
         if user is not None:
@@ -224,14 +241,18 @@ def apple():
     provider_config = requests.get(Config.OAUTH_APPLE_URL).json()
     authorization_endpoint = provider_config["authorization_endpoint"]
 
-    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_STATE_NBYTES)
+    state = security_utils.random_urlsafe(nbytes=Config.OAUTH_RANDOM_NBYTES)
+    nonce = security_utils.random_urlsafe(nbytes=Config.OAUTH_RANDOM_NBYTES)
+    nonce_hash = security_utils.hash_string(nonce, digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE)
     session["oauth_state"] = state
+    session["oauth_nonce"] = nonce
     request_uri = apple_oauth_client.prepare_request_uri(
         uri=authorization_endpoint,
         redirect_uri=f"{request.base_url}/callback",
         scope=["openid", "email", "name"],
         response_mode="form_post",
-        state=state)
+        state=state,
+        nonce=nonce_hash)
     print(f"request_uri = {request_uri}")
     return redirect(request_uri)
 
@@ -258,8 +279,9 @@ def apple_callback():
     authorization_code = request.form.get("code")
     print(f"request.form = {json.dumps(request.form, indent=4)}")
 
-    if session.get("oauth_state") != request.form.get("state"):
-        abort(Response("Authorization server returned an invalid state parameter.", 500))
+    if request.form.get("state") != session["oauth_state"]:
+        abort(500)
+    session.pop("oauth_state")
 
     provider_config = requests.get(Config.OAUTH_APPLE_URL).json()
     token_endpoint = provider_config["token_endpoint"]
@@ -285,8 +307,16 @@ def apple_callback():
     print(f"parsed_token = {json.dumps(parsed_token, indent=4)}")
 
     id_token = parsed_token.get("id_token")
-    id_token_data = jwt.decode(id_token, options={"verify_signature": False})
+    jwks_client = jwt.PyJWKClient(provider_config["jwks_uri"])
+    signing_key = jwks_client.get_signing_key_from_jwt(id_token)
+    # id_token_data = jwt.decode(id_token, options={"verify_signature": False})
+    id_token_data = jwt.decode(id_token, signing_key.key, algorithms=["RS256"], audience=Config.OAUTH_APPLE_CLIENT_ID)
     print(f"id_token_data = {json.dumps(id_token_data, indent=4)}")
+
+    if id_token_data["nonce"] != security_utils.hash_string(session["oauth_nonce"],
+                                                            digest_size=Config.OAUTH_NONCE_HASH_DIGEST_SIZE):
+        abort(500)
+    session.pop("oauth_nonce")
 
     # userinfo_endpoint = provider_config["userinfo_endpoint"]
     # userinfo_url, headers, body = apple_oauth_client.add_token(userinfo_endpoint)
