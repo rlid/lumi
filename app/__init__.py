@@ -2,28 +2,53 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap5
-
+from authlib.integrations.flask_client import OAuth
 from config import config
+from utils.auth_utils import ApplePrivateKeyJWT
+import logging
+import sys
+
+log = logging.getLogger('authlib')
+log.addHandler(logging.StreamHandler(sys.stdout))
+log.setLevel(logging.DEBUG)
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = "auth.login"
+login_manager.login_view = 'auth.login'
 bootstrap = Bootstrap5()
+oauth = OAuth()
 
 
 def create_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+    app_config = config[config_name]
+    app.config.from_object(app_config)
+    app_config.init_app(app)
 
     db.init_app(app)
     login_manager.init_app(app)
     bootstrap.init_app(app)
+    oauth.init_app(app)
+
+    oauth.register(
+        name='google',
+        client_kwargs={'scope': 'openid email profile'}
+    )
+
+    oauth.register(
+        name='apple',
+        # response_mode must be form_post when name or email scope is requested, as required by Apple:
+        authorize_params={'response_mode': 'form_post'},
+        token_endpoint_auth_method=ApplePrivateKeyJWT(apple_private_key=app_config.OAUTH_APPLE_PRIVATE_KEY,
+                                                      apple_key_id=app_config.OAUTH_APPLE_KEY_ID,
+                                                      apple_team_id=app_config.OAUTH_APPLE_TEAM_ID),
+        client_kwargs={'scope': 'openid email name'}
+    )
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
     from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
     return app

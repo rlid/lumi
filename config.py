@@ -21,8 +21,8 @@ class Config:
     OAUTH_APPLE_KEY_ID = os.environ.get("OAUTH_APPLE_KEY_ID")
 
     OAUTH_APPLE_PRIVATE_KEY = None
-    with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "rt") as file:
-        OAUTH_APPLE_PRIVATE_KEY = file.read()
+    with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "r") as f:
+        OAUTH_APPLE_PRIVATE_KEY = f.read()
 
     OAUTH_GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
     OAUTH_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
@@ -30,6 +30,16 @@ class Config:
 
     CLIENT_NONCE_NBYTES = 32
     CLIENT_NONCE_HASH_DIGEST_SIZE = 32
+
+    GOOGLE_SERVER_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
+    GOOGLE_CLIENT_ID = os.getenv('OAUTH_GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.getenv('OAUTH_GOOGLE_CLIENT_SECRET')
+
+    APPLE_SERVER_METADATA_URL = "https://appleid.apple.com/.well-known/openid-configuration"
+    APPLE_CLIENT_ID = os.environ.get("OAUTH_APPLE_CLIENT_ID")
+    # APPLE_CLIENT_SECRET = None
+    # with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "rb") as f:
+    #     APPLE_CLIENT_SECRET = f.read()
 
     @staticmethod
     def init_app(app):
