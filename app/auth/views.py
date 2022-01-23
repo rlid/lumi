@@ -141,69 +141,49 @@ def resend_confirmation():
     return redirect(url_for("main.index"))
 
 
-@auth.route('/google')
-def google():
-    redirect_uri = url_for("auth.google_callback", _external=True)
-    response = oauth.google.authorize_redirect(redirect_uri)
-    print(f"response.response = {response.response}")
-    return response
+def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
+    oauth_provider_name = oauth_provider.name.capitalize()
+    callback_route_name = f"{oauth_provider.name}_callback"
 
+    def entry_route():
+        redirect_uri = url_for(f"auth.{callback_route_name}", _external=True)
+        response = oauth_provider.authorize_redirect(redirect_uri)
+        print(f"response.response = {response.response}")
+        return response
 
-@auth.route('/google/callback')
-def google_callback():
-    token = oauth.google.authorize_access_token()
-    print(f"token = {token}")
-    userinfo = token.get("userinfo")
-    print(f"userinfo = {userinfo}")
+    def callback_route():
+        token = oauth_provider.authorize_access_token()
+        print(f"token = {token}")
+        userinfo = token.get("userinfo")
+        print(f"userinfo = {userinfo}")
 
-    if userinfo and userinfo.get("email_verified"):
-        email = userinfo["email"]
+        if userinfo and userinfo.get("email_verified"):
+            email = userinfo["email"]
 
-        user = User.query.filter_by(email=email).first()
-        if user is not None:
-            login_user(user, remember=True)
-            flash("You have logged in with Google.", category="success")
+            user = User.query.filter_by(email=email).first()
+            if user is not None:
+                login_user(user, remember=True)
+                flash(f"You have logged in with {oauth_provider_name}.", category="success")
+            else:
+                user = User(email=email, confirmed=True)
+                db.session.add(user)
+                db.session.commit()
+                login_user(user, remember=True)
+                flash(f"You have signed up with {oauth_provider_name}.", category="success")
+            return redirect(url_for("main.index"))
         else:
-            user = User(email=email, confirmed=True)
-            db.session.add(user)
-            db.session.commit()
-            login_user(user, remember=True)
-            flash("You have signed up with Google.", category="success")
-        return redirect(url_for("main.index"))
-    else:
-        flash("User email not available or not verified by Google.", category="danger")
-    return redirect(url_for("auth.login"))
+            flash(f"User email not available or not verified by {oauth_provider_name}.", category="danger")
+        return redirect(url_for("auth.login"))
+
+    auth.add_url_rule(f"/{oauth_provider.name}",
+                      endpoint=oauth_provider.name,
+                      view_func=entry_route)
+    auth.add_url_rule(f"/{oauth_provider.name}/callback",
+                      endpoint=callback_route_name,
+                      view_func=callback_route,
+                      methods=callback_methods)
 
 
-@auth.route('/apple')
-def apple():
-    redirect_uri = url_for("auth.apple_callback", _external=True)
-    response = oauth.apple.authorize_redirect(redirect_uri)
-    print(f"response.response = {response.response}")
-    return response
+make_oauth_routes(oauth.google)
 
-
-@auth.route('/apple/callback', methods=["POST"])
-def apple_callback():
-    token = oauth.apple.authorize_access_token()
-    print(f"token = {token}")
-    userinfo = token.get("userinfo")
-    print(f"userinfo = {userinfo}")
-
-    if userinfo and userinfo.get("email_verified"):
-        email = userinfo["email"]
-
-        user = User.query.filter_by(email=email).first()
-        if user is not None:
-            login_user(user, remember=True)
-            flash("You have logged in with Apple.", category="success")
-        else:
-            user = User(email=email, confirmed=True)
-            db.session.add(user)
-            db.session.commit()
-            login_user(user, remember=True)
-            flash("You have signed up with Apple.", category="success")
-        return redirect(url_for("main.index"))
-    else:
-        flash("User email not available or not verified by Apple.", category="danger")
-    return redirect(url_for("auth.login"))
+make_oauth_routes(oauth.apple, callback_methods=["POST"])

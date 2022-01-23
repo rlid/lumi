@@ -5,12 +5,6 @@ from flask_bootstrap import Bootstrap5
 from authlib.integrations.flask_client import OAuth
 from config import config
 from utils.auth_utils import ApplePrivateKeyJWT
-import logging
-import sys
-
-log = logging.getLogger('authlib')
-log.addHandler(logging.StreamHandler(sys.stdout))
-log.setLevel(logging.DEBUG)
 
 db = SQLAlchemy()
 login_manager = LoginManager()
