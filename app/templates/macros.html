@@ -37,7 +37,7 @@
 {% endmacro %}
 
 
-{% macro render_nav_item(endpoint, text, icon=None, link=None) %}
+{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="nav-item text-nowrap rounded btn-outline-success">
         <a class="nav-link text-center {% if active %}text-light{% endif %}"
@@ -64,9 +64,9 @@
                     {{ render_nav_item("main.guide", "Guided Tour", "bi-signpost-split") }}
                     {{ render_nav_item("main.new", "Make a Request", "bi-plus-square") }}
                     {{ render_nav_item("main.browse", "Browse", "bi-search") }}
-                    {{ render_nav_item("main.support", "Support", "bi-chat", link="https://discord.gg/xtXCScr9") }}
+                    {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/xtXCScr9") }}
                     {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off") }}
-                    {{ render_nav_item("main.about", "About Us", "bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
+                    {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item my-1">
@@ -146,12 +146,12 @@
 
 
 {# only visible if screen width is visible_from or more #}
-{% macro render_nav_item_bottom(endpoint, text=None, icon=None, visible_from=None, link=None) %}
+{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="btn-secondary {% if text %}btn-sm{% endif %} text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
         <a href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
            class="nav-link text-light">{% if icon %}
-            <i class="bi {{ icon }}"></i><br>{% endif %}{% if text %}{{ text }}{% endif %}</a>
+            <i class="bi {{ icon }}"></i><br>{% endif %}{% if text %}{{ text|safe }}{% endif %}</a>
     </li>
 {% endmacro %}
 
@@ -160,16 +160,18 @@
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
-                {{ render_nav_item_bottom("main.search", "Search", "bi-search", "md") }}
+                {{ render_nav_item_bottom("main.search", "Search", "bi-search", "sm") }}
                 {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell") }}
-                {{ render_nav_item_bottom("main.conversations", "Conversations", "bi-chat-square-text") }}
+                {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text") }}
                 {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check") }}
-                {{ render_nav_item_bottom("main.account", "Account", "bi-person-circle", "sm") }}
+                {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
             {% else %}
-                {{ render_nav_item_bottom("main.twitter", link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
-                {{ render_nav_item_bottom("main.facebook", link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
-                {{ render_nav_item_bottom("main.discord", link="https://discord.gg/xtXCScr9", icon="bi-discord") }}
-                {{ render_nav_item_bottom("main.linkedin", link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
+
+                {{ render_nav_item_bottom(link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
+                {{ render_nav_item_bottom(link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
+                {{ render_nav_item_bottom(link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
+                {{ render_nav_item_bottom(link="https://discord.gg/xtXCScr9", icon="bi-discord") }}
+                {{ render_nav_item_bottom(link="mailto:support@lumiask.com", icon="bi-envelope-fill") }}
             {% endif %}
         </ul>
     </div>

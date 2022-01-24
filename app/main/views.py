@@ -98,7 +98,7 @@ def linkedin():
 
 @main.route('/discord')
 def discord():
-    return redirect("https://discord.gg/xtXCScr9")
+    return redirect("https://discord.gg/JUD7SMh5tA")
 
 
 @main.route("/reset")

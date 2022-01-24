@@ -12,34 +12,22 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    OAUTH_RANDOM_NBYTES = 32
-    OAUTH_NONCE_HASH_DIGEST_SIZE = 32
-
-    OAUTH_APPLE_URL = "https://appleid.apple.com/.well-known/openid-configuration"
-    OAUTH_APPLE_CLIENT_ID = os.environ.get("OAUTH_APPLE_CLIENT_ID")
-    OAUTH_APPLE_TEAM_ID = os.environ.get("OAUTH_APPLE_TEAM_ID")
-    OAUTH_APPLE_KEY_ID = os.environ.get("OAUTH_APPLE_KEY_ID")
-
-    OAUTH_APPLE_PRIVATE_KEY = None
-    with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "r") as f:
-        OAUTH_APPLE_PRIVATE_KEY = f.read()
-
-    OAUTH_GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
-    OAUTH_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
-    OAUTH_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
-
     CLIENT_NONCE_NBYTES = 32
     CLIENT_NONCE_HASH_DIGEST_SIZE = 32
 
     GOOGLE_SERVER_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
-    GOOGLE_CLIENT_ID = os.getenv('OAUTH_GOOGLE_CLIENT_ID')
-    GOOGLE_CLIENT_SECRET = os.getenv('OAUTH_GOOGLE_CLIENT_SECRET')
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
     APPLE_SERVER_METADATA_URL = "https://appleid.apple.com/.well-known/openid-configuration"
-    APPLE_CLIENT_ID = os.environ.get("OAUTH_APPLE_CLIENT_ID")
-    # APPLE_CLIENT_SECRET = None
-    # with open(os.environ.get("OAUTH_APPLE_KEY_FILE"), "rb") as f:
-    #     APPLE_CLIENT_SECRET = f.read()
+    APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID")
+    APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID")
+    APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID")
+    # For Sign in with Apple, the client secret is dynamic - it is a JWT generated using a private key issued by Apple.
+    # This variable stores the private key, and this convention is assumed by Authlib and auth_utils.ApplePrivateKeyJWT
+    APPLE_CLIENT_SECRET = None
+    with open(os.environ.get("APPLE_KEY_FILE"), "r") as f:
+        APPLE_CLIENT_SECRET = f.read()
 
     @staticmethod
     def init_app(app):

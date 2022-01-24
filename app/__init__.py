@@ -33,9 +33,8 @@ def create_app(config_name):
         name='apple',
         # response_mode must be form_post when name or email scope is requested, as required by Apple:
         authorize_params={'response_mode': 'form_post'},
-        token_endpoint_auth_method=ApplePrivateKeyJWT(apple_private_key=app_config.OAUTH_APPLE_PRIVATE_KEY,
-                                                      apple_key_id=app_config.OAUTH_APPLE_KEY_ID,
-                                                      apple_team_id=app_config.OAUTH_APPLE_TEAM_ID),
+        token_endpoint_auth_method=ApplePrivateKeyJWT(apple_key_id=app_config.APPLE_KEY_ID,
+                                                      apple_team_id=app_config.APPLE_TEAM_ID),
         client_kwargs={'scope': 'openid email name'}
     )
 

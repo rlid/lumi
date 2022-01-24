@@ -8,10 +8,9 @@ class ApplePrivateKeyJWT:
     name = 'apple_private_key_jwt'
 
     def __init__(self, token_endpoint=None, claims=None,
-                 apple_private_key=None, apple_key_id=None, apple_team_id=None):
+                 apple_key_id=None, apple_team_id=None):
         self.token_endpoint = token_endpoint
         self.claims = claims
-        self.apple_private_key = apple_private_key
         self.apple_key_id = apple_key_id
         self.apple_team_id = apple_team_id
 
@@ -22,7 +21,7 @@ class ApplePrivateKeyJWT:
         print(f"auth.auth_method = {auth.auth_method}")
         url = urlparse(token_endpoint)
         return sign_jwt_bearer_assertion(
-            key=self.apple_private_key,  # private key
+            key=auth.client_secret,  # private key
             alg='ES256',  # header:alg
             header={'kid': self.apple_key_id},  # header:kid
             issuer=self.apple_team_id,  # payload:iss
@@ -42,7 +41,7 @@ class ApplePrivateKeyJWT:
             token_endpoint = uri
 
         client_secret = self.sign(auth, token_endpoint)
-        decoded_client_secret = jwt.decode(client_secret, key=self.apple_private_key)
+        decoded_client_secret = jwt.decode(client_secret, key=auth.client_secret)
         print(f'decoded_client_secret.header = {decoded_client_secret.header}')
         print(f'decoded_client_secret(.payload) = {decoded_client_secret}')
         print(f'decoded_client_secret.options = {decoded_client_secret.options}')
