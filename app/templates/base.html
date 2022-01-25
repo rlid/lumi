@@ -12,44 +12,16 @@
             {{ macros.ios_meta(app_title=config["APP_NAME"]) }}
         {% endblock %}
 
-        {% block links %}
-            {{ macros.bootstrap_css() }}
+        {% block link %}
             {{ macros.favicon_meta() }}
+            {{ macros.bootstrap_css() }}
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
         {% endblock %}
 
-        {% block style %}
-            <style>
-                .form-check-input:checked {
-                    background-color: #198754;
-                }
-
-                .btn-outline-success:hover {
-                    color: white;
-                    border-color: white;
-                }
-
-                .separator {
-                    display: flex;
-                    align-items: center;
-                    text-align: center;
-                }
-
-                .separator::before,
-                .separator::after {
-                    content: '';
-                    flex: 1;
-                    border-bottom: 1px solid grey;
-                }
-
-                .separator:not(:empty)::before {
-                    margin-right: .25em;
-                }
-
-                .separator:not(:empty)::after {
-                    margin-left: .25em;
-                }
-            </style>
-        {% endblock %}
+        <style>
+            {% block style %}
+            {% endblock %}
+        </style>
 
         <title>{% block title %}{{ config["APP_NAME"] }} -
             {% if title %}{{ title }}{% else %}Boosted Q&A{% endif %}{% endblock %}</title>
@@ -80,6 +52,7 @@
 
     {% block scripts %}
         {{ macros.bootstrap_js() }}
+        <script src="https://embed.small.chat/T0302G8MBB4C02V1UES8G7.js" async></script>
     {% endblock %}
 {% endblock %}
 </body>
