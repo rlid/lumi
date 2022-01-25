@@ -35,7 +35,7 @@ def login():
                 if user.verify_password(form.password.data):
                     login_user(user, form.remember_me.data)
                     next_url = request.args.get('next')
-                    if next_url is None or not next_url.startswith('/'):
+                    if next_url is None or not next_url.startswith('/') or '/auth/' in next_url:
                         next_url = url_for('main.index')
                     return redirect(next_url)
                 flash('Invalid username or password', category='danger')
@@ -150,7 +150,8 @@ def resend_confirmation():
 @login_required
 def change_password():
     if current_user.signup_method != "email":
-        flash(f"You cannot change password because you signed up with Apple or Google.", category="error")
+        flash(f"You cannot change password because your account does not support login via email and password.",
+              category='danger')
         return redirect(url_for("main.index"))
 
     form = ChangePasswordForm()
@@ -179,8 +180,9 @@ def password_reset_request():
         user = User.query.filter_by(email=email).first()
         if user:
             if user.signup_method != "email":
-                flash(f"You cannot reset password because you signed up with Apple or Google.", category="error")
-                return redirect(url_for("main.index"))
+                flash(f"Your account does not support password reset. Please use an alternative login method.",
+                      category='danger')
+                return redirect(url_for("auth.login"))
             # add client_nonce for extra safety - the nonce is stored as a cookie on the client side, which means
             # that if the login link is opened in a different browser environment (e.g. on a different PC / phone),
             # it will be invalid as the cookie does not exist, and only the hashed nonce is included in the token
@@ -196,6 +198,7 @@ def password_reset_request():
             flash(f'An email with instructions to reset your password has been sent to {form.email.data}.',
                   category='info')
             return redirect(url_for('main.index'))
+        flash(f'{form.email.data} is not associated with any account in our system.', category='danger')
     return render_template('auth/reset_password.html', form=form)
 
 
@@ -225,7 +228,7 @@ def password_reset(token):
                 session.pop('client_nonce')
             login_user(token_user, remember=False)
         return redirect(url_for('main.index'))
-    return render_template('auth/reset_password.html', form=form)
+    return render_template('auth/change_password.html', form=form)
 
 
 def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
@@ -255,32 +258,40 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
             user = User.query.filter_by(email=email).first()
             if user is None:
                 if session.get("invite_code") is None:
-                    # no invite_code in session, user must be signing in before signing up with the provider
-                    flash(f'{userinfo["email"]} is not associated with any account. Please ' +
-                          Markup(f'<a href={url_for("auth.signup")}>sign up</a>') + ' first.', category='danger')
-                    return redirect(url_for("main.index"))
+                    # new user and no invite_code in session
+                    # user must have clicked Signing in with Provider before signing up with the provider (as it is
+                    # impossible to click Sign up with Provider without a valid invite code at the time of writing)
+                    # TODO: review once invite code restriction is removed
+                    flash(f'{userinfo["email"]} is not associated with any account. Please sign up first.',
+                          category='danger')
+                    return redirect(url_for("auth.signup"))
                 invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
                 if invite_code is None:
                     flash(error_message, category="danger")
-                    return redirect(url_for("main.index"))
+                    return redirect(url_for("auth.signup"))
                 user = User(email=email, email_verified=True, signup_method=oauth_provider.name)
                 db.session.add(user)
                 db.session.delete(invite_code)
                 db.session.commit()
                 session.pop("invite_code")
-                flash(f"You have signed up with {name_capitalized}.", category="success")
                 login_user(user, remember=False)
+                flash(f"You have signed up with {name_capitalized}.", category="success")
             else:
                 if user.signup_method == oauth_provider.name:
-                    flash(f"You have logged in with {name_capitalized}.", category="success")
                     login_user(user, remember=False)
+                    flash(f"You have logged in with {name_capitalized}.", category="success")
                 else:
                     flash(
                         f'The account associated with {userinfo["email"]} does not support Sign in with {name_capitalized}. '
-                        'Please use an alternative login method',
-                        category="error")
+                        'Please use an alternative login method.',
+                        category="danger")
+                    return redirect(url_for("auth.login"))
         else:
             flash(f"Your {name_capitalized} account does not have a verified email address.", category="danger")
+            if session.get("invite_code"):
+                return redirect(url_for("auth.signup", code=session.get("invite_code")))
+            else:
+                return redirect(url_for("auth.signup"))
         return redirect(url_for("main.index"))
 
     auth.add_url_rule(f"/{oauth_provider.name}",
