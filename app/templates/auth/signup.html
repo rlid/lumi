@@ -1,7 +1,7 @@
 {% extends "auth/base.html" %}
 
 {% block content %}
-{#    {{ super() }}#}
+    {{ super() }}
     <a class="btn btn-outline-dark w-100 mb-2 {% if not has_invite_code %}disabled{% endif %}"
        href="{{ url_for("auth.apple") }}"><i
             class="bi bi-apple"></i> Sign up

@@ -1,5 +1,5 @@
 {% import "macros.html" as macros %}
-{% from 'bootstrap5/utils.html' import render_messages %}
+{% from "form.html" import render_messages %}
 
 <!doctype html>
 <html lang="en">
@@ -63,8 +63,8 @@
 {% block body %}
     {{ macros.render_navbar(current_user) }}
 
-    <div class="container-fluid mt-3">
-        {{ render_messages(container=False, dismissible=True, dismiss_animate=True) }}
+    <div class="container-fluid">
+        {{ render_messages(dismissible=True, dismiss_animate=True) }}
     </div>
 
     <main>
