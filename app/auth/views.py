@@ -24,7 +24,7 @@ def before_request():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash(f'You have already logged in as {current_user.email}.', category='warning')
+        flash('You have already logged in.', category='warning')
         return redirect(url_for('main.index'))
 
     form = LogInForm()
@@ -238,7 +238,7 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
     # intended user: is_authenticated no | signup_method oauth | email_verified n/a
     def entry():
         if current_user.is_authenticated:
-            flash("You have already signed up and logged in.", category="warning")
+            flash('You have already logged in.', category='warning')
             return redirect(url_for("main.index"))
 
         redirect_uri = url_for(f"auth.{callback_endpoint}", _external=True)
