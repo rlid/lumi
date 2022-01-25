@@ -1,3 +1,7 @@
+import secrets
+import string
+from datetime import datetime, timedelta
+
 from flask import current_app
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -6,17 +10,47 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from utils import security_utils
 from app import db, login_manager
 
+_INVITE_CODE_CHARS = string.ascii_lowercase + string.digits
+
 _REMEMBER_ME_ID_NBYTES = 32
 _TOKEN_SERVER_NONCE_NBYTES = 32
 _TOKEN_EXPIRATION = 600
 
 
+class InviteCode(db.Model):
+    __tablename__ = 'invite_codes'
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), index=True, unique=True, nullable=False)
+    expiry = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, length=4, expiry=timedelta(days=30)):
+        self.code = ''.join(secrets.choice(_INVITE_CODE_CHARS) for i in range(length))
+        self.expiry = datetime.utcnow() + expiry
+
+    def __repr__(self):
+        return f'<InviteCode[{self.id}]:code={self.code},expiry={self.expiry}>'
+
+    @staticmethod
+    def validate(code):
+        if code is None or code == "":
+            return None, f'The invite code "{code}" is invalid.'
+        invite_code = InviteCode.query.filter_by(code=code).first()
+        if invite_code is None:
+            return None, f'The invite code "{code}" is invalid.'
+        elif datetime.utcnow() > invite_code.expiry:
+            return None, f'The invite code "{code}" has expired.'
+        else:
+            return invite_code, None
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(64), unique=True, index=True)
+    email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    confirmed = db.Column(db.Boolean, default=False)
+
+    email_verified = db.Column(db.Boolean, default=False)
+    signup_method = db.Column(db.String(16), default="email")
 
     # length of str(unsigned 64-bit integer) = 20
     # length of separator = 1
@@ -25,7 +59,7 @@ class User(UserMixin, db.Model):
     remember_me_id = db.Column(db.String(21 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
 
     def __repr__(self):
-        return f"<User[{self.id}] {self.email}>"
+        return f"<User[{self.id}]:email={self.email}>"
 
     @property
     def password(self):
@@ -77,7 +111,7 @@ class User(UserMixin, db.Model):
         verified = token_user_id == self.id \
                    and token_server_nonce == self.server_nonce \
                    and token_client_nonce_hash == client_nonce_hash
-        if self.server_nonce == token_server_nonce and self.server_nonce is not None:
+        if self.server_nonce is not None and self.server_nonce == token_server_nonce:
             self.server_nonce = None
             db.session.add(self)
             db.session.commit()

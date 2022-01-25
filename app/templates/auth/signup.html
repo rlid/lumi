@@ -1,14 +1,23 @@
-{% from "form.html" import render_form %}
+{% extends "auth/base.html" %}
 
-{% extends "base.html" %}
+{% block content %}
+{#    {{ super() }}#}
+    <a class="btn btn-outline-dark w-100 mb-2 {% if not has_invite_code %}disabled{% endif %}"
+       href="{{ url_for("auth.apple") }}"><i
+            class="bi bi-apple"></i> Sign up
+        with Apple</a>
+    <a class="btn btn-outline-danger w-100 my-2 {% if not has_invite_code %}disabled{% endif %}"
+       href="{{ url_for("auth.google") }}"><i
+            class="bi bi-google"></i> Sign up
+        with Google</a>
 
-{% block main %}
-    <div class="container">
-        <div class="row mt-5 align-items-center justify-content-center">
-            <div class="col-sm-8 col-md-6 col-lg-4 rounded p-3 shadow">
-                {{ render_form(form, button_style="success", floating_input_label=True) }}
-                <p class="mt-3 text-center text-muted small">(*) Leave password blank to log in with links sent by email. You can set a password later.</p>
-            </div>
-        </div>
-    </div>
+    <div class="separator my-2"><span class="text-muted"> Or </span></div>
+    {{ render_form(form, button_style="success", floating_input_label=True) }}
+
+    {% if not has_invite_code %}
+        <p class="mt-3 text-center text-muted">Need an invite code? <a href="https://discord.gg/xtXCScr9">Join
+            our Discord</a> or follow us on <a href="https://twitter.com/KnowbleApp">Twitter</a> / <a
+                href="https://fb.me/KnowbleApp">Facebook</a> / <a
+                href="https://www.linkedin.com/company/knowbleapp">LinkedIn</a>.</p>
+    {% endif %}
 {% endblock %}

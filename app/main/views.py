@@ -10,11 +10,6 @@ def index():
     return render_template("index.html")
 
 
-@main.route('/login')
-def login():
-    return render_template("auth/login.html")
-
-
 @main.route('/guide')
 def guide():
     return render_template("index.html", title="Guided Tour")
@@ -101,8 +96,8 @@ def discord():
     return redirect("https://discord.gg/JUD7SMh5tA")
 
 
-@main.route("/reset")
-def reset():
+@main.route("/initdb")
+def initdb():
     db.session.remove()
     db.drop_all()
     db.create_all()
