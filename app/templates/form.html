@@ -316,13 +316,19 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
 {%- endmacro %}
 
 
-{% macro render_messages(messages=None, dismissible=False, dismiss_animate=False) -%}
+{% macro render_messages(messages=None, dismissible=False, dismiss_animate=False,
+                         category_map={
+                             'success':'success',
+                             'info':'info',
+                             'warning':'warning',
+                             'danger':'danger'
+                         }) -%}
 
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
         {% if messages -%} {# don't output anything if there are no messages #}
             <div class="container-fluid mt-2 px-0">
         {% for cat, msg in messages %}
-            <div class="alert ps-2 pe-3 mb-2 py-1 alert-{{ cat }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}" role="alert">
+            <div class="alert ps-2 pe-3 mb-2 py-1 alert-{{ category_map[cat] }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}" role="alert">
                 <small>{% if dismissible %}<button type="button" class="btn-close px-2 py-2" data-bs-dismiss="alert" aria-label="Close"></button>{% endif %}
                 {{ msg }}</small>
             </div>
