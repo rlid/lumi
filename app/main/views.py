@@ -10,14 +10,14 @@ def index():
     return render_template("index.html")
 
 
-@main.route('/guide')
-def guide():
+@main.route('/start')
+def start():
     return render_template("index.html", title="Guided Tour")
 
 
-@main.route('/new')
+@main.route('/create')
 @login_required
-def new():
+def create():
     return render_template("index.html", title="Make a Request")
 
 
