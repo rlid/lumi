@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import render_template, redirect, request, url_for, flash, Markup, session
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -36,7 +38,7 @@ def login():
                 if user.verify_password(form.password.data):
                     login_user(user, form.remember_me.data)
                     next_url = request.args.get('next')
-                    if next_url is None or not next_url.startswith('/') or '/auth/' in next_url:
+                    if next_url is None or not next_url.startswith('/') or '/auth/logout' in next_url:
                         next_url = url_for('main.index')
                     return redirect(next_url)
                 flash('Invalid username or password', category='danger')
@@ -50,15 +52,6 @@ def login():
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all
-@auth.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('You have been logged out.', category='success')
-    return redirect(url_for('main.index'))
-
-
-# intended user: is_authenticated yes | signup_method all | email_verified all
 @auth.route('/remember')
 @login_required
 def remember():
@@ -68,10 +61,20 @@ def remember():
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', category='success')
+    return redirect(url_for('main.index'))
+
+
+# intended user: is_authenticated yes | signup_method all | email_verified all
 @auth.route('/logout-everywhere')
 @login_required
 def logout_all():
     current_user.reset_remember_id()
+    logout_user()
     flash('You have been logged out on all devices.', category='success')
     return redirect(url_for('main.index'))
 
@@ -79,13 +82,9 @@ def logout_all():
 # intended user: all | signup_method all | email_verified all
 @auth.route('/invite')
 def invite():
-    codes = [code for code, in db.session.query(InviteCode.code).all()]
-    invite_code = InviteCode()
-    while invite_code.code in codes:
-        invite_code = InviteCode()
-    db.session.add(invite_code)
-    db.session.commit()
-    return redirect(url_for("auth.signup", code=invite_code.code))
+    return redirect(url_for("auth.signup",
+                            code=InviteCode.generate(length=4,
+                                                     expiry_timedelta=timedelta(days=30)).code))
 
 
 # intended user: is_authenticated no | signup_method email | email_verified n/a
@@ -105,7 +104,8 @@ def signup():
         session.pop("invite_code")
         token = user.generate_token(action="confirm")
         print(url_for("auth.confirm", token=token, remember=1, _external=True))
-        flash(f'A confirmation email has been sent to {form.email.data}.', category="info")
+        flash(f'A confirmation email has been sent to {form.email.data}.',
+              category="info")
         login_user(user, remember=False)
         flash(f"You have logged in. " +
               Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
@@ -154,7 +154,8 @@ def resend_confirmation():
 
     token = current_user.generate_token(action="confirm")
     print(url_for("auth.confirm", token=token, _external=True))
-    flash(f'A new confirmation email has been sent to {current_user.email}.', category="info")
+    flash(f'A new confirmation email has been sent to {current_user.email}.',
+          category="info")
     return redirect(url_for("main.index"))
 
 
@@ -196,17 +197,18 @@ def password_reset_request():
                 flash(f"Your account does not support password reset. Please use an alternative login method.",
                       category='danger')
                 return redirect(url_for("auth.login"))
-            # add client_nonce for extra safety - the nonce is stored as a cookie on the client side, which means
-            # that if the login link is opened in a different browser environment (e.g. on a different PC / phone),
-            # it will be invalid as the cookie does not exist, and only the hashed nonce is included in the token
-            # for security reasons:
-            client_nonce = security_utils.random_urlsafe(nbytes=Config.CLIENT_NONCE_NBYTES)
-            session['client_nonce'] = client_nonce
+            # add a random site_rid for extra safety - the id is stored as a cookie on the client side, which means
+            # that if the login link is opened on a different site (e.g. on a different PC / phone), it will be invalid
+            # as the cookie does not exist, and only the hashed id is included in the token for security reasons:
+            site_rid = security_utils.random_urlsafe(nbytes=Config.SITE_RID_NBYTES)
+            session['auth_reset'] = site_rid
+            print(f"site_rid is set to [{site_rid}].")
             token = user.generate_token(
                 action="reset",
-                client_nonce_hash=security_utils.hash_string(client_nonce,
-                                                             digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE))
-            print(f"client_nonce is set to [{client_nonce}].")
+                site_rid_hash=security_utils.hash_string(
+                    site_rid,
+                    digest_size=Config.SITE_RID_HASH_DIGEST_SIZE
+                ))
             print(url_for("auth.password_reset", token=token, _external=True))
             flash(f'An email with instructions to reset your password has been sent to {form.email.data}.',
                   category='info')
@@ -224,23 +226,26 @@ def password_reset(token):
 
     form = PasswordResetForm()
     if form.validate_on_submit():
-        client_nonce_hash = session.get('client_nonce')
-        # client_nonce_hash is just client_nonce at this point, hash it if it is not None:
-        if client_nonce_hash is not None:
-            client_nonce_hash = security_utils.hash_string(client_nonce_hash,
-                                                           digest_size=Config.CLIENT_NONCE_HASH_DIGEST_SIZE)
-        token_data = User.decode_token(token)
-        token_user = User.query.get(int(token_data.get("reset")))
-        if token_user.verify_token_data(token_data, action="reset", client_nonce_hash=client_nonce_hash):
-            token_user.password = form.password.data
-            db.session.add(token_user)
+        site_rid_hash = session.get('auth_reset')
+        # site_rid_hash is just site_rid at this point, hash it if it is not None:
+        if site_rid_hash is not None:
+            site_rid_hash = security_utils.hash_string(site_rid_hash,
+                                                       digest_size=Config.SITE_RID_HASH_DIGEST_SIZE)
+
+        is_verified, user = User.verify_token_static(token=token,
+                                                     action="reset",
+                                                     site_rid_hash=site_rid_hash)
+        if is_verified:
+            user.password = form.password.data
+            db.session.add(user)
             db.session.commit()
             flash('Your password has been updated.', category='success')
-            if client_nonce_hash is not None and client_nonce_hash == token_data.get("client_nonce_hash"):
-                print(f"client_nonce [{session.get('client_nonce')}] is deleted.")
-                session.pop('client_nonce')
-            login_user(token_user, remember=False)
-        return redirect(url_for('main.index'))
+            print(f"site_rid [{session.get('auth_reset')}] is deleted.")
+            session.pop('auth_reset')
+            return redirect(url_for('main.index'))
+        else:
+            flash('The password reset link is invalid or has expired.', category='danger')
+            return redirect(url_for('auth.password_reset_request'))
     return render_template('auth/change_password.html', form=form)
 
 

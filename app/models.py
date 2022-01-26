@@ -13,8 +13,49 @@ from app import db, login_manager
 _INVITE_CODE_CHARS = string.ascii_lowercase + string.digits
 
 _REMEMBER_ME_ID_NBYTES = 32
-_TOKEN_SERVER_NONCE_NBYTES = 32
-_TOKEN_EXPIRATION = 600
+_SINGLE_USE_TOKEN_NBYTES = 32
+_ACCOUNT_TOKEN_EXPIRATION = 600
+
+
+class SingleUseToken(db.Model):
+    __tablename__ = 'single_use_tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    # base64 encoding of _NBYTES bytes = ~1.3 * _NBYTES, rounded to 1.5 for safety
+    code = db.Column(db.String(int(1.5 * _SINGLE_USE_TOKEN_NBYTES)), index=True, unique=True, nullable=False)
+    expiry = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, expiry_timedelta):
+        self.code = security_utils.random_urlsafe(nbytes=_SINGLE_USE_TOKEN_NBYTES)
+        self.expiry = datetime.utcnow() + expiry_timedelta
+
+    def __repr__(self):
+        return f'<SingleUseToken[{self.id}]:code={self.code},expiry={self.expiry}>'
+
+    @staticmethod
+    def generate(expiry_timedelta):
+        codes = [code for code, in db.session.query(SingleUseToken.code).all()]
+        token = SingleUseToken(expiry_timedelta=expiry_timedelta)
+        while token.code in codes:
+            token = SingleUseToken(expiry_timedelta=expiry_timedelta)
+        db.session.add(token)
+        db.session.commit()
+        print(f"Created {token}.")
+        return token
+
+    @staticmethod
+    def validate(code):
+        if code is None or code == "":
+            return False
+        token = SingleUseToken.query.filter_by(code=code).first()
+        if token is None:
+            return False
+        elif datetime.utcnow() > token.expiry:
+            return False
+        else:
+            db.session.delete(token)
+            db.session.commit()
+            print(f"Deleted {token}.")
+            return True
 
 
 class InviteCode(db.Model):
@@ -23,12 +64,22 @@ class InviteCode(db.Model):
     code = db.Column(db.String(16), index=True, unique=True, nullable=False)
     expiry = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, length=4, expiry=timedelta(days=30)):
+    def __init__(self, length, expiry_timedelta):
         self.code = ''.join(secrets.choice(_INVITE_CODE_CHARS) for i in range(length))
-        self.expiry = datetime.utcnow() + expiry
+        self.expiry = datetime.utcnow() + expiry_timedelta
 
     def __repr__(self):
         return f'<InviteCode[{self.id}]:code={self.code},expiry={self.expiry}>'
+
+    @staticmethod
+    def generate(length, expiry_timedelta):
+        codes = [code for code, in db.session.query(InviteCode.code).all()]
+        invite_code = InviteCode(length=length, expiry_timedelta=expiry_timedelta)
+        while invite_code.code in codes:
+            invite_code = InviteCode(length=length, expiry_timedelta=expiry_timedelta)
+        db.session.add(invite_code)
+        db.session.commit()
+        return invite_code
 
     @staticmethod
     def validate(code):
@@ -54,8 +105,7 @@ class User(UserMixin, db.Model):
 
     # length of str(unsigned 64-bit integer) = 20
     # length of separator = 1
-    # base64 encoding of _NBYTES bytes = ~1.3 * _NBYTES, rounded to 1.5 for safety
-    server_nonce = db.Column(db.String(int(1.5 * _TOKEN_SERVER_NONCE_NBYTES)))
+    # base64 encoding of n bytes = ~1.3 * n, rounded to 1.5 for safety
     remember_me_id = db.Column(db.String(21 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
 
     def __repr__(self):
@@ -83,43 +133,46 @@ class User(UserMixin, db.Model):
             self.reset_remember_id()
         return self.remember_me_id
 
-    def generate_token(self, action, client_nonce_hash=None, expiration=_TOKEN_EXPIRATION):
+    def generate_token(self, action, site_rid_hash=None, expiration=_ACCOUNT_TOKEN_EXPIRATION):
         s = Serializer(current_app.config["SECRET_KEY"], expiration)
-        server_nonce = security_utils.random_urlsafe(nbytes=_TOKEN_SERVER_NONCE_NBYTES)
-        self.server_nonce = server_nonce
-        db.session.add(self)
-        db.session.commit()
-        print(f"server_nonce is set to [{server_nonce}].")
+        server_token = SingleUseToken.generate(expiry_timedelta=timedelta(seconds=_ACCOUNT_TOKEN_EXPIRATION))
         return s.dumps({action: self.id,
-                        "server_nonce": server_nonce,
-                        "client_nonce_hash": client_nonce_hash}).decode("utf-8")
+                        "server_token": server_token.code,
+                        "site_rid_hash": site_rid_hash}).decode()
 
     @staticmethod
     def decode_token(token):
         s = Serializer(current_app.config["SECRET_KEY"])
         try:
-            data = s.loads(token.encode("utf-8"))
+            data = s.loads(token.encode())
         except:
             data = dict()
         return data
 
-    def verify_token_data(self, data, action, client_nonce_hash=None):
-        token_user_id = data.get(action)
-        token_server_nonce = data.get("server_nonce")
-        token_client_nonce_hash = data.get("client_nonce_hash")
+    @staticmethod
+    def verify_token_data(user, data, action, site_rid_hash=None):
+        id_match = user.id == data.get(action)
+        server_token_is_valid = SingleUseToken.validate(data.get("server_token"))
+        site_rid_match = site_rid_hash == data.get("site_rid_hash")
 
-        verified = token_user_id == self.id \
-                   and token_server_nonce == self.server_nonce \
-                   and token_client_nonce_hash == client_nonce_hash
-        if self.server_nonce is not None and self.server_nonce == token_server_nonce:
-            self.server_nonce = None
-            db.session.add(self)
-            db.session.commit()
-            print(f"server_nonce [{token_server_nonce}] is deleted.")
-        return verified
+        return id_match and server_token_is_valid and site_rid_match
 
-    def verify_token(self, token, action, client_nonce_hash=None):
-        return self.verify_token_data(data=User.decode_token(token), action=action, client_nonce_hash=client_nonce_hash)
+    def verify_token(self, token, action, site_rid_hash=None):
+        return User.verify_token_data(user=self,
+                                      data=User.decode_token(token),
+                                      action=action,
+                                      site_rid_hash=site_rid_hash)
+
+    @staticmethod
+    def verify_token_static(token, action, site_rid_hash=None):
+        data = User.decode_token(token)
+        user_id = data.get(action)
+        if user_id is None:
+            return False, None
+        user = User.query.get(int(user_id))
+        if user is None:
+            return False, None
+        return User.verify_token_data(user=user, data=data, action=action, site_rid_hash=site_rid_hash), user
 
 
 @login_manager.user_loader

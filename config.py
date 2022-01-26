@@ -12,8 +12,8 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    CLIENT_NONCE_NBYTES = 32
-    CLIENT_NONCE_HASH_DIGEST_SIZE = 32
+    SITE_RID_NBYTES = 32
+    SITE_RID_HASH_DIGEST_SIZE = 32
 
     GOOGLE_SERVER_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')

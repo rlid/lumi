@@ -37,7 +37,7 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(u1.password_hash == u2.password_hash)
 
     def test_valid_tokens(self):
-        u = User()
+        u = User(email="a@a")
         db.session.add(u)
         db.session.commit()
         token1 = u.generate_token(action="dummy")
@@ -46,8 +46,8 @@ class UserModelTestCase(unittest.TestCase):
         self.assertTrue(u.verify_token(token2, action="dummy"))
 
     def test_invalid_tokens(self):
-        u1 = User()
-        u2 = User()
+        u1 = User(email="a@a")
+        u2 = User(email="b@b")
         db.session.add_all([u1, u2])
         db.session.commit()
 
