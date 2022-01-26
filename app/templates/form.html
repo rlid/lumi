@@ -322,8 +322,8 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
         {% if messages -%} {# don't output anything if there are no messages #}
             <div class="container-fluid mt-2 px-0">
         {% for cat, msg in messages %}
-            <div class="alert py-1 mb-2 alert-{{ cat }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}" role="alert">
-                <small>{% if dismissible %}<button type="button" class="btn-close py-2 px-2" data-bs-dismiss="alert" aria-label="Close"></button>{% endif %}
+            <div class="alert ps-2 pe-3 mb-2 py-1 alert-{{ cat }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}" role="alert">
+                <small>{% if dismissible %}<button type="button" class="btn-close px-2 py-2" data-bs-dismiss="alert" aria-label="Close"></button>{% endif %}
                 {{ msg }}</small>
             </div>
         {%- endfor -%}
