@@ -14,7 +14,8 @@ def before_request():
     if current_user.is_authenticated \
             and not current_user.email_verified \
             and request.blueprint != 'auth' \
-            and request.endpoint != 'static':
+            and request.endpoint != 'static' \
+            and request.endpoint != 'main.index':
         flash('Your access is restricted because your email address is not verified. ' +
               Markup(f'<a href={url_for("auth.resend_confirmation")}>Click here</a> ') +
               'to request another confirmation email.', category='warning')
@@ -58,6 +59,15 @@ def logout():
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all
+@auth.route('/remember')
+@login_required
+def remember():
+    login_user(current_user, remember=True)
+    flash('You will stay logged in on this device until you log out.', category='warning')
+    return redirect(url_for('main.index'))
+
+
+# intended user: is_authenticated yes | signup_method all | email_verified all
 @auth.route('/logout-everywhere')
 @login_required
 def logout_all():
@@ -97,6 +107,9 @@ def signup():
         print(url_for("auth.confirm", token=token, remember=1, _external=True))
         flash(f'A confirmation email has been sent to {form.email.data}.', category="info")
         login_user(user, remember=False)
+        flash(f"You have logged in. " +
+              Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
+              category="success")
         return redirect(url_for("main.index"))
 
     code = request.args.get('code')
@@ -275,11 +288,15 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
                 db.session.commit()
                 session.pop("invite_code")
                 login_user(user, remember=False)
-                flash(f"You have signed up with {name_capitalized}.", category="success")
+                flash(f"You have signed up with {name_capitalized}. " +
+                      Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
+                      category="success")
             else:
                 if user.signup_method == oauth_provider.name:
                     login_user(user, remember=False)
-                    flash(f"You have logged in with {name_capitalized}.", category="success")
+                    flash(f"You have logged in with {name_capitalized}. " +
+                          Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
+                          category="success")
                 else:
                     flash(
                         f'The account associated with {userinfo["email"]} does not support Sign in with {name_capitalized}. '
