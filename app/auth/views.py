@@ -5,8 +5,9 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from app import db, oauth
 from app.auth import auth
-from app.models import User, InviteCode
 from app.auth.forms import LogInForm, SignUpForm, ChangePasswordForm, PasswordResetRequestForm, PasswordResetForm
+from app.models.invite_code import InviteCode
+from app.models.user import User
 from config import Config
 from utils import security_utils
 

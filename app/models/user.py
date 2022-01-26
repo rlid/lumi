@@ -1,97 +1,16 @@
-import secrets
-import string
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from flask import current_app
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from utils import security_utils
 from app import db, login_manager
-
-_INVITE_CODE_CHARS = string.ascii_lowercase + string.digits
+from app.models.single_use_token import SingleUseToken
+from utils import security_utils
 
 _REMEMBER_ME_ID_NBYTES = 32
-_SINGLE_USE_TOKEN_NBYTES = 32
 _ACCOUNT_TOKEN_EXPIRATION = 600
-
-
-class SingleUseToken(db.Model):
-    __tablename__ = 'single_use_tokens'
-    id = db.Column(db.Integer, primary_key=True)
-    # base64 encoding of _NBYTES bytes = ~1.3 * _NBYTES, rounded to 1.5 for safety
-    code = db.Column(db.String(int(1.5 * _SINGLE_USE_TOKEN_NBYTES)), index=True, unique=True, nullable=False)
-    expiry = db.Column(db.DateTime, nullable=False)
-
-    def __init__(self, expiry_timedelta):
-        self.code = security_utils.random_urlsafe(nbytes=_SINGLE_USE_TOKEN_NBYTES)
-        self.expiry = datetime.utcnow() + expiry_timedelta
-
-    def __repr__(self):
-        return f'<SingleUseToken[{self.id}]:code={self.code},expiry={self.expiry}>'
-
-    @staticmethod
-    def generate(expiry_timedelta):
-        codes = [code for code, in db.session.query(SingleUseToken.code).all()]
-        token = SingleUseToken(expiry_timedelta=expiry_timedelta)
-        while token.code in codes:
-            token = SingleUseToken(expiry_timedelta=expiry_timedelta)
-        db.session.add(token)
-        db.session.commit()
-        print(f"Created {token}.")
-        return token
-
-    @staticmethod
-    def validate(code):
-        if code is None or code == "":
-            return False
-        token = SingleUseToken.query.filter_by(code=code).first()
-        if token is None:
-            return False
-        elif datetime.utcnow() > token.expiry:
-            return False
-        else:
-            db.session.delete(token)
-            db.session.commit()
-            print(f"Deleted {token}.")
-            return True
-
-
-class InviteCode(db.Model):
-    __tablename__ = 'invite_codes'
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(16), index=True, unique=True, nullable=False)
-    expiry = db.Column(db.DateTime, nullable=False)
-
-    def __init__(self, length, expiry_timedelta):
-        self.code = ''.join(secrets.choice(_INVITE_CODE_CHARS) for i in range(length))
-        self.expiry = datetime.utcnow() + expiry_timedelta
-
-    def __repr__(self):
-        return f'<InviteCode[{self.id}]:code={self.code},expiry={self.expiry}>'
-
-    @staticmethod
-    def generate(length, expiry_timedelta):
-        codes = [code for code, in db.session.query(InviteCode.code).all()]
-        invite_code = InviteCode(length=length, expiry_timedelta=expiry_timedelta)
-        while invite_code.code in codes:
-            invite_code = InviteCode(length=length, expiry_timedelta=expiry_timedelta)
-        db.session.add(invite_code)
-        db.session.commit()
-        return invite_code
-
-    @staticmethod
-    def validate(code):
-        if code is None or code == "":
-            return None, f'The invite code "{code}" is invalid.'
-        invite_code = InviteCode.query.filter_by(code=code).first()
-        if invite_code is None:
-            return None, f'The invite code "{code}" is invalid.'
-        elif datetime.utcnow() > invite_code.expiry:
-            return None, f'The invite code "{code}" has expired.'
-        else:
-            return invite_code, None
 
 
 class User(UserMixin, db.Model):

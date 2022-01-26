@@ -1,4 +1,5 @@
 import os
+
 from sqlalchemy.engine.url import URL
 
 basedir = os.path.abspath(os.path.dirname(__file__))

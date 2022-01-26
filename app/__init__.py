@@ -1,8 +1,9 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_bootstrap import Bootstrap5
 from authlib.integrations.flask_client import OAuth
+from flask import Flask
+from flask_bootstrap import Bootstrap5
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+
 from config import config
 from utils.auth_utils import ApplePrivateKeyJWT
 

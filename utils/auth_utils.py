@@ -1,7 +1,8 @@
-from authlib.jose import jwt
 from urllib.parse import urlparse
-from authlib.oauth2.rfc7523.assertion import sign_jwt_bearer_assertion
+
 from authlib.common.urls import add_params_to_qs
+from authlib.jose import jwt
+from authlib.oauth2.rfc7523.assertion import sign_jwt_bearer_assertion
 
 
 class ApplePrivateKeyJWT:

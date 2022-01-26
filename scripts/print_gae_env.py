@@ -1,4 +1,5 @@
 import sys
+
 import yaml
 
 with open("app_env_var.yaml", "r") as stream:

@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from flask_wtf import FlaskForm
 from wtforms import EmailField, PasswordField, BooleanField, SubmitField, StringField
 from wtforms.validators import InputRequired, EqualTo, ValidationError, Length
 
-from app.models import User, InviteCode
+from app.models.invite_code import InviteCode
+from app.models.user import User
 
 
 class LogInForm(FlaskForm):

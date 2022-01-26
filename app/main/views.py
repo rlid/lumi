@@ -2,7 +2,7 @@ from flask import render_template, redirect, flash
 from flask_login import login_required, current_user
 
 from app import db
-from . import main
+from app.main import main
 
 
 @main.route('/')
