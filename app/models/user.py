@@ -1,16 +1,16 @@
 from datetime import timedelta
 
+from authlib.jose.errors import BadSignatureError
 from flask import current_app
 from flask_login import UserMixin
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
 from app.models.single_use_token import SingleUseToken
-from utils import security_utils
+from utils import security_utils, authlib_ext
 
 _REMEMBER_ME_ID_NBYTES = 32
-_ACCOUNT_TOKEN_EXPIRATION = 600
+_TOKEN_SECONDS_TO_EXPIRY = 600
 
 
 class User(UserMixin, db.Model):
@@ -52,24 +52,26 @@ class User(UserMixin, db.Model):
             self.reset_remember_id()
         return self.remember_me_id
 
-    def generate_token(self, action, site_rid_hash=None, expiration=_ACCOUNT_TOKEN_EXPIRATION):
-        s = Serializer(current_app.config["SECRET_KEY"], expiration)
-        server_token = SingleUseToken.generate(expiry_timedelta=timedelta(seconds=_ACCOUNT_TOKEN_EXPIRATION))
-        return s.dumps({action: self.id,
-                        "server_token": server_token.code,
-                        "site_rid_hash": site_rid_hash}).decode()
+    def generate_token(self, action, site_rid_hash=None, seconds_to_exp=_TOKEN_SECONDS_TO_EXPIRY):
+        server_token = SingleUseToken.generate(timedelta_to_expiry=timedelta(seconds=seconds_to_exp))
+        return authlib_ext.jws_compact_serialize_timed(
+            payload={action: self.id,
+                     "server_token": server_token.code,
+                     "site_rid_hash": site_rid_hash},
+            key=current_app.config["SECRET_KEY"],
+            seconds_to_exp=seconds_to_exp
+        )
 
     @staticmethod
-    def decode_token(token):
-        s = Serializer(current_app.config["SECRET_KEY"])
+    def _decode_token(token):
         try:
-            data = s.loads(token.encode())
-        except:
-            data = dict()
-        return data
+            payload = authlib_ext.jws_compact_deserialize_timed(token, current_app.config["SECRET_KEY"])
+        except BadSignatureError:
+            payload = dict()
+        return payload
 
     @staticmethod
-    def verify_token_data(user, data, action, site_rid_hash=None):
+    def _verify_token_data(user, data, action, site_rid_hash=None):
         id_match = user.id == data.get(action)
         server_token_is_valid = SingleUseToken.validate(data.get("server_token"))
         site_rid_match = site_rid_hash == data.get("site_rid_hash")
@@ -77,21 +79,32 @@ class User(UserMixin, db.Model):
         return id_match and server_token_is_valid and site_rid_match
 
     def verify_token(self, token, action, site_rid_hash=None):
-        return User.verify_token_data(user=self,
-                                      data=User.decode_token(token),
-                                      action=action,
-                                      site_rid_hash=site_rid_hash)
+        data = User._decode_token(token)
+        if not data:
+            return False
+
+        return User._verify_token_data(user=self,
+                                       data=data,
+                                       action=action,
+                                       site_rid_hash=site_rid_hash)
 
     @staticmethod
     def verify_token_static(token, action, site_rid_hash=None):
-        data = User.decode_token(token)
+        data = User._decode_token(token)
+        if not data:
+            return False, None
+
         user_id = data.get(action)
         if user_id is None:
             return False, None
+
         user = User.query.get(int(user_id))
         if user is None:
             return False, None
-        return User.verify_token_data(user=user, data=data, action=action, site_rid_hash=site_rid_hash), user
+        return User._verify_token_data(user=user,
+                                       data=data,
+                                       action=action,
+                                       site_rid_hash=site_rid_hash), user
 
 
 @login_manager.user_loader

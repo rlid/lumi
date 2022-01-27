@@ -5,7 +5,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 from config import config
-from utils.auth_utils import ApplePrivateKeyJWT
+from utils.authlib_ext import ApplePrivateKeyJWT
 
 db = SQLAlchemy()
 login_manager = LoginManager()

@@ -2,7 +2,7 @@ import time
 import unittest
 
 from app import create_app, db
-from app.models import User
+from app.models.user import User
 
 
 class UserModelTestCase(unittest.TestCase):
@@ -42,7 +42,7 @@ class UserModelTestCase(unittest.TestCase):
         db.session.commit()
         token1 = u.generate_token(action="dummy")
         self.assertTrue(u.verify_token(token1, action="dummy"))
-        token2 = u.generate_token(action="dummy", expiration=60)
+        token2 = u.generate_token(action="dummy", seconds_to_exp=60)
         self.assertTrue(u.verify_token(token2, action="dummy"))
 
     def test_invalid_tokens(self):
@@ -51,7 +51,7 @@ class UserModelTestCase(unittest.TestCase):
         db.session.add_all([u1, u2])
         db.session.commit()
 
-        token1 = u1.generate_token(action="dummy", expiration=1)
+        token1 = u1.generate_token(action="dummy", seconds_to_exp=1)
         time.sleep(2)
         self.assertFalse(u1.verify_token(token1, action="dummy"))
 

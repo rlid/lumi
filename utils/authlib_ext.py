@@ -1,8 +1,41 @@
+import json
+import time
 from urllib.parse import urlparse
 
 from authlib.common.urls import add_params_to_qs
-from authlib.jose import jwt
+from authlib.jose import jwt, JsonWebSignature
+from authlib.jose.errors import BadSignatureError
 from authlib.oauth2.rfc7523.assertion import sign_jwt_bearer_assertion
+
+
+def jws_compact_serialize_timed(payload, key, seconds_to_exp, alg='HS256'):
+    protected = {
+        'alg': alg,
+        'crit': ['exp'],
+        "exp": int(time.time()) + seconds_to_exp
+    }
+    jws = JsonWebSignature()
+    return jws.serialize_compact(protected, json.dumps(payload), key).decode()
+
+
+def jws_compact_deserialize_timed(compact, key):
+    jws = JsonWebSignature()
+    data = jws.deserialize_compact(compact, key)
+    payload = json.loads(data.payload)
+
+    expiry = data.header.get('exp')
+    if expiry is None:
+        raise BadSignatureError('Missing "exp" in header')
+
+    try:
+        expiry = int(expiry)
+    except ValueError:
+        raise BadSignatureError('"exp" is not an int')
+
+    if expiry < int(time.time()):
+        raise BadSignatureError("Signature expired")
+
+    return payload
 
 
 class ApplePrivateKeyJWT:

@@ -21,11 +21,11 @@ class SingleUseToken(db.Model):
         return f'<SingleUseToken[{self.id}]:code={self.code},expiry={self.expiry}>'
 
     @staticmethod
-    def generate(expiry_timedelta):
+    def generate(timedelta_to_expiry):
         codes = [code for code, in db.session.query(SingleUseToken.code).all()]
-        token = SingleUseToken(expiry_timedelta=expiry_timedelta)
+        token = SingleUseToken(expiry_timedelta=timedelta_to_expiry)
         while token.code in codes:
-            token = SingleUseToken(expiry_timedelta=expiry_timedelta)
+            token = SingleUseToken(expiry_timedelta=timedelta_to_expiry)
         db.session.add(token)
         db.session.commit()
         print(f"Created {token}.")
