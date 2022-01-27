@@ -32,7 +32,7 @@ class InviteCode(db.Model):
 
     @staticmethod
     def validate(code):
-        if code is None or code == "":
+        if code is None or code == '':
             return None, f'The invite code "{code}" is invalid.'
         invite_code = InviteCode.query.filter_by(code=code).first()
         if invite_code is None:

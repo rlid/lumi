@@ -9,6 +9,7 @@ _SINGLE_USE_TOKEN_NBYTES = 32
 class SingleUseToken(db.Model):
     __tablename__ = 'single_use_tokens'
     id = db.Column(db.Integer, primary_key=True)
+
     # base64 encoding of _NBYTES bytes = ~1.3 * _NBYTES, rounded to 1.5 for safety
     code = db.Column(db.String(int(1.5 * _SINGLE_USE_TOKEN_NBYTES)), index=True, unique=True, nullable=False)
     expiry = db.Column(db.DateTime, nullable=False)
@@ -28,12 +29,12 @@ class SingleUseToken(db.Model):
             token = SingleUseToken(expiry_timedelta=timedelta_to_expiry)
         db.session.add(token)
         db.session.commit()
-        print(f"Created {token}.")
+        print(f'Created {token}.')
         return token
 
     @staticmethod
     def validate(code):
-        if code is None or code == "":
+        if code is None or code == '':
             return False
         token = SingleUseToken.query.filter_by(code=code).first()
         if token is None:
@@ -43,5 +44,5 @@ class SingleUseToken(db.Model):
         else:
             db.session.delete(token)
             db.session.commit()
-            print(f"Deleted {token}.")
+            print(f'Deleted {token}.')
             return True
