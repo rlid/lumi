@@ -104,7 +104,7 @@ def signup():
         db.session.commit()
         session.pop("invite_code")
         token = user.generate_token(action="confirm")
-        print(url_for("auth.confirm", token=token, remember=1, _external=True))
+        print(url_for("auth.confirm", token=token, _external=True))
         flash(f'A confirmation email has been sent to {form.email.data}.',
               category="info")
         login_user(user, remember=False)
