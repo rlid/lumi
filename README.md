@@ -1,20 +1,20 @@
 # Notes
 ## Python
- - `pip freeze > requirements.txt` to generate requirements.txt with version numbers
- - `python -m unittest [test dir].[test file]` to run unit tests in a specific file
+- `pip freeze > requirements.txt` to generate requirements.txt with version numbers
+- `python -m unittest [test dir].[test file]` to run unit tests in a specific file
 
 ## Database
- - `gcloud beta sql connect devins`
- - `./cloud_sql_proxy -instances=lumiask:europe-west2:devins=tcp:9470`
+- `gcloud beta sql connect devins`
+- `./cloud_sql_proxy -instances=lumiask:europe-west2:devins=tcp:9470`
 
 ## Google Cloud
- - `gcloud app logs tail -s default`
+- `gcloud app logs tail -s default`
 
 ## Git
- - `git remote add [name] [url]` for each additional repo
- - `git remote update`
- - `git remote add all [url]` for the origin repo
- - `git remote set-url --add --push all [url]` for each additional repo
+- `git remote add [name] [url]` for each additional repo
+- `git remote update`
+- `git remote add all [url]` for the origin repo
+- `git remote set-url --add --push all [url]` for each additional repo
 
 
 # To-Do
@@ -35,19 +35,19 @@
 - NO legal / tax advice - keep it casual and make friends!
 
 ### Add verification protocol to guide
- - take a picture / record a video with hand gesture "L" in frame
- - possibly consider a few variations to the gesture chosen by the asker to prevent photoshopping
+- take a picture / record a video with hand gesture "L" in frame
+- possibly consider a few variations to the gesture chosen by the asker to prevent photoshopping
 
 ## incentive optimization
- - prevent cheating with multiple account
- - once a request is fullfilled, the answerer is presented with options to show appreciations by sharing the reward, to either the people who introduced the him to the request, or if the answerer is answering the asker directly, to the community (not just contributors of this request, to discourage people from making a node on every quest), 
- - options:
+- prevent cheating with multiple account
+- once a request is fullfilled, the answerer is presented with options to show appreciations by sharing the reward, to either the people who introduced the him to the request, or if the answerer is answering the asker directly, to the community (not just contributors of this request, to discourage people from making a node on every quest), 
+- options:
   - if answered with introductions: 0 - 40%, 20% as default, shared equally in the referral chain
   - if answered without introduction: 0 - 20%, 10% as default, shared [equally among the [20% / 10, if the lowest ranked users are tied, randomly choose such that the total number = 20% * N or 10] users with the highest goodwill level / in proportion to goodwill level?]
- - answerer's goodwill level
+- answerer's goodwill level
   - option 1: cumulative own reward shared, increases as the reward is shared [decreases as shared reward is received?]
-  - option 2: exponentially weighted average of [amount or proportion] shared, to give new users a fair chance
- - the more you share, the more will be shared with you
+  - option 2: exponentially weighted average of amount shared, to give new users a fair chance
+- the more you share, the more will be shared with you
 
 ### referrals
- - a node is created for the referrer, 
+- a node is created for the referrer, 
