@@ -36,4 +36,18 @@
 
 ### Add verification protocol to guide
  - take a picture / record a video with hand gesture "L" in frame
- - possibly consider a few variations to the gesture chosen by the asker to prevent photoshopping  
+ - possibly consider a few variations to the gesture chosen by the asker to prevent photoshopping
+
+## incentive optimization
+ - prevent cheating with multiple account
+ - once a request is fullfilled, the answerer is presented with options to show appreciations by sharing the reward, to either the people who introduced the him to the request, or if the answerer is answering the asker directly, to the community (not just contributors of this request, to discourage people from making a node on every quest), 
+ - options:
+  - if answered with introductions: 0 - 40%, 20% as default, shared equally in the referral chain
+  - if answered without introduction: 0 - 20%, 10% as default, shared [equally among the [20% / 10, if the lowest ranked users are tied, randomly choose such that the total number = 20% * N or 10] users with the highest goodwill level / in proportion to goodwill level?]
+ - answerer's goodwill level
+  - option 1: cumulative own reward shared, increases as the reward is shared [decreases as shared reward is received?]
+  - option 2: exponentially weighted average of [amount or proportion] shared, to give new users a fair chance
+ - the more you share, the more will be shared with you
+
+### referrals
+ - a node is created for the referrer, 
