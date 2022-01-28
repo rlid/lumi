@@ -1,9 +1,0 @@
-env_variables:
-  SECRET_KEY: "87v3Q6h0wMEkVGgP6V1E_ZGjzZRQ0pR_bOLvqt6gDf8"
-  DB_PASSWORD: "yx27FCPjqtAM638I"
-  GOOGLE_CLIENT_ID: "276555255912-c7jq4clb41m3eac1fbsf4pqrd9h1acjp.apps.googleusercontent.com"
-  GOOGLE_CLIENT_SECRET: "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"
-  APPLE_CLIENT_ID: "com.lumiask.client"
-  APPLE_TEAM_ID: "3WT485YTP5"
-  APPLE_KEY_ID: "V79GWHFDH4"
-  APPLE_KEY_FILE: "AuthKey_V79GWHFDH4.p8"
