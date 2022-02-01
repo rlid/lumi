@@ -85,7 +85,7 @@ class User(UserMixin, db.Model):
                                     cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<User[{self.id}]:reputation={self.reputation}>'
+        return f'<User[{self.id}]:email={self.email}>'
 
     def __str__(self):
         return f'User(email={self.email}, signup_method={self.signup_method}, email_verified={self.email_verified}, ' \
@@ -217,8 +217,8 @@ class User(UserMixin, db.Model):
 
     def reputation_if_dispute_lost(self, x):
         m = math.exp(-math.fabs(x) * _REP_DECAY)
-        s = -x + m * self.sum_v
-        s_abs = -math.fabs(x) + m * self.sum_abs_v
+        s = -x + m * self.sum_value
+        s_abs = math.fabs(x) + m * self.sum_abs_value
 
         m1 = math.exp(-_REP_DECAY)
         s1 = -1 + m1 * self.sum_one

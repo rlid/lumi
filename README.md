@@ -52,3 +52,21 @@
 
 ### referrals
 - a node is created for the referrer, 
+
+Maths
+
+competence = Prob of success = p
+
+credibility = Prob(Claim Fail | Fail) = 1 - q
+
+q for answerer = q1
+
+q for asker = q2
+
+Proportion of claimed success
+
+= p + (1-p)*q1 = p + q1 - p*q1 = p * (1 - q1) + q1 for answerer
+
+= 1 - [(1-p) + p * q2] = p - p * q2 = p * (1 - q2) for asker
+
+If q1 = q2, then the difference in proportion of claimed success = prob of lying, the larger the discrepancy, the larger the prob of lying
