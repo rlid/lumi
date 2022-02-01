@@ -18,6 +18,7 @@
 
 
 # To-Do
+## add transaction model to show account activities, e.g. income due to answers, referrals etc with timestamp
 ## Make template for "Get Started"
 - I am looking for someone with a specific experience, e.g.
   - lives at / used to live at [a location]

@@ -13,13 +13,26 @@ class Node(db.Model):
     https://docs.sqlalchemy.org/en/14/_modules/examples/nested_sets/nested_sets.html
     https://docs.sqlalchemy.org/en/14/orm/self_referential.html#self-referential
     '''
+    __tablename__ = 'nodes'
     __mapper_args__ = {
         'batch': False  # allows extension to fire for each instance before going to the next.
     }
 
-    __tablename__ = 'nodes'
+    STATE_CLOSED = 0
+    STATE_OPEN = 1
+    STATE_ENGAGEMENT_REQUESTED = 2
+    STATE_ENGAGED = 3
+    STATE_ENGAGEMENT_COMPLETED = 4
+
+    DEFAULT_REWARD_SHARE = 0.1
+
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    state = db.Column(db.Integer, default=STATE_OPEN)
+    rating_by_asker = db.Column(db.Integer, default=0)
+    rating_by_answerer = db.Column(db.Integer, default=0)
+    reward_share = db.Column(db.Float, default=DEFAULT_REWARD_SHARE)
 
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     quest_id = db.Column(db.Integer, db.ForeignKey('quests.id'), nullable=False)
