@@ -1,0 +1,6 @@
+- Set price for question
+- Asking too many questions (share stats on credibility, average price paid, average number of exchanges, average time to finish)
+- Make sure referers are compensated
+- Set maximum price allowed
+- Measures to check proof/credentials (ideally anonymously) before engagement
+- How to close out if asker or answerer does not rate the engagement

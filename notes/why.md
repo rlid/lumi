@@ -1,0 +1,10 @@
+- ßFight scam
+- Make purchase decisions
+- Find out about a company/school/new place by talking to someone there
+- Ask specific questions about a product by talking directly with an owner/the maker
+- Find someone to play online games with
+- Get advice from people who has been through the same
+- Promote credibility and trust, higher credibility = more influence
+- A little bit of incentive goes a long way
+- Build up reputation
+- Find out about a product you are interested in from current owners before you own it

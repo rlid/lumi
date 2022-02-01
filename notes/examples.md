@@ -1,0 +1,6 @@
+- Find someone to sell USPS international stamps in UK
+- Find someone who studied at a university 
+- Find someone who will be on a particular flight
+- Find someone who know how to troubleshoot a particular washing machine
+- Find someone who knows how to deal with a particular error message
+- Confirm if a baby water bottle leaks when upside down
