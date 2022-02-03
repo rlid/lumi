@@ -1,21 +1,29 @@
 import random
+from faker import Faker
+
 from sqlalchemy import and_
 from app import create_app, db
 from app.models.user import User, Quest, Node
 
-app = create_app("TEST")
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
+db.drop_all()
 db.create_all()
 
 N_USERS = 10
 
-users = [User(email=str(i), account_balance=10000) for i in range(N_USERS)]
+faker = Faker()
+
+users = [User(email=faker.email(), account_balance=10000) for i in range(N_USERS)]
 db.session.add_all(users)
 db.session.commit()
 
 # choose a user at random and create a quest
-quests = [random.choice(users).create_quest(value=random.randint(50, 500), title='title') for i in range(100)]
+quests = [random.choice(users).create_quest(value=random.randint(50, 500),
+                                            title=faker.text(100),
+                                            body=faker.text(500)) for i in
+          range(100)]
 
 for i in range(200):
     # choose a quest at random, choose a user who is not the quest creator at random, and create a node
@@ -38,12 +46,12 @@ for i in range(100):
     answerer = node.creator
     answerer.request_engagement(node, reward_share=.2)
     node.quest.creator.accept_engagement(node)
-    actual_success = random.uniform(0, 1) < competence[int(answerer.id)-1]
+    actual_success = random.uniform(0, 1) < competence[int(answerer.id) - 1]
     answerer_claim = actual_success
-    if not actual_success and random.uniform(0, 1) > credibility[int(answerer.id)-1]:
+    if not actual_success and random.uniform(0, 1) > credibility[int(answerer.id) - 1]:
         answerer_claim = True
     asker_claim = actual_success
-    if actual_success and random.uniform(0, 1) > credibility[int(node.quest.creator_id)-1]:
+    if actual_success and random.uniform(0, 1) > credibility[int(node.quest.creator_id) - 1]:
         asker_claim = False
     answerer.rate_engagement(node, success=answerer_claim)
     node.quest.creator.rate_engagement(node, success=asker_claim)
@@ -55,6 +63,6 @@ print(answerer.nodes_created.filter(and_(Node.parent != None,
 print(answerer.nodes_created.filter(and_(Node.parent != None,
                                          Node.state == Node.STATE_ENGAGEMENT_COMPLETED)).count())
 
-db.session.remove()
-db.drop_all()
+# db.session.remove()
+# db.drop_all()
 app_context.pop()

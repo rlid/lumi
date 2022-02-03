@@ -1,109 +1,65 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <div class="container">
-
-        <div class="card my-3">
-
-            <div class="accordion" id="accordionPanelsStayOpenExample">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
-                                aria-controls="panelsStayOpen-collapseOne">
-                            <b>Basic Information</b>
-                        </button>
-                    </h2>
-                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
-                         aria-labelledby="panelsStayOpen-headingOne">
-                        <div class="accordion-body">
-                            <p class="card-text">ID: {{ user.id }}</p>
-                            <p class="card-text">Member since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
-                            <p class="card-text">Average response time: </p>
-                            <p class="card-text">Last seen:</p>
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col col-md-9 col-lg-7 col-xl-6">
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                    aria-controls="panelsStayOpen-collapseOne">
+                                <b>Basic Information</b>
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+                             aria-labelledby="panelsStayOpen-headingOne">
+                            <div class="accordion-body">
+                                <p class="card-text">ID: {{ user.id }}</p>
+                                <p class="card-text">Member since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
+                                <p class="card-text">Average response time: TODO</p>
+                                <p class="card-text">Last seen: TODO</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
-                                aria-controls="panelsStayOpen-collapseTwo">
-                            <b>Statistics as Asker</b>
-                        </button>
-                    </h2>
-                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
-                         aria-labelledby="panelsStayOpen-headingTwo">
-                        <div class="accordion-body">
-                            <p class="card-text">Engagements:</p>
-                            <p class="card-text">Successful engagements: </p>
-                            <p class="card-text">Disputed engagements:</p>
-                            <p class="card-text">Average engagement duration:</p>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true"
+                                    aria-controls="panelsStayOpen-collapseTwo">
+                                <b>Statistics as Asker</b>
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show"
+                             aria-labelledby="panelsStayOpen-headingTwo">
+                            <div class="accordion-body">
+                                <p class="card-text">Completed Engagements: TODO</p>
+                                <p class="card-text">Successful engagements: TODO</p>
+                                <p class="card-text">Disputed engagements: TODO</p>
+                                <p class="card-text">Average engagement duration: TODO</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
-                                aria-controls="panelsStayOpen-collapseThree">
-                            <b>Statistics as Answer</b>
-                        </button>
-                    </h2>
-                    <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
-                         aria-labelledby="panelsStayOpen-headingThree">
-                        <div class="accordion-body">
-                            <p class="card-text">Engagements:</p>
-                            <p class="card-text">Successful engagements: </p>
-                            <p class="card-text">Disputed engagements:</p>
-                            <p class="card-text">Average engagement duration:</p>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true"
+                                    aria-controls="panelsStayOpen-collapseThree">
+                                <b>Statistics as Answerer</b>
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse show"
+                             aria-labelledby="panelsStayOpen-headingThree">
+                            <div class="accordion-body">
+                                <p class="card-text">Completed Engagements: TODO</p>
+                                <p class="card-text">Successful engagements: TODO</p>
+                                <p class="card-text">Disputed engagements: TODO</p>
+                                <p class="card-text">Average engagement duration: TODO</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-
-            {#            <div class="card-header">#}
-            {#                Basic Information#}
-            {#            </div>#}
-            {#            <div class="card-body">#}
-            {#                <p class="card-text">ID: {{ user.id }}</p>#}
-            {#                <p class="card-text">Member since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>#}
-            {#                <p class="card-text">Average response time: </p>#}
-            {#                <p class="card-text">Last seen:</p>#}
-            {#            </div>#}
-            {#        </div>#}
-            {##}
-            {##}
-            {#        <table class="table">#}
-            {#            <thead>#}
-            {#            <tr>#}
-            {#                <th scope="col"></th>#}
-            {#                <th scope="col">As Asker</th>#}
-            {#                <th scope="col">As Answerer</th>#}
-            {#                <th scope="col">Overall</th>#}
-            {#            </tr>#}
-            {#            </thead>#}
-            {#            <tbody>#}
-            {#            <tr>#}
-            {#                <th scope="row">Engagements</th>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#            </tr>#}
-            {#            <tr>#}
-            {#                <th scope="row">Successful engagements</th>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#            </tr>#}
-            {#            <tr>#}
-            {#                <th scope="row">Average engagement duration</th>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#                <td></td>#}
-            {#            </tr>#}
-            {#            </tbody>#}
-            {#        </table>#}
         </div>
 {% endblock %}

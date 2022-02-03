@@ -1,11 +1,49 @@
+{% from "form.html" import render_form %}
+
 {% extends "base.html" %}
 
 {% block main %}
-    <div class="container vh-100">
-        <div class="text-center mt-5">
-            <h1 class="display-3"><strong>Welcome to {{ config["APP_NAME"] }}</strong></h1>
-            <p class="mt-3 fs-5">We are creating a new platform for casual online services conducted as Q&A chats.</p>
-            <p class="fs-5">Coming soon in 2022</p>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col d-none d-md-block">Tags</div>
+            <div class="col col-md-8 col-lg-6">
+                {% for quest in quests %}
+                    {{ render_quest_card(quest, truncate_body=True) }}
+                {% endfor %}
+            </div>
+            <div class="col d-none d-md-block">Links</div>
         </div>
     </div>
 {% endblock %}
+
+{% macro render_quest_card(quest, quest_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
+    <div class="card my-3">
+        <div class="card-body py-2">
+            <p class="small text-muted mb-1">Posted {{ moment(quest.timestamp).fromNow() }}</p>
+            <h5 class="card-title">
+                <a style="text-decoration: none" class="text-dark"
+                   href="{{ url_for("main.quest", quest_id=quest.id) }}">{{ quest.title }}</a>
+            </h5>
+            <span class="card-subtitle"></span>
+
+            <div class="card-text">
+                {% if truncate_body %}
+                    <a style="text-decoration: none" class="text-dark"
+                       href="{{ url_for("main.quest", quest_id=quest.id) }}">
+                        {% if quest.body_html %}
+                            {{ bleach.clean(quest.body_html, tags=[], strip=True) | truncate }}
+                        {% else %}
+                            {{ quest.body | truncate }}
+                        {% endif %}
+                    </a>
+                {% else %}
+                    {% if quest.body_html %}
+                        {{ quest.body_html | safe }}
+                    {% else %}
+                        {{ quest.body }}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endmacro %}

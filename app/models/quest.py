@@ -32,7 +32,8 @@ class Quest(db.Model):
     @staticmethod
     def make(creator, value, title, body=None, body_html=None):
         quest = Quest(creator=creator, value=value, title=title, body=body, body_html=body_html)
+        db.session.add(quest)
         node = Node(quest=quest, creator=creator)
-        db.session.add_all([quest, node])
+        db.session.add(node)
         db.session.commit()
         return quest

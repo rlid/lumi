@@ -18,10 +18,12 @@ def before_request():
             and not current_user.email_verified \
             and request.blueprint != 'auth' \
             and request.endpoint != 'static' \
-            and request.endpoint != 'main.index':
+            and request.endpoint != 'main.index' \
+            and request.endpoint != 'main.browse':
         flash('Your access is restricted because your email address is not verified. ' +
               Markup(f'<a href={url_for("auth.resend_confirmation")}>Click here</a> ') +
               'to request another confirmation email.', category='warning')
+        return redirect(url_for('main.browse'))
 
 
 # intended user: is_authenticated no | signup_method email | email_verified all

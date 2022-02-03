@@ -32,7 +32,7 @@ def _distribute_reward(node, amount):
         db.session.add(node.creator)
     else:  # there is at least 1 referer and reward share is not 0:
         remaining_amount = amount
-        answerer_reward = (1.0 - node.reward_share) * remaining_amount
+        answerer_reward = int((1.0 - node.reward_share) * remaining_amount)
         node.creator.account_balance += answerer_reward
         db.session.add(node.creator)
 
@@ -40,7 +40,7 @@ def _distribute_reward(node, amount):
         i = len(referral_nodes)
         while i > 0:
             i = i - 1
-            referer_reward = 0.5 * remaining_amount
+            referer_reward = int(0.5 * remaining_amount)
             referral_nodes[i].creator.account_balance += referer_reward
             db.session.add(referral_nodes[i].creator)
             remaining_amount -= referer_reward

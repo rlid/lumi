@@ -1,0 +1,13 @@
+{% from "form.html" import render_form %}
+
+{% extends "base.html" %}
+
+{% block main %}
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col col-md-9 col-lg-7 col-xl-6 rounded p-4 border shadow">
+                {{ render_form(form, button_style="success", floating_input_label=True) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
