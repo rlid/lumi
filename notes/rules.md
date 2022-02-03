@@ -23,7 +23,9 @@ Seller fee = 80% - referer fee (80% to 50%)
 
 
 Platform insurance = Initial platform insurance + 10% of total profit
+
 User insurance = User deposit
+
 Sponsor insurance = Sponsor deposit
 
 Max value of task a seller can guarantee = 20% * Platform insurance + 10% * Sponsor insurance - Total claim against the seller + Additional guarantee offered by the seller (<= user deposit)

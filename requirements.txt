@@ -1,6 +1,6 @@
 asn1crypto==1.4.0
 Authlib==1.0.0rc1
-Bootstrap-Flask==2.0.0
+Bootstrap-Flask==2.0.1
 certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.10
@@ -8,6 +8,7 @@ click==8.0.3
 cryptography==36.0.1
 Flask==2.0.2
 Flask-Login==0.5.0
+Flask-Moment==1.0.2
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==1.0.0
 idna==3.3

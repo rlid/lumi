@@ -3,11 +3,12 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.main import main
+from app.models.user import User
 
 
 @main.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("landing.html")
 
 
 @main.route('/start')
@@ -44,6 +45,14 @@ def terms():
 @main.route('/about')
 def about():
     return redirect("https://www.linkedin.com/company/knowbleapp")
+
+
+@main.route('/user/<int:user_id>')
+def user(user_id):
+    u = User.query.filter_by(id=user_id).first_or_404()
+    return render_template("user.html", user=u)
+
+
 
 
 @main.route('/alerts')

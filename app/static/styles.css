@@ -27,3 +27,13 @@
 .separator:not(:empty)::after {
     margin-left: .25em;
 }
+
+.accordion-button {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
