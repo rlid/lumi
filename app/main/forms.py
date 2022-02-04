@@ -1,7 +1,11 @@
 from flask_wtf import FlaskForm
 from flask_pagedown.fields import PageDownField
-from wtforms import SubmitField, StringField, DecimalField, Label
+from wtforms import SubmitField, StringField, DecimalField, Field, TextAreaField
 from wtforms.validators import InputRequired, NumberRange
+
+
+class TUIEditorField(TextAreaField):
+    pass
 
 
 class PostForm(FlaskForm):
@@ -17,6 +21,6 @@ class PostForm(FlaskForm):
     price = DecimalField("As reward I offer (in USD $)...",
                          validators=[InputRequired(), NumberRange(1, 5)],
                          render_kw={"placeholder": "Price"})
-    # text = TextAreaField("Text", render_kw={"placeholder": "Text", "style": "height: 20vh"})
-    text = PageDownField("Text", render_kw={"placeholder": "Details (optional)", "style": "height: 20vh"})
+    text = TextAreaField("Details (optional)", render_kw={"style": "display:none;"})
+    editor = TUIEditorField()
     submit = SubmitField("Post", render_kw={"class": "w-100"})

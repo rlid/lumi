@@ -169,8 +169,8 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
-    def create_quest(self, value, title, body=None, body_html=None):
-        return Quest.make(creator=self, value=value, title=title, body=body, body_html=body_html)
+    def create_quest(self, value, title, body=None):
+        return Quest.make(creator=self, value=value, title=title, body=body)
 
     def create_node(self, quest, parent=None):
         node = quest.nodes.filter_by(creator=self).first()

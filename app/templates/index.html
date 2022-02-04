@@ -32,23 +32,15 @@
                    href="{{ url_for("main.quest", quest_id=quest.id) }}">{{ quest.title }}</a>
             </h5>
 
-            <div class="card-text mb-1">
-                {% if truncate_body %}
-                    <a style="text-decoration: none" class="text-dark"
-                       href="{{ url_for("main.quest", quest_id=quest.id) }}">
-                        {% if quest.body_html %}
-                            {{ bleach.clean(quest.body_html, tags=[], strip=True) | truncate }}
-                        {% else %}
-                            {{ quest.body | truncate }}
-                        {% endif %}
-                    </a>
-                {% else %}
+            <div class="card-text mb-1 text-truncate" style="max-height: 5rem">
+                <a class="text-decoration-none text-dark"
+                   href="{{ url_for("main.quest", quest_id=quest.id) }}">
                     {% if quest.body_html %}
                         {{ quest.body_html | safe }}
                     {% else %}
                         {{ quest.body }}
                     {% endif %}
-                {% endif %}
+                </a>
             </div>
             <a href="{{ url_for("main.quest", quest_id=quest.id) }}" class="btn btn-success badge">
                 Contribute

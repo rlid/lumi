@@ -17,9 +17,9 @@ def start():
     return render_template("landing.html", title="Guided Tour")
 
 
-@main.route('/create', methods=['GET', 'POST'])
+@main.route('/post', methods=['GET', 'POST'])
 @login_required
-def create():
+def post():
     form = PostForm()
     if form.validate_on_submit():
         current_user.create_quest(value=100, title=form.title.data, body=form.text.data)

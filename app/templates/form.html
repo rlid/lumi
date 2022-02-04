@@ -60,7 +60,6 @@ the necessary fix for required=False attributes, but will also not set the requi
     {% if field.flags.required and not required in kwargs %}
         {% set kwargs = dict(required=True, **kwargs) %}
     {% endif %}
-
     {% set form_group_classes = form_group_classes or config.BOOTSTRAP_FORM_GROUP_CLASSES %}
 
     {# combine render_kw class or class/class_ argument with Bootstrap classes #}
@@ -73,7 +72,6 @@ the necessary fix for required=False attributes, but will also not set the requi
         {% set class = ' ' + class %}
     {% endif %}
     {% set extra_classes = render_kw_class + class %}
-
     {% if field.widget.input_type == 'checkbox' %}
         {% set field_kwargs = kwargs %}
         {% call _hz_form_wrap(horizontal_columns, form_type, True, required=required) %}
@@ -227,7 +225,7 @@ the necessary fix for required=False attributes, but will also not set the requi
                 {%- elif field.description -%}
                     <small class="form-text text-muted">{{ field.description|safe }}</small>
                 {%- endif %}
-                {%- if floating_input_label and field.type not in ['TextAreaField', 'PageDownField'] %}{{ field.label(class="form-label")|safe }}{% endif %}
+                {%- if floating_input_label and field.type != 'TextAreaField' %}{{ field.label(class="form-label")|safe }}{% endif %}
             {%- endif %}
         </div>
     {% endif %}
@@ -250,7 +248,8 @@ the necessary fix for required=False attributes, but will also not set the requi
                     render_kw={},
                     form_group_classes='',
                     form_inline_classes='',
-                    floating_input_label=False) %}
+                    floating_input_label=False,
+                    onsubmit="") %}
     {#-
 action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
 
@@ -297,19 +296,23 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
             {%- if _enctype[0] %} enctype="{{ _enctype[0] }}"{% endif -%}
             {%- if role %} role="{{ role }}"{% endif -%}
             {%- if novalidate %} novalidate{% endif -%}
-            {%- if render_kw %} {{ render_kw|xmlattr }}{% endif -%}>
+            {%- if render_kw %} {{ render_kw|xmlattr }}{% endif -%}
+            {%- if onsubmit -%} onsubmit="{{ onsubmit }}"{% endif %}>
         {{ form.hidden_tag() }}
         {{ render_hidden_errors(form) }}
         {%- for field in form %}
             {% if not bootstrap_is_hidden_field(field) -%}
-                {{ render_field(field,
-                    form_type=form_type,
-                    horizontal_columns=horizontal_columns,
-                    button_map=button_map,
-                    button_style=button_style,
-                    button_size=button_size,
-                    form_group_classes=form_group_classes,
-                    floating_input_label=floating_input_label) }}
+                {%- if field.type == 'TUIEditorField' %}<div id="{{ field.id }}"></div>
+                {% else %}
+                    {{ render_field(field,
+                        form_type=form_type,
+                        horizontal_columns=horizontal_columns,
+                        button_map=button_map,
+                        button_style=button_style,
+                        button_size=button_size,
+                        form_group_classes=form_group_classes,
+                        floating_input_label=floating_input_label) }}
+                {% endif %}
             {%- endif %}
         {%- endfor %}
     </form>

@@ -23,6 +23,6 @@ SQLAlchemy==1.4.31
 urllib3==1.26.8
 Werkzeug==2.0.2
 WTForms==3.0.1
-flask-pagedown
 markdown
 bleach
+Flask-Mobility

@@ -2,12 +2,66 @@
 
 {% extends "base.html" %}
 
+{% block link %}
+    {{ super() }}
+    {% if request.MOBILE %}
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    {% else %}
+        <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {% if request.MOBILE %}
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    {% else %}
+        <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    {% endif %}
+{% endblock %}
+
 {% block main %}
     <div class="container mb-5">
         <div class="row justify-content-center">
             <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
-                <h5 class="mb-3">Post a request</h5>
-                {{ render_form(form, button_style="success", floating_input_label=True) }}
+                <h4 class="mb-3">Post a request</h4>
+                {% if request.MOBILE %}
+                    {{ render_form(form, button_style="success", floating_input_label=True) }}
+                    <script>
+                        const easyMDE = new EasyMDE({
+                            toolbar: ["bold", "italic", "strikethrough", "link", "upload-image", "code", "unordered-list",
+                                "ordered-list", "horizontal-rule", "side-by-side", "preview"],
+                            promptURLs: true,
+                            uploadImage: true,
+                            imageMaxSize: 8388608,
+                            imageUploadEndpoint: "{{ url_for('main.upload') }}",
+                            imagePathAbsolute: false,
+                            spellChecker: false,
+                            sideBySideFullscreen: false,
+                            status: false,
+                            placeholder: 'Details (optional)'
+                        });
+                    </script>
+                {% else %}
+                    {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+                    <script>
+                        const editor = new toastui.Editor({
+                            el: document.querySelector('#editor'),
+                            height: '500px',
+                            initialEditType: 'wysiwyg',
+                            previewStyle: 'vertical',
+                            previewHighlight: true,
+                            usageStatistics: false,
+                            hideModeSwitch: false,
+                            placeholder: 'Details (optional)'
+                        });
+
+                        function DoSubmit() {
+                            document.getElementById('text').value = editor.getMarkdown();
+                            return true;
+                        }
+                    </script>
+                {% endif %}
             </div>
             <div class="col">
                 <div class="card border-0">

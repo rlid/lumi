@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_moment import Moment
-from flask_pagedown import PageDown
+from flask_mobility import Mobility
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -16,7 +16,8 @@ login_manager.login_message_category = 'info'
 bootstrap = Bootstrap5()
 oauth = OAuth()
 moment = Moment()
-pagedown = PageDown()
+mobility = Mobility()
+
 
 
 def create_app(config_name):
@@ -30,7 +31,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     oauth.init_app(app)
     moment.init_app(app)
-    pagedown.init_app(app)
+    mobility.init_app(app)
 
     oauth.register(
         name='google',

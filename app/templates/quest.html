@@ -7,7 +7,12 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ quest.title }}</h5>
-                        <p class="card-text">{{ quest.body }}</p>
+                        <p class="card-text">
+                            {% if quest.body_html %}
+                                {{ quest.body_html | safe }}
+                            {% else %}
+                                {{ quest.body }}
+                            {% endif %}</p>
                     </div>
                 </div>
             </div>
