@@ -16,6 +16,11 @@
 - `git remote add all [url]` for the origin repo
 - `git remote set-url --add --push all [url]` for each additional repo
 
+## Colour codes
+- Green / Success: after user did something successfully, and no more action required
+- Yellow / Warning: user is recommended / advised to do something
+- Red / Danger: after user's action failed, and user needs to try something else
+- Info / Cyan: purely FYI, no action required and any suggested/possible action is optional
 
 # To-Do
 ## add transaction model to show account activities, e.g. income due to answers, referrals etc with timestamp

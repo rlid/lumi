@@ -1,5 +1,6 @@
-- ßFight scam
+- Fight scam
 - Make purchase decisions
+- Buying stuff from Japan
 - Find out about a company/school/new place by talking to someone there
 - Ask specific questions about a product by talking directly with an owner/the maker
 - Find someone to play online games with

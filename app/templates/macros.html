@@ -125,12 +125,15 @@
 
 
 {# only visible if screen width is visible_from or more #}
-{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None) %}
+{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, num=0) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="btn-secondary {% if text %}btn-sm{% endif %} text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
+    <li class="btn-secondary position-relative {% if text %}btn-sm{% endif %} text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
         <a href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
            class="nav-link text-light">{% if icon %}
             <i class="bi {{ icon }}"></i><br>{% endif %}{% if text %}{{ text|safe }}{% endif %}</a>
+        {% if num > 0 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">{{ num }}</span>
+        {% endif %}
     </li>
 {% endmacro %}
 
@@ -139,8 +142,8 @@
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
-                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell") }}
-                {{ render_nav_item_bottom("main.create", "Ask", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.create", "Post", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", num=5) }}
                 {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
                 {{ render_nav_item_bottom("main.browse", "Browse", "bi-search", "sm") }}

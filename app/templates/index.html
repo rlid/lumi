@@ -16,17 +16,23 @@
     </div>
 {% endblock %}
 
+{% macro render_user_inline(user, capitalize=True) %}
+    <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
+        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}A user{% endif %}
+    </a>
+{% endmacro %}
+
 {% macro render_quest_card(quest, quest_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
     <div class="card my-3">
         <div class="card-body py-2">
-            <p class="small text-muted mb-1">Posted {{ moment(quest.timestamp).fromNow() }}</p>
+            <p class="small text-muted mb-1">{{ render_user_inline(quest.creator) }}
+                posted {{ moment(quest.timestamp).fromNow() }}</p>
             <h5 class="card-title">
                 <a style="text-decoration: none" class="text-dark"
                    href="{{ url_for("main.quest", quest_id=quest.id) }}">{{ quest.title }}</a>
             </h5>
-            <span class="card-subtitle"></span>
 
-            <div class="card-text">
+            <div class="card-text mb-1">
                 {% if truncate_body %}
                     <a style="text-decoration: none" class="text-dark"
                        href="{{ url_for("main.quest", quest_id=quest.id) }}">
@@ -44,6 +50,12 @@
                     {% endif %}
                 {% endif %}
             </div>
+            <a href="{{ url_for("main.quest", quest_id=quest.id) }}" class="btn btn-success badge">
+                Contribute
+            </a>
+            <a href="{{ url_for("main.quest", quest_id=quest.id) }}" class="btn btn-success badge">
+                Share
+            </a>
         </div>
     </div>
 {% endmacro %}

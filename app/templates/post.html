@@ -3,10 +3,42 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <div class="container mt-3">
+    <div class="container mb-5">
         <div class="row justify-content-center">
-            <div class="col col-md-9 col-lg-7 col-xl-6 rounded p-4 border shadow">
+            <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
+                <h5 class="mb-3">Post a request</h5>
                 {{ render_form(form, button_style="success", floating_input_label=True) }}
+            </div>
+            <div class="col">
+                <div class="card border-0">
+                    <div class="card-body">
+                        <h5 class="text-muted">Guidelines for posting</h5>
+                        <ul class="text-muted small">
+                            <li>You can ask for many things, e.g.</li>
+                            <ul>
+                                <li>find out more about a town / area / residential block I am about to visit / live in
+                                </li>
+                                <li>ask people to share their experience of a school as a student / workplace as an
+                                    employee
+                                </li>
+                                <li>walk you through the process of buying a foreign product, e.g. snacks from Japan
+                                </li>
+                                <li>help you to find out / test a specific use case of a product before you buy</li>
+                            </ul>
+                            <li>If you know who are best positioned to help you, you can put criteria who you want to
+                                hear from, e.g.
+                            </li>
+                            <ul>
+                                <li>someone who used to live around there, or visited / lived in the block</li>
+                                <li>someone who used to study / work there</li>
+                                <li>someone who lives in the same country as you and buys Japanese snacks online
+                                    regularly
+                                </li>
+                                <li>a current owner of the product I am interested in</li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
