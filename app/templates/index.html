@@ -7,8 +7,8 @@
         <div class="row">
             <div class="col d-none d-md-block">Tags</div>
             <div class="col col-md-8 col-lg-6">
-                {% for quest in quests %}
-                    {{ render_quest_card(quest, truncate_body=True) }}
+                {% for post in posts %}
+                    {{ render_post_card(post, truncate_body=True) }}
                 {% endfor %}
             </div>
             <div class="col d-none d-md-block">Links</div>
@@ -22,30 +22,30 @@
     </a>
 {% endmacro %}
 
-{% macro render_quest_card(quest, quest_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
+{% macro render_post_card(post, post_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
     <div class="card my-3">
         <div class="card-body py-2">
-            <p class="small text-muted mb-1">{{ render_user_inline(quest.creator) }}
-                posted {{ moment(quest.timestamp).fromNow() }}</p>
+            <p class="small text-muted mb-1">{{ render_user_inline(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}</p>
             <h5 class="card-title">
                 <a style="text-decoration: none" class="text-dark"
-                   href="{{ url_for("main.quest", quest_id=quest.id) }}">{{ quest.title }}</a>
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">{{ post.title }}</a>
             </h5>
 
             <div class="card-text mb-1 text-truncate" style="max-height: 5rem">
                 <a class="text-decoration-none text-dark"
-                   href="{{ url_for("main.quest", quest_id=quest.id) }}">
-                    {% if quest.body_html %}
-                        {{ quest.body_html | safe }}
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    {% if post.body_html %}
+                        {{ post.body_html | safe }}
                     {% else %}
-                        {{ quest.body }}
+                        {{ post.body }}
                     {% endif %}
                 </a>
             </div>
-            <a href="{{ url_for("main.quest", quest_id=quest.id) }}" class="btn btn-success badge">
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-success badge">
                 Contribute
             </a>
-            <a href="{{ url_for("main.quest", quest_id=quest.id) }}" class="btn btn-success badge">
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-success badge">
                 Share
             </a>
         </div>

@@ -6,10 +6,10 @@
 - Reverse Q&A, same payment criteria
 - Disposable knowledge / time - knowledge that loses value with time anyway / time wasted anyway
 - Knowble Guide for common tasks
-- Once the quest starter is satisfied, he can choose give a discretionary tip to the solution provider
+- Once the post starter is satisfied, he can choose give a discretionary tip to the solution provider
 - Problems: spam, gaming by opening multiple accounts
 - Small world network where the route is optimised by tech
-- Node is only visible to public if quest creator commented in public
+- Node is only visible to public if post creator commented in public
 - Ability to up ode helpful content / tags
 - It helps you connect with someone who you and other people think are best suited to offer tips or help with your questions that are not easily answered by the standard researching methods on the Internet (search engines, online communities etc)
 - Real-time Q&A as the medium for service delivery
@@ -66,8 +66,8 @@
 - Endorsement
 - Crowd sourced guarantee
 - Increase transaction size/insurance cap with reputation; Start small to gain reputation; Reputation can go up and down
-- Reputation can be substituted with insurance for atomic quests
-- To undertake quests which higher reputation requirements, guarantee needs to be put down
+- Reputation can be substituted with insurance for atomic posts
+- To undertake posts which higher reputation requirements, guarantee needs to be put down
 - Protocol and reference implementation
 - Goals in the form of searching questions
 - Heavy reliance on rating and goodwill currently, not bulletproof
@@ -82,7 +82,7 @@
 - Option to donate earning to charity 
 - Promotional events: gain as much as reputation in x days
 - Marketing: YouTube personality to demonstrate / play games to see how much money can be made/donated in 10min
-- Quest status: waiting online / offline
+- Post status: waiting online / offline
 - Social networking specialising in solving each others problems for a fee, establishing a reputation and launchpad for new services (newcomers making a name)
 - Problems are not usually solved by asking a question and getting an answer, a dialogue is often required for clarifications and followups
 - Promote positivity: the best way to get to know each other is to help someone

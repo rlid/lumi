@@ -24,13 +24,14 @@
     <div class="container mb-5">
         <div class="row justify-content-center">
             <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
-                <h4 class="mb-3">Post a request</h4>
+                <h3 class="mb-3">Add a New Post</h3>
                 {% if request.MOBILE %}
                     {{ render_form(form, button_style="success", floating_input_label=True) }}
                     <script>
                         const easyMDE = new EasyMDE({
-                            toolbar: ["bold", "italic", "strikethrough", "link", "upload-image", "code", "unordered-list",
-                                "ordered-list", "horizontal-rule", "side-by-side", "preview"],
+                            toolbar: ["bold", "italic", "strikethrough", "link", "image"{# "upload-image" #}, "code",
+                                "unordered-list", "ordered-list", "|",
+                                "side-by-side", "preview", "guide"],
                             promptURLs: true,
                             uploadImage: false,
                             spellChecker: false,

@@ -3,7 +3,7 @@ from faker import Faker
 
 from sqlalchemy import and_
 from app import create_app, db
-from app.models.user import User, Quest, Node
+from app.models.user import User, Post, Node, Engagement
 
 app = create_app("DEV")
 app_context = app.app_context()
@@ -11,57 +11,55 @@ app_context.push()
 db.drop_all()
 db.create_all()
 
-N_USERS = 10
+N_USERS = 2
 
 faker = Faker()
 
-users = [User(email=faker.email(), account_balance=10000) for i in range(N_USERS)]
+users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
 db.session.add_all(users)
 db.session.commit()
 
-# choose a user at random and create a quest
-quests = [random.choice(users).create_quest(value=random.randint(50, 500),
-                                            title=faker.text(100),
-                                            body=faker.text(500)) for i in
-          range(100)]
+# choose a user at random and create a post
+posts = [random.choice(users).post(is_request=True,
+                                   reward=random.randint(50, 500),
+                                   title=faker.text(100),
+                                   body=faker.text(500)) for i in
+         range(1)]
 
-for i in range(200):
-    # choose a quest at random, choose a user who is not the quest creator at random, and create a node
-    quest = random.choice(quests)
+for i in range(1):
+    # choose a post at random, choose a user who is not the post creator at random, and create a node
+    post = random.choice(posts)
     answerer = random.choice(users)
-    while answerer == quest.creator:
+    while answerer == post.creator:
         answerer = random.choice(users)
-    answerer.create_node(quest=quest, parent=random.choice(quest.nodes.all()))
+    answerer.create_node(post=post, parent=random.choice(post.nodes.all()))
 
-print(len(Quest.query.all()))
+print(len(Post.query.all()))
 print(len(Node.query.all()))
 
-competence = [random.uniform(0.91, 0.92) for i in range(N_USERS)]
-credibility = [random.uniform(0.91, 0.92) for i in range(N_USERS)]
-for i in range(100):
+competence = [random.uniform(0.5, 0.5) for i in range(N_USERS)]
+credibility = [random.uniform(1, 1) for i in range(N_USERS)]
+for i in range(500):
     # choose a node which is not an asker node at random, and make engagement
     node = random.choice(Node.query.filter(Node.parent != None).all())
-    while node.state != Node.STATE_OPEN:
-        node = random.choice(Node.query.filter(Node.parent != None).all())
+    asker = node.post.creator
     answerer = node.creator
-    answerer.request_engagement(node, reward_share=.2)
-    node.quest.creator.accept_engagement(node)
+    engagement = answerer.request_engagement(node)
+    asker.accept_engagement(engagement)
     actual_success = random.uniform(0, 1) < competence[int(answerer.id) - 1]
     answerer_claim = actual_success
     if not actual_success and random.uniform(0, 1) > credibility[int(answerer.id) - 1]:
         answerer_claim = True
     asker_claim = actual_success
-    if actual_success and random.uniform(0, 1) > credibility[int(node.quest.creator_id) - 1]:
+    if actual_success and random.uniform(0, 1) > credibility[int(asker.id) - 1]:
         asker_claim = False
-    answerer.rate_engagement(node, success=answerer_claim)
-    node.quest.creator.rate_engagement(node, success=asker_claim)
+    answerer.rate_engagement(engagement, success=answerer_claim)
+    asker.rate_engagement(engagement, success=asker_claim)
 
-print(answerer.nodes_created.filter(and_(Node.parent != None,
-                                         Node.state == Node.STATE_ENGAGEMENT_COMPLETED,
-                                         Node.rating_by_asker == 1)).count())
+print(answerer.engagements_as_answerer.filter(and_(Engagement.state == Engagement.STATE_COMPLETED,
+                                                   Engagement.rating_by_asker == 1)).count())
 
-print(answerer.nodes_created.filter(and_(Node.parent != None,
-                                         Node.state == Node.STATE_ENGAGEMENT_COMPLETED)).count())
+print(answerer.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
 
 # db.session.remove()
 # db.drop_all()

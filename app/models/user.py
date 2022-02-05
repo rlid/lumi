@@ -7,9 +7,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models.quest import Quest
-from app.models.node import Node
-from app.models.single_use_token import SingleUseToken
+from app.models import SingleUseToken, Node, Post, Engagement
 from app.models.errors import InvalidActionError, RewardDistributionError
 from utils import security_utils, authlib_ext
 
@@ -18,23 +16,25 @@ _TOKEN_SECONDS_TO_EXPIRY = 600
 _REP_DECAY = 0.0
 
 
-def _distribute_reward(node, amount):
+def _distribute_reward(node, amount, reward_share):
     nodes = node.nodes_before_inc().all()
     referral_nodes = nodes[1:(len(nodes) - 1)]
 
     if len(nodes) == 1:
-        raise RewardDistributionError('Cannot distribute reward from the asker node')
+        raise RewardDistributionError('Cannot distribute reward from the root node')
 
-    # if the answerer node is directly connected to the asker node or if the answerer does not share:
-    if len(referral_nodes) == 0 or node.reward_share == 0:
+    answerer = node.creator if node.post.is_request else node.post.creator
+
+    # if the node is directly connected to the root node or if the answerer does not share:
+    if len(referral_nodes) == 0 or reward_share == 0:
         # reward for answerer
-        node.creator.account_balance += amount
-        db.session.add(node.creator)
+        answerer.account_balance += amount
+        db.session.add(answerer)
     else:  # there is at least 1 referer and reward share is not 0:
         remaining_amount = amount
         answerer_reward = int((1.0 - node.reward_share) * remaining_amount)
-        node.creator.account_balance += answerer_reward
-        db.session.add(node.creator)
+        answerer.account_balance += answerer_reward
+        db.session.add(answerer)
 
         remaining_amount -= answerer_reward
         i = len(referral_nodes)
@@ -72,17 +72,27 @@ class User(UserMixin, db.Model):
     # base64 encoding of n bytes = ~1.3 * n, rounded to 1.5 for safety
     remember_me_id = db.Column(db.String(21 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
 
-    quest_created = db.relationship('Quest',
-                                    foreign_keys=[Quest.creator_id],
-                                    backref=db.backref('creator', lazy='subquery'),
-                                    lazy='dynamic',
-                                    cascade='all, delete-orphan')
+    posts = db.relationship('Post',
+                            backref=db.backref('creator'),
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
 
-    nodes_created = db.relationship('Node',
-                                    foreign_keys=[Node.creator_id],
-                                    backref=db.backref('creator', lazy='joined'),
-                                    lazy='dynamic',
-                                    cascade='all, delete-orphan')
+    nodes = db.relationship('Node',
+                            backref=db.backref('creator'),
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
+
+    engagements_as_asker = db.relationship('Engagement',
+                                           backref=db.backref('asker'),
+                                           foreign_keys=[Engagement.asker_id],
+                                           lazy='dynamic',
+                                           cascade='all, delete-orphan')
+
+    engagements_as_answerer = db.relationship('Engagement',
+                                              backref=db.backref('answerer'),
+                                              foreign_keys=[Engagement.answerer_id],
+                                              lazy='dynamic',
+                                              cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<User[{self.id}]:email={self.email}>'
@@ -169,42 +179,56 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
-    def create_quest(self, value, title, body=None):
-        return Quest.make(creator=self, value=value, title=title, body=body)
+    def post(self, is_request, reward, title, body=None):
+        post = Post(creator=self, is_request=is_request, reward=reward, title=title, body=body)
+        node = Node(post=post, creator=self)
+        db.session.add(post)
+        db.session.add(node)
+        db.session.commit()
+        return post
 
-    def create_node(self, quest, parent=None):
-        node = quest.nodes.filter_by(creator=self).first()
+    def create_node(self, post, parent=None):
+        node = post.nodes.filter_by(creator=self).first()
         if node is None:
             if parent is None:
                 # if no parent node, add the node to the root node (created by the quest creator) directly
                 # TODO: make it more efficient to get the root node
-                parent = quest.nodes.filter_by(creator=quest.creator).first()
-            node = Node.make(creator=self, quest=quest, parent=parent)
+                parent = post.nodes.filter_by(creator=post.creator).first()
+            node = Node(creator=self, post=post, parent=parent)
+            db.session.add(node)
+            db.session.commit()
         return node
 
     # TODO: think whether this is the best place to ask to share reward, alternative place would be when the answerer
     # rates the engagement
-    def request_engagement(self, node, reward_share):
-        if self == node.quest.creator:
-            raise InvalidActionError('Cannot request engagement because the user cannot be the asker')
+    def request_engagement(self, node):
         if self != node.creator:
-            raise InvalidActionError('Cannot request engagement because the user is not the answerer')
-        node.state = Node.STATE_ENGAGEMENT_REQUESTED
-        node.reward_share = reward_share
-        db.session.add(node)
-        db.session.commit()
+            raise InvalidActionError('Cannot request engagement because the user is not the node creator')
+        if self == node.post.creator:
+            raise InvalidActionError('Cannot request engagement because the user cannot be the post creator')
 
-    def accept_engagement(self, node):
-        if node.state != Node.STATE_ENGAGEMENT_REQUESTED:
-            raise InvalidActionError('Cannot accept engagement because engagement has not been requested')
-        if self != node.quest.creator:
-            raise InvalidActionError('Cannot accept engagement because the user is not the asker')
-        if self.account_balance - self.committed_amount < node.quest.value:
+        if node.post.is_request:
+            engagement = Engagement(node=node, asker=node.post.creator, answerer=self)
+        else:
+            engagement = Engagement(node=node, asker=self, answerer=node.post.creator)
+        db.session.add(engagement)
+        db.session.commit()
+        return engagement
+
+    def accept_engagement(self, engagement):
+        post = engagement.node.post
+        if engagement.state != Engagement.STATE_REQUESTED:
+            raise InvalidActionError('Cannot accept engagement because it is not in requested state')
+        if self != post.creator:
+            raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
+        if self.account_balance - self.committed_amount < post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
-        self.committed_amount = self.committed_amount + node.quest.value
+
+        self.committed_amount = self.committed_amount + post.reward
         db.session.add(self)
-        node.state = Node.STATE_ENGAGED
-        db.session.add(node)
+
+        engagement.state = Engagement.STATE_ENGAGED
+        db.session.add(engagement)
         db.session.commit()
 
     @property
@@ -249,56 +273,57 @@ class User(UserMixin, db.Model):
             self.sum_one += 1 if success else -1
             self.sum_abs_one += 1
 
-    def rate_engagement(self, node, success):
-        if node.state != Node.STATE_ENGAGED:
-            raise InvalidActionError('Cannot rate engagement because the node is not engaged')
-        asker = node.quest.creator
-        answerer = node.creator
+    def rate_engagement(self, engagement, success):
+        if engagement.state != Engagement.STATE_ENGAGED:
+            print(engagement.state)
+            raise InvalidActionError('Cannot rate engagement because it is not in engaged state')
+        asker = engagement.asker
+        answerer = engagement.answerer
         if self == asker:
-            node.rating_by_asker = 1 if success else -1
-            db.session.add(node)
+            engagement.rating_by_asker = 1 if success else -1
+            db.session.add(engagement)
         elif self == answerer:
-            node.rating_by_answerer = 1 if success else -1
-            db.session.add(node)
+            engagement.rating_by_answerer = 1 if success else -1
+            db.session.add(engagement)
         else:
-            raise InvalidActionError('Cannot rate engagement because the user is not the asker or answerer')
+            raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
 
-        if node.rating_by_asker == 0 or node.rating_by_answerer == 0:
+        if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:
             db.session.commit()
             return
 
-        quest_value = node.quest.value
-        if node.rating_by_asker == node.rating_by_answerer == 1:
-            asker.committed_amount -= quest_value
-            asker.account_balance -= quest_value
-            _distribute_reward(node=node, amount=quest_value)
+        reward = engagement.node.post.reward
+        if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
+            asker.committed_amount -= reward
+            asker.account_balance -= reward
+            _distribute_reward(node=engagement.node, amount=reward, reward_share=engagement.reward_share)
 
-            asker.update_reputation(quest_value, success=True, dispute_lost=False)
-            answerer.update_reputation(quest_value, success=True, dispute_lost=False)
+            asker.update_reputation(reward, success=True, dispute_lost=False)
+            answerer.update_reputation(reward, success=True, dispute_lost=False)
 
-        if node.rating_by_asker == -1 and node.rating_by_answerer == 1:
-            asker.committed_amount -= quest_value
+        if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
+            asker.committed_amount -= reward
 
-            asker_rep_if_dispute = asker.reputation_if_dispute_lost(quest_value)
-            answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(quest_value)
+            asker_rep_if_dispute = asker.reputation_if_dispute_lost(reward)
+            answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(reward)
 
             if asker_rep_if_dispute < answerer_rep_if_dispute:  # asker lost:
-                asker.update_reputation(quest_value, success=False, dispute_lost=True)
-                answerer.update_reputation(quest_value, success=False, dispute_lost=False)
+                asker.update_reputation(reward, success=False, dispute_lost=True)
+                answerer.update_reputation(reward, success=False, dispute_lost=False)
             elif asker_rep_if_dispute > answerer_rep_if_dispute:  # answerer lost:
-                asker.update_reputation(quest_value, success=False, dispute_lost=False)
-                answerer.update_reputation(quest_value, success=False, dispute_lost=True)
+                asker.update_reputation(reward, success=False, dispute_lost=False)
+                answerer.update_reputation(reward, success=False, dispute_lost=True)
             else:  # it is a draw, no punishment
                 # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
                 # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-                asker.update_reputation(quest_value, success=False, dispute_lost=False)
-                answerer.update_reputation(quest_value, success=False, dispute_lost=False)
+                asker.update_reputation(reward, success=False, dispute_lost=False)
+                answerer.update_reputation(reward, success=False, dispute_lost=False)
 
-        if node.rating_by_asker == -1 and node.rating_by_answerer == -1:
-            asker.committed_amount -= quest_value
+        if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == -1:
+            asker.committed_amount -= reward
 
-        node.state = Node.STATE_ENGAGEMENT_COMPLETED
-        db.session.add(node)
+        engagement.state = Engagement.STATE_COMPLETED
+        db.session.add(engagement)
         db.session.add(asker)
         db.session.add(answerer)
         db.session.commit()

@@ -23,6 +23,8 @@
 - Info / Cyan: purely FYI, no action required and any suggested/possible action is optional
 
 # To-Do
+## Implement social media mode
+- Hide the post on the site and make the root node inaccessible, so the answerer is forced to share the reward
 ## add transaction model to show account activities, e.g. income due to answers, referrals etc with timestamp
 ## Make template for "Get Started"
 - I am looking for someone with a specific experience, e.g.
@@ -46,7 +48,7 @@
 
 ## incentive optimization
 - prevent cheating with multiple account
-- once a request is fullfilled, the answerer is presented with options to show appreciations by sharing the reward, to either the people who introduced the him to the request, or if the answerer is answering the asker directly, to the community (not just contributors of this request, to discourage people from making a node on every quest), 
+- once a request is fullfilled, the answerer is presented with options to show appreciations by sharing the reward, to either the people who introduced the him to the request, or if the answerer is answering the asker directly, to the community (not just contributors of this request, to discourage people from making a node on every post), 
 - options:
   - if answered with introductions: 0 - 40%, 20% as default, shared equally in the referral chain
   - if answered without introduction: 0 - 20%, 10% as default, shared [equally among the [20% / 10, if the lowest ranked users are tied, randomly choose such that the total number = 20% * N or 10] users with the highest goodwill level / in proportion to goodwill level?]

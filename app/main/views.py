@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.main import main
 from app.main.forms import PostForm
-from app.models.user import User, Quest
+from app.models.user import User, Post
 
 
 @main.route('/')
@@ -19,18 +19,18 @@ def start():
 
 @main.route('/post', methods=['GET', 'POST'])
 @login_required
-def post():
+def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        current_user.create_quest(value=100, title=form.title.data, body=form.text.data)
+        current_user.post(is_request=form.is_request.data, reward=form.reward.data, title=form.title.data, body=form.text.data)
         return redirect(url_for('main.browse'))
-    return render_template("post.html", form=form)
+    return render_template("new_post.html", form=form)
 
 
 @main.route('/browse')
 def browse():
-    quests = Quest.query.order_by(Quest.timestamp.desc()).all()
-    return render_template("index.html", quests=quests)
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template("index.html", posts=posts)
 
 
 @main.route('/support')
@@ -59,10 +59,10 @@ def user(user_id):
     return render_template("user.html", user=u)
 
 
-@main.route('/quest/<int:quest_id>')
-def quest(quest_id):
-    q = Quest.query.filter_by(id=quest_id).first_or_404()
-    return render_template("quest.html", quest=q)
+@main.route('/post/<int:post_id>')
+def view_post(post_id):
+    p = Post.query.filter_by(id=post_id).first_or_404()
+    return render_template("view_post.html", post=p)
 
 
 @main.route('/alerts')

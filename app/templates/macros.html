@@ -61,7 +61,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav my-1">
-                    {{ render_nav_item("main.post", "Post", "bi-signpost-split") }}
+                    {{ render_nav_item("main.new_post", "Post", "bi-plus-square") }}
                     {{ render_nav_item("main.browse", "Browse", "bi-search") }}
                     {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/xtXCScr9") }}
                     {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off") }}
@@ -142,7 +142,7 @@
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
-                {{ render_nav_item_bottom("main.post", "Post", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", num=5) }}
                 {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
