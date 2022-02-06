@@ -22,7 +22,7 @@ def start():
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        current_user.post(is_request=form.is_request.data, reward=form.reward.data, title=form.title.data, body=form.text.data)
+        current_user.post(is_request=bool(form.is_request.data), reward=form.reward.data, title=form.title.data, body=form.text.data)
         return redirect(url_for('main.browse'))
     return render_template("new_post.html", form=form)
 

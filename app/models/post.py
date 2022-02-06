@@ -1,14 +1,12 @@
 from datetime import datetime
 
 import bleach
-from bleach.sanitizer import Cleaner
 from bleach.html5lib_shim import Filter
+from bleach.sanitizer import Cleaner
 from markdown import markdown
 
 from app import db
-from app.models import Node
-
-STATUS_OPEN = 0
+from app.models import PostTag
 
 
 class Post(db.Model):
@@ -27,10 +25,21 @@ class Post(db.Model):
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
 
+    comments = db.relationship('PostComment',
+                               backref=db.backref('post'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
     nodes = db.relationship('Node',
                             backref=db.backref('post'),
                             lazy='dynamic',
                             cascade='all, delete-orphan')
+
+    post_tags = db.relationship("PostTag",
+                                foreign_keys=[PostTag.post_id],
+                                backref=db.backref("quest", lazy="joined"),
+                                lazy="selectin",
+                                cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Post[{self.id}]>'

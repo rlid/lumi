@@ -302,7 +302,7 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
         {{ render_hidden_errors(form) }}
         {%- for field in form %}
             {% if not bootstrap_is_hidden_field(field) -%}
-                {%- if field.type == 'TUIEditorField' %}<div id="{{ field.id }}"></div>
+                {%- if field.type == 'TUIEditorField' %}<div class="mb-3" id="{{ field.id }}"></div>
                 {% else %}
                     {{ render_field(field,
                         form_type=form_type,

@@ -5,13 +5,13 @@
 {% block main %}
     <div class="container mt-3">
         <div class="row">
-            <div class="col d-none d-md-block">Tags</div>
+            <div class="col d-none d-md-block text-center">Tags</div>
             <div class="col col-md-8 col-lg-6">
                 {% for post in posts %}
                     {{ render_post_card(post, truncate_body=True) }}
                 {% endfor %}
             </div>
-            <div class="col d-none d-md-block">Links</div>
+            <div class="col d-none d-md-block text-center">Links</div>
         </div>
     </div>
 {% endblock %}
@@ -23,17 +23,27 @@
 {% endmacro %}
 
 {% macro render_post_card(post, post_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
-    <div class="card my-3">
+    <div class="card me-3 my-3">
         <div class="card-body py-2">
+                <span class="position-absolute top-0 start-100 translate-middle badge text-secondary rounded-pill"
+                style="background-color: rgb(240,240,240)">
+                {{ "$%.2f"|format(0.01 * post.reward) }}
+                </span>
             <p class="small text-muted mb-1">{{ render_user_inline(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>
-            <h5 class="card-title">
-                <a style="text-decoration: none" class="text-dark"
-                   href="{{ url_for("main.view_post", post_id=post.id) }}">{{ post.title }}</a>
-            </h5>
-
-            <div class="card-text mb-1 text-truncate" style="max-height: 5rem">
+            <div class="card-title">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn badge {{ "btn-info" if post.is_request else "btn-warning" }}">
+                    {{ "Buying" if post.is_request else "Selling" }}
+                </a>
                 <a class="text-decoration-none text-dark"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    <b>{{ post.title }}</b>
+                </a>
+            </div>
+
+            <div class="card-text text-truncate" style="max-height: 5rem">
+                <a class="text-decoration-none text-dark small"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     {% if post.body_html %}
                         {{ post.body_html | safe }}
@@ -42,11 +52,17 @@
                     {% endif %}
                 </a>
             </div>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-success badge">
-                Contribute
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                Chat
             </a>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-success badge">
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
                 Share
+            </a>
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                Comment
+            </a>
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                Report
             </a>
         </div>
     </div>

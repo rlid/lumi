@@ -25,7 +25,7 @@ class Engagement(db.Model):
 
     reward_share = db.Column(db.Float, default=DEFAULT_REWARD_SHARE, nullable=False)
 
-    messages = db.relationship('Message',
+    messages = db.relationship('EngagementMessage',
                                backref=db.backref('engagement'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')

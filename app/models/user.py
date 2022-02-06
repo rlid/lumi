@@ -32,7 +32,7 @@ def _distribute_reward(node, amount, reward_share):
         db.session.add(answerer)
     else:  # there is at least 1 referer and reward share is not 0:
         remaining_amount = amount
-        answerer_reward = int((1.0 - node.reward_share) * remaining_amount)
+        answerer_reward = int((1.0 - reward_share) * remaining_amount)
         answerer.account_balance += answerer_reward
         db.session.add(answerer)
 
@@ -77,10 +77,30 @@ class User(UserMixin, db.Model):
                             lazy='dynamic',
                             cascade='all, delete-orphan')
 
+    post_comments = db.relationship('PostComment',
+                                    backref=db.backref('creator'),
+                                    lazy='dynamic',
+                                    cascade='all, delete-orphan')
+
+    tags_created = db.relationship('Tag',
+                                   backref=db.backref('creator'),
+                                   lazy='dynamic',
+                                   cascade='all, delete-orphan')
+
+    post_tags_created = db.relationship('PostTag',
+                                        backref=db.backref('creator'),
+                                        lazy='dynamic',
+                                        cascade='all, delete-orphan')
+
     nodes = db.relationship('Node',
                             backref=db.backref('creator'),
                             lazy='dynamic',
                             cascade='all, delete-orphan')
+
+    node_messages = db.relationship('NodeMessage',
+                                    backref=db.backref('creator'),
+                                    lazy='dynamic',
+                                    cascade='all, delete-orphan')
 
     engagements_as_asker = db.relationship('Engagement',
                                            backref=db.backref('asker'),
@@ -93,6 +113,11 @@ class User(UserMixin, db.Model):
                                               foreign_keys=[Engagement.answerer_id],
                                               lazy='dynamic',
                                               cascade='all, delete-orphan')
+
+    engagement_messages = db.relationship('EngagementMessage',
+                                          backref=db.backref('creator'),
+                                          lazy='dynamic',
+                                          cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<User[{self.id}]:email={self.email}>'
@@ -206,6 +231,8 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot request engagement because the user is not the node creator')
         if self == node.post.creator:
             raise InvalidActionError('Cannot request engagement because the user cannot be the post creator')
+        if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
+            raise InvalidActionError('Cannot request engagement because an active engagement already exists')
 
         if node.post.is_request:
             engagement = Engagement(node=node, asker=node.post.creator, answerer=self)

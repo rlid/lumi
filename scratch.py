@@ -11,7 +11,7 @@ app_context.push()
 db.drop_all()
 db.create_all()
 
-N_USERS = 2
+N_USERS = 10
 
 faker = Faker()
 
@@ -20,13 +20,13 @@ db.session.add_all(users)
 db.session.commit()
 
 # choose a user at random and create a post
-posts = [random.choice(users).post(is_request=True,
+posts = [random.choice(users).post(is_request=random.choice([True, False]),
                                    reward=random.randint(50, 500),
                                    title=faker.text(100),
                                    body=faker.text(500)) for i in
-         range(1)]
+         range(20)]
 
-for i in range(1):
+for i in range(100):
     # choose a post at random, choose a user who is not the post creator at random, and create a node
     post = random.choice(posts)
     answerer = random.choice(users)
@@ -37,9 +37,9 @@ for i in range(1):
 print(len(Post.query.all()))
 print(len(Node.query.all()))
 
-competence = [random.uniform(0.5, 0.5) for i in range(N_USERS)]
-credibility = [random.uniform(1, 1) for i in range(N_USERS)]
-for i in range(500):
+competence = [random.uniform(0.7, 0.9) for i in range(N_USERS)]
+credibility = [random.uniform(0.75, 0.95) for i in range(N_USERS)]
+for i in range(50):
     # choose a node which is not an asker node at random, and make engagement
     node = random.choice(Node.query.filter(Node.parent != None).all())
     asker = node.post.creator

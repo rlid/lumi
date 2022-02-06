@@ -35,6 +35,11 @@ class Node(db.Model):
                                lazy='select',
                                cascade='all, delete-orphan')
 
+    messages = db.relationship('NodeMessage',
+                               backref=db.backref('node'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
     engagements = db.relationship('Engagement',
                                   backref=db.backref('node'),
                                   lazy='dynamic',
