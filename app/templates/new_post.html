@@ -29,7 +29,8 @@
                     {{ render_form(form, button_style="success", floating_input_label=True) }}
                     <script>
                         const easyMDE = new EasyMDE({
-                            toolbar: ["bold", "italic", "strikethrough", "link", "image"{# "upload-image" #}, "code",
+                            toolbar: ["bold", "italic", "quote", {# "strikethrough", #} "link", "image",
+                                {# "upload-image", #} "code",
                                 "unordered-list", "ordered-list", "|",
                                 "side-by-side", "preview", "guide"],
                             promptURLs: true,
@@ -51,11 +52,16 @@
                             previewHighlight: true,
                             usageStatistics: false,
                             hideModeSwitch: false,
-                            placeholder: 'Details (optional)'
+                            placeholder: 'Details (optional)',
+                            toolbarItems: [
+                                ['bold', 'italic', 'quote' {# ,'strike' #}, 'link', 'image', 'code', 'ul', 'ol'],
+                                ['indent', 'outdent'],
+                                ['table'],
+                            ]
                         });
 
                         function DoSubmit() {
-                            document.getElementById('text').value = editor.getMarkdown();
+                            document.getElementById('body').value = editor.getMarkdown();
                             return true;
                         }
                     </script>

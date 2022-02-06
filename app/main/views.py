@@ -1,3 +1,4 @@
+import re
 from flask import render_template, redirect, flash, url_for
 from flask_login import login_required, current_user
 
@@ -5,6 +6,9 @@ from app import db
 from app.main import main
 from app.main.forms import PostForm
 from app.models.user import User, Post
+
+hashtag_pattern = re.compile("#[A-Za-z0-9]+")
+mention_pattern = re.compile("@[A-Za-z0-9]+")
 
 
 @main.route('/')
@@ -22,7 +26,10 @@ def start():
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        current_user.post(is_request=bool(form.is_request.data), reward=form.reward.data, title=form.title.data, body=form.text.data)
+        tag_names = [name[1:] for name in hashtag_pattern.findall(form.body.data)]
+        # usernames = [name[1:] for name in mention_pattern.findall(form.body.data)]
+        current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
+                          title=form.title.data, body=form.body.data.replace('\n', '\n\n'), tag_names=tag_names)
         return redirect(url_for('main.browse'))
     return render_template("new_post.html", form=form)
 

@@ -3,6 +3,7 @@ from app.models.invite_code import InviteCode
 from app.models.engagement_message import EngagementMessage
 from app.models.post_comment import PostComment
 from app.models.post_tag import PostTag
+from app.models.post_tag import Tag
 from app.models.node_message import NodeMessage
 from app.models.engagement import Engagement
 from app.models.node import Node

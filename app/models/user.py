@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag
 from app.models.errors import InvalidActionError, RewardDistributionError
 from utils import security_utils, authlib_ext
 
@@ -204,8 +204,23 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
-    def post(self, is_request, reward, title, body=None):
+    def add_tag(self, post, tag_name):
+        tag = Tag.query.get(tag_name)
+        if tag is None:
+            tag = Tag(name=tag_name, creator=self)
+            db.session.add(tag)
+            db.session.commit()
+        post_tag = post.post_tags.filter_by(tag=tag).first()
+        if post_tag is None:
+            post_tag = PostTag(post=post, tag=tag, creator=self)
+            db.session.add(post_tag)
+            db.session.commit()
+        return post_tag
+
+    def post(self, is_request, reward, title, body=None, tag_names=[]):
         post = Post(creator=self, is_request=is_request, reward=reward, title=title, body=body)
+        for tag_name in tag_names:
+            self.add_tag(post, tag_name)
         node = Node(post=post, creator=self)
         db.session.add(post)
         db.session.add(node)

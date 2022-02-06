@@ -158,3 +158,83 @@
         </ul>
     </div>
 {% endmacro %}
+
+
+{% macro render_user(user, capitalize=True) %}
+    <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
+        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}A user{% endif %}
+    </a>
+{% endmacro %}
+
+{% macro render_post_tag(post_tag, freq=None) %}
+    <a class="badge bg-light text-dark" href="{{ url_for("main.index") }}">
+        #{{ post_tag.tag.name }}
+        {% if freq %}
+            <small>({{ post_tag.tag.post_tags.count() }})</small>
+        {% endif %}
+    </a>
+{% endmacro %}
+
+{% macro render_post_tags(post_tags) %}
+    {% for post_tag in post_tags[:5] %}
+        {{ render_post_tag(post_tag) }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True) %}
+    <div class="card me-3 mb-4">
+        <div class="card-body py-2">
+            {#            <a href="{{ url_for("main.view_post", post_id=post.id) }}"#}
+            {#               class="position-absolute top-0 start-0 translate-middle btn badge rounded-pill {{ "btn-info" if post.is_request else "btn-warning" }}">#}
+            {#                {{ "Buying" if post.is_request else "Selling" }}#}
+            {#            </a>#}
+            <span class="position-absolute top-0 start-100 translate-middle badge text-secondary rounded-pill"
+                  style="background-color: rgb(240,240,240)">
+                {{ "$%.2f"|format(0.01 * post.reward) }}
+            </span>
+            <p class="small text-muted mb-1">{{ render_user(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}</p>
+            <div class="card-title">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn badge {{ "btn-info" if post.is_request else "btn-warning" }}">
+                    {{ "Buying" if post.is_request else "Selling" }}
+                </a>
+                <a class="text-decoration-none text-dark"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    <b>{{ post.title }}</b>
+                </a>
+            </div>
+            <div class="card-text {{ "text-truncate" if truncate_body }}" {{ 'style="max-height: 10rem"'|safe if truncate_body }}>
+                {% if truncate_body %}
+                    <a class="text-decoration-none text-dark small"
+                       href="{{ url_for("main.view_post", post_id=post.id) }}">
+                {% endif %}
+                {% if post.body_html %}
+                    {{ post.body_html | safe }}
+                {% else %}
+                    {{ post.body }}
+                {% endif %}
+                {% if truncate_body %}
+                    </a>
+                {% endif %}
+            {% if post_tags %} {{ render_post_tags(post.post_tags) }} {% endif %}
+            </div>
+        </div>
+        {% if post_badges %}
+            <div class="card-footer pt-0 bg-white border-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Chat
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Share
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Comment
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Report
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}

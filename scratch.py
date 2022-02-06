@@ -21,7 +21,7 @@ db.session.commit()
 
 # choose a user at random and create a post
 posts = [random.choice(users).post(is_request=random.choice([True, False]),
-                                   reward=random.randint(50, 500),
+                                   reward=100 * random.randint(1, 5),
                                    title=faker.text(100),
                                    body=faker.text(500)) for i in
          range(20)]
@@ -30,6 +30,8 @@ for i in range(100):
     # choose a post at random, choose a user who is not the post creator at random, and create a node
     post = random.choice(posts)
     answerer = random.choice(users)
+    for tag_name in faker.words():
+        answerer.add_tag(post, tag_name)
     while answerer == post.creator:
         answerer = random.choice(users)
     answerer.create_node(post=post, parent=random.choice(post.nodes.all()))

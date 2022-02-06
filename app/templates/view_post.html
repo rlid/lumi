@@ -1,20 +1,12 @@
 {% extends "base.html" %}
 
+{% from "macros.html" import render_post_card with context %}
+
 {% block main %}
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col col-md-9 col-lg-7 col-xl-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ post.title }}</h5>
-                        <p class="card-text">
-                            {% if post.body_html %}
-                                {{ post.body_html | safe }}
-                            {% else %}
-                                {{ post.body }}
-                            {% endif %}</p>
-                    </div>
-                </div>
+                {{ render_post_card(post, truncate_body=False) }}
             </div>
         </div>
     </div>

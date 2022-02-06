@@ -37,8 +37,8 @@ class Post(db.Model):
 
     post_tags = db.relationship("PostTag",
                                 foreign_keys=[PostTag.post_id],
-                                backref=db.backref("quest", lazy="joined"),
-                                lazy="selectin",
+                                backref=db.backref("post", lazy="joined"),
+                                lazy="dynamic",
                                 cascade="all, delete-orphan")
 
     def __repr__(self):
@@ -50,7 +50,7 @@ class Post(db.Model):
                         'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']
 
-        class MooFilter(Filter):
+        class HxFilter(Filter):
             def __iter__(self):
                 for token in Filter.__iter__(self):
                     if token['type'] in ['StartTag', 'EndTag'] and \
@@ -58,8 +58,7 @@ class Post(db.Model):
                         token['name'] = 'h6'
                     yield token
 
-        cleaner = Cleaner(tags=allowed_tags, filters=[MooFilter], strip=True)
-
+        cleaner = Cleaner(tags=allowed_tags, filters=[HxFilter], strip=True)
         target.body_html = bleach.linkify(cleaner.clean(markdown(value, output_format='html')))
 
 
