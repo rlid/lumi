@@ -3,12 +3,12 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <div class="container mt-3">
+    <div class="container my-4">
         <div class="row">
             <div class="col d-none d-md-block text-center">Tags</div>
             <div class="col col-md-8 col-lg-6">
                 {% for post in posts %}
-                    {{ render_post_card(post, truncate_body=True) }}
+                    {{ render_post_card(post, render_quest_badges=False) }}
                 {% endfor %}
             </div>
             <div class="col d-none d-md-block text-center">Links</div>
@@ -22,27 +22,31 @@
     </a>
 {% endmacro %}
 
-{% macro render_post_card(post, post_with_stats=None, truncate_body=False, render_quest_badges=False, quest_options=None) %}
-    <div class="card me-3 my-3">
-        <div class="card-body py-2">
-                <span class="position-absolute top-0 start-100 translate-middle badge text-secondary rounded-pill"
-                style="background-color: rgb(240,240,240)">
+{% macro render_post_card(post, post_with_stats=None, truncate_body=True, render_quest_badges=True) %}
+    <div class="card mx-4 mb-4">
+        <div class="card-body pt-3 pb-{{ 2 if render_quest_badges else 0}}">
+            <span class="position-absolute top-0 start-100 translate-middle badge text-secondary rounded-pill"
+                  style="background-color: rgb(240,240,240)">
                 {{ "$%.2f"|format(0.01 * post.reward) }}
-                </span>
+            </span>
+            <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+               class="position-absolute top-0 start-0 translate-middle btn badge rounded-pill {{ "btn-info" if post.is_request else "btn-warning" }}">
+                {{ "Buying" if post.is_request else "Selling" }}
+            </a>
             <p class="small text-muted mb-1">{{ render_user_inline(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn badge {{ "btn-info" if post.is_request else "btn-warning" }}">
-                    {{ "Buying" if post.is_request else "Selling" }}
-                </a>
+                {#                <a href="{{ url_for("main.view_post", post_id=post.id) }}"#}
+                {#                   class="btn badge {{ "btn-info" if post.is_request else "btn-warning" }}">#}
+                {#                    {{ "Buying" if post.is_request else "Selling" }}#}
+                {#                </a>#}
                 <a class="text-decoration-none text-dark"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
             </div>
 
-            <div class="card-text text-truncate" style="max-height: 5rem">
+            <div class="card-text {{ "text-truncate" if truncate_body }}" {{ 'style="max-height: 5rem"'|safe if truncate_body }}>
                 <a class="text-decoration-none text-dark small"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     {% if post.body_html %}
@@ -52,18 +56,20 @@
                     {% endif %}
                 </a>
             </div>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
-                Chat
-            </a>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
-                Share
-            </a>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
-                Comment
-            </a>
-            <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
-                Report
-            </a>
+            {% if render_quest_badges %}
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Chat
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Share
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Comment
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                    Report
+                </a>
+            {% endif %}
         </div>
     </div>
 {% endmacro %}
