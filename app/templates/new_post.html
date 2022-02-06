@@ -29,8 +29,7 @@
                     {{ render_form(form, button_style="success", floating_input_label=True) }}
                     <script>
                         const easyMDE = new EasyMDE({
-                            toolbar: ["bold", "italic", "quote", {# "strikethrough", #} "link", "image",
-                                {# "upload-image", #} "code",
+                            toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
                                 "unordered-list", "ordered-list", "|",
                                 "side-by-side", "preview", "guide"],
                             promptURLs: true,
@@ -53,11 +52,7 @@
                             usageStatistics: false,
                             hideModeSwitch: false,
                             placeholder: 'Details (optional)',
-                            toolbarItems: [
-                                ['bold', 'italic', 'quote' {# ,'strike' #}, 'link', 'image', 'code', 'ul', 'ol'],
-                                ['indent', 'outdent'],
-                                ['table'],
-                            ]
+                            toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
                         });
 
                         function DoSubmit() {

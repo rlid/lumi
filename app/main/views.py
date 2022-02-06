@@ -7,9 +7,6 @@ from app.main import main
 from app.main.forms import PostForm
 from app.models.user import User, Post
 
-hashtag_pattern = re.compile("#[A-Za-z0-9]+")
-mention_pattern = re.compile("@[A-Za-z0-9]+")
-
 
 @main.route('/')
 def index():
@@ -26,10 +23,12 @@ def start():
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        tag_names = [name[1:] for name in hashtag_pattern.findall(form.body.data)]
-        # usernames = [name[1:] for name in mention_pattern.findall(form.body.data)]
+        body = re.sub(r'(?<!\\)#[A-Za-z0-9]+', lambda x: '\\' + x.group(0), form.body.data)
+        tag_names = [name[2:] for name in re.findall(r'\\#[A-Za-z0-9]+', body)]
+        # usernames = [name[1:] for name in re.findall(r'@[A-Za-z0-9]+', body)]
+
         current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
-                          title=form.title.data, body=form.body.data.replace('\n', '\n\n'), tag_names=tag_names)
+                          title=form.title.data, body=body.replace('\n', '\n\n'), tag_names=tag_names)
         return redirect(url_for('main.browse'))
     return render_template("new_post.html", form=form)
 
