@@ -204,7 +204,7 @@
                     <b>{{ post.title }}</b>
                 </a>
             </div>
-            <div class="card-text {{ "text-truncate" if truncate_body }}" {{ 'style="max-height: 10rem"'|safe if truncate_body }}>
+            <div class="card-text {{ "text-truncate" if truncate_body }}" {{ 'style="max-height: 6rem"'|safe if truncate_body }}>
                 {% if truncate_body %}
                     <a class="text-decoration-none text-dark small"
                        href="{{ url_for("main.view_post", post_id=post.id) }}">

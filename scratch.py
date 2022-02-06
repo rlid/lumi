@@ -23,7 +23,7 @@ db.session.commit()
 posts = [random.choice(users).post(is_request=random.choice([True, False]),
                                    reward=100 * random.randint(1, 5),
                                    title=faker.text(100),
-                                   body=faker.text(500)) for i in
+                                   body='\n\n'.join(faker.text(100) for i in range(random.randint(2, 5)))) for i in
          range(20)]
 
 for i in range(100):
