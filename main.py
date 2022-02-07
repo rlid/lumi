@@ -1,14 +1,14 @@
 import os
 
 from app import create_app, db
-from app.models.user import User
+from app.models.user import User, Post, Node, PostTag
 
 app = create_app(os.getenv("FLASK_CONFIG") or "DEFAULT")
 
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User)
+    return dict(db=db, User=User, Post=Post, Node=Node, PostTag=PostTag)
 
 
 @app.cli.command()

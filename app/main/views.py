@@ -1,13 +1,12 @@
 import re
 
-import jinja2
 from bs4 import BeautifulSoup
-from flask import render_template, redirect, flash, url_for
+from flask import render_template, redirect, flash, url_for, Markup
 from flask_login import login_required, current_user
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm
+from app.main.forms import PostForm, MarkdownPostForm
 from app.models.user import User, Post
 
 
@@ -46,16 +45,34 @@ def start():
 @main.route('/post', methods=['GET', 'POST'])
 @login_required
 def new_post():
-    form = PostForm()
+    form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     if form.validate_on_submit():
-        body = re.sub(r'(?<!\\)#[A-Za-z0-9]+', lambda x: '\\' + x.group(0), form.body.data)
+        body = form.body.data.replace('<br>', '')
+        body = body.replace('\r\n', '\n')
+        body = body.rstrip()
+        body = re.sub(r'(?<!\\)#[A-Za-z0-9]+', lambda x: '\\' + x.group(0), body)
+        body = ('m' if current_user.use_markdown else 's') + body
         tag_names = [name[2:] for name in re.findall(r'\\#[A-Za-z0-9]+', body)]
         # usernames = [name[1:] for name in re.findall(r'@[A-Za-z0-9]+', body)]
-
         current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
-                          title=form.title.data, body=body.replace('\n', '\n\n'), tag_names=tag_names)
+                          title=form.title.data, body=body, tag_names=tag_names)
         return redirect(url_for('main.browse'))
-    return render_template("new_post.html", form=form)
+    if current_user.use_markdown:
+        flash('Don\'t like Markdown? Switch to ' +
+              Markup(f'<a href={url_for("main.toggle_editor")}>simple editor</a>'), category='info')
+    else:
+        flash('Need more formatting options? Try the ' +
+              Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
+    return render_template("new_post.html", form=form, use_markdown=current_user.use_markdown)
+
+
+@main.route('/toggle-editor', methods=['GET', 'POST'])
+@login_required
+def toggle_editor():
+    current_user.use_markdown = not current_user.use_markdown
+    db.session.add(current_user)
+    db.session.commit()
+    return redirect(url_for('main.new_post'))
 
 
 @main.route('/browse')

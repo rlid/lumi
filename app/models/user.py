@@ -51,21 +51,23 @@ def _distribute_reward(node, amount, reward_share):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
-    account_balance = db.Column(db.Integer, nullable=False, default=0)
-    committed_amount = db.Column(db.Integer, nullable=False, default=0)
+    account_balance = db.Column(db.Integer, default=0, nullable=False)
+    committed_amount = db.Column(db.Integer, default=0, nullable=False)
 
-    sum_value = db.Column(db.Float, default=0.0)
-    sum_abs_value = db.Column(db.Float, default=0.0)
-    sum_one = db.Column(db.Float, default=0.0)
-    sum_abs_one = db.Column(db.Float, default=0.0)
+    sum_value = db.Column(db.Float, default=0.0, nullable=False)
+    sum_abs_value = db.Column(db.Float, default=0.0, nullable=False)
+    sum_one = db.Column(db.Float, default=0.0, nullable=False)
+    sum_abs_one = db.Column(db.Float, default=0.0, nullable=False)
 
     email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
 
-    email_verified = db.Column(db.Boolean, default=False)
-    signup_method = db.Column(db.String(16), default='email')
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    signup_method = db.Column(db.String(16), default='email', nullable=False)
+
+    use_markdown = db.Column(db.Boolean, default=False, nullable=False)
 
     # length of str(unsigned 64-bit integer) = 20
     # length of separator = 1

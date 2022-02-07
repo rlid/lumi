@@ -8,8 +8,8 @@ from app.models.user import User, Post, Node, Engagement
 app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
-# db.drop_all()
-# db.create_all()
+db.drop_all()
+db.create_all()
 
 N_USERS = 10
 
@@ -23,7 +23,7 @@ db.session.commit()
 posts = [random.choice(users).post(is_request=random.choice([True, False]),
                                    reward=100 * random.randint(1, 5),
                                    title=faker.text(100),
-                                   body='\n\n'.join(faker.text(100) for i in range(random.randint(2, 5)))) for i in
+                                   body='\n'.join(faker.text(100) for i in range(random.randint(2, 5)))) for i in
          range(20)]
 
 for i in range(100):

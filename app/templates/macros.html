@@ -196,7 +196,7 @@
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn badge {{ "btn-info" if post.is_request else "btn-warning" }}">
+                   class="badge text-decoration-none {{ "btn-info" if post.is_request else "btn-warning" }}">
                     {{ "Buying" if post.is_request else "Selling" }}
                 </a>
                 <a class="text-decoration-none text-dark"
@@ -221,17 +221,17 @@
             </div>
         </div>
         {% if post_badges %}
-            <div class="card-footer pt-0 bg-white border-0">
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+            <div class="card-footer py-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Chat
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Share
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Comment
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-light btn-sm">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Report
                 </a>
             </div>

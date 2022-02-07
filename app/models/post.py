@@ -7,7 +7,6 @@ from markdown import Markdown
 
 from app import db
 from app.models import PostTag
-
 from utils.markdown_ext import DelExtension
 
 
@@ -67,10 +66,16 @@ class Post(db.Model):
                         token['name'] = 'h6'
                     yield token
 
-        markdown = Markdown(extensions=[DelExtension()])
+        use_markdown = value[0] == 'm'
+        value = value[1:]
 
         cleaner = Cleaner(tags=allowed_tags, attributes=allowed_attributes, filters=[HxFilter], strip=True)
-        target.body_html = bleach.linkify(cleaner.clean(markdown.convert(value)))
+        if use_markdown:
+            markdown = Markdown(extensions=[DelExtension()])
+            html = markdown.convert(value)
+        else:
+            html = value.replace('\n', '<br>')
+        target.body_html = bleach.linkify(cleaner.clean(html))
 
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)

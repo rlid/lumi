@@ -25,41 +25,47 @@
         <div class="row justify-content-center">
             <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
                 <h3 class="mb-3">Create a post</h3>
-                {% if request.MOBILE %}
-                    {{ render_form(form, button_style="success", floating_input_label=True) }}
-                    <script>
-                        const easyMDE = new EasyMDE({
-                            toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
-                                "unordered-list", "ordered-list", "|",
-                                "side-by-side", "preview", "guide"],
-                            promptURLs: true,
-                            uploadImage: false,
-                            spellChecker: false,
-                            sideBySideFullscreen: false,
-                            status: false,
-                            placeholder: 'Details (optional)'
-                        });
-                    </script>
-                {% else %}
-                    {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
-                    <script>
-                        const editor = new toastui.Editor({
-                            el: document.querySelector('#editor'),
-                            height: '500px',
-                            initialEditType: 'wysiwyg',
-                            previewStyle: 'vertical',
-                            previewHighlight: true,
-                            usageStatistics: false,
-                            hideModeSwitch: false,
-                            placeholder: 'Details (optional)',
-                            toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
-                        });
+                {% if use_markdown %}
+                    {% if request.MOBILE %}
+                        {{ render_form(form, button_style="success", floating_input_label=True) }}
+                        <script>
+                            const easyMDE = new EasyMDE({
+                                toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
+                                    "unordered-list", "ordered-list", "|",
+                                    "side-by-side", "preview", "guide"],
+                                minHeight: '100px',
+                                maxHeight: '200px',
+                                promptURLs: true,
+                                uploadImage: false,
+                                spellChecker: false,
+                                sideBySideFullscreen: false,
+                                status: false,
+                                placeholder: 'Details (optional)'
+                            });
+                        </script>
+                    {% else %}
+                        {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+                        <script>
+                            const editor = new toastui.Editor({
+                                el: document.querySelector('#editor'),
+                                height: '500px',
+                                initialEditType: 'wysiwyg',
+                                previewStyle: 'vertical',
+                                previewHighlight: true,
+                                usageStatistics: false,
+                                hideModeSwitch: false,
+                                placeholder: 'Details (optional)',
+                                toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
+                            });
 
-                        function DoSubmit() {
-                            document.getElementById('body').value = editor.getMarkdown();
-                            return true;
-                        }
-                    </script>
+                            function DoSubmit() {
+                                document.getElementById('body').value = editor.getMarkdown();
+                                return true;
+                            }
+                        </script>
+                    {% endif %}
+                {% else %}
+                    {{ render_form(form, button_style="success", floating_input_label=True) }}
                 {% endif %}
             </div>
             <div class="col">
