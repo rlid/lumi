@@ -188,11 +188,12 @@
             <p class="small text-muted mb-1">{{ render_user(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}" style="vertical-align: middle"
                    class="badge text-decoration-none {{ "btn-info" if post.is_request else "btn-warning" }}">
                     {{ "Buying" if post.is_request else "Selling" }}
                 </a>
-                <a class="text-decoration-none" href="{{ url_for("main.view_post", post_id=post.id) }}">
+                <a class="text-decoration-none text-dark" style="vertical-align: middle;font-size: 1rem"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
                 {% if post_tags %}
