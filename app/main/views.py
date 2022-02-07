@@ -25,6 +25,14 @@ def truncate_html_processor():
     return dict(truncate_html=truncate_html)
 
 
+@main.app_context_processor
+def html_text_processor():
+    def html_text(value):
+        return BeautifulSoup(value, "html.parser").text
+
+    return dict(html_text=html_text)
+
+
 @main.route('/')
 def index():
     return render_template("landing.html")
