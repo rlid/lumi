@@ -31,7 +31,7 @@ for i in range(100):
     post = random.choice(posts)
     answerer = random.choice(users)
     for tag_name in faker.words():
-        answerer.add_tag(post, tag_name)
+        answerer.add_tag(post, tag_name.capitalize())
     while answerer == post.creator:
         answerer = random.choice(users)
     answerer.create_node(post=post, parent=random.choice(post.nodes.all()))

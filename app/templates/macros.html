@@ -199,11 +199,10 @@
                    class="badge text-decoration-none {{ "btn-info" if post.is_request else "btn-warning" }}">
                     {{ "Buying" if post.is_request else "Selling" }}
                 </a>
-                <a class="text-decoration-none text-dark"
-                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                <a class="text-decoration-none" href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
-                <p class="mt-1 mb-0">{% if post_tags %} {{ render_post_tags(post.post_tags) }} {% endif %}</p>
+                {% if post_tags %}<p class="my-2"> {{ render_post_tags(post.post_tags) }}</p>{% endif %}
             </div>
             <div class="card-text" {{ 'style="max-height: 8rem;overflow: hidden"'|safe if truncate_body }}>
                 {% if truncate_body %}
@@ -222,16 +221,20 @@
         </div>
         {% if post_badges %}
             <div class="card-footer py-0">
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Chat
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Share
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Comment
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
                     Report
                 </a>
             </div>

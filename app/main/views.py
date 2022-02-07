@@ -51,7 +51,6 @@ def new_post():
         body = body.replace('\r\n', '\n')
         body = body.rstrip()
         body = re.sub(r'(?<!\\)#[A-Za-z0-9]+', lambda x: '\\' + x.group(0), body)
-        body = ('m' if current_user.use_markdown else 's') + body
         tag_names = [name[2:] for name in re.findall(r'\\#[A-Za-z0-9]+', body)]
         # usernames = [name[1:] for name in re.findall(r'@[A-Za-z0-9]+', body)]
         current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),

@@ -206,10 +206,10 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
-    def add_tag(self, post, tag_name):
-        tag = Tag.query.get(tag_name)
+    def add_tag(self, post, name):
+        tag = Tag.query.get(name.lower())
         if tag is None:
-            tag = Tag(name=tag_name, creator=self)
+            tag = Tag(id=name.lower(), name=name, creator=self)
             db.session.add(tag)
             db.session.commit()
         post_tag = post.post_tags.filter_by(tag=tag).first()
@@ -220,7 +220,11 @@ class User(UserMixin, db.Model):
         return post_tag
 
     def post(self, is_request, reward, title, body=None, tag_names=[]):
-        post = Post(creator=self, is_request=is_request, reward=reward, title=title, body=body)
+        post = Post(creator=self,
+                    is_request=is_request,
+                    reward=reward,
+                    title=title,
+                    body=('m' if self.use_markdown else 's') + body)
         for tag_name in tag_names:
             self.add_tag(post, tag_name)
         node = Node(post=post, creator=self)
