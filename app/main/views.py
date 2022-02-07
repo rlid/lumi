@@ -1,13 +1,14 @@
 import re
 
 from bs4 import BeautifulSoup
-from flask import render_template, redirect, flash, url_for, Markup
+from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
+from sqlalchemy import func, desc, distinct
 
 from app import db
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm
-from app.models.user import User, Post
+from app.models.user import User, Post, PostTag, Tag
 
 
 @main.app_context_processor
@@ -47,14 +48,15 @@ def start():
 def new_post():
     form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     if form.validate_on_submit():
+        title = form.title.data.strip()
         body = form.body.data.replace('<br>', '')
         body = body.replace('\r\n', '\n')
-        body = body.rstrip()
-        body = re.sub(r'(?<!\\)#[A-Za-z0-9]+', lambda x: '\\' + x.group(0), body)
-        tag_names = [name[2:] for name in re.findall(r'\\#[A-Za-z0-9]+', body)]
-        # usernames = [name[1:] for name in re.findall(r'@[A-Za-z0-9]+', body)]
+        body = body.strip()
+        body = re.sub(r'(?<!\\)#\w+', lambda x: '\\' + x.group(0), body)
+        tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
+        # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
         current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
-                          title=form.title.data, body=body, tag_names=tag_names)
+                          title=title, body=body, tag_names=tag_names)
         return redirect(url_for('main.browse'))
     if current_user.use_markdown:
         flash('Don\'t like Markdown? Switch to ' +
@@ -74,10 +76,48 @@ def toggle_editor():
     return redirect(url_for('main.new_post'))
 
 
+def unique_lower(str_seq):
+    seen = set()
+    return [x.lower() for x in str_seq if not (x.lower() in seen or seen.add(x.lower()))]
+
+
 @main.route('/browse')
 def browse():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template("index.html", posts=posts)
+    print(request.args.get("tags", ""))
+    tag_ids = unique_lower(re.findall(r'\w+', request.args.get("tags", "")))
+
+    if tag_ids:
+        post_query = Post.query.join(
+            PostTag, PostTag.post_id == Post.id
+        ).filter(
+            PostTag.tag_id.in_(tag_ids)
+        ).group_by(
+            Post
+        ).having(
+            func.count(distinct(PostTag.tag_id)) == len(tag_ids)
+        )
+    else:
+        post_query = Post.query
+
+    post_query_sq = post_query.subquery()
+    tag_freq_query = db.session.query(
+        Tag,
+        func.count(PostTag.post_id).label('freq')
+    ).join(
+        PostTag,
+        PostTag.tag_id == Tag.id
+    ).join(
+        post_query_sq,
+        post_query_sq.c.id == PostTag.post_id
+    ).group_by(
+        Tag
+    ).order_by(
+        desc('freq')
+    )
+
+    posts = post_query.order_by(Post.timestamp.desc()).all()
+    tag_freqs = tag_freq_query.all()
+    return render_template("index.html", posts=posts, tag_freqs=tag_freqs)
 
 
 @main.route('/support')

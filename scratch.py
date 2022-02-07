@@ -10,10 +10,13 @@ app_context = app.app_context()
 app_context.push()
 db.drop_all()
 db.create_all()
+faker = Faker()
 
 N_USERS = 10
-
-faker = Faker()
+N_POSTS = N_USERS * 2 * 5
+N_TAGS = N_USERS * 3 * 5
+N_NODES = N_USERS * 4 * 5
+N_ENGAGEMENTS = N_USERS * 1 * 5
 
 users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
 db.session.add_all(users)
@@ -24,14 +27,15 @@ posts = [random.choice(users).post(is_request=random.choice([True, False]),
                                    reward=100 * random.randint(1, 5),
                                    title=faker.text(100),
                                    body='\n'.join(faker.text(100) for i in range(random.randint(2, 5)))) for i in
-         range(20)]
+         range(N_POSTS)]
 
-for i in range(100):
+tag_names = [word.capitalize() for word in faker.words(N_TAGS)]
+
+for i in range(N_NODES):
     # choose a post at random, choose a user who is not the post creator at random, and create a node
     post = random.choice(posts)
     answerer = random.choice(users)
-    for tag_name in faker.words():
-        answerer.add_tag(post, tag_name.capitalize())
+    answerer.add_tag(post, random.choice(tag_names).capitalize())
     while answerer == post.creator:
         answerer = random.choice(users)
     answerer.create_node(post=post, parent=random.choice(post.nodes.all()))
@@ -41,7 +45,7 @@ print(len(Node.query.all()))
 
 competence = [random.uniform(0.7, 0.9) for i in range(User.query.count())]
 credibility = [random.uniform(0.75, 0.95) for i in range(User.query.count())]
-for i in range(50):
+for i in range(N_ENGAGEMENTS):
     # choose a node which is not an asker node at random, and make engagement
     node = random.choice(Node.query.filter(Node.parent != None).all())
     asker = node.post.creator

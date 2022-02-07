@@ -166,22 +166,15 @@
     </a>
 {% endmacro %}
 
-{% macro render_post_tag(post_tag, freq=None) %}
-    <a class="badge bg-light text-dark rounded-pill border text-decoration-none" href="{{ url_for("main.index") }}">
-        #{{ post_tag.tag.name }}
-        {% if freq %}
-            <small>({{ post_tag.tag.post_tags.count() }})</small>
-        {% endif %}
+{% macro render_tag(tag, freq=None, margin_padding="") %}
+    <a class="badge bg-light text-dark rounded-pill border text-decoration-none {{ margin_padding }}"
+       href="{{ url_for("main.index") }}">
+        #{{ tag.name }}
+        {% if freq %}<span class="badge bg-secondary rounded-pill">{{ freq }}</span>{% endif %}
     </a>
 {% endmacro %}
 
-{% macro render_post_tags(post_tags) %}
-    {% for post_tag in post_tags[:5] %}
-        {{ render_post_tag(post_tag) }}
-    {% endfor %}
-{% endmacro %}
-
-{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True) %}
+{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None) %}
     <div class="card me-3 mb-4">
         <div class="card-body py-2">
             {#            <a href="{{ url_for("main.view_post", post_id=post.id) }}"#}
@@ -202,22 +195,28 @@
                 <a class="text-decoration-none" href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
-                {% if post_tags %}<p class="my-2"> {{ render_post_tags(post.post_tags) }}</p>{% endif %}
-            </div>
-            <div class="card-text" {{ 'style="max-height: 8rem;overflow: hidden"'|safe if truncate_body }}>
-                {% if truncate_body %}
-                    <a class="text-decoration-none text-dark small"
-                       href="{{ url_for("main.view_post", post_id=post.id) }}">
+                {% if post_tags %}
+                    <p class="my-1">
+                        {% for post_tag in post.post_tags[:tag_limit] %}
+                            {{ render_tag(post_tag.tag) }}
+                        {% endfor %}
+                    </p>
                 {% endif %}
+            </div>
+            {% if truncate_body %}
+                <a class="text-decoration-none text-dark small"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+            {% endif %}
+            <div class="card-text" {{ 'style="max-height: 5rem;overflow: hidden"'|safe if truncate_body }}>
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}
                     {{ post.body }}
                 {% endif %}
-                {% if truncate_body %}
-                    </a>
-                {% endif %}
             </div>
+            {% if truncate_body %}
+                </a>
+            {% endif %}
         </div>
         {% if post_badges %}
             <div class="card-footer py-0">

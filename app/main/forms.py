@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
-from flask_pagedown.fields import PageDownField
 from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField
-from wtforms.validators import InputRequired, NumberRange, Length
+from wtforms.validators import InputRequired, NumberRange, Length, DataRequired
+from wtforms.validators import ValidationError
+
+TITLE_MIN_LENGTH = 5
 
 
 class TUIEditorField(TextAreaField):
@@ -17,13 +19,17 @@ class PostForm(FlaskForm):
                             validators=[InputRequired()]
                             )
     title = StringField("Title",
-                        validators=[InputRequired(), Length(5, 100)],
+                        validators=[DataRequired(), Length(TITLE_MIN_LENGTH, 100)],
                         render_kw={"placeholder": "Title"})
     reward = DecimalField("Price (in USD $)",
                           validators=[InputRequired(), NumberRange(1, 5)],
                           render_kw={"placeholder": "Price"})
     body = TextAreaField("Details (optional)", render_kw={"placeholder": "Details (optional)", "style": "height: 25vh"})
     submit = SubmitField("Post", render_kw={"class": "w-100"})
+
+    def validate_title(self, field):
+        if len(field.data.strip()) < TITLE_MIN_LENGTH:
+            raise ValidationError(f'Title cannot be less than {TITLE_MIN_LENGTH} characters')
 
 
 class MarkdownPostForm(PostForm):

@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 
 {% from "form.html" import render_form %}
-{% from "macros.html" import render_post_card with context %}
+{% from "macros.html" import render_post_card, render_tag with context %}
 
 {% block main %}
     <div class="container mt-4 mb-5">
         <div class="row">
-            <div class="col d-none d-md-block text-center">Tags</div>
+            <div class="col d-none d-md-block">
+                <div class="position-sticky" style="top:6rem">
+                    {% for tag, freq in tag_freqs[:25] %}
+                        {{ render_tag(tag=tag, freq=freq, margin_padding="mx-2 my-2") }}
+                    {% endfor %}
+                </div>
+            </div>
             <div class="col col-md-8 col-lg-6">
                 {% for post in posts %}
                     {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
