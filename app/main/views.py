@@ -1,4 +1,7 @@
 import re
+
+import jinja2
+from bs4 import BeautifulSoup
 from flask import render_template, redirect, flash, url_for
 from flask_login import login_required, current_user
 
@@ -6,6 +9,20 @@ from app import db
 from app.main import main
 from app.main.forms import PostForm
 from app.models.user import User, Post
+
+
+@main.app_context_processor
+def truncate_html_processor():
+    def truncate_html(value, length=255):
+        n = value.find(' ', length)
+        if n == -1:
+            partial_html = value
+        else:
+            partial_html = value[:n] + '...'
+        soup = BeautifulSoup(partial_html, "html.parser")
+        return soup.prettify()
+
+    return dict(truncate_html=truncate_html)
 
 
 @main.route('/')

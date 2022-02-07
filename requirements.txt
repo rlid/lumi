@@ -26,3 +26,4 @@ WTForms==3.0.1
 markdown
 bleach
 Flask-Mobility
+beautifulsoup4

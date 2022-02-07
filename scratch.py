@@ -8,8 +8,8 @@ from app.models.user import User, Post, Node, Engagement
 app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
-db.drop_all()
-db.create_all()
+# db.drop_all()
+# db.create_all()
 
 N_USERS = 10
 
@@ -39,8 +39,8 @@ for i in range(100):
 print(len(Post.query.all()))
 print(len(Node.query.all()))
 
-competence = [random.uniform(0.7, 0.9) for i in range(N_USERS)]
-credibility = [random.uniform(0.75, 0.95) for i in range(N_USERS)]
+competence = [random.uniform(0.7, 0.9) for i in range(User.query.count())]
+credibility = [random.uniform(0.75, 0.95) for i in range(User.query.count())]
 for i in range(50):
     # choose a node which is not an asker node at random, and make engagement
     node = random.choice(Node.query.filter(Node.parent != None).all())

@@ -167,7 +167,7 @@
 {% endmacro %}
 
 {% macro render_post_tag(post_tag, freq=None) %}
-    <a class="badge bg-light text-dark" href="{{ url_for("main.index") }}">
+    <a class="badge bg-light text-dark rounded-pill border text-decoration-none" href="{{ url_for("main.index") }}">
         #{{ post_tag.tag.name }}
         {% if freq %}
             <small>({{ post_tag.tag.post_tags.count() }})</small>
@@ -183,7 +183,7 @@
 
 {% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True) %}
     <div class="card me-3 mb-4">
-        <div class="card-body py-2">
+        <div class="card-body pt-2 pb-0">
             {#            <a href="{{ url_for("main.view_post", post_id=post.id) }}"#}
             {#               class="position-absolute top-0 start-0 translate-middle btn badge rounded-pill {{ "btn-info" if post.is_request else "btn-warning" }}">#}
             {#                {{ "Buying" if post.is_request else "Selling" }}#}
@@ -203,6 +203,7 @@
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
+                <p class="mt-1 mb-0">{% if post_tags %} {{ render_post_tags(post.post_tags) }} {% endif %}</p>
             </div>
             <div class="card-text {{ "text-truncate" if truncate_body }}" {{ 'style="max-height: 6rem"'|safe if truncate_body }}>
                 {% if truncate_body %}
@@ -217,7 +218,6 @@
                 {% if truncate_body %}
                     </a>
                 {% endif %}
-            {% if post_tags %} {{ render_post_tags(post.post_tags) }} {% endif %}
             </div>
         </div>
         {% if post_badges %}
