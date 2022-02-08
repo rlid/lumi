@@ -23,7 +23,7 @@ def _distribute_reward(node, amount, reward_share):
     if len(nodes) == 1:
         raise RewardDistributionError('Cannot distribute reward from the root node')
 
-    answerer = node.creator if node.post.is_request else node.post.creator
+    answerer = node.creator if node.post.type == Post.TYPE_BUY else node.post.creator
 
     # if the node is directly connected to the root node or if the answerer does not share:
     if len(referral_nodes) == 0 or reward_share == 0:
@@ -221,7 +221,7 @@ class User(UserMixin, db.Model):
 
     def post(self, is_request, reward, title, body=None, tag_names=[]):
         post = Post(creator=self,
-                    is_request=is_request,
+                    type=Post.TYPE_BUY if is_request else Post.TYPE_SELL,
                     reward=reward,
                     title=title,
                     body=('m' if self.use_markdown else 's') + body)
@@ -255,7 +255,7 @@ class User(UserMixin, db.Model):
         if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot request engagement because an active engagement already exists')
 
-        if node.post.is_request:
+        if node.post.type == Post.TYPE_BUY:
             engagement = Engagement(node=node, asker=node.post.creator, answerer=self)
         else:
             engagement = Engagement(node=node, asker=self, answerer=node.post.creator)

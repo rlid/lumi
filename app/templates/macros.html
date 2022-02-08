@@ -170,29 +170,30 @@
     <a class="badge bg-light text-dark rounded-pill border text-decoration-none {{ margin_padding }}"
        href="{{ url_for("main.index") }}">
         #{{ tag.name }}
-        {% if freq %}<span class="badge bg-secondary rounded-pill">{{ freq }}</span>{% endif %}
+        {% if freq %}<span class="badge tag-freq rounded-pill">{{ freq }}</span>{% endif %}
     </a>
 {% endmacro %}
 
-{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None) %}
-    <div class="card me-3 mb-4">
+{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None,
+    style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
+    label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+    <div class="card mb-3 {{ style_map[post.type] }}">
         <div class="card-body py-2">
-            {#            <a href="{{ url_for("main.view_post", post_id=post.id) }}"#}
-            {#               class="position-absolute top-0 start-0 translate-middle btn badge rounded-pill {{ "btn-info" if post.is_request else "btn-warning" }}">#}
-            {#                {{ "Buying" if post.is_request else "Selling" }}#}
-            {#            </a>#}
-            <span class="position-absolute top-0 start-100 translate-middle badge text-secondary rounded-pill"
-                  style="background-color: rgb(240,240,240)">
-                {{ "$%.2f"|format(0.01 * post.reward) }}
-            </span>
             <p class="small text-muted mb-1">{{ render_user(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}" style="vertical-align: middle"
-                   class="badge text-decoration-none {{ "btn-info" if post.is_request else "btn-warning" }}">
-                    {{ "Buying" if post.is_request else "Selling" }}
-                </a>
-                <a class="text-decoration-none text-dark" style="vertical-align: middle;font-size: 1rem"
+                <div class="btn-group btn-group-sm buy-sell" role="group">
+                    <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                       class="btn btn-{{- style_map[post.type] -}}">
+                        {{ label_map[post.type] }}
+                    </a>
+                    {% if post.reward > 0 %}
+                        <button type="button" class="btn btn-secondary px-1" disabled>
+                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                        </button>
+                    {% endif %}
+                </div>
+                <a class="text-decoration-none text-dark" style="vertical-align: middle"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
@@ -208,7 +209,7 @@
                 <a class="text-decoration-none text-dark small"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
             {% endif %}
-            <div class="card-text" {{ 'style="max-height: 5rem;overflow: hidden"'|safe if truncate_body }}>
+            <div class="card-text {{ 'truncated' if truncate_body }}">
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}

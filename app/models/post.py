@@ -13,13 +13,19 @@ from utils.markdown_ext import DelExtension
 class Post(db.Model):
     __tablename__ = 'posts'
 
+    TYPE_BUY = 'buy'
+    TYPE_SELL = 'sell'
+    TYPE_ANNOUNCEMENT = 'announcement'
+    TYPE_WARNING = 'warning'
+    TYPE_INFO = 'info'
+
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
 
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    is_request = db.Column(db.Boolean, nullable=False)
+    type = db.Column(db.String(16), nullable=False)
     reward = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String(100), nullable=False)
 

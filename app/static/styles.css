@@ -7,6 +7,57 @@
 /*    border-color: white;*/
 /*}*/
 
+.card.info {
+    background-color: rgba(13, 202, 240, 0.05);
+    border-color: #0dcaf0;
+}
+
+.card.warning {
+    background-color: rgba(255, 193, 7, 0.05);
+    border-color: #ffc107;
+}
+
+.card.success {
+    background-color: rgba(25, 135, 84, 0.05);
+    border-color: #198754;
+}
+
+.card.danger {
+    background-color: rgba(220, 53, 69, 0.05);
+    border-color: #dc3545;
+}
+
+.card.primary {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-color: #0d6efd;
+}
+
+.card.secondary {
+    background-color: rgba(108, 117, 125, 0.05);
+    border-color: #6c757d;
+}
+
+.card-text.truncated {
+    max-height: 5rem;
+    overflow: hidden
+}
+
+.btn-group.buy-sell .btn:first-child {
+    padding-left: 0.5rem;
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+}
+
+.btn-group.buy-sell .btn:last-child {
+    padding-right: 0.5rem;
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+}
+
+.badge.tag-freq {
+    background-color: grey;
+}
+
 .separator {
     display: flex;
     align-items: center;

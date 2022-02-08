@@ -83,21 +83,23 @@ def unique_lower(str_seq):
 
 @main.route('/browse')
 def browse():
-    print(request.args.get("tags", ""))
     tag_ids = unique_lower(re.findall(r'\w+', request.args.get("tags", "")))
 
     if tag_ids:
         post_query = Post.query.join(
             PostTag, PostTag.post_id == Post.id
         ).filter(
-            PostTag.tag_id.in_(tag_ids)
+            PostTag.tag_id.in_(tag_ids),
+            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
         ).group_by(
             Post
         ).having(
             func.count(distinct(PostTag.tag_id)) == len(tag_ids)
         )
     else:
-        post_query = Post.query
+        post_query = Post.query.filter(
+            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
+        )
 
     post_query_sq = post_query.subquery()
     tag_freq_query = db.session.query(
@@ -117,7 +119,11 @@ def browse():
 
     posts = post_query.order_by(Post.timestamp.desc()).all()
     tag_freqs = tag_freq_query.all()
-    return render_template("index.html", posts=posts, tag_freqs=tag_freqs)
+    return render_template(
+        "index.html",
+        sticky_posts=Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.timestamp.desc()).all(),
+        posts=posts,
+        tag_freqs=tag_freqs)
 
 
 @main.route('/support')
