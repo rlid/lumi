@@ -176,7 +176,8 @@
         {% else %}
             {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
         {% endif %}
-        ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
+        ">#{{ tag.name }} {% if freq %}
+            <span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
         </a>
     {% endif %}
 {% endmacro %}
@@ -190,7 +191,7 @@
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
                 <div class="btn-group btn-group-sm buy-sell" role="group">
-                    <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
                        class="btn btn-{{- style_map[post.type] -}}">
                         {{ label_map[post.type] }}
                     </a>
@@ -205,11 +206,11 @@
                     <b>{{ post.title }}</b>
                 </a>
                 {% if post_tags %}
-{#                    <p class="my-1">#}
-                        {% for post_tag in post.post_tags[:tag_limit] %}
-                            {{ render_tag(post_tag.tag) }}
-                        {% endfor %}
-{#                    </p>#}
+                    {#                    <p class="my-1">#}
+                    {% for post_tag in post.post_tags[:tag_limit] %}
+                        {{ render_tag(post_tag.tag) }}
+                    {% endfor %}
+                    {#                    </p>#}
                 {% endif %}
             </div>
             {% if truncate_body %}
