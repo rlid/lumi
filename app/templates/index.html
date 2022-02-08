@@ -3,33 +3,31 @@
 {% from "form.html" import render_form %}
 {% from "macros.html" import render_post_card, render_tag with context %}
 
-{% block main %}
-    <div class="container mt-3 mb-5">
-        <div class="row">
-            <div class="col d-none d-md-block">
-                <div class="position-sticky" style="top:6rem">
-                    {% if tags_in_filter %}
-                        <p class="text-muted">Active filters (click to remove):</p>
-                        {% for tag in tags_in_filter %}
-                            {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1") }}
-                        {% endfor %}
-                        <hr>
-                    {% endif %}
-                    <p class="text-muted">Add to filter:</p>
-                    {% for tag, freq in tags_not_in_filter_with_freq[:25] %}
-                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-2") }}
+{% block main_container %}
+    <div class="row">
+        <div class="col d-none d-md-block">
+            <div class="position-sticky" style="top:6rem">
+                {% if tags_in_filter %}
+                    <p class="text-muted">Active filters (click to remove):</p>
+                    {% for tag in tags_in_filter %}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1") }}
                     {% endfor %}
-                </div>
-            </div>
-            <div class="col col-md-8 col-lg-6">
-                {% for post in sticky_posts %}
-                    {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
-                {% endfor %}
-                {% for post in posts %}
-                    {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+                    <hr>
+                {% endif %}
+                <p class="text-muted">Add to filter:</p>
+                {% for tag, freq in tags_not_in_filter_with_freq[:25] %}
+                    {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-2") }}
                 {% endfor %}
             </div>
-            <div class="col d-none d-md-block text-center">Links</div>
         </div>
+        <div class="col col-md-8 col-lg-6">
+            {% for post in sticky_posts %}
+                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+            {% endfor %}
+            {% for post in posts %}
+                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+            {% endfor %}
+        </div>
+        <div class="col d-none d-md-block text-center">Links</div>
     </div>
 {% endblock %}

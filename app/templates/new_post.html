@@ -20,83 +20,81 @@
     {% endif %}
 {% endblock %}
 
-{% block main %}
-    <div class="container mb-5">
-        <div class="row justify-content-center">
-            <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
-                <h3 class="mb-3">Create a post</h3>
-                {% if use_markdown %}
-                    {% if request.MOBILE %}
-                        {{ render_form(form, button_style="success", floating_input_label=True) }}
-                        <script>
-                            const easyMDE = new EasyMDE({
-                                toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
-                                    "unordered-list", "ordered-list", "|",
-                                    "side-by-side", "preview", "guide"],
-                                minHeight: '100px',
-                                maxHeight: '200px',
-                                promptURLs: true,
-                                uploadImage: false,
-                                spellChecker: false,
-                                sideBySideFullscreen: false,
-                                status: false,
-                                placeholder: 'Details (optional)'
-                            });
-                        </script>
-                    {% else %}
-                        {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
-                        <script>
-                            const editor = new toastui.Editor({
-                                el: document.querySelector('#editor'),
-                                height: '500px',
-                                initialEditType: 'wysiwyg',
-                                previewStyle: 'vertical',
-                                previewHighlight: true,
-                                usageStatistics: false,
-                                hideModeSwitch: false,
-                                placeholder: 'Details (optional)',
-                                toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
-                            });
-
-                            function DoSubmit() {
-                                document.getElementById('body').value = editor.getMarkdown();
-                                return true;
-                            }
-                        </script>
-                    {% endif %}
-                {% else %}
+{% block main_container %}
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
+            <h3 class="mb-3">Create a post</h3>
+            {% if use_markdown %}
+                {% if request.MOBILE %}
                     {{ render_form(form, button_style="success", floating_input_label=True) }}
+                    <script>
+                        const easyMDE = new EasyMDE({
+                            toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
+                                "unordered-list", "ordered-list", "|",
+                                "side-by-side", "preview", "guide"],
+                            minHeight: '100px',
+                            maxHeight: '200px',
+                            promptURLs: true,
+                            uploadImage: false,
+                            spellChecker: false,
+                            sideBySideFullscreen: false,
+                            status: false,
+                            placeholder: 'Details (optional)'
+                        });
+                    </script>
+                {% else %}
+                    {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+                    <script>
+                        const editor = new toastui.Editor({
+                            el: document.querySelector('#editor'),
+                            height: '500px',
+                            initialEditType: 'wysiwyg',
+                            previewStyle: 'vertical',
+                            previewHighlight: true,
+                            usageStatistics: false,
+                            hideModeSwitch: false,
+                            placeholder: 'Details (optional)',
+                            toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
+                        });
+
+                        function DoSubmit() {
+                            document.getElementById('body').value = editor.getMarkdown();
+                            return true;
+                        }
+                    </script>
                 {% endif %}
-            </div>
-            <div class="col">
-                <div class="card border-0">
-                    <div class="card-body">
-                        <h5 class="text-muted">Guidelines for posting</h5>
-                        <ul class="text-muted small">
-                            <li>You can ask for many things, e.g.</li>
-                            <ul>
-                                <li>find out more about a town / area / residential block I am about to visit / live in
-                                </li>
-                                <li>ask people to share their experience of a school as a student / workplace as an
-                                    employee
-                                </li>
-                                <li>walk you through the process of buying a foreign product, e.g. snacks from Japan
-                                </li>
-                                <li>help you to find out / test a specific use case of a product before you buy</li>
-                            </ul>
-                            <li>If you know who are best positioned to help you, you can put criteria who you want to
-                                hear from, e.g.
+            {% else %}
+                {{ render_form(form, button_style="success", floating_input_label=True) }}
+            {% endif %}
+        </div>
+        <div class="col">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="text-muted">Guidelines for posting</h5>
+                    <ul class="text-muted small">
+                        <li>You can ask for many things, e.g.</li>
+                        <ul>
+                            <li>find out more about a town / area / residential block I am about to visit / live in
                             </li>
-                            <ul>
-                                <li>someone who used to live around there, or visited / lived in the block</li>
-                                <li>someone who used to study / work there</li>
-                                <li>someone who lives in the same country as you and buys Japanese snacks online
-                                    regularly
-                                </li>
-                                <li>a current owner of the product I am interested in</li>
-                            </ul>
+                            <li>ask people to share their experience of a school as a student / workplace as an
+                                employee
+                            </li>
+                            <li>walk you through the process of buying a foreign product, e.g. snacks from Japan
+                            </li>
+                            <li>help you to find out / test a specific use case of a product before you buy</li>
                         </ul>
-                    </div>
+                        <li>If you know who are best positioned to help you, you can put criteria who you want to
+                            hear from, e.g.
+                        </li>
+                        <ul>
+                            <li>someone who used to live around there, or visited / lived in the block</li>
+                            <li>someone who used to study / work there</li>
+                            <li>someone who lives in the same country as you and buys Japanese snacks online
+                                regularly
+                            </li>
+                            <li>a current owner of the product I am interested in</li>
+                        </ul>
+                    </ul>
                 </div>
             </div>
         </div>
