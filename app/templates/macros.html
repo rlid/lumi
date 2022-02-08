@@ -173,7 +173,7 @@
     {% else %}
         {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
     {% endif %}
-    ">#{{ tag.name }} {% if freq %}<span class="badge tag-freq rounded-pill">{{ freq }}</span>{% endif %}
+    ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-50 rounded-pill">{{ freq }}</span>{% endif %}
     </a>
 {% endmacro %}
 
@@ -191,7 +191,7 @@
                         {{ label_map[post.type] }}
                     </a>
                     {% if post.reward > 0 %}
-                        <button type="button" class="btn btn-secondary px-1" disabled>
+                        <button type="button" class="btn btn-secondary" disabled>
                             {{ "$%.0f"|format(0.01 * post.reward) }}
                         </button>
                     {% endif %}

@@ -8,15 +8,17 @@ from app.models.user import User, Post, Node, Engagement
 app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
+
 db.drop_all()
 db.create_all()
-faker = Faker()
 
+faker = Faker()
+N_DAYS = 10
 N_USERS = 10
-N_POSTS = N_USERS * 2 * 5
-N_TAGS = N_USERS * 3 * 5
-N_NODES = N_USERS * 4 * 5
-N_ENGAGEMENTS = N_USERS * 1 * 5
+N_POSTS = N_USERS * 2 * N_DAYS
+N_TAGS = 20
+N_NODES = N_USERS * 4 * N_DAYS
+N_ENGAGEMENTS = N_USERS * 1 * N_DAYS
 
 users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
 db.session.add_all(users)
