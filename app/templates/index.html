@@ -7,9 +7,19 @@
     <div class="container mt-3 mb-5">
         <div class="row">
             <div class="col d-none d-md-block">
+                {% if tags_in_filter %}
+                    <p class="text-muted">Active filters (click to remove):</p>
+                    <div class="position-sticky" style="top:6rem">
+                        {% for tag in tags_in_filter %}
+                            {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1") }}
+                        {% endfor %}
+                    </div>
+                    <hr>
+                {% endif %}
+                <p class="text-muted">Add to filter:</p>
                 <div class="position-sticky" style="top:6rem">
-                    {% for tag, freq in tag_freqs[:25] %}
-                        {{ render_tag(tag=tag, freq=freq, margin_padding="mx-2 my-2") }}
+                    {% for tag, freq in tags_not_in_filter_with_freq[:25] %}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-2") }}
                     {% endfor %}
                 </div>
             </div>

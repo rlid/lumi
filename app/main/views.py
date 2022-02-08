@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
-from sqlalchemy import func, desc, distinct
+from sqlalchemy import func, desc, distinct, not_
 
 from app import db
 from app.main import main
@@ -83,26 +83,28 @@ def unique_lower(str_seq):
 
 @main.route('/browse')
 def browse():
-    tag_ids = unique_lower(re.findall(r'\w+', request.args.get("tags", "")))
+    tag_ids_to_filter = unique_lower(re.findall(r'\w+', request.args.get("tags", "")))
 
-    if tag_ids:
+    if tag_ids_to_filter:
         post_query = Post.query.join(
             PostTag, PostTag.post_id == Post.id
         ).filter(
-            PostTag.tag_id.in_(tag_ids),
+            PostTag.tag_id.in_(tag_ids_to_filter),
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
         ).group_by(
             Post
         ).having(
-            func.count(distinct(PostTag.tag_id)) == len(tag_ids)
+            func.count(distinct(PostTag.tag_id)) == len(tag_ids_to_filter)
         )
+        tags_in_filter = Tag.query.filter(Tag.id.in_(tag_ids_to_filter)).all()
     else:
         post_query = Post.query.filter(
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
         )
+        tags_in_filter = []
 
     post_query_sq = post_query.subquery()
-    tag_freq_query = db.session.query(
+    tags_not_in_filter_query = db.session.query(
         Tag,
         func.count(PostTag.post_id).label('freq')
     ).join(
@@ -111,6 +113,8 @@ def browse():
     ).join(
         post_query_sq,
         post_query_sq.c.id == PostTag.post_id
+    ).filter(
+        not_(Tag.id.in_(tag_ids_to_filter))
     ).group_by(
         Tag
     ).order_by(
@@ -118,12 +122,16 @@ def browse():
     )
 
     posts = post_query.order_by(Post.timestamp.desc()).all()
-    tag_freqs = tag_freq_query.all()
+    sticky_posts = []
+    if not tag_ids_to_filter:
+        sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.timestamp.desc()).all()
+    tags_not_in_filter_with_freq = tags_not_in_filter_query.all()
     return render_template(
         "index.html",
-        sticky_posts=Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.timestamp.desc()).all(),
+        sticky_posts=sticky_posts,
         posts=posts,
-        tag_freqs=tag_freqs)
+        tags_in_filter=tags_in_filter,
+        tags_not_in_filter_with_freq=tags_not_in_filter_with_freq)
 
 
 @main.route('/support')

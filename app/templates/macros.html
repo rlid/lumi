@@ -166,11 +166,14 @@
     </a>
 {% endmacro %}
 
-{% macro render_tag(tag, freq=None, margin_padding="") %}
-    <a class="badge bg-light text-dark rounded-pill border text-decoration-none {{ margin_padding }}"
-       href="{{ url_for("main.index") }}">
-        #{{ tag.name }}
-        {% if freq %}<span class="badge tag-freq rounded-pill">{{ freq }}</span>{% endif %}
+{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="") %}
+    <a class="badge bg-light text-dark rounded-pill border text-decoration-none {{ extra_class }}" href="
+    {% if tag in tags_in_filter %}
+        {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
+    {% else %}
+        {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
+    {% endif %}
+    ">#{{ tag.name }} {% if freq %}<span class="badge tag-freq rounded-pill">{{ freq }}</span>{% endif %}
     </a>
 {% endmacro %}
 
