@@ -173,7 +173,7 @@
     {% else %}
         {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
     {% endif %}
-    ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-50 rounded-pill">{{ freq }}</span>{% endif %}
+    ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
     </a>
 {% endmacro %}
 
@@ -226,19 +226,19 @@
         {% if post_badges %}
             <div class="card-footer py-0">
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     Chat
                 </a>
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     Share
                 </a>
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     Comment
                 </a>
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-secondary border-0 mx-0 my-0 rounded-0">
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     Report
                 </a>
             </div>
