@@ -227,6 +227,7 @@ class User(UserMixin, db.Model):
                     body=('m' if self.use_markdown else 's') + body)
         for tag_name in tag_names:
             self.add_tag(post, tag_name)
+        self.add_tag(post, 'Buying' if is_request else 'Selling')
         node = Node(post=post, creator=self)
         db.session.add(post)
         db.session.add(node)

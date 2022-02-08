@@ -166,15 +166,19 @@
     </a>
 {% endmacro %}
 
-{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="") %}
-    <a class="badge bg-light text-dark rounded-pill border text-decoration-none {{ extra_class }}" href="
-    {% if tag in tags_in_filter %}
-        {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
-    {% else %}
-        {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
+{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['buying', 'selling']) %}
+    {% if tag.id not in ignore_ids %}
+        <a class="badge rounded-pill border text-decoration-none
+        bg-{{- 'info' if tag.id == 'buying' else ('warning' if tag.id == 'selling' else 'light') }}
+        text-dark {{ extra_class }}" href="
+        {% if tag in tags_in_filter %}
+            {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
+        {% else %}
+            {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
+        {% endif %}
+        ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
+        </a>
     {% endif %}
-    ">#{{ tag.name }} {% if freq %}<span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
-    </a>
 {% endmacro %}
 
 {% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None,
@@ -201,11 +205,11 @@
                     <b>{{ post.title }}</b>
                 </a>
                 {% if post_tags %}
-                    <p class="my-1">
+{#                    <p class="my-1">#}
                         {% for post_tag in post.post_tags[:tag_limit] %}
                             {{ render_tag(post_tag.tag) }}
                         {% endfor %}
-                    </p>
+{#                    </p>#}
                 {% endif %}
             </div>
             {% if truncate_body %}
@@ -216,7 +220,7 @@
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}
-                    {{ post.body }}
+                    {{ post.body[1:] }}
                 {% endif %}
             </div>
             {% if truncate_body %}

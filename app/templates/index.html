@@ -8,16 +8,22 @@
         <div class="col d-none d-md-block">
             <div class="position-sticky" style="top:6rem">
                 {% if tags_in_filter %}
-                    <p class="text-muted">Active filters (click to remove):</p>
+                    <p class="text-muted">Active tags (click to remove):</p>
                     {% for tag in tags_in_filter %}
-                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1") }}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
                     {% endfor %}
+                {% endif %}
+                {% if tags_in_filter and tags_not_in_filter_with_freq %}
                     <hr>
                 {% endif %}
-                <p class="text-muted">Add to filter:</p>
-                {% for tag, freq in tags_not_in_filter_with_freq[:25] %}
-                    {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-2") }}
-                {% endfor %}
+                {% if tags_not_in_filter_with_freq %}
+                    <p class="text-muted">
+                        Add a tag to filter (only posts containing all active tags are shown):
+                    </p>
+                    {% for tag, freq in tags_not_in_filter_with_freq %}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-2", ignore_ids=[]) }}
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         <div class="col col-md-8 col-lg-6">
@@ -25,7 +31,7 @@
                 {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
             {% endfor %}
             {% for post in posts %}
-                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=True) }}
             {% endfor %}
         </div>
         <div class="col d-none d-md-block text-center">Links</div>
