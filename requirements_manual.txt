@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+pg8000
+Flask-WTF
+Bootstrap-Flask
+Flask-Moment
+Flask-Login
+Flask-Mobility
+Authlib==1.0.0rc1
+requests
+markdown
+bleach

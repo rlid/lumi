@@ -1,6 +1,5 @@
 import re
 
-from bs4 import BeautifulSoup
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
 from sqlalchemy import func, desc, distinct, not_
@@ -9,28 +8,6 @@ from app import db
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm
 from app.models.user import User, Post, PostTag, Tag
-
-
-@main.app_context_processor
-def truncate_html_processor():
-    def truncate_html(value, length=255):
-        n = value.find(' ', length)
-        if n == -1:
-            partial_html = value
-        else:
-            partial_html = value[:n] + '...'
-        soup = BeautifulSoup(partial_html, "html.parser")
-        return soup.prettify()
-
-    return dict(truncate_html=truncate_html)
-
-
-@main.app_context_processor
-def html_text_processor():
-    def html_text(value):
-        return BeautifulSoup(value, "html.parser").text
-
-    return dict(html_text=html_text)
 
 
 @main.route('/')

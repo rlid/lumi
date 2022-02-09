@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    APP_VER = "20220120_1430"
+    APP_VER = "20220209_1100"
     APP_NAME = "LumiAsk"
 
     SECRET_KEY = os.environ.get("SECRET_KEY")
