@@ -8,7 +8,13 @@
     {% if tags_in_filter or tags_not_in_filter_with_freq %}
         <div class="card mb-3">
             {% if tags_in_filter %}
-                <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
+                <div class="
+            {%- if tags_not_in_filter_with_freq -%}
+                card-header
+            {%- else -%}
+                card-body py-2
+            {%- endif -%}
+            " style="background-color: rgba(220, 53, 69, 0.05)">
                     <b class="text-danger">Active filter:</b>
                     {% for tag in tags_in_filter %}
                         {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
