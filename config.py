@@ -56,7 +56,7 @@ class GAEConfig(Config):
     APP_VER = "GAE-" + Config.APP_VER
     SQLALCHEMY_DATABASE_URI = URL.create(
         drivername="postgresql+pg8000",
-        username="postgres",
+        username="lumi",
         password=os.environ.get('DB_PASSWORD'),
         database="devdb",
         query={"unix_sock": "{socket_path}/{instance_name}/.s.PGSQL.5432".format(

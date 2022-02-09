@@ -13,7 +13,7 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 20
+N_DAYS = 10
 N_USERS = 10
 N_POSTS = N_USERS * 2 * N_DAYS
 N_TAGS = 50
