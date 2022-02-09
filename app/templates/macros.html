@@ -37,10 +37,13 @@
 {% endmacro %}
 
 
-{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None) %}
+{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="nav-item text-nowrap rounded btn-outline-success">
-        <a class="nav-link text-center {% if active %}text-light{% endif %}"
+    <li class="nav-item">
+        <a class="nav-link text-nowrap rounded btn-outline-success rounded-0
+            {% if active %}text-light{% endif %}
+            {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}"
+           style="padding-top: 11px;padding-bottom: 11px"
            href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}">
             {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ text }}</a>
 
@@ -49,11 +52,44 @@
 
 
 {% macro render_navbar(current_user=None) %}
-    <nav class="navbar sticky-top navbar-expand-md navbar-dark bg-dark">
+    <nav class="navbar sticky-top-lg navbar-expand-sm navbar-dark bg-dark py-0">
         <div class="container-fluid">
-            <a class='navbar-brand mb-0 h1 fs-2' href='{{ url_for('main.index') }}'>
-                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='38' height='38'
+            <a class='navbar-brand h1 my-0' href='{{ url_for('main.browse') }}'>
+                <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='30' height='30'
                      class='d-inline-block align-text-bottom'>{{ config["APP_NAME"][1:] }}</a>
+            <ul class="navbar-nav">
+                {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="md") }}
+                {{ render_nav_item("main.new_post", "How It Works", "bi-signpost-split", visible_from="md") }}
+                {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/xtXCScr9", visible_from="md") }}
+                {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp", visible_from="md") }}
+            </ul>
+
+            <ul class="navbar-nav ms-auto py-2">
+                <li class="nav-item">
+                    <div class="btn-group" role="group">
+                        {% if current_user and current_user.is_authenticated %}
+                            <a class="btn btn-sm text-nowrap btn-outline-success text-white"
+                               href="{{ url_for('main.account') }}">
+                                Account
+                            </a>
+                            <a class="btn btn-sm text-nowrap btn-success"
+                               href="{{ url_for('auth.logout') }}">
+                                Log Out
+                            </a>
+                        {% else %}
+                            <a class="btn btn-sm text-nowrap btn-outline-success text-white"
+                               href="{{ url_for('auth.login') }}">
+                                Log In
+                            </a>
+                            <a class="btn btn-sm text-nowrap btn-success"
+                               href="{{ url_for('auth.signup') }}">
+                                Sign Up
+                            </a>
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+            {#
             <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,25 +103,8 @@
                     {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off") }}
                     {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
                 </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item my-1">
-                        <div class="btn-group d-flex" role="group">
-
-                            {% if current_user and current_user.is_authenticated %}
-                                <a class="btn text-nowrap btn-success" href="{{ url_for('auth.logout') }}">
-                                    Log Out</a>
-                            {% else %}
-                                <a class="btn text-nowrap btn-outline-success" href="{{ url_for('auth.login') }}">
-                                    Log In
-                                </a>
-                                <a class="btn text-nowrap btn-success" href="{{ url_for('auth.signup') }}">
-                                    Sign Up
-                                </a>
-                            {% endif %}
-                        </div>
-                    </li>
-                </ul>
             </div>
+             #}
         </div>
     </nav>
 {% endmacro %}
@@ -125,14 +144,14 @@
 
 
 {# only visible if screen width is visible_from or more #}
-{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, num=0) %}
+{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, badge_text=0) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="btn-secondary position-relative {% if text %}btn-sm{% endif %} text-center px-0 py-0 rounded-0 {% if active %}active{% endif %} {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
         <a href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
            class="nav-link text-light">{% if icon %}
             <i class="bi {{ icon }}"></i><br>{% endif %}{% if text %}{{ text|safe }}{% endif %}</a>
-        {% if num > 0 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">{{ num }}</span>
+        {% if badge_text %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">{{ badge_text }}</span>
         {% endif %}
     </li>
 {% endmacro %}
@@ -143,7 +162,7 @@
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
                 {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
-                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", num=5) }}
+                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=5) }}
                 {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
                 {{ render_nav_item_bottom("main.browse", "Browse", "bi-search", "sm") }}

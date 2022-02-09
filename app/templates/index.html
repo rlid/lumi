@@ -4,26 +4,28 @@
 {% from "macros.html" import render_post_card, render_tag with context %}
 
 {% block main_container %}
+    <div class="container">
     <div class="row">
         <div class="col mb-3">
-            <div class="position-sticky" style="top:5rem">
+            <div class="position-sticky" style="top:63px">
                 {% if tags_not_in_filter_with_freq %}
                     <div class="card mb-0">
                         {% if tags_in_filter %}
                             <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
-                                <b class="text-danger">Filter:</b>
+                                <b class="text-danger">Active filter:</b>
                                 {% for tag in tags_in_filter %}
                                     {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
                                 {% endfor %}
                                 <p class="small text-muted my-1">Only posts containing all tags are shown.</p>
-                            <div class="text-center mb-1">
-                                <a class="btn btn-sm btn-danger badge" href="{{ url_for('main.browse') }}">Reset Filter</a>
-                            </div>
+                                <div class="text-center mb-1">
+                                    <a class="btn btn-sm btn-danger badge" href="{{ url_for('main.browse') }}">Reset
+                                        Filter</a>
+                                </div>
                             </div>
                         {% endif %}
                         <div class="card-body bg-light py-2">
-                            <b>Tags:</b>
-                            {% for tag, freq in tags_not_in_filter_with_freq %}
+                            <b>Popular tags:</b>
+                            {% for tag, freq in tags_not_in_filter_with_freq[:20] %}
                                 {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
                             {% endfor %}
                         </div>
@@ -31,7 +33,8 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-sm-auto col-md-8 col-lg-6">
+        {#<div class="w-100 d-lg-none"></div>#}
+        <div class="col-12 col-lg-8 col-xl-6">
             {% for post in sticky_posts %}
                 {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
             {% endfor %}
@@ -39,6 +42,33 @@
                 {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=True) }}
             {% endfor %}
         </div>
-        <div class="col text-center">Links</div>
+        {#<div class="w-100 d-lg-none"></div>#}
+        <div class="col text-center">
+            <div class="position-sticky" style="top:63px">
+                {% if tags_not_in_filter_with_freq %}
+                    <div class="card mb-0">
+                        {% if tags_in_filter %}
+                            <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
+                                <b class="text-danger">Active filter:</b>
+                                {% for tag in tags_in_filter %}
+                                    {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
+                                {% endfor %}
+                                <p class="small text-muted my-1">Only posts containing all tags are shown.</p>
+                                <div class="text-center mb-1">
+                                    <a class="btn btn-sm btn-danger badge" href="{{ url_for('main.browse') }}">Reset
+                                        Filter</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="card-body bg-light py-2">
+                            <b>Popular tags:</b>
+                            {% for tag, freq in tags_not_in_filter_with_freq[:20] %}
+                                {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}
