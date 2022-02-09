@@ -45,22 +45,42 @@
         {#<div class="w-100 d-lg-none"></div>#}
         <div class="col">
             <div class="position-sticky" style="top:63px">
-                <div class="card small text-center text-nowrap text-muted">
+                <div class="card small text-center text-nowrap">
                     <div class="card-body">
-                        <div class="row justify-content-center">
+                        <div class="row">
                             <div class="col">
-                                <p>What's New</p>
-                                <p>Why {{ config["APP_NAME"] }}</p>
-                                <p>How It Works</p>
-                                <p>Help & FAQs</p>
-                                <p>Feedback</p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    What's New
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Why {{ config["APP_NAME"] }}
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    How It Works
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Help & FAQs
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Feedback
+                                </a></p>
                             </div>
                             <div class="col">
-                                <p>About Us</p>
-                                <p>Terms</p>
-                                <p>Privacy Policy</p>
-                                <p>Cookie Policy</p>
-                                <p>Contact Us</p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Community Guidelines
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Terms
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Privacy Policy
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    Cookie Policy
+                                </a></p>
+                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
+                                    About Us
+                                </a></p>
                             </div>
                         </div>
                     </div>

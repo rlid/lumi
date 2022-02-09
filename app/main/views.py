@@ -111,30 +111,16 @@ def browse():
         tags_not_in_filter_with_freq=tags_not_in_filter_with_freq)
 
 
-@main.route('/support')
-def support():
-    return redirect("https://discord.gg/xtXCScr9")
-
-
-@main.route('/privacy')
-def privacy():
-    return render_template("landing.html", title="Privacy Policy")
-
-
-@main.route('/terms')
-def terms():
-    return render_template("landing.html", title="Terms Of Service")
-
-
-@main.route('/about')
-def about():
-    return redirect("https://www.linkedin.com/company/knowbleapp")
-
-
 @main.route('/user/<int:user_id>')
 def user(user_id):
     u = User.query.filter_by(id=user_id).first_or_404()
     return render_template("user.html", user=u)
+
+
+@main.route('/account')
+@login_required
+def account():
+    return render_template("user.html", user=current_user)
 
 
 @main.route('/post/<int:post_id>')
@@ -149,10 +135,10 @@ def alerts():
     return render_template("landing.html", title="Alerts")
 
 
-@main.route('/conversations')
+@main.route('/engagements')
 @login_required
-def conversations():
-    return render_template("landing.html", title="Conversations")
+def engagements():
+    return render_template("landing.html", title="Active Engagements")
 
 
 @main.route('/saved')
@@ -161,36 +147,9 @@ def saved():
     return render_template("landing.html", title="Saved")
 
 
-@main.route('/search')
-def search():
-    return render_template("landing.html", title="Search")
-
-
-@main.route('/account')
-@login_required
-def account():
-    flash(f"current_user is {current_user}", category="info")
-    return render_template("landing.html", title="Account")
-
-
-@main.route('/facebook')
-def facebook():
-    return redirect("https://fb.me/KnowbleApp")
-
-
-@main.route('/twitter')
-def twitter():
-    return redirect("https://twitter.com/KnowbleApp")
-
-
-@main.route('/linkedin')
-def linkedin():
-    return redirect("https://www.linkedin.com/company/knowbleapp")
-
-
-@main.route('/discord')
-def discord():
-    return redirect("https://discord.gg/JUD7SMh5tA")
+@main.route('/guidelines')
+def guidelines():
+    return render_template("landing.html", title="Community Guidelines")
 
 
 @main.route("/initdb")
