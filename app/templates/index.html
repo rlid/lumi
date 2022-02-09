@@ -3,91 +3,43 @@
 {% from "form.html" import render_form %}
 {% from "macros.html" import render_post_card, render_tag with context %}
 
-{% block main_container %}
-    <div class="row">
-        <div class="col mb-3">
-            <div class="position-sticky" style="top:63px">
-                {% if tags_not_in_filter_with_freq %}
-                    <div class="card mb-0">
-                        {% if tags_in_filter %}
-                            <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
-                                <b class="text-danger">Active filter:</b>
-                                {% for tag in tags_in_filter %}
-                                    {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
-                                {% endfor %}
-                                <p class="small text-muted my-1">Only posts containing all tags are shown.</p>
-                                <div class="text-center mb-1">
-                                    <a class="btn btn-sm btn-danger badge" href="{{ url_for('main.browse') }}">Reset
-                                        Filter</a>
-                                </div>
-                            </div>
-                        {% endif %}
-                        <div class="card-body bg-light py-2">
-                            <b>Popular tags:</b>
-                            {% for tag, freq in tags_not_in_filter_with_freq[:20] %}
-                                {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        {#<div class="w-100 d-lg-none"></div>#}
-        <div class="col-12 col-lg-8 col-xl-6">
-            {% for post in sticky_posts %}
-                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
-            {% endfor %}
-            {% for post in posts %}
-                {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=True) }}
-            {% endfor %}
-        </div>
-        {#<div class="w-100 d-lg-none"></div>#}
-        <div class="col">
-            <div class="position-sticky" style="top:63px">
-                <div class="card small text-center text-nowrap">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    What's New
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Why {{ config["APP_NAME"] }}
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    How It Works
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Help & FAQs
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Feedback
-                                </a></p>
-                            </div>
-                            <div class="col">
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Community Guidelines
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Terms
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Privacy Policy
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    Cookie Policy
-                                </a></p>
-                                <p><a class="text-decoration-none text-muted" href="{{ url_for('main.index') }}">
-                                    About Us
-                                </a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer small">
-                        &copy; 2022 {{ config["APP_NAME"] }}. All rights reserved.
+
+{% block left_col %}
+    {% if tags_in_filter or tags_not_in_filter_with_freq %}
+        <div class="card mb-3">
+            {% if tags_in_filter %}
+                <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
+                    <b class="text-danger">Active filter:</b>
+                    {% for tag in tags_in_filter %}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
+                    {% endfor %}
+                    <p class="small text-muted my-1">Only posts containing all tags are
+                        shown.</p>
+                    <div class="text-center mb-1">
+                        <a class="btn btn-sm btn-danger badge"
+                           href="{{ url_for('main.browse') }}">Reset
+                            Filter</a>
                     </div>
                 </div>
-            </div>
+            {% endif %}
+            {% if tags_not_in_filter_with_freq %}
+                <div class="card-body bg-light py-2">
+                    <b>Popular tags:</b>
+                    {% for tag, freq in tags_not_in_filter_with_freq[:20] %}
+                        {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-    </div>
+    {% endif %}
+{% endblock %}
+
+
+{% block mid_col %}
+    {% for post in sticky_posts %}
+        {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+    {% endfor %}
+    {% for post in posts %}
+        {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=True) }}
+    {% endfor %}
 {% endblock %}
