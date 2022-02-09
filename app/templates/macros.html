@@ -36,6 +36,27 @@
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 {% endmacro %}
 
+{% macro smalltalk_js() %}
+    <script src="https://embed.small.chat/T0302G8MBB4C02V1UES8G7.js" async></script>
+{% endmacro %}
+
+{% macro hotjar_js() %}
+    <!-- Hotjar Tracking Code for https://lumiask.com -->
+    <script>
+        (function (h, o, t, j, a, r) {
+            h.hj = h.hj || function () {
+                (h.hj.q = h.hj.q || []).push(arguments)
+            };
+            h._hjSettings = {hjid: 2822982, hjsv: 6};
+            a = o.getElementsByTagName('head')[0];
+            r = o.createElement('script');
+            r.async = 1;
+            r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+            a.appendChild(r);
+        })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+    </script>
+{% endmacro %}
+
 
 {% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
@@ -54,15 +75,14 @@
 {% macro render_navbar(current_user=None) %}
     <nav class="navbar sticky-top-lg navbar-expand-sm navbar-dark bg-dark py-0">
         <div class="container-fluid">
-            <a class='navbar-brand h1 my-0' href='{{ url_for('main.browse') }}'>
+            <a class='navbar-brand h1 my-0' href='{{ url_for('main.index') }}'>
                 <img src='{{ url_for('static', filename='apple-touch-icon.png') }}' width='30' height='30'
                      class='d-inline-block align-text-bottom'>{{ config["APP_NAME"][1:] }}</a>
             <ul class="navbar-nav">
                 {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="md") }}
-                {{ render_nav_item("main.start", "How It Works", "bi-signpost-split", visible_from="md") }}
+                {{ render_nav_item("main.new_post", "Post", "bi-plus-square", visible_from="md") }}
+                {{ render_nav_item("main.how_it_works", "How It Works", "bi-signpost-split", visible_from="md") }}
                 {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/PC7mPwXYsY", visible_from="md") }}
-                {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp", visible_from="md") }}
-                {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off", visible_from="lg") }}
             </ul>
             <ul class="navbar-nav ms-auto py-2">
                 <li class="nav-item">
@@ -89,22 +109,6 @@
                     </div>
                 </li>
             </ul>
-            {#
-            <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav my-1">
-                    {{ render_nav_item("main.new_post", "Post", "bi-plus-square") }}
-                    {{ render_nav_item("main.browse", "Browse", "bi-search") }}
-                    {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/xtXCScr9") }}
-                    {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off") }}
-                    {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp") }}
-                </ul>
-            </div>
-             #}
         </div>
     </nav>
 {% endmacro %}
@@ -162,8 +166,8 @@
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
                 {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=5) }}
-                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}
+                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
                 {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text", "sm") }}
                 {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", "sm") }}

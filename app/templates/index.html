@@ -43,31 +43,31 @@
             {% endfor %}
         </div>
         {#<div class="w-100 d-lg-none"></div>#}
-        <div class="col text-center">
+        <div class="col">
             <div class="position-sticky" style="top:63px">
-                {% if tags_not_in_filter_with_freq %}
-                    <div class="card mb-0">
-                        {% if tags_in_filter %}
-                            <div class="card-header" style="background-color: rgba(220, 53, 69, 0.05)">
-                                <b class="text-danger">Active filter:</b>
-                                {% for tag in tags_in_filter %}
-                                    {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, extra_class="mx-1 my-1", ignore_ids=[]) }}
-                                {% endfor %}
-                                <p class="small text-muted my-1">Only posts containing all tags are shown.</p>
-                                <div class="text-center mb-1">
-                                    <a class="btn btn-sm btn-danger badge" href="{{ url_for('main.browse') }}">Reset
-                                        Filter</a>
-                                </div>
+                <div class="card small text-center text-nowrap text-muted">
+                    <div class="card-body">
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <p>What's New</p>
+                                <p>Why {{ config["APP_NAME"] }}</p>
+                                <p>How It Works</p>
+                                <p>Help & FAQs</p>
+                                <p>Feedback</p>
                             </div>
-                        {% endif %}
-                        <div class="card-body bg-light py-2">
-                            <b>Popular tags:</b>
-                            {% for tag, freq in tags_not_in_filter_with_freq[:20] %}
-                                {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
-                            {% endfor %}
+                            <div class="col">
+                                <p>About Us</p>
+                                <p>Terms</p>
+                                <p>Privacy Policy</p>
+                                <p>Cookie Policy</p>
+                                <p>Contact Us</p>
+                            </div>
                         </div>
                     </div>
-                {% endif %}
+                    <div class="card-footer small">
+                        &copy; 2022 {{ config["APP_NAME"] }}. All rights reserved.
+                    </div>
+                </div>
             </div>
         </div>
     </div>

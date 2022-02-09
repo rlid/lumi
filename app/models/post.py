@@ -80,7 +80,7 @@ class Post(db.Model):
             markdown = Markdown(extensions=[DelExtension()])
             html = markdown.convert(value)
         else:
-            html = value.replace('\n', '<br>')
+            html = value.replace('\n', '<br>').replace('\\#', '#')
         target.body_html = bleach.linkify(cleaner.clean(html))
 
 
