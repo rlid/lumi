@@ -59,11 +59,11 @@
                      class='d-inline-block align-text-bottom'>{{ config["APP_NAME"][1:] }}</a>
             <ul class="navbar-nav">
                 {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="md") }}
-                {{ render_nav_item("main.new_post", "How It Works", "bi-signpost-split", visible_from="md") }}
-                {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/xtXCScr9", visible_from="md") }}
+                {{ render_nav_item("main.start", "How It Works", "bi-signpost-split", visible_from="md") }}
+                {{ render_nav_item(text="Support", icon="bi-chat", link="https://discord.gg/PC7mPwXYsY", visible_from="md") }}
                 {{ render_nav_item(text="About Us", icon="bi-info-circle", link="https://www.linkedin.com/company/knowbleapp", visible_from="md") }}
+                {{ render_nav_item("main.privacy", "Privacy Policy", "bi-camera-video-off", visible_from="lg") }}
             </ul>
-
             <ul class="navbar-nav ms-auto py-2">
                 <li class="nav-item">
                     <div class="btn-group" role="group">
@@ -161,11 +161,11 @@
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
-                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=5) }}
-                {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text") }}
+                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle") }}
-                {{ render_nav_item_bottom("main.browse", "Browse", "bi-search", "sm") }}
+                {{ render_nav_item_bottom("main.conversations", "Chats", "bi-chat-square-text", "sm") }}
                 {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", "sm") }}
             {% else %}
                 {{ render_nav_item_bottom(link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
