@@ -1,6 +1,39 @@
 {% extends "index.html" %}
 
 {% block mid_col %}
+    <div class="card mb-3">
+        <div class="card-header">
+            Posts
+        </div>
+        <div class="card-body">
+            {% for post in user.posts %}
+                <p>{{ post }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Nodes
+        </div>
+        <div class="card-body">
+            {% for node in user.nodes %}
+                <p>{{ node }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Engagements
+        </div>
+        <div class="card-body">
+            {% for engagement in user.engagements_sent %}
+                <p>{{ engagement }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
     <div class="accordion small mb-3" id="accordionPanelsStayOpenExample">
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingOne">

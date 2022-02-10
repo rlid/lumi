@@ -1,0 +1,10 @@
+{% extends "index.html" %}
+
+{% block mid_col %}
+    {{ render_post_card(node.post, truncate_body=False) }}
+    {% if node %}
+        {% for message in node.messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

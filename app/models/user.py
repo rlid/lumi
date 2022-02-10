@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message
 from app.models.errors import InvalidActionError, RewardDistributionError
 from utils import security_utils, authlib_ext
 
@@ -79,10 +79,10 @@ class User(UserMixin, db.Model):
                             lazy='dynamic',
                             cascade='all, delete-orphan')
 
-    post_comments = db.relationship('PostComment',
-                                    backref=db.backref('creator'),
-                                    lazy='dynamic',
-                                    cascade='all, delete-orphan')
+    comments = db.relationship('Comment',
+                               backref=db.backref('creator'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
 
     tags_created = db.relationship('Tag',
                                    backref=db.backref('creator'),
@@ -99,10 +99,10 @@ class User(UserMixin, db.Model):
                             lazy='dynamic',
                             cascade='all, delete-orphan')
 
-    node_messages = db.relationship('NodeMessage',
-                                    backref=db.backref('creator'),
-                                    lazy='dynamic',
-                                    cascade='all, delete-orphan')
+    messages = db.relationship('Message',
+                               backref=db.backref('creator'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
 
     engagements_as_asker = db.relationship('Engagement',
                                            backref=db.backref('asker'),
@@ -116,19 +116,20 @@ class User(UserMixin, db.Model):
                                               lazy='dynamic',
                                               cascade='all, delete-orphan')
 
-    engagement_messages = db.relationship('EngagementMessage',
-                                          backref=db.backref('creator'),
-                                          lazy='dynamic',
-                                          cascade='all, delete-orphan')
+    engagements_sent = db.relationship('Engagement',
+                                       backref=db.backref('sender'),
+                                       foreign_keys=[Engagement.sender_id],
+                                       lazy='dynamic',
+                                       cascade='all, delete-orphan')
+
+    engagements_received = db.relationship('Engagement',
+                                           backref=db.backref('receiver'),
+                                           foreign_keys=[Engagement.receiver_id],
+                                           lazy='dynamic',
+                                           cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<User[{self.id}]:email={self.email}>'
-
-    def __str__(self):
-        return f'User(email={self.email}, signup_method={self.signup_method}, email_verified={self.email_verified}, ' \
-               f'account_balance={self.account_balance}, committed_amount={self.committed_amount}, ' \
-               f'sum_value={self.sum_value}, sum_abs_value={self.sum_abs_value}, ' \
-               f'sum_one={self.sum_one}, sum_abs_one={self.sum_abs_one})'
+        return f'u{self.id}'
 
     @property
     def password(self):
@@ -219,7 +220,7 @@ class User(UserMixin, db.Model):
             db.session.commit()
         return post_tag
 
-    def post(self, is_request, reward, title, body=None, tag_names=[]):
+    def create_post(self, is_request, reward, title, body=None, tag_names=[]):
         post = Post(creator=self,
                     type=Post.TYPE_BUY if is_request else Post.TYPE_SELL,
                     reward=reward,
@@ -234,21 +235,35 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return post
 
-    def create_node(self, post, parent=None):
-        node = post.nodes.filter_by(creator=self).first()
+    def create_node(self, parent_node):
+        post = parent_node.post
+        if self == post.creator:
+            raise InvalidActionError('Cannot create node because the user is the post creator')
+        node = None
+        if self == parent_node.creator:  # try some heuristics to reduce the cost of querying the database
+            node = parent_node
         if node is None:
-            if parent is None:
-                # if no parent node, add the node to the root node (created by the quest creator) directly
-                # TODO: make it more efficient to get the root node
-                parent = post.nodes.filter_by(creator=post.creator).first()
-            node = Node(creator=self, post=post, parent=parent)
+            node = post.nodes.filter_by(creator=self).first()
+        if node is None:
+            node = Node(creator=self, post=parent_node.post, parent=parent_node)
             db.session.add(node)
             db.session.commit()
         return node
 
+    def create_message(self, node, text):
+        if self != node.creator and self != node.post.creator:
+            raise InvalidActionError(
+                'Cannot create node message because the user is not the post creator or the node creator'
+            )
+        engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
+        message = Message(creator=self, node=node, engagement=engagement, text=text)
+        db.session.add(message)
+        db.session.commit()
+        return message
+
     # TODO: think whether this is the best place to ask to share reward, alternative place would be when the answerer
     # rates the engagement
-    def request_engagement(self, node):
+    def create_engagement(self, node):
         if self != node.creator:
             raise InvalidActionError('Cannot request engagement because the user is not the node creator')
         if self == node.post.creator:
@@ -257,9 +272,11 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot request engagement because an active engagement already exists')
 
         if node.post.type == Post.TYPE_BUY:
-            engagement = Engagement(node=node, asker=node.post.creator, answerer=self)
+            engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
+                                    asker=node.post.creator, answerer=self)
         else:
-            engagement = Engagement(node=node, asker=self, answerer=node.post.creator)
+            engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
+                                    asker=self, answerer=node.post.creator)
         db.session.add(engagement)
         db.session.commit()
         return engagement

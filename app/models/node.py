@@ -24,6 +24,8 @@ class Node(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
 
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+
     parent_id = db.Column(db.Integer, db.ForeignKey('nodes.id'))
     left = db.Column(db.Integer, nullable=False)
     right = db.Column(db.Integer, nullable=False)
@@ -35,7 +37,7 @@ class Node(db.Model):
                                lazy='select',
                                cascade='all, delete-orphan')
 
-    messages = db.relationship('NodeMessage',
+    messages = db.relationship('Message',
                                backref=db.backref('node'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')
@@ -52,7 +54,7 @@ class Node(db.Model):
         return self.post.nodes.filter(Node.left.between(self.left, self.right)).order_by(Node.left)
 
     def __repr__(self):
-        return f'<Node[{self.id}]:{self.post_id}/{self.left}-{self.right}>'
+        return f'<n{self.id}{" ROOT" if self.parent is None else ""}>post={self.post}</n{self.id}>'
 
 
 @event.listens_for(Node, 'before_insert')

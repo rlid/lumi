@@ -7,7 +7,7 @@ from sqlalchemy import func, desc, distinct, not_
 from app import db
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm
-from app.models.user import User, Post, PostTag, Tag
+from app.models.user import User, Post, PostTag, Tag, Node
 
 
 @main.route('/')
@@ -32,8 +32,8 @@ def new_post():
         body = re.sub(r'(?<!\\)#\w+', lambda x: '\\' + x.group(0), body)
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
         # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
-        current_user.post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
-                          title=title, body=body, tag_names=tag_names)
+        current_user.create_post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
+                                 title=title, body=body, tag_names=tag_names)
         return redirect(url_for('main.browse'))
     if current_user.use_markdown:
         flash('Don\'t like Markdown? Switch to ' +
@@ -125,8 +125,14 @@ def account():
 
 @main.route('/post/<int:post_id>')
 def view_post(post_id):
-    p = Post.query.filter_by(id=post_id).first_or_404()
-    return render_template("view_post.html", post=p)
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    return render_template("view_post.html", post=post)
+
+
+@main.route('/node/<int:node_id>')
+def view_node(node_id):
+    node = Node.query.filter_by(id=node_id).first_or_404()
+    return render_template("view_node.html", node=node)
 
 
 @main.route('/alerts')

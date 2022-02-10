@@ -3,8 +3,8 @@ from datetime import datetime
 from app import db
 
 
-class PostComment(db.Model):
-    __tablename__ = 'post_comments'
+class Comment(db.Model):
+    __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 

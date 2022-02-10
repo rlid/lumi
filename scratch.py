@@ -15,59 +15,111 @@ db.create_all()
 faker = Faker()
 N_DAYS = 10
 N_USERS = 10
-N_POSTS = N_USERS * 2 * N_DAYS
+P_POST = 0.5
+P_NODE = 0.5
+P_MESSAGE = 0.1
+P_REQUEST_ENGAGE = 0.2
+P_ACCEPT_ENGAGE = 1.0
+P_RATE_ENGAGE = 0.9
 N_TAGS = 50
-N_NODES = N_USERS * 4 * N_DAYS
-N_ENGAGEMENTS = N_USERS * 1 * N_DAYS
 
 users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
 db.session.add_all(users)
 db.session.commit()
 
-# choose a user at random and create a post
-posts = [random.choice(users).post(is_request=random.choice([True, False]),
-                                   reward=100 * random.randint(1, 5),
-                                   title=faker.text(100),
-                                   body='\n'.join(faker.text(100) for i in range(random.randint(2, 5)))) for i in
-         range(N_POSTS)]
-
 tag_names = [word.capitalize() for word in faker.words(N_TAGS)]
 
-for i in range(N_NODES):
-    # choose a post at random, choose a user who is not the post creator at random, and create a node
-    post = random.choice(posts)
-    answerer = random.choice(users)
-    answerer.add_tag(post, random.choice(tag_names).capitalize())
-    while answerer == post.creator:
-        answerer = random.choice(users)
-    answerer.create_node(post=post, parent=random.choice(post.nodes.all()))
+competence = {}
+credibility = {}
+for user in users:
+    competence[user] = random.uniform(0.9, 1)
+    credibility[user] = random.uniform(0.9, 1)
+
+actual_success = {}
+
+for day in range(N_DAYS):
+    for user in users:
+        if random.uniform(0, 1) < P_POST:
+            post = user.create_post(is_request=random.choice([True, False]),
+                                    reward=100 * random.randint(1, 5),
+                                    title=faker.text(100),
+                                    body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
+            print(f'{user} created {post}')
+            for i in range(random.randint(1, 5)):
+                tag = user.add_tag(post, random.choice(tag_names).capitalize())
+                print(f'{user} added {tag}')
+
+    for user in users:
+        for post in Post.query.all():
+            if user != post.creator:
+                if random.uniform(0, 1) < P_NODE:
+                    node = user.create_node(parent_node=random.choice(post.nodes.all()))
+                    print(f'{user} created {node}')
+                    if random.uniform(0, 1) < P_MESSAGE:
+                        for i in range(random.randint(1, 3)):
+                            m1 = [user.create_message(
+                                node, text=faker.text(100)
+                            ) for i in range(random.randint(1, 2))]
+                            print(f'{user} sent {m1}')
+                            m2 = [post.creator.create_message(
+                                node, text=faker.text(100)
+                            ) for i in range(random.randint(1, 2))]
+                            print(f'{post.creator} replied {m1}')
+
+    for user in users:
+        for node in user.nodes.filter(Node.parent != None).all():
+            engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+            if engagement is None:
+                if random.uniform(0, 1) < P_REQUEST_ENGAGE:
+                    engagement = user.create_engagement(node)
+                    print(f'{user} created {engagement}')
+
+    for user in users:
+        for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
+            if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
+                user.accept_engagement(engagement)
+                print(f'{user} accepted {engagement}')
+                for i in range(random.randint(2, 5)):
+                    m1 = [user.create_message(
+                        engagement.node, text=faker.text(100)
+                    ) for i in range(random.randint(1, 2))]
+                    print(f'{user} sent {m1}')
+                    m2 = [engagement.sender.create_message(
+                        engagement.node, text=faker.text(100)
+                    ) for i in range(random.randint(1, 2))]
+                    print(f'{post.creator} replied {m1}')
+
+    for user in users:
+        for engagement in user.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
+            if random.uniform(0, 1) < P_RATE_ENGAGE:
+                is_success = actual_success.get(engagement)
+                if is_success is None:
+                    is_success = random.uniform(0, 1) < competence[user]
+                    actual_success[engagement.answerer] = is_success
+                    print(f'{engagement} success is {is_success}')
+                if not is_success and random.uniform(0, 1) > credibility[user]:
+                    is_success = True
+                user.rate_engagement(engagement, is_success)
+                print(f'{user} rated {engagement} {is_success} as answerer')
+
+        for engagement in user.engagements_as_asker.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
+            if random.uniform(0, 1) < P_RATE_ENGAGE:
+                is_success = actual_success.get(engagement)
+                if is_success is None:
+                    is_success = random.uniform(0, 1) < competence[user]
+                    actual_success[engagement.answerer] = is_success
+                if is_success and random.uniform(0, 1) > credibility[user]:
+                    is_success = False
+                user.rate_engagement(engagement, is_success)
+                print(f'{user} rated {engagement} as {is_success} as asker')
 
 print(len(Post.query.all()))
 print(len(Node.query.all()))
 
-competence = [random.uniform(0.7, 0.9) for i in range(User.query.count())]
-credibility = [random.uniform(0.75, 0.95) for i in range(User.query.count())]
-for i in range(N_ENGAGEMENTS):
-    # choose a node which is not an asker node at random, and make engagement
-    node = random.choice(Node.query.filter(Node.parent != None).all())
-    asker = node.post.creator
-    answerer = node.creator
-    engagement = answerer.request_engagement(node)
-    asker.accept_engagement(engagement)
-    actual_success = random.uniform(0, 1) < competence[int(answerer.id) - 1]
-    answerer_claim = actual_success
-    if not actual_success and random.uniform(0, 1) > credibility[int(answerer.id) - 1]:
-        answerer_claim = True
-    asker_claim = actual_success
-    if actual_success and random.uniform(0, 1) > credibility[int(asker.id) - 1]:
-        asker_claim = False
-    answerer.rate_engagement(engagement, success=answerer_claim)
-    asker.rate_engagement(engagement, success=asker_claim)
+print(Engagement.query.filter(and_(Engagement.state == Engagement.STATE_COMPLETED,
+                                   Engagement.rating_by_asker == 1)).count())
 
-print(answerer.engagements_as_answerer.filter(and_(Engagement.state == Engagement.STATE_COMPLETED,
-                                                   Engagement.rating_by_asker == 1)).count())
-
-print(answerer.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
+print(Engagement.query.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
 
 # db.session.remove()
 # db.drop_all()

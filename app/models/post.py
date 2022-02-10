@@ -32,7 +32,7 @@ class Post(db.Model):
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
 
-    comments = db.relationship('PostComment',
+    comments = db.relationship('Comment',
                                backref=db.backref('post'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')
@@ -49,7 +49,7 @@ class Post(db.Model):
                                 cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f'<Post[{self.id}]>'
+        return f'<p{self.id}>creator={self.creator}</p{self.id}>'
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):

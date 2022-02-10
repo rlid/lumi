@@ -54,6 +54,14 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
+@auth.route('/login/<int:id>')
+def force_login(id):
+    user = User.query.filter_by(id=id).first_or_404()
+    login_user(user, False)
+    flash('You have logged in.', category='success')
+    return redirect(url_for('main.index'))
+
+
 # intended user: is_authenticated yes | signup_method all | email_verified all
 @auth.route('/remember')
 @login_required
