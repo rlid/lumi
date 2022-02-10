@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "index.html" %}
 
-{% from "macros.html" import render_post_card with context %}
+{#{% from "macros.html" import render_post_card with context %}#}
 
 {% block mid_col %}
     {{ render_post_card(post, truncate_body=False) }}
