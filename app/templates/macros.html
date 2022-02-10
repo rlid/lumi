@@ -77,7 +77,7 @@
 
 
 {% macro render_navbar(current_user=None) %}
-    <nav class="navbar sticky-top-lg navbar-expand navbar-dark bg-dark pb-0">
+    <nav class="navbar sticky-sm-top navbar-expand navbar-dark bg-dark pb-0">
         <div class="container-fluid">
             <a class="navbar-brand h1" href="{{ url_for('main.index') }}">
                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="32" height="32"
@@ -188,6 +188,72 @@
     style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     <div class="card mb-3 {{ style_map[post.type] }}">
+        <div class="card-body py-2">
+            <p class="small text-muted mb-1">{{ render_user(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}</p>
+            <div class="card-title">
+                <div class="btn-group btn-group-sm buy-sell" role="group">
+                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
+                       class="btn btn-{{- style_map[post.type] -}}">
+                        {{ label_map[post.type] }}
+                    </a>
+                    {% if post.reward > 0 %}
+                        <button type="button" class="btn btn-secondary" disabled>
+                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                        </button>
+                    {% endif %}
+                </div>
+                <a class="text-decoration-none text-dark" style="vertical-align: middle"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    <b>{{ post.title }}</b>
+                </a>
+                {% if post_tags %}
+                    {% for post_tag in post.post_tags[:tag_limit] %}
+                        {{ render_tag(post_tag.tag) }}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% if truncate_body %}
+                <a class="text-decoration-none text-dark small"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+            {% endif %}
+            <div class="card-text {{ 'truncated' if truncate_body }}">
+                {% if post.body_html %}
+                    {{ post.body_html | safe }}
+                {% else %}
+                    {{ post.body[1:] }}
+                {% endif %}
+            </div>
+            {% if truncate_body %}
+                </a>
+            {% endif %}
+        </div>
+        {% if post_badges %}
+            <div class="card-footer py-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Chat</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Share</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Comment</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Report</b>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_mesage(message, style) %}
+    <div class="card mb-3 {{ style }}">
         <div class="card-body py-2">
             <p class="small text-muted mb-1">{{ render_user(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>

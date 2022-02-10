@@ -1,10 +1,142 @@
+{% from "form.html" import render_form %}
+
 {% extends "index.html" %}
 
-{% block mid_col %}
-    {{ render_post_card(node.post, truncate_body=False) }}
-    {% if node %}
-        {% for message in node.messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+{% macro engagement_style(engagement) %}
+    {% if engagement.state == Engagement.STATE_COMPLETED %}
+        {% if engagement.rating_by_asker == 1 and engagement.rating_by_answerer == 1 %}
+            {#border-success#}
+            style="background-color: rgba(25, 135, 84, 0.05)"
+        {% elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
+            {#border-red#}
+            style="background-color: rgba(220, 53, 69, 0.05)"
+        {% else %}
+            {#border-secondary#}
+            style="background-color: rgba(108, 117, 125, 0.05)"
+        {% endif %}
+    {% else %}
+        {#border-primary#}
+{#        style="background-color: rgba(13, 110, 253, 0.05)"#}
+{#        style="background-color: rgba(220, 53, 69, 0.05)"#}
     {% endif %}
+{% endmacro %}
+
+{% macro engagement_class(engagement) %}
+    {% if engagement.state == Engagement.STATE_COMPLETED %}
+        {% if engagement.rating_by_asker == 1 and engagement.rating_by_answerer == 1 %}
+            border border-success
+        {% elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
+            border border-red
+        {% else %}
+            border border-secondary
+        {% endif %}
+    {% else %}
+        border
+    {% endif %}
+{% endmacro %}
+
+{% macro button_class(user, node) %}
+    {%- if (user == node.post.creator and node.post.type == "buy") or
+            (user == node.creator and node.post.type == "sell") -%}
+        info
+    {%- elif (user == node.post.creator and node.post.type == "sell") or
+            (user == node.creator and node.post.type == "buy") -%}
+        warning
+    {%- else -%}
+        danger
+    {%- endif -%}
+{% endmacro %}
+
+{% macro text_area_style(user, node) %}
+    {%- if (user == node.post.creator and node.post.type == "buy") or
+            (user == node.creator and node.post.type == "sell") -%}
+        background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;
+    {%- elif (user == node.post.creator and node.post.type == "sell") or
+            (user == node.creator and node.post.type == "buy") -%}
+        background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;
+    {%- else -%}
+        danger
+    {%- endif -%}
+{% endmacro %}
+
+
+{% block main_container %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            {{ render_post_card(node.post, truncate_body=False) }}
+
+            {% set current = namespace(engagement_id=none) %}
+            {% for message in messages %}
+                {% if message.engagement is not none %}
+                    {% if message.engagement_id != current.engagement_id %}
+                        {% if current.engagement_id is not none %}
+                            </div>
+                        {% endif %}
+                        <div class="rounded px-3 py-1 pb-1 mb-3 {{ engagement_class(message.engagement) }}"
+                                {{ engagement_style(message.engagement) }}>
+                        {% set current.engagement_id = message.engagement_id %}
+                    {% endif %}
+                {% else %}
+                {% if current.engagement_id is not none %}
+                    </div>
+                    {% set current.engagement_id = none %}
+                {% endif %}
+                {% endif %}
+
+                <div class="card my-3
+                {% if message.creator == node.creator %}ms-auto{% else %}me-auto{% endif %}
+                {% if message.creator == node.post.creator %}
+                    {% if node.post.type == 'buy' %}info{% else %}warning{% endif %}
+                {% else %}
+                    {% if node.post.type == 'sell' %}info{% else %}warning{% endif %}
+                {% endif %}
+               " style="width: 90%">
+                    <div class="card-body py-1">
+                        {{ message.text }}
+                        <br>
+                        <small class="text-muted">
+                            Sent by
+                            {% if message.creator == current_user %}
+                                you
+                            {% else %}
+                                {{ message.creator }}
+                            {% endif %} {{ moment(message.timestamp).fromNow() }}
+                        </small>
+                    </div>
+                </div>
+            {% endfor %}
+        {% if engagement is none %}
+            {% if current.engagement_id is not none %}
+                </div>
+            {% endif %}
+            {% if current_user == node.creator %}
+                <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Request Engagement</a>
+            {% endif %}
+            {{ render_form(form, button_style=button_class(current_user, node), floating_input_label=True) }}
+        {% else %}
+            {% if engagement.state == Engagement.STATE_REQUESTED %}
+                {% if current_user == node.post.creator %}
+                    <a class="btn btn{{- button_class(current_user, node) -}}" href="#">Accept Engagement</a>
+                {% endif %}
+            {% elif engagement.state == Engagement.STATE_ENGAGED %}
+                {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
+                      (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
+                    <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Rate Engagement</a>
+                {% endif %}
+            {% endif %}
+            {{ render_form(form,
+                           button_style=button_class(current_user, node),
+                           text_area_style=text_area_style(current_user, node),
+                           floating_input_label=True) }}
+            {% if current.engagement_id is not none %}
+                </div>
+            {% endif %}
+        {% endif %}
+
+
+    {% if current.engagement_id is not none %}
+        </div>
+    {% endif %}
+    </div>
+    </div>
 {% endblock %}

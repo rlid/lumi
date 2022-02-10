@@ -6,8 +6,8 @@ from sqlalchemy import func, desc, distinct, not_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, MarkdownPostForm
-from app.models.user import User, Post, PostTag, Tag, Node
+from app.main.forms import PostForm, MarkdownPostForm, MessageForm
+from app.models.user import User, Post, PostTag, Tag, Node, Message, Engagement
 
 
 @main.route('/')
@@ -131,8 +131,17 @@ def view_post(post_id):
 
 @main.route('/node/<int:node_id>')
 def view_node(node_id):
+    form = MessageForm()
     node = Node.query.filter_by(id=node_id).first_or_404()
-    return render_template("view_node.html", node=node)
+    engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+    messages = node.messages.order_by(Message.timestamp.asc()).all()
+    return render_template(
+        "view_node.html",
+        node=node,
+        engagement=engagement,
+        messages=messages,
+        form=form,
+        Engagement=Engagement)
 
 
 @main.route('/alerts')

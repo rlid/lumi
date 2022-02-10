@@ -4,8 +4,6 @@ from sqlalchemy import event, select, case, and_
 
 from app import db
 
-STATUS_OPEN = 0
-
 
 # Contribution Node
 class Node(db.Model):
@@ -54,7 +52,7 @@ class Node(db.Model):
         return self.post.nodes.filter(Node.left.between(self.left, self.right)).order_by(Node.left)
 
     def __repr__(self):
-        return f'<n{self.id}{" ROOT" if self.parent is None else ""}>post={self.post}</n{self.id}>'
+        return f'<n{self.id}{" ROOT" if self.parent is None else ""}>creator={self.creator},post={self.post}</n{self.id}>'
 
 
 @event.listens_for(Node, 'before_insert')

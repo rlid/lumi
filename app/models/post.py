@@ -49,7 +49,7 @@ class Post(db.Model):
                                 cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f'<p{self.id}>creator={self.creator}</p{self.id}>'
+        return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):

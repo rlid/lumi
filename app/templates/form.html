@@ -53,7 +53,8 @@ floating_input_label=floating_input_label
                     button_style='',
                     button_size='',
                     form_group_classes='',
-                    floating_input_label=False) %}
+                    floating_input_label=False,
+                    text_area_style='') %}
 
     {# this is a workaround hack for the more straightforward-code of just passing required=required parameter. older versions of wtforms do not have
 the necessary fix for required=False attributes, but will also not set the required flag in the first place. we skirt the issue using the code below #}
@@ -211,6 +212,12 @@ the necessary fix for required=False attributes, but will also not set the requi
                     {% else %}
                         {{ field(class="form-range%s" % extra_classes, **kwargs)|safe }}
                     {% endif %}
+                {%- elif field.type == 'TextAreaField' %}
+                    {% if field.errors %}
+                        {{ field(class="form-control is-invalid%s" % extra_classes, **kwargs)|safe }}
+                    {% else %}
+                        {{ field(class="form-control%s" % extra_classes, style=text_area_style)|safe }}
+                    {% endif %}
                 {%- else -%}
                     {% if field.errors %}
                         {{ field(class="form-control is-invalid%s" % extra_classes, **kwargs)|safe }}
@@ -249,7 +256,8 @@ the necessary fix for required=False attributes, but will also not set the requi
                     form_group_classes='',
                     form_inline_classes='',
                     floating_input_label=False,
-                    onsubmit="") %}
+                    onsubmit="",
+                    text_area_style="") %}
     {#-
 action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
 
@@ -311,7 +319,8 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
                         button_style=button_style,
                         button_size=button_size,
                         form_group_classes=form_group_classes,
-                        floating_input_label=floating_input_label) }}
+                        floating_input_label=floating_input_label,
+                        text_area_style=text_area_style) }}
                 {% endif %}
             {%- endif %}
         {%- endfor %}

@@ -13,14 +13,14 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 10
-N_USERS = 10
+N_DAYS = 5
+N_USERS = 5
 P_POST = 0.5
 P_NODE = 0.5
-P_MESSAGE = 0.1
+P_MESSAGE = 1.0
 P_REQUEST_ENGAGE = 0.2
-P_ACCEPT_ENGAGE = 1.0
-P_RATE_ENGAGE = 0.9
+P_ACCEPT_ENGAGE = 0.5
+P_RATE_ENGAGE = 0.5
 N_TAGS = 50
 
 users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
@@ -32,8 +32,8 @@ tag_names = [word.capitalize() for word in faker.words(N_TAGS)]
 competence = {}
 credibility = {}
 for user in users:
-    competence[user] = random.uniform(0.9, 1)
-    credibility[user] = random.uniform(0.9, 1)
+    competence[user] = random.uniform(0.4, 0.6)
+    credibility[user] = random.uniform(0.4, 0.6)
 
 actual_success = {}
 
@@ -56,7 +56,7 @@ for day in range(N_DAYS):
                     node = user.create_node(parent_node=random.choice(post.nodes.all()))
                     print(f'{user} created {node}')
                     if random.uniform(0, 1) < P_MESSAGE:
-                        for i in range(random.randint(1, 3)):
+                        for i in range(random.randint(1, 1)):
                             m1 = [user.create_message(
                                 node, text=faker.text(100)
                             ) for i in range(random.randint(1, 2))]
@@ -79,7 +79,7 @@ for day in range(N_DAYS):
             if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
                 user.accept_engagement(engagement)
                 print(f'{user} accepted {engagement}')
-                for i in range(random.randint(2, 5)):
+                for i in range(random.randint(1, 2)):
                     m1 = [user.create_message(
                         engagement.node, text=faker.text(100)
                     ) for i in range(random.randint(1, 2))]

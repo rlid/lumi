@@ -9,3 +9,4 @@
 - A little bit of incentive goes a long way
 - Build up reputation
 - Find out about a product you are interested in from current owners before you own it
+- Want to make videos on tiktok / youtube, wants to talk to an experienced (ex-)youtuber

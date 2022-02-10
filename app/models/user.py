@@ -277,7 +277,10 @@ class User(UserMixin, db.Model):
         else:
             engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
                                     asker=self, answerer=node.post.creator)
+
         db.session.add(engagement)
+        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text="Engagement requested")
+        db.session.add(message)
         db.session.commit()
         return engagement
 
@@ -295,6 +298,12 @@ class User(UserMixin, db.Model):
 
         engagement.state = Engagement.STATE_ENGAGED
         db.session.add(engagement)
+        message = Message(creator=self,
+                          node=engagement.node,
+                          engagement=engagement,
+                          type=Message.TYPE_ACCEPT,
+                          text="Engagement accepted")
+        db.session.add(message)
         db.session.commit()
 
     @property
@@ -353,6 +362,13 @@ class User(UserMixin, db.Model):
             db.session.add(engagement)
         else:
             raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
+
+        message = Message(creator=self,
+                          node=engagement.node,
+                          engagement=engagement,
+                          type=Message.TYPE_RATE,
+                          text="Engagement rated")
+        db.session.add(message)
 
         if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:
             db.session.commit()

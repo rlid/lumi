@@ -36,3 +36,8 @@ class MarkdownPostForm(PostForm):
     body = TextAreaField("Details (optional)", render_kw={"style": "display:none;"})
     editor = TUIEditorField()
     submit = SubmitField("Post", render_kw={"class": "w-100"})
+
+
+class MessageForm(FlaskForm):
+    body = TextAreaField("Text", render_kw={"placeholder": "Text"})
+    submit = SubmitField("Post")
