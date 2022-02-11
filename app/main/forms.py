@@ -39,5 +39,5 @@ class MarkdownPostForm(PostForm):
 
 
 class MessageForm(FlaskForm):
-    body = TextAreaField("Text", render_kw={"placeholder": "Text"})
+    body = TextAreaField("Text")
     submit = SubmitField("Post")

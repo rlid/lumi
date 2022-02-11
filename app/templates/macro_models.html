@@ -1,5 +1,5 @@
 {% macro render_message(message, viewer, last_timestamp=None) %}
-    <div class="card my-3 small
+    <div class="card my-3 small border-0
                 {% if message.type >= Message.TYPE_REQUEST %}
                     mx-auto text-center
                 {% elif message.creator == message.node.creator %}
@@ -10,9 +10,9 @@
                 {% if message.type >= Message.TYPE_REQUEST %}
                       bg-transparent
                 {% elif message.creator == message.node.post.creator %}
-                    {% if message.node.post.type == 'buy' %}info{% else %}warning{% endif %}
+                    {% if message.node.post.type == 'buy' %}info10{% else %}warning10{% endif %}
                 {% else %}
-                    {% if message.node.post.type == 'sell' %}info{% else %}warning{% endif %}
+                    {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
                 {% endif %}
                " style="width: {% if message.type >= Message.TYPE_REQUEST %}80%{% else %}90%{% endif %}">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
