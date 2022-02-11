@@ -39,5 +39,5 @@ class MarkdownPostForm(PostForm):
 
 
 class MessageForm(FlaskForm):
-    body = TextAreaField("Text")
+    text = TextAreaField("Text")
     submit = SubmitField("Post")

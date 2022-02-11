@@ -359,17 +359,22 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
 
 {% macro render_flash(messages=None, dismissible=False, dismiss_animate=False,
                          category_map={
-                             'success':'success',
-                             'info':'info',
-                             'warning':'warning',
-                             'danger':'danger'
-                         }) -%}
+                             'success':'background-color: rgb(158,200,182);',
+                             'info':'background-color: rgb(153,225,241);',
+                             'warning':'background-color: rgb(245,222,152);',
+                             'danger':'background-color: rgb(232,168,176);'}) %}
+
+    {#                              'success':'background-color: #c9dfd6;',#}
+{#                             'info':'background-color: #c7ebf3;',#}
+{#                             'warning':'background-color: #f5eac6;',#}
+{#                             'danger':'background-color: #eecfd3;'}) -%}#}
+
 
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
         {% if messages -%} {# don't output anything if there are no messages #}
-            <div class="toast-container position-absolute p-3 end-0" style="z-index: 999">
+            <div class="toast-container position-absolute p-3 end-0" style="z-index: 999;">
                 {% for cat, msg in messages %}
-                    <div class="toast bg-{{- cat -}}" role="alert" data-bs-delay="10000">
+                    <div class="toast" role="alert" data-bs-delay="10000" style="{{ category_map[cat] }}">
                         <div class="d-flex">
                             <div class="toast-body">
                                 <small>{{ msg }}</small>
