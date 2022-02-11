@@ -367,7 +367,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
-                          text="Engagement rated")
+                          text="Engagement rated +")
         db.session.add(message)
 
         if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:

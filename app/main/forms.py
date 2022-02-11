@@ -21,10 +21,10 @@ class PostForm(FlaskForm):
     title = StringField("Title",
                         validators=[DataRequired(), Length(TITLE_MIN_LENGTH, 100)],
                         render_kw={"placeholder": "Title"})
-    reward = DecimalField("Price (in USD $)",
+    reward = DecimalField("Price (in USD - $)",
                           validators=[InputRequired(), NumberRange(1, 5)],
                           render_kw={"placeholder": "Price"})
-    body = TextAreaField("Details (optional)", render_kw={"placeholder": "Details (optional)", "style": "height: 25vh"})
+    body = TextAreaField("Details (optional)", render_kw={"placeholder": "Details (optional)"})
     submit = SubmitField("Post", render_kw={"class": "w-100"})
 
     def validate_title(self, field):

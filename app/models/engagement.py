@@ -7,6 +7,7 @@ class Engagement(db.Model):
     STATE_REQUESTED = 0
     STATE_ENGAGED = 1
     STATE_COMPLETED = 2
+
     DEFAULT_REWARD_SHARE = 0.1
 
     __tablename__ = 'engagements'

@@ -1,5 +1,57 @@
 {% extends "index.html" %}
 
-{% block mid_col %}
-    {{ render_post_card(post, truncate_body=False) }}
+{% from "macro_models.html" import render_message with context %}
+
+{% block main_container %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+
+            {{ render_post_card(post, truncate_body=False) }}
+            {% for node, last_timestamp in nodes %}
+                {% set messages = node.messages_ordered(order_desc=True) %}
+
+                <div class="card mb-3
+                {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+                    border-primary
+                {% elif messages[0].type == Message.TYPE_REQUEST %}
+                    border-danger
+                {% endif %}
+                ">
+                    <div class="card-header border-0 small"
+                            {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+                         style="background-color: rgba(13, 110, 253, 0.05)"
+                            {% elif messages[0].type == Message.TYPE_REQUEST %}
+                         style="background-color: rgba(220, 53, 69, 0.05)"
+                            {% endif %}
+                    >
+                        <a href="{{ url_for('main.view_node', node_id=node.id) }}"
+                           Recent interactions with {{ node.creator }}
+                           class="text-decoration-none
+                            {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+                                {% if messages[0].engagement.state == Engagement.STATE_ENGAGED %}
+                                    text-primary"><b>Active engagement with {{ node.creator }}</b>
+                                {% endif %}
+                            {% else %}
+                                {% if messages[0].type == Message.TYPE_REQUEST %}
+                                    text-danger"><b>Engagement requested by {{ node.creator }}</b>
+                                {% else %}
+                                    text-muted"><b>Recent interactions with {{ node.creator }}</b>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </div>
+
+                    <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none">
+                        <div class="card-body pt-0">
+                            <div class="card-text truncated-lg">
+                                {% for message in messages[:5] %}
+                                    {{ render_message(message, current_user) }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

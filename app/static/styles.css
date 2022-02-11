@@ -47,8 +47,23 @@
     border-color: #6c757d;
 }
 
-.card-text.truncated {
+.card-text.truncated-sm {
     max-height: 5rem;
+    overflow: hidden
+}
+
+.card-text.truncated-md {
+    max-height: 10rem;
+    overflow: hidden
+}
+
+.card-text.truncated-lg {
+    max-height: 15rem;
+    overflow: hidden
+}
+
+.card-text.truncated-xl {
+    max-height: 20rem;
     overflow: hidden
 }
 

@@ -114,6 +114,7 @@
 - Only upvote, no downvoting
 - Naming: organic/wholesome tips/advice
 - Share message: “Help x with his question and earn rewards and reputation(*) on Knowble. (*) Higher profile requests might require higher levels of reputation to participate.”
-
+- Transfer the credit risk to a 3rd party
+- 
 
 ￼

@@ -126,7 +126,23 @@ def account():
 @main.route('/post/<int:post_id>')
 def view_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
-    return render_template("view_post.html", post=post)
+
+    # TODO: don't group_by, process the Cartesian products in Python into a dict of node:messages so the database is
+    # queried only once
+    nodes = db.session.query(
+        Node,
+        func.max(Message.timestamp).label('max_timestamp')
+    ).join(
+        Post, Node.post_id == post_id
+    ).join(
+        Message, Message.node_id == Node.id
+    ).group_by(
+        Node
+    ).order_by(
+        desc('max_timestamp')
+    ).all()
+
+    return render_template("view_post.html", post=post, nodes=nodes, Engagement=Engagement, Message=Message)
 
 
 @main.route('/node/<int:node_id>')
@@ -141,7 +157,8 @@ def view_node(node_id):
         engagement=engagement,
         messages=messages,
         form=form,
-        Engagement=Engagement)
+        Engagement=Engagement,
+        Message=Message)
 
 
 @main.route('/alerts')

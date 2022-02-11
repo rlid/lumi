@@ -331,7 +331,7 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
 {%- endmacro %}
 
 
-{% macro render_messages(messages=None, dismissible=False, dismiss_animate=False,
+{% macro render_flashed_messages(messages=None, dismissible=False, dismiss_animate=False,
                          category_map={
                              'success':'success',
                              'info':'info',

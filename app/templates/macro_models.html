@@ -1,0 +1,23 @@
+{% macro render_message(message, viewer) %}
+    <div class="card my-3 small
+                {% if message.creator == message.node.creator %}ms-auto{% else %}me-auto{% endif %}
+                {% if message.creator == message.node.post.creator %}
+                    {% if message.node.post.type == 'buy' %}info{% else %}warning{% endif %}
+                {% else %}
+                    {% if message.node.post.type == 'sell' %}info{% else %}warning{% endif %}
+                {% endif %}
+               " style="width: 90%">
+        <div class="card-body py-1 text-dark">
+            {{ message.text }}
+            <br>
+            <small class="text-muted">
+                By
+                {% if message.creator == viewer -%}
+                    you
+                {% else %}
+                    {{ message.creator }}
+                {% endif %} {{ moment(message.timestamp).fromNow() }}
+            </small>
+        </div>
+    </div>
+{% endmacro %}

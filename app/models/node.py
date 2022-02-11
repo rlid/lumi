@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import event, select, case, and_
+from sqlalchemy import event, select, case, and_, asc, desc
 
 from app import db
+from app.models import Message
 
 
 # Contribution Node
@@ -53,6 +54,9 @@ class Node(db.Model):
 
     def __repr__(self):
         return f'<n{self.id}{" ROOT" if self.parent is None else ""}>creator={self.creator},post={self.post}</n{self.id}>'
+
+    def messages_ordered(self, order_desc=True):
+        return self.messages.order_by((desc if order_desc else asc)(Message.timestamp)).all()
 
 
 @event.listens_for(Node, 'before_insert')
