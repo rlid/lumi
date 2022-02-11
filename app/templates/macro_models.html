@@ -17,7 +17,7 @@
                " style="width: {% if message.type >= Message.TYPE_REQUEST %}80%{% else %}90%{% endif %}">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
-            {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > 60 %}
+            {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > 300 %}
                 <br>
                 <small class="text-muted">
                     {{ moment(message.timestamp).calendar() }}
