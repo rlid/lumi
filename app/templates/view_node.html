@@ -96,39 +96,15 @@
                 {% set current.timestamp = message.timestamp %}
             {% endfor %}
 
-
-            {# close any tags if necessary #}
-
-
-            {% if engagement is none or engagement.state == Engagement.STATE_REQUESTED %}
-                {# no engagement or no accepted engagement currently #}
-                {% if current.engagement_id != -1 %}
-                    {# no active engagement but at least 1 message and therefore 1 div block #}
-                    </div>
-                {% endif %}
-                {# because there is no active engagement, the node creator can request engagement (again) #}
+            {% if current.engagement_id == -1 %}
+                {# no message, so need to create a div block #}
                 <div class="rounded px-3 mb-3">
-                    {% if current_user == node.creator %}
-                        <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Request Engagement</a>
-                    {% endif %}
-                    {% if engagement.state == Engagement.STATE_REQUESTED %}
-                        {% if current_user == node.post.creator %}
-                            <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Accept Engagement</a>
-                        {% endif %}
-                    {% elif engagement.state == Engagement.STATE_ENGAGED %}
-                        {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
-                          (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
-                            <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Rate Engagement</a>
-                        {% endif %}
-                    {% endif %}
-                    {{ render_form(
-                        form,
-                        button_style=button_class(current_user, node),
-                        text_area_style=text_area_style(current_user, node),
-                        floating_input_label=True) }}
-                </div>
-            {% else %}
-                {# there is an active engagement #}
+            {% endif %}
+
+            {% if current_user == node.creator and (engagement is none or engagement.state != Engagement.STATE_ENGAGED) %}
+                <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Request Engagement</a>
+            {% endif %}
+            {% if engagement is not none  %}
                 {% if engagement.state == Engagement.STATE_REQUESTED %}
                     {% if current_user == node.post.creator %}
                         <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Accept Engagement</a>
@@ -139,43 +115,18 @@
                         <a class="btn btn-{{- button_class(current_user, node) -}}" href="#">Rate Engagement</a>
                     {% endif %}
                 {% endif %}
-
-                {% if current.engagement_id == -1 %}
-                    {# if no message at all, no need to close div tags, just create a div block and render the form #}
-                    <div class="card border-success">
-                        <div class="card-header success text-success border-0 small">
-                            <b>Active Engagement</b>
-                        </div>
-                        <div class="card-body pt-0 pb-3">
-                            {{ render_form(form,
-                               button_style=button_class(current_user, node),
-                               text_area_style=text_area_style(current_user, node),
-                               floating_input_label=True) }}
-                        </div>
-                    </div>
-                {% elif current.engagement_id != engagement.id %}
-                    {# if there is at least 1 message but it does not belong to the engagement, close the div, then create a div and render the form #}
-                    </div>
-                    <div class="card border-success">
-                        <div class="card-header success text-success border-0 small">
-                            <b>Active Engagement</b>
-                        </div>
-                        <div class="card-body pt-0 pb-3">
-                            {{ render_form(form,
-                               button_style=button_class(current_user, node),
-                               text_area_style=text_area_style(current_user, node),
-                               floating_input_label=True) }}
-                        </div>
-                    </div>
-                {% elif current.engagement_id == engagement.id %}
-                    {# if there is at least 1 message and it belongs to the engagement, render the form then close the div #}
-                    {{ render_form(form,
-                           button_style=button_class(current_user, node),
-                           text_area_style=text_area_style(current_user, node),
-                           floating_input_label=True) }}
-                    </div></div>
-                {% endif %}
             {% endif %}
+
+            {{ render_form(form,
+                button_style=button_class(current_user, node),
+                text_area_style=text_area_style(current_user, node),
+                floating_input_label=True) }}
+
+            {% if engagement.state == Engagement.STATE_ENGAGED %}
+                {# close the div tag for card-body #}
+                </div>
+            {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}

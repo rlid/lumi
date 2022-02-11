@@ -385,7 +385,6 @@ class User(UserMixin, db.Model):
 
             message = Message(creator=self,
                               node=engagement.node,
-                              engagement=engagement,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement successful - reward has been distributed')
             db.session.add(message)
@@ -410,7 +409,6 @@ class User(UserMixin, db.Model):
 
             message = Message(creator=self,
                               node=engagement.node,
-                              engagement=engagement,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement outcome disputed - no reward will be distributed')
             db.session.add(message)
@@ -420,7 +418,6 @@ class User(UserMixin, db.Model):
 
             message = Message(creator=self,
                               node=engagement.node,
-                              engagement=engagement,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement unsuccessful - no reward will be distributed')
             db.session.add(message)
