@@ -4,9 +4,9 @@ from app import db
 
 
 class Engagement(db.Model):
-    STATE_REQUESTED = 0
-    STATE_ENGAGED = 1
-    STATE_COMPLETED = 2
+    STATE_REQUESTED = 2 ** 10
+    STATE_ENGAGED = 2 * STATE_REQUESTED
+    STATE_COMPLETED = 2 * STATE_ENGAGED
 
     DEFAULT_REWARD_SHARE = 0.1
 

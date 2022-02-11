@@ -1,23 +1,28 @@
-{% macro render_message(message, viewer) %}
+{% macro render_message(message, viewer, last_timestamp=None) %}
     <div class="card my-3 small
-                {% if message.creator == message.node.creator %}ms-auto{% else %}me-auto{% endif %}
-                {% if message.creator == message.node.post.creator %}
+                {% if message.type >= Message.TYPE_REQUEST %}
+                    mx-auto text-center
+                {% elif message.creator == message.node.creator %}
+                    ms-auto
+                {% elif message.creator == message.node.post.creator %}
+                    me-auto
+                {% endif %}
+                {% if message.type >= Message.TYPE_REQUEST %}
+                      bg-transparent
+                {% elif message.creator == message.node.post.creator %}
                     {% if message.node.post.type == 'buy' %}info{% else %}warning{% endif %}
                 {% else %}
                     {% if message.node.post.type == 'sell' %}info{% else %}warning{% endif %}
                 {% endif %}
-               " style="width: 90%">
-        <div class="card-body py-1 text-dark">
+               " style="width: {% if message.type >= Message.TYPE_REQUEST %}80%{% else %}90%{% endif %}">
+        <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
-            <br>
-            <small class="text-muted">
-                By
-                {% if message.creator == viewer -%}
-                    you
-                {% else %}
-                    {{ message.creator }}
-                {% endif %} {{ moment(message.timestamp).fromNow() }}
-            </small>
+            {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > 60 %}
+                <br>
+                <small class="text-muted">
+                    {{ moment(message.timestamp).calendar() }}
+                </small>
+            {% endif %}
         </div>
     </div>
 {% endmacro %}

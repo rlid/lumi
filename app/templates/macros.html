@@ -162,7 +162,7 @@
 
 {% macro render_user(user, capitalize=True) %}
     <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
-        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}A user{% endif %}
+        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}{{ user }}{% endif %}
     </a>
 {% endmacro %}
 

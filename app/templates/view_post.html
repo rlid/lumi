@@ -12,28 +12,28 @@
 
                 <div class="card mb-3
                 {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
-                    border-primary
+                    border-success
                 {% elif messages[0].type == Message.TYPE_REQUEST %}
-                    border-danger
+                    border-primary
                 {% endif %}
                 ">
-                    <div class="card-header border-0 small"
+                    <div class="card-header border-0 small
                             {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
-                         style="background-color: rgba(13, 110, 253, 0.05)"
+                         success
                             {% elif messages[0].type == Message.TYPE_REQUEST %}
-                         style="background-color: rgba(220, 53, 69, 0.05)"
+                         primary
                             {% endif %}
-                    >
+                    ">
                         <a href="{{ url_for('main.view_node', node_id=node.id) }}"
                            Recent interactions with {{ node.creator }}
                            class="text-decoration-none
                             {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
                                 {% if messages[0].engagement.state == Engagement.STATE_ENGAGED %}
-                                    text-primary"><b>Active engagement with {{ node.creator }}</b>
+                                    text-success"><b>Active engagement with {{ node.creator }}</b>
                                 {% endif %}
                             {% else %}
                                 {% if messages[0].type == Message.TYPE_REQUEST %}
-                                    text-danger"><b>Engagement requested by {{ node.creator }}</b>
+                                    text-primary"><b>Engagement requested by {{ node.creator }}</b>
                                 {% else %}
                                     text-muted"><b>Recent interactions with {{ node.creator }}</b>
                                 {% endif %}
@@ -44,8 +44,10 @@
                     <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none">
                         <div class="card-body pt-0">
                             <div class="card-text truncated-lg">
+                                {% set current = namespace(timestamp=none) %}
                                 {% for message in messages[:5] %}
-                                    {{ render_message(message, current_user) }}
+                                    {{ render_message(message, current_user, current.timestamp) }}
+                                    {% set current.timestamp = message.timestamp %}
                                 {% endfor %}
                             </div>
                         </div>

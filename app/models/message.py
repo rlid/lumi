@@ -4,10 +4,11 @@ from app import db
 
 
 class Message(db.Model):
-    TYPE_CHAT = 0
-    TYPE_REQUEST = 1
-    TYPE_ACCEPT = 2
-    TYPE_RATE = 3
+    TYPE_CHAT = 2 ** 10
+    TYPE_REQUEST = 2 * TYPE_CHAT
+    TYPE_ACCEPT = 2 * TYPE_REQUEST
+    TYPE_RATE = 2 * TYPE_ACCEPT
+    TYPE_COMPLETE = 2 * TYPE_RATE
 
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)

@@ -65,7 +65,7 @@
         <div class="col-12 col-lg-8 col-xl-6">
             {{ render_post_card(node.post, truncate_body=False) }}
 
-            {% set current = namespace(engagement_id=none) %}
+            {% set current = namespace(engagement_id=none, timestamp=none) %}
             {% for message in messages %}
                 {% if message.engagement is not none %}
                     {% if message.engagement_id != current.engagement_id %}
@@ -76,11 +76,8 @@
                             <div class="rounded px-3 py-1 mb-3 {{ engagement_class(message.engagement) }}"
                                     {{ engagement_style(message.engagement) }}>
                         {% else %}
-                            {#                            <div class="rounded px-3 pt-1 pb-3 mb-3 {{ engagement_class(message.engagement) }}"#}
-                            {#                                    {{ engagement_style(message.engagement) }}>#}
-                            <div class="card border-primary">
-                            <div class="card-header text-primary border-0 small"
-                                 style="background-color: rgba(13, 110, 253, 0.05)">
+                            <div class="card border-success">
+                            <div class="card-header success text-success border-0 small">
                                 <b>Active Engagement</b>
                             </div>
                             <div class="card-body pt-0 pb-3">
@@ -93,7 +90,9 @@
                     {% set current.engagement_id = none %}
                 {% endif %}
                 {% endif %}
-                {{ render_message(message, current_user) }}
+
+                {{ render_message(message, current_user, current.timestamp) }}
+                {% set current.timestamp = message.timestamp %}
             {% endfor %}
             {% if engagement is none %}
                 {% if current.engagement_id is not none %}

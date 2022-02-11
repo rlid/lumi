@@ -12,18 +12,8 @@
     border-color: #0dcaf0;
 }
 
-.card.info10 {
-    background-color: rgba(13, 202, 240, 0.1);
-    border-color: #0dcaf0;
-}
-
 .card.warning {
     background-color: rgba(255, 193, 7, 0.05);
-    border-color: #ffc107;
-}
-
-.card.warning10 {
-    background-color: rgba(255, 193, 7, 0.10);
     border-color: #ffc107;
 }
 
@@ -46,6 +36,21 @@
     background-color: rgba(108, 117, 125, 0.05);
     border-color: #6c757d;
 }
+
+.card-header.success {
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.card-header.primary {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.card-header.danger {
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+
+
 
 .card-text.truncated-sm {
     max-height: 5rem;

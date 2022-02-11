@@ -279,7 +279,7 @@ class User(UserMixin, db.Model):
                                     asker=self, answerer=node.post.creator)
 
         db.session.add(engagement)
-        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text="Engagement requested")
+        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested by {self}')
         db.session.add(message)
         db.session.commit()
         return engagement
@@ -302,7 +302,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_ACCEPT,
-                          text="Engagement accepted")
+                          text=f'Engagement accepted by {self}')
         db.session.add(message)
         db.session.commit()
 
@@ -367,7 +367,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
-                          text="Engagement rated +")
+                          text=f'Engagement rated {"+" if success else "-"} by {self}')
         db.session.add(message)
 
         if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:
@@ -382,6 +382,13 @@ class User(UserMixin, db.Model):
 
             asker.update_reputation(reward, success=True, dispute_lost=False)
             answerer.update_reputation(reward, success=True, dispute_lost=False)
+
+            message = Message(creator=self,
+                              node=engagement.node,
+                              engagement=engagement,
+                              type=Message.TYPE_COMPLETE,
+                              text=f'Engagement successful - reward has been distributed')
+            db.session.add(message)
 
         if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
             asker.committed_amount -= reward
@@ -401,8 +408,22 @@ class User(UserMixin, db.Model):
                 asker.update_reputation(reward, success=False, dispute_lost=False)
                 answerer.update_reputation(reward, success=False, dispute_lost=False)
 
-        if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == -1:
+            message = Message(creator=self,
+                              node=engagement.node,
+                              engagement=engagement,
+                              type=Message.TYPE_COMPLETE,
+                              text=f'Engagement outcome disputed - no reward will be distributed')
+            db.session.add(message)
+
+        if engagement.rating_by_answerer == -1:
             asker.committed_amount -= reward
+
+            message = Message(creator=self,
+                              node=engagement.node,
+                              engagement=engagement,
+                              type=Message.TYPE_COMPLETE,
+                              text=f'Engagement unsuccessful - no reward will be distributed')
+            db.session.add(message)
 
         engagement.state = Engagement.STATE_COMPLETED
         db.session.add(engagement)
