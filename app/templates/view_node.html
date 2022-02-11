@@ -17,7 +17,7 @@
     {% else %}
         {#border-primary#}
 {#        style="background-color: rgba(13, 110, 253, 0.05)"#}
-{#        style="background-color: rgba(220, 53, 69, 0.05)"#}
+        style="background-color: rgba(220, 53, 69, 0.05)"
     {% endif %}
 {% endmacro %}
 
@@ -31,7 +31,7 @@
             border border-secondary
         {% endif %}
     {% else %}
-        border
+{#        border#}
     {% endif %}
 {% endmacro %}
 
@@ -72,8 +72,18 @@
                         {% if current.engagement_id is not none %}
                             </div>
                         {% endif %}
-                        <div class="rounded px-3 py-1 pb-1 mb-3 {{ engagement_class(message.engagement) }}"
-                                {{ engagement_style(message.engagement) }}>
+                        {% if message.engagement != engagement %}
+                            <div class="rounded px-3 py-1 mb-3 {{ engagement_class(message.engagement) }}"
+                                    {{ engagement_style(message.engagement) }}>
+                        {% else %}
+{#                            <div class="rounded px-3 pt-1 pb-3 mb-3 {{ engagement_class(message.engagement) }}"#}
+{#                                    {{ engagement_style(message.engagement) }}>#}
+                            <div class="card border-danger">
+                            <div class="card-header text-danger border-0 small" style="background-color: rgba(220, 53, 69, 0.05)">
+                                <b>Active Engagement</b>
+                            </div>
+                            <div class="card-body pt-0 pb-3">
+                        {% endif %}
                         {% set current.engagement_id = message.engagement_id %}
                     {% endif %}
                 {% else %}
@@ -95,8 +105,8 @@
                         {{ message.text }}
                         <br>
                         <small class="text-muted">
-                            Sent by
-                            {% if message.creator == current_user %}
+                            By
+                            {% if message.creator == current_user -%}
                                 you
                             {% else %}
                                 {{ message.creator }}

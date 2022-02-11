@@ -76,9 +76,9 @@ the necessary fix for required=False attributes, but will also not set the requi
     {% if field.widget.input_type == 'checkbox' %}
         {% set field_kwargs = kwargs %}
         {% call _hz_form_wrap(horizontal_columns, form_type, True, required=required) %}
-        {% if field.type == 'SwitchField' %}
-            {% do field_kwargs.update({'role': 'switch'}) %}
-        {% endif %}
+            {% if field.type == 'SwitchField' %}
+                {% do field_kwargs.update({'role': 'switch'}) %}
+            {% endif %}
             <div class="{{ form_group_classes }} form-check{% if field.type == 'SwitchField' %} form-switch{% endif %}{% if form_type == "inline" %} form-check-inline{% endif %}">
                 {%- if field.errors %}
                     {{ field(class="form-check-input is-invalid%s" % extra_classes, **field_kwargs)|safe }}
@@ -110,8 +110,8 @@ the necessary fix for required=False attributes, but will also not set the requi
                 {{ field.label(class="form-label")|safe }}
             {% endif %}
             {% if form_type == 'horizontal' %}
-              <div class="col-{{ horizontal_columns[0] }}-{{ horizontal_columns[2] }}">
-              {% endif %}
+                <div class="col-{{ horizontal_columns[0] }}-{{ horizontal_columns[2] }}">
+            {% endif %}
             {#% call _hz_form_wrap(horizontal_columns, form_type, True, required=required) %#}
             {% for item in field -%}
                 <div class="form-check{% if form_type == "inline" %} form-check-inline{% endif %}">
@@ -119,17 +119,17 @@ the necessary fix for required=False attributes, but will also not set the requi
                     {{ item.label(class="form-check-label", for=item.id)|safe }}
                 </div>
             {% endfor %}
-        {#% endcall %#}
-        {% if form_type == 'horizontal' %}
-          </div>
-        {% endif %}
-        {%- if field.errors %}
-            {%- for error in field.errors %}
-                <div class="invalid-feedback" style="display: block;">{{ error }}</div>
-            {%- endfor %}
-        {%- elif field.description -%}
-            <small class="form-text text-muted">{{ field.description|safe }}</small>
-        {%- endif %}
+            {#% endcall %#}
+            {% if form_type == 'horizontal' %}
+                </div>
+            {% endif %}
+            {%- if field.errors %}
+                {%- for error in field.errors %}
+                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+                {%- endfor %}
+            {%- elif field.description -%}
+                <small class="form-text text-muted">{{ field.description|safe }}</small>
+            {%- endif %}
         </div>
     {%- elif field.type == 'SubmitField' -%}
         {# deal with jinja scoping issues? #}
@@ -159,7 +159,8 @@ the necessary fix for required=False attributes, but will also not set the requi
             {%- endfor %}
         </fieldset>
     {% else -%}
-        <div class="{% if floating_input_label and field.type != "TextAreaField" %}form-floating{% endif %} {{ form_group_classes }}{%- if form_type == "horizontal" %} row{% endif -%}
+        <div class="{% if floating_input_label and field.type != "TextAreaField" %}form-floating{% endif %}
+                {{ form_group_classes }}{%- if form_type == "horizontal" %} row{% endif -%}
                          {%- if field.flags.required %} required{% endif -%}">
             {%- if form_type == "inline" %}
                 {{ field.label(class="visually-hidden")|safe }}
@@ -179,19 +180,19 @@ the necessary fix for required=False attributes, but will also not set the requi
             {% elif form_type == "horizontal" %}
                 {{ field.label(class="col-form-label" + (" col-%s-%s" % horizontal_columns[0:2]))|safe }}
                 <div class="col-{{ horizontal_columns[0] }}-{{ horizontal_columns[2] }}">
-                {%- if field.type in ['DecimalRangeField', 'IntegerRangeField'] %}
-                    {% if field.errors %}
-                        {{ field(class="form-range is-invalid%s" % extra_classes, **kwargs)|safe }}
-                    {% else %}
-                        {{ field(class="form-range%s" % extra_classes, **kwargs)|safe }}
-                    {% endif %}
-                {%- else -%}
-                    {% if field.errors %}
-                        {{ field(class="form-control is-invalid%s" % extra_classes, **kwargs)|safe }}
-                    {% else %}
-                        {{ field(class="form-control%s" % extra_classes, **kwargs)|safe }}
-                    {% endif %}
-                {%- endif %}
+                    {%- if field.type in ['DecimalRangeField', 'IntegerRangeField'] %}
+                        {% if field.errors %}
+                            {{ field(class="form-range is-invalid%s" % extra_classes, **kwargs)|safe }}
+                        {% else %}
+                            {{ field(class="form-range%s" % extra_classes, **kwargs)|safe }}
+                        {% endif %}
+                    {%- else -%}
+                        {% if field.errors %}
+                            {{ field(class="form-control is-invalid%s" % extra_classes, **kwargs)|safe }}
+                        {% else %}
+                            {{ field(class="form-control%s" % extra_classes, **kwargs)|safe }}
+                        {% endif %}
+                    {%- endif %}
                 </div>
                 {%- if field.errors %}
                     {%- for error in field.errors %}
@@ -232,7 +233,8 @@ the necessary fix for required=False attributes, but will also not set the requi
                 {%- elif field.description -%}
                     <small class="form-text text-muted">{{ field.description|safe }}</small>
                 {%- endif %}
-                {%- if floating_input_label and field.type != 'TextAreaField' %}{{ field.label(class="form-label")|safe }}{% endif %}
+                {%- if floating_input_label and field.type != 'TextAreaField' %}
+                    {{ field.label(class="form-label")|safe }}{% endif %}
             {%- endif %}
         </div>
     {% endif %}
@@ -299,7 +301,7 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
     <form{%- if action != None %} action="{{ action }}"{% endif -%}
             {%- if id %} id="{{ id }}"{% endif -%}
             {%- if method %} method="{{ method }}"{% endif %}
-            class="form
+                                  class="form
 {%- if extra_classes %} {{ extra_classes }}{% endif -%}{%- if form_type == "inline" %} {{ form_inline_classes }}{% endif -%}"
             {%- if _enctype[0] %} enctype="{{ _enctype[0] }}"{% endif -%}
             {%- if role %} role="{{ role }}"{% endif -%}
@@ -310,7 +312,8 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
         {{ render_hidden_errors(form) }}
         {%- for field in form %}
             {% if not bootstrap_is_hidden_field(field) -%}
-                {%- if field.type == 'TUIEditorField' %}<div class="mb-3" id="{{ field.id }}"></div>
+                {%- if field.type == 'TUIEditorField' %}
+                    <div class="mb-3" id="{{ field.id }}"></div>
                 {% else %}
                     {{ render_field(field,
                         form_type=form_type,
@@ -339,12 +342,42 @@ action="" is what we want, from http://www.ietf.org/rfc/rfc2396.txt:
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
         {% if messages -%} {# don't output anything if there are no messages #}
             <div class="container-fluid mt-2 px-0">
-        {% for cat, msg in messages %}
-            <div class="alert ps-2 pe-3 mb-2 py-1 alert-{{ category_map[cat] }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}" role="alert">
-                <small>{% if dismissible %}<button type="button" class="btn-close px-2 py-2" data-bs-dismiss="alert" aria-label="Close"></button>{% endif %}
-                {{ msg }}</small>
+                {% for cat, msg in messages %}
+                    <div class="alert ps-2 pe-3 mb-2 py-1 alert-{{ category_map[cat] }} {% if dismissible %}alert-dismissible {% if dismiss_animate %}fade show{% endif %}{% endif %}"
+                         role="alert">
+                        <small>{% if dismissible %}
+                            <button type="button" class="btn-close px-2 py-2" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>{% endif %}
+                            {{ msg }}</small>
+                    </div>
+                {%- endfor -%}
             </div>
-        {%- endfor -%}
+        {% endif -%}
+    {% endwith -%}
+{% endmacro -%}
+
+
+{% macro render_flash(messages=None, dismissible=False, dismiss_animate=False,
+                         category_map={
+                             'success':'success',
+                             'info':'info',
+                             'warning':'warning',
+                             'danger':'danger'
+                         }) -%}
+
+    {% with messages = messages or get_flashed_messages(with_categories=True) -%}
+        {% if messages -%} {# don't output anything if there are no messages #}
+            <div class="toast-container position-absolute p-3 end-0" style="z-index: 999">
+                {% for cat, msg in messages %}
+                    <div class="toast bg-{{- cat -}}" role="alert" data-bs-delay="10000">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <small>{{ msg }}</small>
+                            </div>
+                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {%- endfor -%}
             </div>
         {% endif -%}
     {% endwith -%}

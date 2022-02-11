@@ -1,5 +1,5 @@
 {% import "macros.html" as macros %}
-{% from "form.html" import render_messages %}
+{% from "form.html" import render_flash %}
 
 <!doctype html>
 <html lang="en">
@@ -22,6 +22,14 @@
             {{ macros.bootstrap_js() }}
             {{ moment.include_moment() }}
             {{ macros.smalltalk_js() }}
+            <script>
+                window.onload = (event) => {
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    toastElList.map(function (toastEl) {
+                        new bootstrap.Toast(toastEl).show({delay: 1000})
+                    })
+                }
+            </script>
         {% endblock %}
 
         <style>
@@ -42,7 +50,7 @@
     {{ macros.render_navbar(current_user) }}
 
     <div class="container-fluid">
-        {{ render_messages(dismissible=True, dismiss_animate=True) }}
+        {{ render_flash(dismissible=True, dismiss_animate=True) }}
     </div>
 
     <main>
@@ -61,6 +69,8 @@
     </footer>
 
 {% endblock %}
+
+
 </body>
 
 </html>
