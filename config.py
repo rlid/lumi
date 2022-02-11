@@ -45,10 +45,10 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = "{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}".format(
         server_type="postgresql",
         driver="pg8000",
-        username=os.environ.get('DB_USERNAME') or "postgres",
+        username=os.environ.get('DB_USERNAME') or "lumi",
         password=os.environ.get('DB_PASSWORD'),
         hostname=os.environ.get('DB_HOSTNAME') or "localhost",
-        port=os.environ.get('DB_PORT') or "9470",
+        port=os.environ.get('DB_PORT') or "5432",
         database=os.environ.get('DB_NAME') or "devdb")
 
 

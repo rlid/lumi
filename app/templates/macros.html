@@ -214,10 +214,10 @@
                 {% endif %}
             </div>
             {% if truncate_body %}
-                <a class="text-decoration-none text-dark small"
+                <a class="text-decoration-none text-dark"
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
             {% endif %}
-            <div class="card-text {{ 'truncated-sm' if truncate_body }}">
+            <div class="card-text small {{ 'truncated-sm' if truncate_body }}">
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}
