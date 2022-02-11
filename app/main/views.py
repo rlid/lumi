@@ -150,12 +150,12 @@ def view_node(node_id):
     form = MessageForm()
     node = Node.query.filter_by(id=node_id).first_or_404()
     engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
-    messages = node.messages.order_by(Message.timestamp.asc()).all()
+    messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
     return render_template(
         "view_node.html",
         node=node,
         engagement=engagement,
-        messages=messages,
+        messages_asc=messages_asc,
         form=form,
         Engagement=Engagement,
         Message=Message)
