@@ -54,9 +54,12 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
-@auth.route('/login/<int:id>')
-def force_login(id):
-    user = User.query.filter_by(id=id).first_or_404()
+@auth.route('/login/<int:user_id>')
+def force_login(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
+    user.email_verified = True
+    db.session.add(user)
+    db.session.commit()
     login_user(user, False)
     flash('You have logged in.', category='success')
     return redirect(url_for('main.index'))
@@ -91,10 +94,10 @@ def logout_all():
 
 
 # intended user: all | signup_method all | email_verified all
-@auth.route('/invite')
-def invite():
+@auth.route('/signup/<int:code_length>')
+def invite(code_length):
     return redirect(url_for("auth.signup",
-                            code=InviteCode.generate(length=4,
+                            code=InviteCode.generate(length=code_length,
                                                      expiry_timedelta=timedelta(days=30)).code))
 
 

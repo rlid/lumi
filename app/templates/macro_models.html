@@ -1,5 +1,5 @@
 {% macro render_message(message, viewer, last_timestamp=None) %}
-    <div class="card my-3 small border-0
+    <div class="card my-3 small
                 {% if message.type >= Message.TYPE_REQUEST %}
                     mx-auto text-center
                 {% elif message.creator == message.node.creator %}

@@ -40,4 +40,4 @@ class MarkdownPostForm(PostForm):
 
 class MessageForm(FlaskForm):
     text = TextAreaField("Text")
-    submit = SubmitField("Post")
+    submit = SubmitField("Send")
