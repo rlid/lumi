@@ -11,3 +11,5 @@ requests
 markdown
 bleach
 flask-socketio
+eventlet
+gunicorn

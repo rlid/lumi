@@ -1,28 +1,46 @@
-{% macro render_message(message, viewer, last_timestamp=None) %}
+{% macro render_message(message, viewer, last_timestamp=None, gap_in_seconds=300) %}
+    {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > gap_in_seconds %}
+        <div class="card my-3 small mx-auto text-center border-0" style="width:80%">
+            <div class="card-body py-0 text-muted small">
+                {{ moment(message.timestamp).calendar() }}
+            </div>
+        </div>
+    {% endif %}
+
     <div class="card my-3 small
+        {% if message.type >= Message.TYPE_REQUEST %}
+            mx-auto text-center
+        {% elif message.creator == message.node.creator %}
+            ms-auto
+        {% elif message.creator == message.node.post.creator %}
+            me-auto
+        {% endif %}
+        {% if message.type >= Message.TYPE_REQUEST %}
+              bg-light border-0
+        {% elif message.creator == message.node.post.creator %}
+            {% if message.node.post.type == 'buy' %}info10{% else %}warning10{% endif %}
+        {% else %}
+            {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
+        {% endif %}
+        "
+        style="
+            width:
                 {% if message.type >= Message.TYPE_REQUEST %}
-                    mx-auto text-center
-                {% elif message.creator == message.node.creator %}
-                    ms-auto
-                {% elif message.creator == message.node.post.creator %}
-                    me-auto
-                {% endif %}
-                {% if message.type >= Message.TYPE_REQUEST %}
-                      bg-transparent
-                {% elif message.creator == message.node.post.creator %}
-                    {% if message.node.post.type == 'buy' %}info10{% else %}warning10{% endif %}
+                    80%
                 {% else %}
-                    {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
+                    90%
+                {% endif %};
+            {% if message.type < Message.TYPE_REQUEST %}
+                border-radius: 10px;
+                {% if message.creator == message.node.creator %}
+                    border-bottom-right-radius: 0;
+                {% elif message.creator == message.node.post.creator %}
+                    border-bottom-left-radius: 0;
                 {% endif %}
-               " style="width: {% if message.type >= Message.TYPE_REQUEST %}80%{% else %}90%{% endif %}">
+            {% endif %}
+        ">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
-            {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > 1 %}
-                <br>
-                <small class="text-muted">
-                    {{ moment(message.timestamp).calendar() }}
-                </small>
-            {% endif %}
         </div>
     </div>
 {% endmacro %}

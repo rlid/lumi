@@ -190,24 +190,31 @@ def initdb():
     return {"success": True}, 200
 
 
+@socketio.on('connect')
+def connect():
+    if not current_user.is_authenticated:
+        return False
+
+
 @socketio.on('message sent')
 def handle_message(message):
     node = Node.query.get(message['node_id'])
+    if current_user != node.creator and current_user != node.post.creator:
+        disconnect()
+        return
+
     last_timestamp = db.session.query(
-        func.max(Message.timestamp).label('max_timestamp')).filter(Message.node_id == node.id).first().max_timestamp
+        func.max(Message.timestamp).label('max_timestamp')
+    ).filter(Message.node_id == node.id).first().max_timestamp
     message = current_user.create_message(node, message['text'])
     html = render_template('message.html',
                            message=message,
                            viewer=current_user,
                            last_timestamp=last_timestamp,
+                           gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
+                                               # available here. TODO: try to match the logic for existing messages
                            Message=Message)
     emit('message processed', html, to=node.id)
-
-
-@socketio.on('connect')
-def connect():
-    if not current_user.is_authenticated:
-        return False
 
 
 @socketio.on('join')
@@ -219,3 +226,10 @@ def on_join(data):
         join_room(node_id)
     else:
         disconnect()
+
+
+# @sock.route('/sock/message')
+# def echo(ws):
+#     while True:
+#         data = ws.receive()
+#         ws.send(data)
