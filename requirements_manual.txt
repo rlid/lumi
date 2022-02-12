@@ -10,3 +10,4 @@ Authlib==1.0.0rc1
 requests
 markdown
 bleach
+flask-sock

@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_moment import Moment
 from flask_mobility import Mobility
+from flask_sock import Sock
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -17,7 +18,14 @@ bootstrap = Bootstrap5()
 oauth = OAuth()
 moment = Moment()
 mobility = Mobility()
+sock = Sock()
 
+
+@sock.route('/sock/message')
+def echo(ws):
+    while True:
+        data = ws.receive()
+        ws.send(data)
 
 
 def create_app(config_name):
@@ -32,6 +40,7 @@ def create_app(config_name):
     oauth.init_app(app)
     moment.init_app(app)
     mobility.init_app(app)
+    sock.init_app(app)
 
     oauth.register(
         name='google',

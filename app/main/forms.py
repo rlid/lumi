@@ -19,7 +19,7 @@ class PostForm(FlaskForm):
                             validators=[InputRequired()]
                             )
     title = StringField("Title",
-                        validators=[DataRequired(), Length(TITLE_MIN_LENGTH, 100)],
+                        validators=[InputRequired(), Length(TITLE_MIN_LENGTH, 100)],
                         render_kw={"placeholder": "Title"})
     reward = DecimalField("Price (in USD - $)",
                           validators=[InputRequired(), NumberRange(1, 5)],
@@ -39,5 +39,5 @@ class MarkdownPostForm(PostForm):
 
 
 class MessageForm(FlaskForm):
-    text = TextAreaField("Text")
+    text = TextAreaField("Text", validators=[InputRequired()])
     submit = SubmitField("Send")

@@ -15,11 +15,6 @@ def index():
     return render_template("landing.html")
 
 
-@main.route('/how-it-works')
-def how_it_works():
-    return render_template("landing.html", title="How It Works")
-
-
 @main.route('/post', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -53,14 +48,11 @@ def toggle_editor():
     return redirect(url_for('main.new_post'))
 
 
-def unique_lower(str_seq):
-    seen = set()
-    return [x.lower() for x in str_seq if not (x.lower() in seen or seen.add(x.lower()))]
-
-
 @main.route('/browse')
 def browse():
-    tag_ids_to_filter = unique_lower(re.findall(r'\w+', request.args.get("tags", "")))
+    tags = re.findall(r'\w+', request.args.get("tags", ""))
+    seen = set()
+    tag_ids_to_filter = [tag.lower() for tag in tags if not (tag.lower() in seen or seen.add(tag.lower()))]
 
     if tag_ids_to_filter:
         post_query = Post.query.join(
@@ -159,6 +151,11 @@ def view_node(node_id):
         form=form,
         Engagement=Engagement,
         Message=Message)
+
+
+@main.route('/how-it-works')
+def how_it_works():
+    return render_template("landing.html", title="How It Works")
 
 
 @main.route('/alerts')
