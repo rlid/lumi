@@ -60,6 +60,13 @@
 {% endmacro %}
 
 
+{% macro socketio_js() %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"
+            integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H"
+            crossorigin="anonymous"></script>
+{% endmacro %}
+
+
 {% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="nav-item">

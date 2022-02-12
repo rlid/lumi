@@ -147,7 +147,32 @@
 
 
 {% macro ws_script(section_id) %}
-    <script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+        socket.on('connect', function() {
+            socket.emit('my event', {data: 'I\'m connected!'});
+        });
+        socket.on('message processed', function(text) {
+            let template = document.createElement('template');
+            template.innerHTML = text
+            document.getElementById("{{ section_id }}").appendChild(template.content.firstElementChild)
+            flask_moment_render_all();
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+        document.getElementById('form').onsubmit = event_handler => {
+            event_handler.preventDefault();
+            const textField = document.getElementById('text');
+            socket.emit(
+                'message sent', {
+                    'node_id': {{ node.id }},
+                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
+                    'text': textField.value,
+                });
+            textField.value = '';
+        };
+    </script>
+
+    <!--script>
         const log = (text, color) => {
             let card = document.createElement('div');
             card.className = 'card my-3 small ms-auto info10'
@@ -161,15 +186,15 @@
             document.getElementById("{{ section_id }}").appendChild(card)
         };
 
-        const socket = new WebSocket('ws://' + location.host + '/sock/message');
-        socket.addEventListener('message', ev => {
+        const sock = new WebSocket('ws://' + location.host + '/sock/message');
+        sock.addEventListener('message', ev => {
             log(ev.data);
         });
         document.getElementById('form').onsubmit = ev => {
             ev.preventDefault();
             const textField = document.getElementById('text');
-            socket.send(textField.value);
+            sock.send(textField.value);
             textField.value = '';
         };
-    </script>
+    </script-->
 {% endmacro %}

@@ -3,8 +3,9 @@ import re
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
 from sqlalchemy import func, desc, distinct, not_
+from flask_socketio import emit
 
-from app import db
+from app import db, socketio
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm, MessageForm
 from app.models.user import User, Post, PostTag, Tag, Node, Message, Engagement
@@ -187,3 +188,17 @@ def initdb():
     db.drop_all()
     db.create_all()
     return {"success": True}, 200
+
+
+@socketio.on('message sent')
+def handle_message(message):
+    node = Node.query.get(message['node_id'])
+    last_timestamp = db.session.query(
+        func.max(Message.timestamp).label('max_timestamp')).filter(Message.node_id == node.id).first().max_timestamp
+    message = current_user.create_message(node, message['text'])
+    html = render_template('message.html',
+                           message=message,
+                           viewer=current_user,
+                           last_timestamp=last_timestamp,
+                           Message=Message)
+    emit('message processed', f'Echo: {html}')

@@ -22,6 +22,7 @@
             {{ macros.bootstrap_js() }}
             {{ moment.include_moment() }}
             {{ macros.smalltalk_js() }}
+            {{ macros.socketio_js() }}
             <script>
                 window.onload = (event) => {
                     var toastElList = [].slice.call(document.querySelectorAll('.toast'))
