@@ -150,7 +150,11 @@
     <script type="text/javascript" charset="utf-8">
         var socket = io();
         socket.on('connect', function() {
-            socket.emit('my event', {data: 'I\'m connected!'});
+            socket.emit(
+                'join',
+                {
+                    node_id: {{ node.id }}
+                });
         });
         socket.on('message processed', function(text) {
             let template = document.createElement('template');
@@ -163,10 +167,11 @@
             event_handler.preventDefault();
             const textField = document.getElementById('text');
             socket.emit(
-                'message sent', {
-                    'node_id': {{ node.id }},
+                'message sent',
+                {
+                    node_id: {{ node.id }},
                     {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
-                    'text': textField.value,
+                    text: textField.value,
                 });
             textField.value = '';
         };

@@ -3,7 +3,7 @@ import re
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
 from sqlalchemy import func, desc, distinct, not_
-from flask_socketio import emit
+from flask_socketio import emit, join_room, disconnect
 
 from app import db, socketio
 from app.main import main
@@ -201,4 +201,21 @@ def handle_message(message):
                            viewer=current_user,
                            last_timestamp=last_timestamp,
                            Message=Message)
-    emit('message processed', f'Echo: {html}')
+    emit('message processed', html, to=node.id)
+
+
+@socketio.on('connect')
+def connect():
+    if not current_user.is_authenticated:
+        return False
+
+
+@socketio.on('join')
+def on_join(data):
+    node_id = data['node_id']
+    node = Node.query.get(data['node_id'])
+    if current_user == node.creator or current_user == node.post.creator:
+        print(f'{current_user} joined room {node_id}')
+        join_room(node_id)
+    else:
+        disconnect()
