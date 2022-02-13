@@ -2,9 +2,9 @@ import re
 
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
-from sqlalchemy import func, desc, distinct, not_, event
 from flask_socketio import emit, join_room, disconnect
 from simple_websocket import ConnectionClosed
+from sqlalchemy import func, desc, distinct, and_, not_, event
 
 from app import db, socketio, sock
 from app.main import main
@@ -251,7 +251,12 @@ def emit_after_insert(mapper, connection, message):
         if user_id == message.node.creator_id or user_id == message.node.post.creator_id:
             last_timestamp = db.session.query(
                 func.max(Message.timestamp).label('max_timestamp')
-            ).filter(Message.node_id == message.node_id).first().max_timestamp
+            ).filter(
+                and_(
+                    Message.node_id == message.node_id,
+                    Message.timestamp < message.timestamp
+                )
+            ).first().max_timestamp
             html = render_template('message.html',
                                    message=message,
                                    viewer=current_user,

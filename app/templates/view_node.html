@@ -142,12 +142,12 @@
             </div>
         </div>
     </div>
-    {{ ws_script(current.section_id) }}
+    {{ socketio_script(current.section_id) }}
 {% endblock %}
 
 
-{% macro ws_script(section_id) %}
-    <!--script type="text/javascript" charset="utf-8">
+{% macro socketio_script(section_id) %}
+    <script type="text/javascript" charset="utf-8">
         var socket = io();
         socket.on('connect', () => {
             socket.emit(
@@ -174,12 +174,16 @@
                 'message sent',
                 {
                     node_id: {{ node.id }},
-                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
+                    'engagement_id': {{ engagement.id if engagement is not none else 'null' }},
                     text: textField.value,
                 });
             textField.value = '';
         };
-    </script-->
+    </script>
+{% endmacro %}
+
+
+{% macro sock_script(section_id) %}
     <script>
         const sock = new WebSocket('ws://' + location.host + '/sock/node/{{ node.id }}');
         sock.addEventListener('message', message => {

@@ -127,7 +127,7 @@
 
 
 {# only visible if screen width is visible_from or more #}
-{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, badge_text=None, alt=None, extra_class="") %}
+{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, badge_text=None, alt=None, extra_class="", onclick=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="btn-secondary position-relative text-center px-0 py-0 rounded-0
         {{ extra_class }}
@@ -135,8 +135,11 @@
         {% if active %}active{% endif %}
         {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}
         ">
-        <a href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
-           class="nav-link text-light" {% if alt %}title="{{ alt }}" alt="{{ alt }}"{% endif %}>{% if icon %}
+        <a href="{% if link is not none %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
+           class="nav-link text-light"
+           {% if alt %}title="{{ alt }}" alt="{{ alt }}"{% endif %}
+           {% if onclick %}onclick="{{ onclick }}"{% endif %}
+        >{% if icon %}
             <i class="bi {{ icon }}"></i><br>{% endif %}
             {% if text %}
 {#                <span class="d-inline-block text-truncate" style="max-width: 12vw;">#}
@@ -152,11 +155,15 @@
 
 
 {% macro render_navbar_bottom(current_user=None) %}
+
     <div class="container-fluid fixed-bottom bg-secondary">
         <ul class="nav justify-content-center">
             {% if current_user and current_user.is_authenticated %}
                 {% if request.MOBILE %}
-                    {{ render_nav_item_bottom(link="javascript:history.back()", icon="bi-arrow-90deg-left", extra_class="me-auto", alt="Back") }}
+                    {{ render_nav_item_bottom(link="",
+                        onclick="if(document.referrer.indexOf(window.location.host)!==-1){history.back()};return false;",
+                        icon="bi-arrow-90deg-left",
+                        extra_class="me-auto") }}
                 {% endif %}
                 {{ render_nav_item_bottom("main.alerts", "Feed", "bi-bell", badge_text=5) }}
                 {{ render_nav_item_bottom("main.new_post", "New", "bi-plus-square") }}
