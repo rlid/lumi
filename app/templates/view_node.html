@@ -180,4 +180,28 @@
             textField.value = '';
         };
     </script>
+{#    <script>#}
+{#        const log = (text, color) => {#}
+{#            let card = document.createElement('div');#}
+{#            card.className = 'card my-3 small ms-auto info10'#}
+{#            card.style.width = "90%"#}
+{#            card.innerHTML =#}
+{#                '<div class="card-body py-1 text-dark">' +#}
+{#                 text +#}
+{#                '<br>' +#}
+{#                '<small class="text-muted">Timestamp</small>' +#}
+{#                '</div>'#}
+{#            document.getElementById("{{ section_id }}").appendChild(card)#}
+{#        };#}
+{#        const sock = new WebSocket('ws://' + location.host + '/sock/message');#}
+{#        sock.addEventListener('message', ev => {#}
+{#            log(ev.data);#}
+{#        });#}
+{#        document.getElementById('form').onsubmit = ev => {#}
+{#            ev.preventDefault();#}
+{#            const textField = document.getElementById('text');#}
+{#            sock.send(textField.value);#}
+{#            textField.value = '';#}
+{#        };#}
+{#    </script>#}
 {% endmacro %}
