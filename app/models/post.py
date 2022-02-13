@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import event
 
 import bleach
 from bleach.html5lib_shim import Filter
@@ -51,37 +52,35 @@ class Post(db.Model):
     def __repr__(self):
         return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'
 
-    @staticmethod
-    def on_changed_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'br', 'code', 'del',
-                        'em', 'hr', 'i', 'img', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']
 
-        allowed_attributes = {
-            "a": ["href", "title"],
-            "abbr": ["title"],
-            "acronym": ["title"],
-            "img": ["alt", "src"]
-        }
+@event.listens_for(Post.body, 'set')
+def on_changed_body(target, value, oldvalue, initiator):
+    allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'br', 'code', 'del',
+                    'em', 'hr', 'i', 'img', 'li', 'ol', 'pre', 'strong', 'ul',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']
 
-        class HxFilter(Filter):
-            def __iter__(self):
-                for token in Filter.__iter__(self):
-                    if token['type'] in ['StartTag', 'EndTag'] and \
-                            token['name'] in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-                        token['name'] = 'h6'
-                    yield token
+    allowed_attributes = {
+        "a": ["href", "title"],
+        "abbr": ["title"],
+        "acronym": ["title"],
+        "img": ["alt", "src"]
+    }
 
-        use_markdown = value[0] == 'm'
-        value = value[1:]
+    class HxFilter(Filter):
+        def __iter__(self):
+            for token in Filter.__iter__(self):
+                if token['type'] in ['StartTag', 'EndTag'] and \
+                        token['name'] in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                    token['name'] = 'h6'
+                yield token
 
-        cleaner = Cleaner(tags=allowed_tags, attributes=allowed_attributes, filters=[HxFilter], strip=True)
-        if use_markdown:
-            markdown = Markdown(extensions=[DelExtension()])
-            html = markdown.convert(value)
-        else:
-            html = value.replace('\n', '<br>').replace('\\#', '#')
-        target.body_html = bleach.linkify(cleaner.clean(html))
+    use_markdown = value[0] == 'm'
+    value = value[1:]
 
-
-db.event.listen(Post.body, 'set', Post.on_changed_body)
+    cleaner = Cleaner(tags=allowed_tags, attributes=allowed_attributes, filters=[HxFilter], strip=True)
+    if use_markdown:
+        markdown = Markdown(extensions=[DelExtension()])
+        html = markdown.convert(value)
+    else:
+        html = value.replace('\n', '<br>').replace('\\#', '#')
+    target.body_html = bleach.linkify(cleaner.clean(html))

@@ -2,10 +2,11 @@ import re
 
 from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
-from sqlalchemy import func, desc, distinct, not_
+from sqlalchemy import func, desc, distinct, not_, event
 from flask_socketio import emit, join_room, disconnect
+from simple_websocket import ConnectionClosed
 
-from app import db, socketio
+from app import db, socketio, sock
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm, MessageForm
 from app.models.user import User, Post, PostTag, Tag, Node, Message, Engagement
@@ -212,7 +213,7 @@ def handle_message(message):
                            viewer=current_user,
                            last_timestamp=last_timestamp,
                            gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
-                                               # available here. TODO: try to match the logic for existing messages
+                           # available here. TODO: try to match the logic for existing messages
                            Message=Message)
     emit('message processed', html, to=node.id)
 
@@ -228,8 +229,44 @@ def on_join(data):
         disconnect()
 
 
-# @sock.route('/sock/message')
-# def echo(ws):
-#     while True:
-#         data = ws.receive()
-#         ws.send(data)
+@sock.route('/sock/node/<int:node_id>')
+@login_required
+def sock_to_node(ws, node_id):
+    node = Node.query.get(node_id)
+    if current_user == node.creator or current_user == node.post.creator:
+        Message.message_listeners.append((current_user.id, ws))
+        print(f'{current_user} connected to node {node_id}')
+        while True:
+            text = ws.receive()
+            current_user.create_message(node, text)
+    else:
+        ws.close()
+
+
+@event.listens_for(Message, 'after_insert')
+def emit_after_insert(mapper, connection, message):
+    closed_connections = []
+    for user_id, user_sock in Message.message_listeners:
+        # TODO: remove closed sockets
+        if user_id == message.node.creator_id or user_id == message.node.post.creator_id:
+            last_timestamp = db.session.query(
+                func.max(Message.timestamp).label('max_timestamp')
+            ).filter(Message.node_id == message.node_id).first().max_timestamp
+            html = render_template('message.html',
+                                   message=message,
+                                   viewer=current_user,
+                                   last_timestamp=last_timestamp,
+                                   gap_in_seconds=60,
+                                   # this is from the last message SENT, not rendered, as that info is not
+                                   # available here. TODO: try to match the logic for existing messages
+                                   Message=Message)
+            print(f'Pushing message to user {user_id}')
+            try:
+                user_sock.send(html)
+            except ConnectionClosed as e:
+                print(f'A Connection for user {user_id} is closed')
+                closed_connections.append((user_id, user_sock))
+
+    for c in closed_connections:
+        Message.message_listeners.remove(c)
+        print(f'A listener for user {c[0]} is removed')
