@@ -8,6 +8,8 @@ cffi==1.15.0
 charset-normalizer==2.0.12
 click==8.0.3
 cryptography==36.0.1
+dnspython==2.2.0
+eventlet==0.33.0
 Flask==2.0.2
 Flask-Login==0.5.0
 Flask-Mobility==1.1.0
@@ -16,6 +18,8 @@ flask-sock==0.4.0
 Flask-SocketIO==5.1.1
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==1.0.0
+greenlet==1.1.2
+https://github.com/benoitc/gunicorn/archive/ff58e0c6da83d5520916bc4cc109a529258d76e1.zip#egg=gunicorn==20.1.0
 h11==0.13.0
 idna==3.3
 itsdangerous==2.0.1
