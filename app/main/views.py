@@ -268,5 +268,8 @@ def emit_after_insert(mapper, connection, message):
                 closed_connections.append((user_id, user_sock))
 
     for c in closed_connections:
-        Message.message_listeners.remove(c)
-        print(f'A listener for user {c[0]} is removed')
+        try:
+            Message.message_listeners.remove(c)
+            print(f'A listener for user {c[0]} is removed')
+        except ValueError as e:
+            print(e)
