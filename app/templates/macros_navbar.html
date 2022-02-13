@@ -91,10 +91,10 @@
                         icon="bi-arrow-90deg-left",
                         extra_class="me-auto") }}
                 {% endif %}
-                {{ render_nav_item_bottom("main.alerts", "Feed", "bi-bell", badge_text=5) }}
-                {{ render_nav_item_bottom("main.new_post", "New", "bi-plus-square") }}
-                {{ render_nav_item_bottom("main.browse", "Find", "bi-search") }}
-                {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", "sm") }}
+                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=5, extra_class="hide-3b") }}
+                {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}
+                {{ render_nav_item_bottom("main.new_post", "Post", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", extra_class="hide-4b") }}
                 {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", "sm") }}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle", "sm") }}
                 {% if request.MOBILE %}

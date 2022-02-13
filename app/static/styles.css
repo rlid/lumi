@@ -1,3 +1,57 @@
+/*                 320px
+Apple iPhone 5
+Apple iPhone 5c
+Apple iPhone 5s
+Apple iPhone SE
+*/
+
+@media (max-width: 340px) {
+    .hide-3b {
+      display: none;
+    }
+}
+
+/*                 360px
+Apple iPhone 12 mini
+*/
+/*                 375px
+Apple iPhone 6
+Apple iPhone 6s
+Apple iPhone 7
+Apple iPhone 8
+Apple iPhone X
+Apple iPhone 11 Pro
+Apple iPhone SE (2020)
+Apple iPhone 13 Mini
+ */
+/*                 390px
+Apple iPhone 12
+Apple iPhone 12 Pro
+Apple iPhone 13
+Apple iPhone 13 Pro
+*/
+
+@media (max-width: 414px) {
+    .hide-4b {
+      display: none;
+    }
+}
+
+/*                 414px
+iPhone 6 Plus
+Apple iPhone 6s Plus
+Apple iPhone 7 Plus
+Apple iPhone 8 Plus
+Apple iPhone XR
+Apple iPhone XS Max
+Apple iPhone 11
+Apple iPhone 11 Pro Max
+*/
+/*                 428px
+Apple iPhone 12 Pro Max
+Apple iPhone 13 Pro Max
+*/
+
 .form-check-input:checked {
     background-color: #198754;
 }
