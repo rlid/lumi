@@ -1,0 +1,138 @@
+{% macro render_user(user, capitalize=True) %}
+    <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
+        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}{{ user }}{% endif %}
+    </a>
+{% endmacro %}
+
+
+{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['buying', 'selling']) %}
+    {% if tag.id not in ignore_ids %}
+        <a class="badge rounded-pill border text-decoration-none
+        bg-{{- 'info' if tag.id == 'buying' else ('warning' if tag.id == 'selling' else 'light') }}
+        text-dark {{ extra_class }}" href="
+        {% if tag in tags_in_filter %}
+            {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
+        {% else %}
+            {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
+        {% endif %}
+        ">#{{ tag.name }} {% if freq %}
+            <span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
+        </a>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None,
+    style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
+    label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+    <div class="card mb-3 {{ style_map[post.type] }}">
+        <div class="card-body py-2">
+            <p class="small text-muted mb-1">{{ render_user(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}</p>
+            <div class="card-title">
+                <div class="btn-group btn-group-sm buy-sell" role="group">
+                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
+                       class="btn btn-{{- style_map[post.type] -}}">
+                        {{ label_map[post.type] }}
+                    </a>
+                    {% if post.reward > 0 %}
+                        <button type="button" class="btn btn-secondary" disabled>
+                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                        </button>
+                    {% endif %}
+                </div>
+                <a class="text-decoration-none text-dark" style="vertical-align: middle"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    <b>{{ post.title }}</b>
+                </a>
+                {% if post_tags %}
+                    {% for post_tag in post.post_tags[:tag_limit] %}
+                        {{ render_tag(post_tag.tag) }}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% if truncate_body %}
+                <a class="text-decoration-none text-dark"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+            {% endif %}
+            <div class="card-text small {{ 'truncated-sm' if truncate_body }}">
+                {% if post.body_html %}
+                    {{ post.body_html | safe }}
+                {% else %}
+                    {{ post.body[1:] }}
+                {% endif %}
+            </div>
+            {% if truncate_body %}
+                </a>
+            {% endif %}
+        </div>
+        {% if post_badges %}
+            <div class="card-footer py-0">
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Chat</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Share</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Comment</b>
+                </a>
+                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Report</b>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_message(message, viewer, last_timestamp=None, gap_in_seconds=300) %}
+    {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > gap_in_seconds %}
+        <div class="card my-3 small mx-auto text-center border-0" style="width:80%">
+            <div class="card-body py-0 text-muted small">
+                {{ moment(message.timestamp).calendar() }}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card my-3 small
+        {% if message.type >= Message.TYPE_REQUEST %}
+            mx-auto text-center
+        {% elif message.creator == message.node.creator %}
+            ms-auto
+        {% elif message.creator == message.node.post.creator %}
+            me-auto
+        {% endif %}
+        {% if message.type >= Message.TYPE_REQUEST %}
+              bg-light border-0
+        {% elif message.creator == message.node.post.creator %}
+            {% if message.node.post.type == 'buy' %}info10{% else %}warning10{% endif %}
+        {% else %}
+            {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
+        {% endif %}
+        "
+        style="
+            width:
+                {% if message.type >= Message.TYPE_REQUEST %}
+                    80%
+                {% else %}
+                    90%
+                {% endif %};
+            {% if message.type < Message.TYPE_REQUEST %}
+                border-radius: 10px;
+                {% if message.creator == message.node.creator %}
+                    border-bottom-right-radius: 0;
+                {% elif message.creator == message.node.post.creator %}
+                    border-bottom-left-radius: 0;
+                {% endif %}
+            {% endif %}
+        ">
+        <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
+            {{ message.text }}
+        </div>
+    </div>
+{% endmacro %}

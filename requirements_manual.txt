@@ -13,3 +13,4 @@ bleach
 flask-socketio
 eventlet
 gunicorn
+flask-sock

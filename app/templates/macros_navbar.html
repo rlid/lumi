@@ -1,0 +1,112 @@
+{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
+    {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
+    <li class="nav-item">
+        <a class="nav-link text-nowrap rounded
+            {% if active %}active{% endif %}
+            {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}"
+                {#           style="padding-top: 11px;padding-bottom: 11px"#}
+           href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}">
+            {% if icon %}<i class="bi {{ icon }}"></i>{% endif %}
+            {{ text }}
+        </a>
+
+    </li>
+{% endmacro %}
+
+
+{% macro render_navbar(current_user=None) %}
+    <nav class="navbar sticky-top navbar-expand navbar-dark bg-dark pb-0">
+        <div class="container-fluid">
+            <a class="navbar-brand h1" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="32" height="32"
+                     class="d-inline-block align-text-bottom">{{ config["APP_NAME"][1:] }}</a>
+            <ul class="navbar-nav">
+                {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}
+                {{ render_nav_item("main.new_post", "Post", "bi-plus-square", visible_from="sm") }}
+                {{ render_nav_item("main.how_it_works", "How It Works", "bi-signpost-split", visible_from="md") }}
+                {{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}
+                {{ render_nav_item(text="Help", icon="bi-question-circle", link="mailto:support@lumiask.com", visible_from="sm") }}
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2">
+                <li class="nav-item">
+                    <div class="btn-group" role="group">
+                        {% if current_user and current_user.is_authenticated %}
+                            <a class="btn text-nowrap btn-outline-success text-white"
+                               href="{{ url_for('main.account') }}">
+                                Account
+                            </a>
+                            <a class="btn text-nowrap btn-success"
+                               href="{{ url_for('auth.logout') }}">
+                                Log Out
+                            </a>
+                        {% else %}
+                            <a class="btn text-nowrap btn-outline-success text-white"
+                               href="{{ url_for('auth.login') }}">
+                                Log In
+                            </a>
+                            <a class="btn text-nowrap btn-success"
+                               href="{{ url_for('auth.signup') }}">
+                                Sign Up
+                            </a>
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+{% endmacro %}
+
+
+{# only visible if screen width is visible_from or more #}
+{% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, badge_text=None, alt=None, extra_class="", onclick=None) %}
+    {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
+    <li class="btn-secondary position-relative text-center px-0 py-0 rounded-0
+        {{ extra_class }}
+        {% if text %}btn-sm{% else %}btn-lg my-auto{% endif %}
+        {% if active %}active{% endif %}
+        {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}
+        ">
+        <a href="{% if link is not none %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
+           class="nav-link text-light"
+           {% if alt %}title="{{ alt }}" alt="{{ alt }}"{% endif %}
+           {% if onclick %}onclick="{{ onclick }}"{% endif %}
+        >{% if icon %}
+            <i class="bi {{ icon }}"></i><br>{% endif %}
+            {% if text %} {{ text|safe }} {% endif %}
+        </a>
+        {% if badge_text %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">{{ badge_text }}</span>
+        {% endif %}
+    </li>
+{% endmacro %}
+
+
+{% macro render_navbar_bottom(current_user=None) %}
+    <div class="container-fluid fixed-bottom bg-secondary">
+        <ul class="nav justify-content-center">
+            {% if current_user and current_user.is_authenticated %}
+                {% if request.MOBILE %}
+                    {{ render_nav_item_bottom(link="",
+                        onclick="if(document.referrer.indexOf(window.location.host)!==-1){history.back()};return false;",
+                        icon="bi-arrow-90deg-left",
+                        extra_class="me-auto") }}
+                {% endif %}
+                {{ render_nav_item_bottom("main.alerts", "Feed", "bi-bell", badge_text=5) }}
+                {{ render_nav_item_bottom("main.new_post", "New", "bi-plus-square") }}
+                {{ render_nav_item_bottom("main.browse", "Find", "bi-search") }}
+                {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", "sm") }}
+                {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", "sm") }}
+                {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle", "sm") }}
+                {% if request.MOBILE %}
+                    {{ render_nav_item_bottom(link="javascript:history.forward()", icon="bi-arrow-90deg-right", extra_class="ms-auto", alt="Forward") }}
+                {% endif %}
+            {% else %}
+                {{ render_nav_item_bottom(link="https://twitter.com/KnowbleApp", icon="bi-twitter") }}
+                {{ render_nav_item_bottom(link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
+                {{ render_nav_item_bottom(link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
+                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord") }}
+                {{ render_nav_item_bottom(link="mailto:info@lumiask.com", icon="bi-envelope-fill") }}
+            {% endif %}
+        </ul>
+    </div>
+{% endmacro %}

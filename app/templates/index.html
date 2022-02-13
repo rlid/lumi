@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% from "macros_form.html" import render_form %}
+{% from "macros_models.html" import render_post_card, render_tag with context %}
 
-{% from "form.html" import render_form %}
-{% from "macros.html" import render_post_card, render_tag with context %}
+{% extends "base.html" %}
 
 {% block main_container %}
     <div class="row">
