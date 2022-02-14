@@ -207,7 +207,7 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
-    def add_tag(self, post, name):
+    def _add_tag(self, post, name):
         tag = Tag.query.get(name.lower())
         if tag is None:
             tag = Tag(id=name.lower(), name=name, creator=self)
@@ -220,6 +220,10 @@ class User(UserMixin, db.Model):
             db.session.commit()
         return post_tag
 
+    def add_tag(self, post, name):
+        if name.lower() not in ('buying', 'selling'):
+            self._add_tag(post, name)
+
     def create_post(self, is_request, reward, title, body=None, tag_names=[]):
         post = Post(creator=self,
                     type=Post.TYPE_BUY if is_request else Post.TYPE_SELL,
@@ -228,7 +232,7 @@ class User(UserMixin, db.Model):
                     body=('m' if self.use_markdown else 's') + body)
         for tag_name in tag_names:
             self.add_tag(post, tag_name)
-        self.add_tag(post, 'Buying' if is_request else 'Selling')
+        self._add_tag(post, 'Buying' if is_request else 'Selling')
         node = Node(post=post, creator=self)
         db.session.add(post)
         db.session.add(node)

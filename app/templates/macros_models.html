@@ -4,15 +4,17 @@
     </a>
 {% endmacro %}
 
-
+{# tags_in_filter should contain all the ACTIVE tags on the current page #}
 {% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['buying', 'selling']) %}
     {% if tag.id not in ignore_ids %}
         <a class="badge rounded-pill border text-decoration-none
         bg-{{- 'info' if tag.id == 'buying' else ('warning' if tag.id == 'selling' else 'light') }}
         text-dark {{ extra_class }}" href="
         {% if tag in tags_in_filter %}
+            {# if the tag is already active, the link will remove the tag from the filter #}
             {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
         {% else %}
+            {# if the tag is not in the active filter, the link will add it #}
             {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
         {% endif %}
         ">#{{ tag.name }} {% if freq %}
@@ -21,8 +23,8 @@
     {% endif %}
 {% endmacro %}
 
-
-{% macro render_post_card(post, truncate_body=False, post_badges=True, post_tags=True, tag_limit=None,
+{# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
+{% macro render_post_card(post, truncate_body=False, buttons=True, tag_limit=None,
     style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     <div class="card mb-3 {{ style_map[post.type] }}">
@@ -45,11 +47,9 @@
                    href="{{ url_for("main.view_post", post_id=post.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
-                {% if post_tags %}
-                    {% for post_tag in post.post_tags[:tag_limit] %}
-                        {{ render_tag(post_tag.tag) }}
-                    {% endfor %}
-                {% endif %}
+                {% for post_tag in post.post_tags[:tag_limit] %}
+                    {{ render_tag(post_tag.tag) }}
+                {% endfor %}
             </div>
             {% if truncate_body %}
                 <a class="text-decoration-none text-dark"
@@ -66,19 +66,11 @@
                 </a>
             {% endif %}
         </div>
-        {% if post_badges %}
+        {% if buttons %}
             <div class="card-footer py-0">
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
                    class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Chat</b>
-                </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     <b>Share</b>
-                </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Comment</b>
                 </a>
                 <a href="{{ url_for("main.view_post", post_id=post.id) }}"
                    class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">

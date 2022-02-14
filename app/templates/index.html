@@ -45,10 +45,10 @@
         <div class="col-12 col-lg-8 col-xl-6">
             {% block mid_col %}
                 {% for post in sticky_posts %}
-                    {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=False) }}
+                    {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
                 {% endfor %}
                 {% for post in posts %}
-                    {{ render_post_card(post, truncate_body=True, post_badges=False, post_tags=True) }}
+                    {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
                 {% endfor %}
             {% endblock %}
         </div>
