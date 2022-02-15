@@ -128,7 +128,7 @@ def view_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
-@main.route('/node/<int:node_id>')
+@main.route('/node/<int:node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
 
@@ -168,6 +168,12 @@ def view_node(node_id):
             Message=Message)
 
     form = MessageForm()
+    if form.validate_on_submit():
+        # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
+        user_node = current_user.create_node(node)
+        current_user.create_message(user_node, form.text.data)
+        return redirect(url_for('main.view_node', node_id=user_node.id))
+
     return render_template("view_node_as_other_user.html", node=node, form=form)
 
 
