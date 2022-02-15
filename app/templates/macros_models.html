@@ -107,7 +107,7 @@
         </div>
     {% endif %}
 
-    <div class="card my-3 small
+    <div id="message{{- message.id }}" class="card my-3 small
         {% if message.type >= Message.TYPE_REQUEST %}
             mx-auto text-center
         {% elif message.creator == message.node.creator %}

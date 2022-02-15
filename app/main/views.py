@@ -208,6 +208,17 @@ def request_engagement(node_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
+@main.route('/engagement/<int:engagement_id>/accept')
+@login_required
+def accept_engagement(engagement_id):
+    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+    if current_user == engagement.node.post.creator:
+        current_user.accept_engagement(engagement)
+    else:
+        flash('Only the original poster can accept the engagement.', category='danger')
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+
+
 @main.route('/how-it-works')
 def how_it_works():
     return render_template("landing.html", title="How It Works")
@@ -268,7 +279,7 @@ def handle_message(message):
                            gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
                            # available here. TODO: try to match the logic for existing messages
                            Message=Message)
-    emit('message processed', html, to=node.id)
+    emit('message processed', {'id': message.id, 'html': html}, to=node.id)
 
 
 @socketio.on('join')

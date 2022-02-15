@@ -247,6 +247,8 @@ class User(UserMixin, db.Model):
         if self == parent_node.creator:  # try some heuristics to reduce the cost of querying the database
             node = parent_node
         if node is None:
+            # check if a node exists already as 2 nodes with the same creator is not allowed
+            # TODO: consider if it makes sense to make it more strict by raising an error if a node is found
             node = post.nodes.filter_by(creator=self).first()
         if node is None:
             node = Node(creator=self, post=parent_node.post, parent=parent_node)
@@ -273,7 +275,7 @@ class User(UserMixin, db.Model):
         if self == node.post.creator:
             raise InvalidActionError('Cannot request for engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
-            raise InvalidActionError('Cannot request for engagement because an incomplete engagement already exists')
+            raise InvalidActionError('Cannot request for engagement because an uncompleted engagement already exists')
         if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 

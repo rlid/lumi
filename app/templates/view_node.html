@@ -91,17 +91,21 @@
 
             {% if current_user == node.creator and (engagement is none or engagement.state != Engagement.STATE_ENGAGED) %}
                 <a class="btn btn-{{- button_class(current_user, node.post) -}}"
-                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">Request for Engagement</a>
+                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">
+                    Request for Engagement</a>
             {% endif %}
             {% if engagement is not none %}
                 {% if engagement.state == Engagement.STATE_REQUESTED %}
                     {% if current_user == node.post.creator %}
-                        <a class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">Accept Engagement</a>
+                        <a class="btn btn-{{- button_class(current_user, node.post) -}}"
+                           href="{{ url_for('main.accept_engagement', engagement_id=engagement.id) }}">
+                            Accept Engagement</a>
                     {% endif %}
                 {% elif engagement.state == Engagement.STATE_ENGAGED %}
                     {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
                           (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
-                        <a class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">Rate Engagement</a>
+                        <a class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">
+                            Rate Engagement</a>
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -170,16 +174,19 @@
                     node_id: {{ node.id }}
                 });
         });
-        socket.on('message processed', html => {
+        socket.on('refresh', message => {
+            location.reload();
+        }
+        socket.on('message processed', message => {
             let template = document.createElement('template');
-            template.innerHTML = html
+            template.innerHTML = message.html
             let nChildElement = template.content.childElementCount
             document.getElementById("{{ section_id }}").appendChild(template.content.firstElementChild)
             if (nChildElement > 1) {
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            document.getElementById('form').scrollIntoView();
+            document.getElementById('form').scrollIntoView(true);
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();
@@ -209,7 +216,7 @@
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            window.scrollTo(0, document.body.scrollHeight);
+            document.getElementById('form').scrollIntoView(true);
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();
