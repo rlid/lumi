@@ -174,9 +174,6 @@
                     node_id: {{ node.id }}
                 });
         });
-        socket.on('refresh', message => {
-            location.reload();
-        }
         socket.on('message processed', message => {
             let template = document.createElement('template');
             template.innerHTML = message.html
@@ -186,7 +183,7 @@
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            document.getElementById('form').scrollIntoView(true);
+            {#document.getElementById('message'+message.id).scrollIntoView(false);#}
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();
@@ -216,7 +213,7 @@
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            document.getElementById('form').scrollIntoView(true);
+            {#document.getElementById('form').scrollIntoView(false);#}
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();

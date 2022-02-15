@@ -187,10 +187,7 @@ def request_engagement(node_id):
         flash('You cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id))
 
-    if (post.type == Post.TYPE_SELL and
-        current_user.account_balance - current_user.committed_amount < post.reward) or (
-            post.type == Post.TYPE_BUY and
-            current_user.account_balance - current_user.committed_amount < post.reward):
+    if post.type == Post.TYPE_SELL and current_user.account_balance - current_user.committed_amount < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.index'))
 
@@ -212,10 +209,16 @@ def request_engagement(node_id):
 @login_required
 def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-    if current_user == engagement.node.post.creator:
-        current_user.accept_engagement(engagement)
-    else:
+
+    if current_user != engagement.node.post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
+
+    post = engagement.node.post
+    if post.type == Post.TYPE_BUY and current_user.account_balance - current_user.committed_amount < post.reward:
+        flash('Insufficient funds, please top up before you proceed.', category='warning')
+        return redirect(url_for('main.index'))
+
+    current_user.accept_engagement(engagement)
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
@@ -262,24 +265,35 @@ def connect():
 
 
 @socketio.on('message sent')
-def handle_message(message):
+def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
     if current_user != node.creator and current_user != node.post.creator:
         disconnect()
         return
 
-    last_timestamp = db.session.query(
+    # last_timestamp = db.session.query(
+    #     func.max(Message.timestamp).label('max_timestamp')
+    # ).filter(Message.node_id == node.id).first().max_timestamp
+    # last_message = node.messages.filter(Node.timestamp == last_timestamp).first()
+
+    sub_query = db.session.query(
         func.max(Message.timestamp).label('max_timestamp')
-    ).filter(Message.node_id == node.id).first().max_timestamp
+    ).filter(Message.node_id == node.id).subquery()
+    last_message = node.messages.join(
+        sub_query, Message.timestamp == sub_query.c.max_timestamp
+    ).first()
+
     message = current_user.create_message(node, message['text'])
+
+    new_section = message.engagement_id != last_message.engagement_id
     html = render_template('message.html',
                            message=message,
                            viewer=current_user,
-                           last_timestamp=last_timestamp,
+                           last_timestamp=last_message.timestamp,
                            gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
                            # available here. TODO: try to match the logic for existing messages
                            Message=Message)
-    emit('message processed', {'id': message.id, 'html': html}, to=node.id)
+    emit('message processed', {'id': message.id, 'html': html, 'new_section': new_section}, to=node.id)
 
 
 @socketio.on('join')
