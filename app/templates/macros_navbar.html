@@ -110,3 +110,60 @@
         </ul>
     </div>
 {% endmacro %}
+
+
+{% macro render_navbar_side() %}
+    <div class="card small text-center text-nowrap">
+        <div class="card-body">
+            <div class="row justify-content-evenly">
+                <div class="col-auto">
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        What's New
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Why {{ config["APP_NAME"] }}
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        How It Works
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Help & FAQs
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Feedback
+                    </a></p>
+                </div>
+                <div class="col-auto">
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Community Guidelines
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Terms
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Privacy Policy
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        Cookie Policy
+                    </a></p>
+                    <p><a class="text-decoration-none text-muted"
+                          href="{{ url_for('main.index') }}">
+                        About Us
+                    </a></p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer small">
+            &copy; 2022 {{ config["APP_NAME"] }}. All rights reserved.
+        </div>
+    </div>
+{% endmacro %}

@@ -82,10 +82,12 @@
                    class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                     <b>Share</b>
                 </a>
-                <a href="{{ url_for("main.view_post", post_id=post.id) }}"
-                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Report</b>
-                </a>
+                {% if current_user != post.creator %}
+                    <a href="{{ url_for("main.view_post", post_id=post.id) }}"
+                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                        <b>Report</b>
+                    </a>
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -118,7 +120,7 @@
         {% endif %}
         "
         style="
-            width:
+            max-width:
                 {% if message.type >= Message.TYPE_REQUEST %}
                     80%
                 {% else %}

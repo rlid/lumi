@@ -1,6 +1,6 @@
+{% extends "index.html" %}
 {% from "macros_form.html" import render_form %}
-
-{% extends "base.html" %}
+{% from "macros_navbar.html" import render_navbar_side %}
 
 {% block link %}
     {{ super() }}
@@ -20,83 +20,113 @@
     {% endif %}
 {% endblock %}
 
-{% block main_container %}
-    <div class="row justify-content-center">
-        <div class="col-11 col-md-9 col-lg-7 col-xl-6 my-3">
-            <h3 class="mb-3">Create a post</h3>
-            {% if use_markdown %}
-                {% if request.MOBILE %}
-                    {{ render_form(form, button_style="success", floating_input_label=True) }}
-                    <script>
-                        const easyMDE = new EasyMDE({
-                            toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
-                                "unordered-list", "ordered-list", "|",
-                                "side-by-side", "preview", "guide"],
-                            minHeight: '100px',
-                            maxHeight: '200px',
-                            promptURLs: true,
-                            uploadImage: false,
-                            spellChecker: false,
-                            sideBySideFullscreen: false,
-                            status: false,
-                            placeholder: 'Details (optional)'
-                        });
-                    </script>
-                {% else %}
-                    {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
-                    <script>
-                        const editor = new toastui.Editor({
-                            el: document.querySelector('#editor'),
-                            height: '500px',
-                            initialEditType: 'wysiwyg',
-                            previewStyle: 'vertical',
-                            previewHighlight: true,
-                            usageStatistics: false,
-                            hideModeSwitch: false,
-                            placeholder: 'Details (optional)',
-                            toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
-                        });
+{% block mid_col %}
+    <div class="mb-3">
+    <h3 class="mb-3">Create a post</h3>
+    {% if use_markdown %}
+        {% if request.MOBILE %}
+            {{ render_form(form, button_style="success", floating_input_label=True) }}
+            <script>
+                const easyMDE = new EasyMDE({
+                    toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
+                        "unordered-list", "ordered-list", "|",
+                        "side-by-side", "preview", "guide"],
+                    minHeight: '100px',
+                    maxHeight: '200px',
+                    promptURLs: true,
+                    uploadImage: false,
+                    spellChecker: false,
+                    sideBySideFullscreen: false,
+                    status: false,
+                    placeholder: 'Details (optional)'
+                });
+            </script>
+        {% else %}
+            {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+            <script>
+                const editor = new toastui.Editor({
+                    el: document.querySelector('#editor'),
+                    height: '500px',
+                    initialEditType: 'wysiwyg',
+                    previewStyle: 'vertical',
+                    previewHighlight: true,
+                    usageStatistics: false,
+                    hideModeSwitch: false,
+                    placeholder: 'Details (optional)',
+                    toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
+                });
 
-                        function DoSubmit() {
-                            document.getElementById('body').value = editor.getMarkdown();
-                            return true;
-                        }
-                    </script>
-                {% endif %}
-            {% else %}
-                {{ render_form(form, button_style="success", floating_input_label=True, text_area_style="height: 20rem") }}
-            {% endif %}
-        </div>
-        <div class="col">
-            <div class="card border-0">
-                <div class="card-body">
-                    <h5 class="text-muted">Guidelines for posting</h5>
-                    <ul class="text-muted small">
-                        <li>You can ask for many things, e.g.</li>
-                        <ul>
-                            <li>find out more about a town / area / residential block I am about to visit / live in
-                            </li>
-                            <li>ask people to share their experience of a school as a student / workplace as an
-                                employee
-                            </li>
-                            <li>walk you through the process of buying a foreign product, e.g. snacks from Japan
-                            </li>
-                            <li>help you to find out / test a specific use case of a product before you buy</li>
-                        </ul>
-                        <li>If you know who are best positioned to help you, you can put criteria who you want to
-                            hear from, e.g.
-                        </li>
-                        <ul>
-                            <li>someone who used to live around there, or visited / lived in the block</li>
-                            <li>someone who used to study / work there</li>
-                            <li>someone who lives in the same country as you and buys Japanese snacks online
-                                regularly
-                            </li>
-                            <li>a current owner of the product I am interested in</li>
-                        </ul>
-                    </ul>
-                </div>
-            </div>
+                function DoSubmit() {
+                    document.getElementById('body').value = editor.getMarkdown();
+                    return true;
+                }
+            </script>
+        {% endif %}
+    {% else %}
+        {{ render_form(form, button_style="success", floating_input_label=True, text_area_style="height: 15rem") }}
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block right_col %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title text-muted">Guidelines for posting</h5>
+            <ul class="small">
+                <li>Be specific, give criteria on who you want to hear from if possible</li>
+                <li>Use hashtags so the relevant people can find your post quicker, e.g. if your question is
+                about New York, put #NewYork somewhere in the Details section for it to be recognized as a hashtag</li>
+                <li>Share your post using social media and other online communities to spread the word, but <b>please
+                    follow their rules and don't spam</b>. Generally, a good way is to ask the same question in the
+                    community and offer to pay a reward using the link to your post here.</li>
+                <li>Don't put any personal information in the post</li>
+                <li>Enable Social Media mode to offer even more incentive for people to spread the word by guaranteeing
+                    a referral reward</li>
+            </ul>
+            <h5 class="card-title text-muted">Payments and rewards</h5>
+            <ul class="small">
+                <li>Payment is not required when a post is created</li>
+                <li>If someone takes an interest in your post and makes an engagement request, the buyer's account
+                    balance will be checked before the engagement can be entered into, and a top-up will
+                    be required if there is not enough funds to make a payment for the reward offered</li>
+                <li>If both parties rate the engagement as successful(+), the reward will be distributed according to
+                    the <a href="#">reward distribution rules</a></li>
+                <li>If the buyer rates the engagement as unsuccessful(-), no reward will be distributed and the reserved
+                    amount will be released back to the buyer's account</li>
+                <li>The track record of each user is available for all users to see on the user profile page, it is also
+                    used model a user's reputation on the platform and limits the maximum reward a user is allowed to
+                    offer</li>
+            </ul>
+
+{#                You can ask for many things, e.g. find out more about a town / area / residential block I am about to visit / live in#}
+{#                ask people to share their experience of a school as a student / workplace as an employee#}
+{#                walk you through the process of buying a foreign product, e.g. snacks from Japan#}
+{#                help you to find out / test a specific use case of a product before you buy#}
+{#                If you know who are best positioned to help you, you can put criteria who you want to#}
+{#                hear from, e.g.#}
+{#                someone who used to live around there, or visited / lived in the block#}
+{#                someone who used to study / work there#}
+{#                someone who lives in the same country as you and buys Japanese snacks online#}
+{#                        regularly#}
+{#                    a current owner of the product I am interested in#}
+{#            <h5 class="text-muted">When do I pay?</h5>#}
+{#                <li>#}
+{#                The buyer's account balance will be checked before someone's engagement request can be accepted, and#}
+{#                a top-up will be required if the balance is not enough to cover the payment.#}
+{#                </li>#}
+{#                <li>#}
+{#                Once the engagement is accepted, the amount will be reserved in the buyer's account until both#}
+{#                parties have rated the engagement.#}
+{#                </li>#}
+{#                <li>#}
+{#                If they both rate the engagement as successful(+), the reward#}
+{#                will be distributed according to our <a href="#">reward distribution rules</a>.#}
+{#                </li>#}
+{#                <li>#}
+{#                If the buyer rates the engagement as unsuccessful(-), no reward will be distributed and the reserved#}
+{#                amount will be released back to the buyer.#}
+{#                </li>#}
         </div>
     </div>
+    {{ render_navbar_side() }}
 {% endblock %}

@@ -13,15 +13,15 @@ class TUIEditorField(TextAreaField):
 class PostForm(FlaskForm):
     is_request = RadioField("Are you buying or selling?",
                             choices=[
-                                (1, "Buying - I am making a request"),
-                                (0, "Selling - I am offering my service"),
+                                (1, "Buying - I am asking a question / making a request"),
+                                (0, "Selling - I am answering questions / offering my service"),
                             ],
                             validators=[InputRequired()]
                             )
     title = StringField("Title",
                         validators=[InputRequired(), Length(TITLE_MIN_LENGTH, 100)],
                         render_kw={"placeholder": "Title"})
-    reward = DecimalField("Price (in USD - $)",
+    reward = DecimalField("Reward / Price (in USD - $)",
                           validators=[InputRequired(), NumberRange(1, 5)],
                           render_kw={"placeholder": "Price"})
     body = TextAreaField("Details (optional)", render_kw={"placeholder": "Details (optional)"})

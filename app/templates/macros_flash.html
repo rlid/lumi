@@ -49,7 +49,7 @@
         {% if messages -%} {# don't output anything if there are no messages #}
             <div class="toast-container position-absolute p-3 end-0" style="z-index: 999;">
                 {% for cat, msg in messages %}
-                    <div class="toast" role="alert" data-bs-delay="10000" style="{{ category_map[cat] }}">
+                    <div class="toast" role="alert" data-bs-delay="5000" style="{{ category_map[cat] }}">
                         <div class="d-flex">
                             <div class="toast-body">
                                 <small>{{ msg }}</small>

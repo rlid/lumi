@@ -117,42 +117,58 @@ def account():
     return render_template("user.html", user=current_user)
 
 
-@main.route('/post/<int:post_id>')
+@main.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def view_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
-
-    # TODO: don't group_by, process the Cartesian products in Python into a dict of node:messages so the database is
-    # queried only once
-    nodes = db.session.query(
-        Node,
-        func.max(Message.timestamp).label('max_timestamp')
-    ).join(
-        Post, Node.post_id == post_id
-    ).join(
-        Message, Message.node_id == Node.id
-    ).group_by(
-        Node
-    ).order_by(
-        desc('max_timestamp')
-    ).all()
-
-    return render_template("view_post.html", post=post, nodes=nodes, Engagement=Engagement, Message=Message)
+    node = None
+    if current_user.is_authenticated:
+        node = post.nodes.filter(Node.creator == current_user).first()
+    if node is None:
+        node = post.nodes.filter(Node.creator == post.creator).first()
+    return redirect(url_for('main.view_node', node_id=node.id))
 
 
 @main.route('/node/<int:node_id>')
 def view_node(node_id):
-    form = MessageForm()
     node = Node.query.filter_by(id=node_id).first_or_404()
-    engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
-    messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
-    return render_template(
-        "view_node.html",
-        node=node,
-        engagement=engagement,
-        messages_asc=messages_asc,
-        form=form,
-        Engagement=Engagement,
-        Message=Message)
+
+    if current_user == node.creator and current_user == node.post.creator:
+        # TODO: experiment with not using group_by, process the Cartesian products in Python into a dict of
+        #  node:message so the database is queried only once
+        nodes = db.session.query(
+            Node,
+            func.max(Message.timestamp).label('max_timestamp')
+        ).join(
+            Post, Node.post_id == node.post_id
+        ).join(
+            Message, Message.node_id == Node.id
+        ).group_by(
+            Node
+        ).order_by(
+            desc('max_timestamp')
+        ).all()
+        return render_template(
+            "view_node_as_post_creator.html",
+            post=node.post,
+            nodes=nodes,
+            Engagement=Engagement,
+            Message=Message)
+
+    if current_user == node.creator or current_user == node.post.creator:
+        engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+        messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
+        form = MessageForm()
+        return render_template(
+            "view_node.html",
+            node=node,
+            engagement=engagement,
+            messages_asc=messages_asc,
+            form=form,
+            Engagement=Engagement,
+            Message=Message)
+
+    form = MessageForm()
+    return render_template("view_node_as_other_user.html", node=node, form=form)
 
 
 @main.route('/how-it-works')

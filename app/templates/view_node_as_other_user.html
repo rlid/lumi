@@ -1,0 +1,50 @@
+{% extends "index.html" %}
+{% from "macros_models.html" import render_post_card with context %}
+{% from "macros_form.html" import text_area_style, button_class with context %}
+
+{% block mid_col %}
+    {{ render_post_card(node.post, truncate_body=False) }}
+
+    <div class="mb-3">
+        <form id="form" method="post">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.text(
+                       class_="form-control",
+                       placeholder="Message",
+                       style=text_area_style(current_user, node.post),
+                       disabled=not current_user.is_authenticated)
+                }}
+            </div>
+            <div class="d-flex justify-content-between">
+                {{ form.submit(
+                       class_="btn btn-" + button_class(current_user, node.post),
+                       disabled=not current_user.is_authenticated) }}
+                <a class="btn btn-{{- button_class(current_user, node.post) }}
+                    {% if not current_user.is_authenticated %}disabled{% endif %}"
+                   href="#"
+                    {% if not current_user.is_authenticated %}tabindex="-1"{% endif %}>
+                    Request Engagement
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block right_col %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title text-muted">Think you can help or know someone who can?</h5>
+            {% if not current_user.is_authenticated %}
+                 <p class="small"><a href="#"> Log in</a> to contribute and earn rewards.</p>
+            {% endif %}
+            <ul class="small">
+                <li><b>Send</b> the poster a message if you need something clarified</li>
+                <li><b>Request Engagement</b> when you are ready to help, and earn a reward if the engagement is rated as successful(+) by both of you</li>
+                <li><b>Share</b> it with a friend or on social media / online communities with your circle of friends. Your will earn a reward if  the question is successfully answered through you. <strong>Make sure to use the Share button to generate your unique referer link!</strong></li>
+            </ul>
+        </div>
+    </div>
+    {{ super() }}
+{% endblock %}
