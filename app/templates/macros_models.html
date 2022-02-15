@@ -68,6 +68,10 @@
         </div>
         {% if buttons %}
             <div class="card-footer py-0">
+                <a href="#"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Share</b>
+                </a>
                 {% if current_user == post.creator %}
                     <a href="#"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
@@ -75,17 +79,13 @@
                     </a>
                     <a href="#"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Delete</b>
+                        <b>Mark as Done</b>
                     </a>
                     <a href="#"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Mark as Done</b>
+                        <b>Delete</b>
                     </a>
                 {% endif %}
-                <a href="#"
-                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Share</b>
-                </a>
                 {% if current_user != post.creator %}
                     <a href="#"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">

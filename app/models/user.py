@@ -269,11 +269,11 @@ class User(UserMixin, db.Model):
     # rates the engagement
     def create_engagement(self, node):
         if self != node.creator:
-            raise InvalidActionError('Cannot request engagement because the user is not the node creator')
+            raise InvalidActionError('Cannot request for engagement because the user is not the node creator')
         if self == node.post.creator:
-            raise InvalidActionError('Cannot request engagement because the user cannot be the post creator')
+            raise InvalidActionError('Cannot request for engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
-            raise InvalidActionError('Cannot request engagement because an active engagement already exists')
+            raise InvalidActionError('Cannot request for engagement because an active engagement already exists')
 
         if node.post.type == Post.TYPE_BUY:
             engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
