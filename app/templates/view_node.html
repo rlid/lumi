@@ -118,14 +118,34 @@
 {% block right_col %}
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title text-muted">Think you can help or know someone who can?</h5>
-            {% if not current_user.is_authenticated %}
-                 <p class="small"><a href="#"> Log in</a> to contribute and earn rewards.</p>
-            {% endif %}
+            <h5 class="card-title text-muted">Guide on user interactions</h5>
             <ul class="small">
-                <li><b>Send</b> the poster a message if you need something clarified</li>
-                <li><b>Request Engagement</b> when you are ready to help, and earn a reward if the engagement is rated as successful(+) by both of you</li>
-                <li><b>Share</b> it with a friend or on social media / online communities with your circle of friends. Your will earn a reward if  the question is successfully answered through you. <strong>Make sure to use the Share button to generate your unique referer link!</strong></li>
+                <li>Find out as much as necessary from each other before <b>Request for Engagement</b> or <b>Accept
+                    Engagement</b>. Be wary of proof of credentials, you are welcome to ask for more proof if
+                    you think it is necessary</li>
+                <li><b>Request for Engagement</b> when you are ready to enter into an engagement, at the end of which
+                    a reward will be distributed if the engagement is rated as successful(+) by both parties</li>
+                <li>If the asker's account balance is not enough for the reward, a top-up will be required before the
+                    engagement can be entered into. The money will be reserved in the asker's account until the
+                    engagement is rated by both parties</li>
+                <li><b>Rate Engagement</b> once you are happy with the answer provided to or by you. The other party
+                    needs to rate the engagement <b>within 72 hours</b> of your rating. The other party's rating will be
+                    recorded as unsuccessful(&minus;) after the window expires.</li>
+                <li>If both parties rate the engagement as successful(+), a reward will be distributed according to
+                    the <a href="#">reward distribution rules</a></li>
+            </ul>
+            <h5 class="card-title text-muted">Trustworthiness on the platform</h5>
+            <ul class="small">
+                <li>The <b>track record</b> of each user is available for all users to see on the user profile page</li>
+                <li>The platform uses the track record to model each user's <b>trustworthiness on the platform</b>,
+                    which is in turn used limit the reward value of posts a user is allowed to participate in</li>
+                <li>Even though no reward is paid out as long as the asker rates the engagement as &minus;,
+                    both parties' track records will be on the line once an engagement is entered into, as it contain
+                    information about all engagements</li>
+                <li>A <b>dispute</b> arises if the asker rates &minus; and the answerer rates +, the party with a weaker
+                    trustworthiness on the platform will have its trustworthiness directly impacted</li>
+                <li>There will be no dispute as long as the answerer rates the engagement as &minus;, in which
+                    case the trustworthiness will not be directly impacted for either party</li>
             </ul>
         </div>
     </div>
