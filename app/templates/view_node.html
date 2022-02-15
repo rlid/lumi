@@ -90,7 +90,8 @@
             {{ form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
 
             {% if current_user == node.creator and (engagement is none or engagement.state != Engagement.STATE_ENGAGED) %}
-                <a class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">Request for Engagement</a>
+                <a class="btn btn-{{- button_class(current_user, node.post) -}}"
+                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">Request for Engagement</a>
             {% endif %}
             {% if engagement is not none %}
                 {% if engagement.state == Engagement.STATE_REQUESTED %}
@@ -178,7 +179,7 @@
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            window.scrollTo(0, document.body.scrollHeight);
+            document.getElementById('form').scrollIntoView();
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();

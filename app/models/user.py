@@ -273,7 +273,9 @@ class User(UserMixin, db.Model):
         if self == node.post.creator:
             raise InvalidActionError('Cannot request for engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
-            raise InvalidActionError('Cannot request for engagement because an active engagement already exists')
+            raise InvalidActionError('Cannot request for engagement because an incomplete engagement already exists')
+        if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
+            raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
         if node.post.type == Post.TYPE_BUY:
             engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
@@ -294,7 +296,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        if self.account_balance - self.committed_amount < post.reward:
+        if post.type == Post.TYPE_BUY and self.account_balance - self.committed_amount < post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
         self.committed_amount = self.committed_amount + post.reward

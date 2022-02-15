@@ -177,6 +177,37 @@ def view_node(node_id):
     return render_template("view_node_as_other_user.html", node=node, form=form)
 
 
+@main.route('/node/<int:node_id>/request-engagement')
+@login_required
+def request_engagement(node_id):
+    node = Node.query.filter_by(id=node_id).first_or_404()
+    post = node.post
+
+    if current_user == post.creator:
+        flash('You cannot request for engagement on your own post.', category='danger')
+        return redirect(url_for('main.view_node', node_id=node_id))
+
+    if (post.type == Post.TYPE_SELL and
+        current_user.account_balance - current_user.committed_amount < post.reward) or (
+            post.type == Post.TYPE_BUY and
+            current_user.account_balance - current_user.committed_amount < post.reward):
+        flash('Insufficient funds, please top up before you proceed.', category='warning')
+        return redirect(url_for('main.index'))
+
+    user_node = node
+    if current_user != node.creator:
+        user_node = post.nodes.filter(Node.creator == current_user).first()
+        if user_node is None:
+            user_node = current_user.create_node(node)
+
+    engagement = user_node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+    if engagement is None:
+        engagement = current_user.create_engagement(user_node)
+    else:
+        flash('You have already requested for engagement, please let the other user know.', category='warning')
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+
+
 @main.route('/how-it-works')
 def how_it_works():
     return render_template("landing.html", title="How It Works")
