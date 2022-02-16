@@ -274,7 +274,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot request for engagement because the user is not the node creator')
         if self == node.post.creator:
             raise InvalidActionError('Cannot request for engagement because the user cannot be the post creator')
-        if node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first() is not None:
+        if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot request for engagement because an uncompleted engagement already exists')
         if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
@@ -292,14 +292,21 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return engagement
 
-    def delete_engagement(self, engagement):
+    def cancel_engagement(self, engagement):
         if self != engagement.sender:
             raise InvalidActionError('Cannot delete engagement because the user is not the engagement sender.')
 
         if engagement.state != Engagement.STATE_REQUESTED:
             raise InvalidActionError('Cannot delete engagement because the engagement is not in requested state.')
 
-        db.session.delete(engagement)
+        engagement.state = Engagement.STATE_CANCELLED
+        db.session.add(engagement)
+        message = Message(creator=self,
+                          node=engagement.node,
+                          engagement=engagement,
+                          type=Message.TYPE_CANCEL,
+                          text=f'Engagement cancelled by {self}')
+        db.session.add(message)
         db.session.commit()
 
     def accept_engagement(self, engagement):

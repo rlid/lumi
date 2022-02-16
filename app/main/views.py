@@ -155,7 +155,7 @@ def view_node(node_id):
             Message=Message)
 
     if current_user == node.creator or current_user == node.post.creator:
-        engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+        engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()
         return render_template(
@@ -197,7 +197,7 @@ def request_engagement(node_id):
         if user_node is None:
             user_node = current_user.create_node(node)
 
-    engagement = user_node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+    engagement = user_node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
     if engagement is None:
         engagement = current_user.create_engagement(user_node)
     else:
@@ -216,7 +216,7 @@ def cancel_engagement(engagement_id):
     elif engagement.state != Engagement.STATE_REQUESTED:
         flash('The engagement cannot be cancelled because it has been accepted.', category='warning')
     else:
-        current_user.delete_engagement(engagement)
+        current_user.cancel_engagement(engagement)
 
     return redirect(url_for('main.view_node', node_id=node_id))
 
@@ -225,16 +225,17 @@ def cancel_engagement(engagement_id):
 @login_required
 def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-
-    if current_user != engagement.node.post.creator:
-        flash('Only the original poster can accept the engagement.', category='danger')
-
     post = engagement.node.post
-    if post.type == Post.TYPE_BUY and current_user.account_balance - current_user.committed_amount < post.reward:
+
+    if engagement.state != Engagement.STATE_REQUESTED:
+        flash('The request for engagement can no longer be accepted.', category='danger')
+    elif current_user != post.creator:
+        flash('Only the original poster can accept the engagement.', category='danger')
+    elif post.type == Post.TYPE_BUY and current_user.account_balance - current_user.committed_amount < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.index'))
-
-    current_user.accept_engagement(engagement)
+    else:
+        current_user.accept_engagement(engagement)
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 

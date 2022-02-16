@@ -6,14 +6,14 @@
     {% for node, last_timestamp in nodes %}
         {% set messages = node.messages_ordered(order_desc=True) %}
         <div class="card mb-3
-        {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+        {% if messages[0].engagement is not none and messages[0].engagement.state < Engagement.STATE_COMPLETED %}
             border-success
         {% elif messages[0].type == Message.TYPE_REQUEST %}
             border-primary
         {% endif %}
         ">
             <div class="card-header border-0 small
-                    {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+                    {% if messages[0].engagement is not none and messages[0].engagement.state < Engagement.STATE_COMPLETED %}
                  success
                     {% elif messages[0].type == Message.TYPE_REQUEST %}
                  primary
@@ -21,7 +21,7 @@
             ">
                 <a href="{{ url_for('main.view_node', node_id=node.id) }}"
                    class="text-decoration-none
-                    {% if messages[0].engagement is not none and messages[0].engagement.state != Engagement.STATE_COMPLETED %}
+                    {% if messages[0].engagement is not none and messages[0].engagement.state < Engagement.STATE_COMPLETED %}
                         {% if messages[0].engagement.state == Engagement.STATE_ENGAGED %}
                             text-success"><b>Active engagement with {{ node.creator }}</b>
                    {% endif %}

@@ -68,7 +68,7 @@ for day in range(N_DAYS):
 
     for user in users:
         for node in user.nodes.filter(Node.parent != None).all():
-            engagement = node.engagements.filter(Engagement.state != Engagement.STATE_COMPLETED).first()
+            engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
             if engagement is None:
                 if random.uniform(0, 1) < P_REQUEST_ENGAGE:
                     engagement = user.create_engagement(node)

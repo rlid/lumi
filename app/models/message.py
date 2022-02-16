@@ -11,6 +11,7 @@ class Message(db.Model):
     TYPE_ACCEPT = 2 * TYPE_REQUEST
     TYPE_RATE = 2 * TYPE_ACCEPT
     TYPE_COMPLETE = 2 * TYPE_RATE
+    TYPE_CANCEL = 2 * TYPE_COMPLETE
 
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
