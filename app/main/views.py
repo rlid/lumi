@@ -132,6 +132,11 @@ def view_post(post_id):
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
 
+    if current_user.is_authenticated and (current_user != node.creator and current_user != node.post.creator):
+        user_node = node.post.nodes.filter(Node.creator == current_user).first()
+        if user_node is not None:
+            return redirect(url_for('main.view_node', node_id=user_node.id))
+
     if current_user == node.creator and current_user == node.post.creator:
         # TODO: experiment with not using group_by, process the Cartesian products in Python into a dict of
         #  node:message so the database is queried only once
