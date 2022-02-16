@@ -292,6 +292,16 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return engagement
 
+    def delete_engagement(self, engagement):
+        if self != engagement.sender:
+            raise InvalidActionError('Cannot delete engagement because the user is not the engagement sender.')
+
+        if engagement.state != Engagement.STATE_REQUESTED:
+            raise InvalidActionError('Cannot delete engagement because the engagement is not in requested state.')
+
+        db.session.delete(engagement)
+        db.session.commit()
+
     def accept_engagement(self, engagement):
         post = engagement.node.post
         if engagement.state != Engagement.STATE_REQUESTED:

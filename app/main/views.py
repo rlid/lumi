@@ -205,6 +205,22 @@ def request_engagement(node_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
+@main.route('/engagement/<int:engagement_id>/cancel')
+@login_required
+def cancel_engagement(engagement_id):
+    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+    node_id = engagement.node_id
+
+    if current_user != engagement.sender:
+        flash('You cannot cancel the engagement requested by someone else.', category='danger')
+    elif engagement.state != Engagement.STATE_REQUESTED:
+        flash('The engagement cannot be cancelled because it has been accepted.', category='warning')
+    else:
+        current_user.delete_engagement(engagement)
+
+    return redirect(url_for('main.view_node', node_id=node_id))
+
+
 @main.route('/engagement/<int:engagement_id>/accept')
 @login_required
 def accept_engagement(engagement_id):

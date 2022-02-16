@@ -89,10 +89,35 @@
         <div class="d-flex justify-content-between">
             {{ form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
 
-            {% if current_user == node.creator and (engagement is none or engagement.state != Engagement.STATE_ENGAGED) %}
-                <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">
-                    Request for Engagement</a>
+            {% if current_user == node.creator %}
+                {% if engagement is none %}
+                    <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                       data-bs-toggle="modal" data-bs-target="#modalRequest">
+                        Request for Engagement</button>
+
+                    <div class="modal fade" id="modalRequest" tabindex="-1">
+                      <div class="modal-dialog modal-fullscreen-sm-down">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body text-center">
+                            <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                               href="{{ url_for('main.request_engagement', node_id=node.id) }}">
+                                Confirm
+                            </a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                {% elif engagement.state == Engagement.STATE_REQUESTED %}
+                    <a id="btnCancel" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                       href="{{ url_for('main.cancel_engagement', engagement_id=engagement.id) }}">
+                        Cancel Request
+                    </a>
+                {% endif %}
             {% endif %}
             {% if engagement is not none %}
                 {% if engagement.state == Engagement.STATE_REQUESTED %}
@@ -109,19 +134,19 @@
                             <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}" disabled>
                                 Rate Engagement</button>
                             <button type="button" class="btn btn-outline-success"
-                                    data-bs-toggle="modal" data-bs-target="#ratePlus">
+                                    data-bs-toggle="modal" data-bs-target="#modalRatePlus">
                                 &plus;
                             </button>
                             <button type="button" class="btn btn-outline-danger"
-                                    data-bs-toggle="modal" data-bs-target="#rateMinus">
+                                    data-bs-toggle="modal" data-bs-target="#modalRateMinus">
                                 &minus;
                             </button>
                         </div>
-                        <div class="modal fade" id="ratePlus" tabindex="-1">
+                        <div class="modal fade" id="modalRatePlus" tabindex="-1">
                           <div class="modal-dialog modal-fullscreen-sm-down">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h6 class="modal-title" id="exampleModalLabel">You rated this engagement as
+                                <h6 class="modal-title">You rated this engagement as
                                     <b class="text-success">successful (&plus;)</b></h6>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
@@ -135,11 +160,11 @@
                           </div>
                         </div>
 
-                        <div class="modal fade" id="rateMinus" tabindex="-1">
+                        <div class="modal fade" id="modalRateMinus" tabindex="-1">
                           <div class="modal-dialog modal-fullscreen-sm-down">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h6 class="modal-title" id="exampleModalLabel">You rated this engagement as
+                                <h6 class="modal-title">You rated this engagement as
                                     <b class="text-danger">unsuccessful (&minus;)</b></h6>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
