@@ -264,7 +264,7 @@ def connect():
         return False
 
 
-@socketio.on('message sent')
+@socketio.on('message_sent')
 def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
     if current_user != node.creator and current_user != node.post.creator:
@@ -293,7 +293,31 @@ def handle_message_sent(message):
                            gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
                            # available here. TODO: try to match the logic for existing messages
                            Message=Message)
-    emit('message processed', {'id': message.id, 'html': html, 'new_section': new_section}, to=node.id)
+    emit('processed_message_sent',
+         {
+             'id': message.id,
+             'html': html,
+             'new_section': new_section
+         },
+         to=node.id)
+
+
+@socketio.on('engagement_requested')
+def handle_engagement_requested(message):
+    emit('processed_engagement_requested', {
+        'html': 'Your received a request for engagement - please <a href="{node_url}">refresh</a> this page.'.format(
+            node_url=url_for('main.view_node', node_id=message['node_id'])
+        )},
+         to=message['node_id'])
+
+
+@socketio.on('engagement_accepted')
+def handle_engagement_accepted(message):
+    emit('processed_engagement_accepted', {
+        'html': 'Your request for engagement is accepted - please <a href="{node_url}">refresh</a> this page.'.format(
+            node_url=url_for('main.view_node', node_id=message['node_id'])
+        )},
+         to=message['node_id'])
 
 
 @socketio.on('join')

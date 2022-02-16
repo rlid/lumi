@@ -90,21 +90,21 @@
             {{ form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
 
             {% if current_user == node.creator and (engagement is none or engagement.state != Engagement.STATE_ENGAGED) %}
-                <a class="btn btn-{{- button_class(current_user, node.post) -}}"
+                <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
                    href="{{ url_for('main.request_engagement', node_id=node.id) }}">
                     Request for Engagement</a>
             {% endif %}
             {% if engagement is not none %}
                 {% if engagement.state == Engagement.STATE_REQUESTED %}
                     {% if current_user == node.post.creator %}
-                        <a class="btn btn-{{- button_class(current_user, node.post) -}}"
+                        <a id="btnAccept" class="btn btn-{{- button_class(current_user, node.post) -}}"
                            href="{{ url_for('main.accept_engagement', engagement_id=engagement.id) }}">
                             Accept Engagement</a>
                     {% endif %}
                 {% elif engagement.state == Engagement.STATE_ENGAGED %}
                     {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
                           (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
-                        <a class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">
+                        <a id="btnRate" class="btn btn-{{- button_class(current_user, node.post) -}}" href="#">
                             Rate Engagement</a>
                     {% endif %}
                 {% endif %}
@@ -164,6 +164,7 @@
     {{ super() }}
 {% endblock %}
 
+
 {% macro socketio_script(section_id) %}
     <script type="text/javascript" charset="utf-8">
         var socket = io();
@@ -174,7 +175,7 @@
                     node_id: {{ node.id }}
                 });
         });
-        socket.on('message processed', message => {
+        socket.on('processed_message_sent', message => {
             let template = document.createElement('template');
             template.innerHTML = message.html
             let nChildElement = template.content.childElementCount
@@ -184,18 +185,55 @@
             }
             flask_moment_render_all();
             {#document.getElementById('message'+message.id).scrollIntoView(false);#}
+            {#document.getElementById('message'+message.id).scrollIntoViewIfNeeded(true);#}
+            {#let message_form = document.getElementById('form')#}
+            {#message_form.scrollTop = message_form.scrollHeight;#}
+        });
+        socket.on('processed_engagement_requested', message => {
+            let toast = document.getElementById('nodeToast');
+            let toastText = document.getElementById('nodeToastText');
+            toastText.innerHTML = message.html;
+            toast.hidden = false;
+            {#location.reload();#}
+        });
+        socket.on('processed_engagement_accepted', message => {
+            let toast = document.getElementById('nodeToast');
+            let toastText = document.getElementById('nodeToastText');
+            toastText.innerHTML = message.html;
+            toast.hidden = false;
+            {#location.reload();#}
         });
         document.getElementById('form').onsubmit = event => {
             event.preventDefault();
             const textField = document.getElementById('text');
             socket.emit(
-                'message sent',
+                'message_sent',
                 {
                     node_id: {{ node.id }},
-                    'engagement_id': {{ engagement.id if engagement is not none else 'null' }},
+                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
                     text: textField.value,
                 });
             textField.value = '';
+        };
+        let btnRequest = document.getElementById('btnRequest')
+        if (btnRequest) {
+            document.getElementById('btnRequest').onclick = event => {
+                socket.emit(
+                    'engagement_requested',
+                    {
+                        node_id: {{ node.id }}
+                    });
+            };
+        };
+        let btnAccept = document.getElementById('btnAccept')
+        if (btnAccept) {
+            document.getElementById('btnAccept').onclick = event => {
+                socket.emit(
+                    'engagement_accepted',
+                    {
+                        node_id: {{ node.id }}
+                    });
+            };
         };
     </script>
 {% endmacro %}

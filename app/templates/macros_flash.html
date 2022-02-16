@@ -1,10 +1,10 @@
 {% macro flash_toast_js() %}
     <script>
         window.onload = event => {
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
             toastElList.map(function (toastEl) {
-                new bootstrap.Toast(toastEl).show({delay: 1000})
-            })
+                new bootstrap.Toast(toastEl).show()
+            });
         }
     </script>
 {% endmacro %}
@@ -37,17 +37,17 @@
 
 {% macro render_flash(messages=None, dismissible=False, dismiss_animate=False,
                          category_map={
-                             'success':'background-color: rgb(158,200,182);',
-                             'info':'background-color: rgb(153,225,241);',
-                             'warning':'background-color: rgb(245,222,152);',
-                             'danger':'background-color: rgb(232,168,176);'}) %}
+                             'success':'background-color: springgreen;',
+                             'info':'background-color: cyan;',
+                             'warning':'background-color: yellow;',
+                             'danger':'background-color: pink;'}) %}
 {#                              'success':'background-color: #c9dfd6;',#}
 {#                             'info':'background-color: #c7ebf3;',#}
 {#                             'warning':'background-color: #f5eac6;',#}
 {#                             'danger':'background-color: #eecfd3;'}) -%}#}
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
-        {% if messages -%} {# don't output anything if there are no messages #}
-            <div class="toast-container position-absolute p-3 end-0" style="z-index: 999;">
+        <div class="toast-container position-absolute p-3 end-0" style="z-index: 999;">
+            {% if messages -%} {# don't output anything if there are no messages #}
                 {% for cat, msg in messages %}
                     <div class="toast" role="alert" data-bs-delay="5000" style="{{ category_map[cat] }}">
                         <div class="d-flex">
@@ -58,7 +58,15 @@
                         </div>
                     </div>
                 {%- endfor -%}
+            {% endif -%}
+            <div class="toast" hidden id="nodeToast" role="alert" data-bs-autohide="false" style="{{ category_map['warning'] }}">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <small id="nodeToastText">{{ msg }}</small>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
-        {% endif -%}
+        </div>
     {% endwith -%}
 {% endmacro -%}
