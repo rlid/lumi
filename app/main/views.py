@@ -222,6 +222,19 @@ def accept_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
+@main.route('/engagement/<int:engagement_id>/<int:rating>')
+@login_required
+def rate_engagement(engagement_id, rating):
+    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+
+    if current_user == engagement.node.creator or current_user == engagement.node.post.creator:
+        current_user.rate_engagement(engagement, rating)
+    else:
+        flash('Only the original poster can accept the engagement.', category='danger')
+
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+
+
 @main.route('/how-it-works')
 def how_it_works():
     return render_template("landing.html", title="How It Works")
