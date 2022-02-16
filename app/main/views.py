@@ -301,23 +301,23 @@ def handle_message_sent(message):
          },
          to=node.id)
 
+# Disabled for now because they cannot handle account balance checks
+# TODO: implement these as toast notification using flask-sock and SQLAlchemy after_insert event
+# @socketio.on('engagement_requested')
+# def handle_engagement_requested(message):
+#     emit('processed_engagement_requested', {
+#         'html': 'Your received a request for engagement - please <a href="{node_url}">refresh</a> this page.'.format(
+#             node_url=url_for('main.view_node', node_id=message['node_id'])
+#         )},
+#          to=message['node_id'])
 
-@socketio.on('engagement_requested')
-def handle_engagement_requested(message):
-    emit('processed_engagement_requested', {
-        'html': 'Your received a request for engagement - please <a href="{node_url}">refresh</a> this page.'.format(
-            node_url=url_for('main.view_node', node_id=message['node_id'])
-        )},
-         to=message['node_id'])
-
-
-@socketio.on('engagement_accepted')
-def handle_engagement_accepted(message):
-    emit('processed_engagement_accepted', {
-        'html': 'Your request for engagement is accepted - please <a href="{node_url}">refresh</a> this page.'.format(
-            node_url=url_for('main.view_node', node_id=message['node_id'])
-        )},
-         to=message['node_id'])
+# @socketio.on('engagement_accepted')
+# def handle_engagement_accepted(message):
+#     emit('processed_engagement_accepted', {
+#         'html': 'Your request for engagement is accepted - please <a href="{node_url}">refresh</a> this page.'.format(
+#             node_url=url_for('main.view_node', node_id=message['node_id'])
+#         )},
+#          to=message['node_id'])
 
 
 @socketio.on('join')

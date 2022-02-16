@@ -175,6 +175,20 @@
                     node_id: {{ node.id }}
                 });
         });
+
+        document.getElementById('form').onsubmit = event => {
+            event.preventDefault();
+            const textField = document.getElementById('text');
+            socket.emit(
+                'message_sent',
+                {
+                    node_id: {{ node.id }},
+                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
+                    text: textField.value,
+                });
+            textField.value = '';
+        };
+
         socket.on('processed_message_sent', message => {
             let template = document.createElement('template');
             template.innerHTML = message.html
@@ -189,52 +203,41 @@
             {#let message_form = document.getElementById('form')#}
             {#message_form.scrollTop = message_form.scrollHeight;#}
         });
-        socket.on('processed_engagement_requested', message => {
-            let toast = document.getElementById('nodeToast');
-            let toastText = document.getElementById('nodeToastText');
-            toastText.innerHTML = message.html;
-            toast.hidden = false;
+
+        {#let btnRequest = document.getElementById('btnRequest')#}
+        {#if (btnRequest) {#}
+        {#    document.getElementById('btnRequest').onclick = event => {#}
+        {#        socket.emit(#}
+        {#            'engagement_requested',#}
+        {#            {#}
+        {#                node_id: {{ node.id }}#}
+        {#            });#}
+        {#    };#}
+        {#};#}
+        {#socket.on('processed_engagement_requested', message => {#}
+        {#    let toast = document.getElementById('nodeToast');#}
+        {#    let toastText = document.getElementById('nodeToastText');#}
+        {#    toastText.innerHTML = message.html;#}
+        {#    toast.hidden = false;#}
             {#location.reload();#}
-        });
-        socket.on('processed_engagement_accepted', message => {
-            let toast = document.getElementById('nodeToast');
-            let toastText = document.getElementById('nodeToastText');
-            toastText.innerHTML = message.html;
-            toast.hidden = false;
+        {#});#}
+        {#let btnAccept = document.getElementById('btnAccept')#}
+        {#if (btnAccept) {#}
+        {#    document.getElementById('btnAccept').onclick = event => {#}
+        {#        socket.emit(#}
+        {#            'engagement_accepted',#}
+        {#            {#}
+        {#                node_id: {{ node.id }}#}
+        {#            });#}
+        {#    };#}
+        {#};#}
+        {#socket.on('processed_engagement_accepted', message => {#}
+        {#    let toast = document.getElementById('nodeToast');#}
+        {#    let toastText = document.getElementById('nodeToastText');#}
+        {#    toastText.innerHTML = message.html;#}
+        {#    toast.hidden = false;#}
             {#location.reload();#}
-        });
-        document.getElementById('form').onsubmit = event => {
-            event.preventDefault();
-            const textField = document.getElementById('text');
-            socket.emit(
-                'message_sent',
-                {
-                    node_id: {{ node.id }},
-                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
-                    text: textField.value,
-                });
-            textField.value = '';
-        };
-        let btnRequest = document.getElementById('btnRequest')
-        if (btnRequest) {
-            document.getElementById('btnRequest').onclick = event => {
-                socket.emit(
-                    'engagement_requested',
-                    {
-                        node_id: {{ node.id }}
-                    });
-            };
-        };
-        let btnAccept = document.getElementById('btnAccept')
-        if (btnAccept) {
-            document.getElementById('btnAccept').onclick = event => {
-                socket.emit(
-                    'engagement_accepted',
-                    {
-                        node_id: {{ node.id }}
-                    });
-            };
-        };
+        {#});#}
     </script>
 {% endmacro %}
 
