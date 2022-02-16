@@ -131,19 +131,19 @@
                           (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
 
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}" disabled>
-                                Rate Engagement</button>
-                            <button type="button" class="btn btn-outline-success"
+                            <button type="button" class="btn btn-outline-success border-{{- button_class(current_user, node.post) -}}"
                                     data-bs-toggle="modal" data-bs-target="#modalRatePlus">
                                 &plus;
                             </button>
-                            <button type="button" class="btn btn-outline-danger"
+                            <button type="button" class="btn btn-{{- button_class(current_user, node.post) }}">
+                                Rate Engagement</button>
+                            <button type="button" class="btn btn-outline-danger border-{{- button_class(current_user, node.post) -}}"
                                     data-bs-toggle="modal" data-bs-target="#modalRateMinus">
                                 &minus;
                             </button>
                         </div>
                         <div class="modal fade" id="modalRatePlus" tabindex="-1">
-                          <div class="modal-dialog modal-fullscreen-sm-down">
+                          <div class="modal-dialog modal-fullscreen-sm-dow">
                             <div class="modal-content">
                               <div class="modal-header">
                                 <h6 class="modal-title">You rated this engagement as
