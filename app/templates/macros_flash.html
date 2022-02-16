@@ -46,7 +46,7 @@
 {#                             'warning':'background-color: #f5eac6;',#}
 {#                             'danger':'background-color: #eecfd3;'}) -%}#}
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
-        <div class="toast-container position-absolute p-3 end-0" style="z-index: 999;">
+        <div class="toast-container fixed-top ms-auto p-3">
             {% if messages -%} {# don't output anything if there are no messages #}
                 {% for cat, msg in messages %}
                     <div class="toast" role="alert" data-bs-delay="10000" style="{{ category_map[cat] }}">

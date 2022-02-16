@@ -188,13 +188,15 @@
         </div>
     {% endif %}
     </div>
-    <div class="toast fixed-top ms-3 mt-5"
-         id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
-        <div class="d-flex">
-            <div class="toast-body">
-                <small id="nodeToastText">{{ msg }}</small>
+    <div class="toast-container fixed-top ms-auto p-3">
+        <div class="toast"
+             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
+            <div class="d-flex">
+                <div class="toast-body">
+                    <small id="nodeToastText">{{ msg }}</small>
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 

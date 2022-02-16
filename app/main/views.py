@@ -190,7 +190,7 @@ def request_engagement(node_id):
 
     if current_user == post.creator:
         flash('You cannot request for engagement on your own post.', category='danger')
-        return redirect(url_for('main.view_node', node_id=node_id))
+        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
     if post.type == Post.TYPE_SELL and current_user.account_balance - current_user.committed_amount < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
@@ -207,7 +207,7 @@ def request_engagement(node_id):
         engagement = current_user.create_engagement(user_node)
     else:
         flash('You have already requested for engagement, please let the other user know.', category='warning')
-    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
 @main.route('/engagement/<int:engagement_id>/cancel')
@@ -223,7 +223,7 @@ def cancel_engagement(engagement_id):
     else:
         current_user.cancel_engagement(engagement)
 
-    return redirect(url_for('main.view_node', node_id=node_id))
+    return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
 
 @main.route('/engagement/<int:engagement_id>/accept')
@@ -241,7 +241,7 @@ def accept_engagement(engagement_id):
         return redirect(url_for('main.index'))
     else:
         current_user.accept_engagement(engagement)
-    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
 @main.route('/engagement/<int:engagement_id>/<int:is_success>')
@@ -254,7 +254,7 @@ def rate_engagement(engagement_id, is_success):
     else:
         flash('Only the original poster can accept the engagement.', category='danger')
 
-    return redirect(url_for('main.view_node', node_id=engagement.node_id))
+    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
 @main.route('/how-it-works')
