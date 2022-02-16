@@ -244,13 +244,13 @@ def accept_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
-@main.route('/engagement/<int:engagement_id>/<int:rating>')
+@main.route('/engagement/<int:engagement_id>/<int:is_success>')
 @login_required
-def rate_engagement(engagement_id, rating):
+def rate_engagement(engagement_id, is_success):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
 
     if current_user == engagement.node.creator or current_user == engagement.node.post.creator:
-        current_user.rate_engagement(engagement, rating)
+        current_user.rate_engagement(engagement, is_success)
     else:
         flash('Only the original poster can accept the engagement.', category='danger')
 
@@ -299,6 +299,17 @@ def connect():
         return False
 
 
+@socketio.on('join')
+def on_join(data):
+    node_id = data['node_id']
+    node = Node.query.get(node_id)
+    if current_user == node.creator or current_user == node.post.creator:
+        join_room(node_id)
+        # emit('notify_node', {'html': f'{current_user} has joined the chat.'}, to=node_id)
+    else:
+        disconnect()
+
+
 @socketio.on('message_sent')
 def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
@@ -336,6 +347,15 @@ def handle_message_sent(message):
          },
          to=node.id)
 
+
+@socketio.on('engagement_rated')
+def handle_engagement_rated(message):
+    emit('notify_node', {
+        'html': 'The other user has rated this engagement - please <a href="{node_url}" onclick="location.reload()">refresh</a> this page.'.format(
+            node_url=url_for('main.view_node', node_id=message['node_id'], _anchor='form')
+        )},
+         to=message['node_id'])
+
 # Disabled for now because they cannot handle account balance checks
 # TODO: implement these as toast notification using flask-sock and SQLAlchemy after_insert event
 # @socketio.on('engagement_requested')
@@ -353,18 +373,6 @@ def handle_message_sent(message):
 #             node_url=url_for('main.view_node', node_id=message['node_id'])
 #         )},
 #          to=message['node_id'])
-
-
-@socketio.on('join')
-def on_join(data):
-    node_id = data['node_id']
-    node = Node.query.get(data['node_id'])
-    if current_user == node.creator or current_user == node.post.creator:
-        print(f'{current_user} joined room {node_id}')
-        join_room(node_id)
-    else:
-        disconnect()
-
 
 @sock.route('/sock/node/<int:node_id>')
 @login_required

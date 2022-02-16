@@ -151,7 +151,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
                               <div class="modal-body text-center">
-                                <a href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, rating=1) }}"
+                                <a id="btnRatePlus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1) }}"
                                    class="btn btn-{{- button_class(current_user, node.post) -}}">
                                     Confirm</a>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -169,7 +169,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
                               <div class="modal-body text-center">
-                                <a href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, rating=1) }}"
+                                <a id="btnRateMinus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0) }}"
                                    class="btn btn-{{- button_class(current_user, node.post) -}}">
                                     Confirm</a>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -177,30 +177,6 @@
                             </div>
                           </div>
                         </div>
-
-
-{#                        <button id="btnRate" type="button" data-bs-toggle="modal" data-bs-target="#rateModal"#}
-{#                                class="btn btn-{{- button_class(current_user, node.post) -}}">#}
-{#                            Rate Engagement</button>#}
-{#                        <div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">#}
-{#                          <div class="modal-dialog">#}
-{#                            <div class="modal-content">#}
-{#                              <div class="modal-header">#}
-{#                                <h6 class="modal-title" id="exampleModalLabel">Is the engagement successful?</h6>#}
-{#                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>#}
-{#                              </div>#}
-{#                              <div class="modal-body text-justify">#}
-{#                                <button type="button" class="btn btn-success" style="width: 3rem">&plus;</button>#}
-{#                                <button type="button" class="btn btn-danger" style="width: 3rem">&minus;</button>#}
-{#                              </div>#}
-{#                              <div class="modal-footer">#}
-{#                                  <small>The reward will be distributed immediately if both users rate the engagement as#}
-{#                                  successful.</small>#}
-{#                              </div>#}
-{#                            </div>#}
-{#                          </div>#}
-{#                        </div>#}
-
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -212,6 +188,16 @@
         </div>
     {% endif %}
     </div>
+    <div class="toast fixed-top ms-3 mt-5"
+         id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
+        <div class="d-flex">
+            <div class="toast-body">
+                <small id="nodeToastText">{{ msg }}</small>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
     {{ socketio_script(current.section_id) }}
 {% endblock %}
 
@@ -283,7 +269,6 @@
                 });
             textField.value = '';
         };
-
         socket.on('processed_message_sent', message => {
             let template = document.createElement('template');
             template.innerHTML = message.html
@@ -299,9 +284,33 @@
             {#message_form.scrollTop = message_form.scrollHeight;#}
         });
 
+        let rate_event_handler = event => {
+            socket.emit(
+                'engagement_rated',
+                {
+                    node_id: {{ node.id }},
+                });
+        };
+        let btnRatePlus = document.getElementById('btnRatePlus')
+        if (btnRatePlus) {
+            btnRatePlus.onclick = rate_event_handler;
+        };
+        let btnRateMinus = document.getElementById('btnRateMinus')
+        if (btnRateMinus) {
+            btnRateMinus.onclick = rate_event_handler;
+        };
+        socket.on('notify_node', message => {
+            let toast = document.getElementById('nodeToast');
+            let toastText = document.getElementById('nodeToastText');
+            toastText.innerHTML = message.html;
+            bootstrap.Toast.getOrCreateInstance(toast).show()
+            toast.hidden = false;
+            {#location.reload();#}
+        });
+
         {#let btnRequest = document.getElementById('btnRequest')#}
         {#if (btnRequest) {#}
-        {#    document.getElementById('btnRequest').onclick = event => {#}
+        {#    btnRequest.onclick = event => {#}
         {#        socket.emit(#}
         {#            'engagement_requested',#}
         {#            {#}
@@ -318,7 +327,7 @@
         {#});#}
         {#let btnAccept = document.getElementById('btnAccept')#}
         {#if (btnAccept) {#}
-        {#    document.getElementById('btnAccept').onclick = event => {#}
+        {#    btnAccept.onclick = event => {#}
         {#        socket.emit(#}
         {#            'engagement_accepted',#}
         {#            {#}

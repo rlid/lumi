@@ -373,17 +373,17 @@ class User(UserMixin, db.Model):
             self.sum_one += 1 if success else -1
             self.sum_abs_one += 1
 
-    def rate_engagement(self, engagement, success):
+    def rate_engagement(self, engagement, is_success):
         if engagement.state != Engagement.STATE_ENGAGED:
             print(engagement.state)
             raise InvalidActionError('Cannot rate engagement because it is not in engaged state')
         asker = engagement.asker
         answerer = engagement.answerer
         if self == asker:
-            engagement.rating_by_asker = 1 if success else -1
+            engagement.rating_by_asker = 1 if is_success else -1
             db.session.add(engagement)
         elif self == answerer:
-            engagement.rating_by_answerer = 1 if success else -1
+            engagement.rating_by_answerer = 1 if is_success else -1
             db.session.add(engagement)
         else:
             raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
@@ -392,7 +392,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
-                          text=f'Engagement rated {"+" if success else "-"} by {self}')
+                          text=f'Engagement rated {"+" if is_success else "-"} by {self}')
         db.session.add(message)
 
         if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:
