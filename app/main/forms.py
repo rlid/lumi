@@ -11,10 +11,10 @@ class TUIEditorField(TextAreaField):
 
 
 class PostForm(FlaskForm):
-    is_request = RadioField("Are you an asker or an answerer?",
+    is_request = RadioField("Are you buying or selling?",
                             choices=[
-                                (1, "Asker - I am asking a question / making a request"),
-                                (0, "Answerer - I am answering questions / offering my service"),
+                                (1, "Buying - I am asking a question / making a request"),
+                                (0, "Selling - I am answering questions / offering my service"),
                             ],
                             validators=[InputRequired()]
                             )

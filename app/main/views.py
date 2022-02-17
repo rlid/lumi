@@ -114,7 +114,7 @@ def user(user_id):
 @main.route('/account')
 @login_required
 def account():
-    return render_template("user.html", user=current_user)
+    return render_template("account.html", user=current_user)
 
 
 @main.route('/post/<int:post_id>', methods=['GET', 'POST'])
