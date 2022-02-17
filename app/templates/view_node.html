@@ -82,6 +82,7 @@
     {% endif %}
     {# before rendering the form, close the div tag for messages to display #}
     </div>
+    {% if node.post.is_open or (engagement is not none and engagement.state == Engagement.STATE_ENGAGED) %}
     <form id="form">
         <div class="mb-3">
             {{ form.text(class_="form-control", placeholder="Message", style=text_area_style(current_user, node.post)) }}
@@ -182,7 +183,7 @@
             {% endif %}
         </div>
     </form>
-
+    {% endif %}
     {% if engagement.state == Engagement.STATE_ENGAGED %}
         {# Active engagement uses card and card-body which means 2 divs, close the div tag for card-body #}
         </div>
@@ -266,7 +267,7 @@
                 'message_sent',
                 {
                     node_id: {{ node.id }},
-                    {#'engagement_id': {{ engagement.id if engagement is not none else 'null' }},#}
+                    'engagement_id': {{ engagement.id if engagement is not none else 'null' }},
                     text: textField.value,
                 });
             textField.value = '';

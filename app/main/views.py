@@ -4,7 +4,7 @@ from flask import render_template, redirect, flash, url_for, Markup, request
 from flask_login import login_required, current_user
 from flask_socketio import emit, join_room, disconnect
 from simple_websocket import ConnectionClosed
-from sqlalchemy import func, desc, distinct, and_, not_, event
+from sqlalchemy import func, desc, distinct, and_, or_, not_, event
 
 from app import db, socketio, sock
 from app.main import main
@@ -108,13 +108,79 @@ def browse():
 @main.route('/user/<int:user_id>')
 def user(user_id):
     u = User.query.filter_by(id=user_id).first_or_404()
-    return render_template("user.html", user=u)
+    all_engagements = Engagement.query.filter(
+        and_(
+            or_(Engagement.asker_id == user_id, Engagement.answerer_id == user_id),
+            Engagement.state == Engagement.STATE_COMPLETED
+        )
+    ).order_by(
+        Engagement.timestamp.desc()
+    ).all()
+    return render_template("user.html", user=u, engagements=all_engagements)
 
 
 @main.route('/account')
 @login_required
 def account():
-    return render_template("account.html", user=current_user)
+    posts_with_uncompleted_engagement = db.session.query(
+        Post
+    ).join(
+        Node, Node.post_id == Post.id
+    ).join(
+        Engagement, Engagement.node_id == Node.id
+    ).filter(
+        Post.creator_id == current_user.id,
+        or_(
+            Engagement.state == Engagement.STATE_ENGAGED,
+            and_(
+                Engagement.state == Engagement.STATE_REQUESTED,
+                Post.is_open == True
+            )
+        )
+    ).group_by(
+        Post
+    ).order_by(
+        Post.timestamp.desc()
+    ).all()
+
+    nodes_with_uncompleted_engagement = db.session.query(
+        Node
+    ).join(
+        Post, Post.id == Node.post_id
+    ).join(
+        Engagement, Engagement.node_id == Node.id
+    ).filter(
+        Node.creator_id == current_user.id,
+        or_(
+            Engagement.state == Engagement.STATE_ENGAGED,
+            and_(
+                Engagement.state == Engagement.STATE_REQUESTED,
+                Post.is_open == True
+            )
+        )
+    ).group_by(
+        Node
+    ).order_by(
+        Node.timestamp.desc()
+    ).all()
+
+    all_engagements = Engagement.query.filter(
+        and_(
+            or_(Engagement.asker_id == current_user.id, Engagement.answerer_id == current_user.id),
+            Engagement.state == Engagement.STATE_COMPLETED
+        )
+    ).order_by(
+        Engagement.timestamp.desc()
+    ).all()
+
+    return render_template(
+        "account.html",
+        user=current_user,
+        posts_with_uncompleted_engagement=posts_with_uncompleted_engagement,
+        nodes_with_uncompleted_engagement=nodes_with_uncompleted_engagement,
+        engagements=all_engagements,
+        Post=Post,
+        Node=Node)
 
 
 @main.route('/post/<int:post_id>', methods=['GET', 'POST'])
@@ -126,6 +192,21 @@ def view_post(post_id):
     if node is None:
         node = post.nodes.filter(Node.creator == post.creator).first()
     return redirect(url_for('main.view_node', node_id=node.id))
+
+
+@main.route('/post/<int:post_id>/close')
+@login_required
+def close_post(post_id):
+    post = Post.query.filter_by(id=post_id).first_or_404()
+
+    if current_user != post.creator:
+        flash('Only the original poster can close the post for new chats.', category='danger')
+    else:
+        post.is_open = False
+        db.session.add(post)
+        db.session.commit()
+
+    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
 @main.route('/node/<int:node_id>', methods=['GET', 'POST'])
@@ -160,7 +241,7 @@ def view_node(node_id):
             Message=Message)
 
     if current_user == node.creator or current_user == node.post.creator:
-        engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
+        engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()
         return render_template(
@@ -188,8 +269,12 @@ def request_engagement(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
     post = node.post
 
+    if not post.is_open:
+        flash('Cannot request for engagement because the post is not open to new interactions.', category='danger')
+        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
+
     if current_user == post.creator:
-        flash('You cannot request for engagement on your own post.', category='danger')
+        flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
     if post.type == Post.TYPE_SELL and current_user.account_balance - current_user.committed_amount < post.reward:
@@ -214,16 +299,17 @@ def request_engagement(node_id):
 @login_required
 def cancel_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-    node_id = engagement.node_id
 
-    if current_user != engagement.sender:
-        flash('You cannot cancel the engagement requested by someone else.', category='danger')
+    if not engagement.node.post.is_open:
+        flash('Cannot cancel engagement because the post is not open to new interactions.', category='danger')
+    elif current_user != engagement.sender:
+        flash('Cannot cancel engagement requested by someone else.', category='danger')
     elif engagement.state != Engagement.STATE_REQUESTED:
-        flash('The engagement cannot be cancelled because it has been accepted.', category='warning')
+        flash('Cannot cancel engagement because it has been accepted.', category='warning')
     else:
         current_user.cancel_engagement(engagement)
 
-    return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
+    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
 @main.route('/engagement/<int:engagement_id>/accept')
@@ -232,7 +318,9 @@ def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
     post = engagement.node.post
 
-    if engagement.state != Engagement.STATE_REQUESTED:
+    if not post.is_open:
+        flash('Cannot accept engagement because the post is not open to new interactions.', category='danger')
+    elif engagement.state != Engagement.STATE_REQUESTED:
         flash('The request for engagement can no longer be accepted.', category='danger')
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
@@ -313,7 +401,8 @@ def on_join(data):
 @socketio.on('message_sent')
 def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
-    if current_user != node.creator and current_user != node.post.creator:
+    if (current_user != node.creator and current_user != node.post.creator) or \
+            not (node.post.is_open or message['engagement_id'] is not None):
         disconnect()
         return
 
@@ -353,9 +442,10 @@ def handle_engagement_rated(message):
     emit('notify_node', {
         'html': 'The other user has rated this engagement - please '
                 '<a href="{node_url}" onclick="location.reload()">refresh</a> to see the updates.'.format(
-                    node_url=url_for('main.view_node', node_id=message['node_id'], _anchor='form')
+            node_url=url_for('main.view_node', node_id=message['node_id'], _anchor='form')
         )},
          to=message['node_id'])
+
 
 # Disabled for now because they cannot handle account balance checks
 # TODO: implement these as toast notification using flask-sock and SQLAlchemy after_insert event
@@ -424,3 +514,8 @@ def emit_after_insert(mapper, connection, message):
             print(f'A listener for user {c[0]} is removed')
         except ValueError as e:
             print(e)
+
+
+@main.route('/about')
+def about():
+    return render_template('about.html')

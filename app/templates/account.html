@@ -1,50 +1,15 @@
 {% extends "index.html" %}
 
 {% block mid_col %}
-    <div class="card mb-3">
-        <div class="card-header">
-            Posts
-        </div>
-        <div class="card-body">
-            {% for post in user.posts %}
-                <p>{{ post }}</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="card mb-3">
-        <div class="card-header">
-            Nodes
-        </div>
-        <div class="card-body">
-            {% for node in user.nodes %}
-                <p>{{ node }}</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="card mb-3">
-        <div class="card-header">
-            Engagements
-        </div>
-        <div class="card-body">
-            {% for engagement in user.engagements_sent %}
-                <p>{{ engagement }}</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="accordion small mb-3" id="accordionPanelsStayOpenExample">
+    <div class="accordion accordion-flush small mb-3">
         <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
-                        aria-controls="panelsStayOpen-collapseOne">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionBasicInfo">
                     <b>Basic Information</b>
                 </button>
             </h2>
-            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
-                 aria-labelledby="panelsStayOpen-headingOne">
+            <div id="accordionBasicInfo" class="accordion-collapse collapse">
                 <div class="accordion-body">
                     <p class="card-text">ID: {{ user.id }}</p>
                     <p class="card-text">Member since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
@@ -53,41 +18,111 @@
                 </div>
             </div>
         </div>
+
         <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true"
-                        aria-controls="panelsStayOpen-collapseTwo">
-                    <b>Statistics as Asker</b>
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionTrackRecord">
+                    <b>Track Record</b>
                 </button>
             </h2>
-            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show"
+            <div id="accordionTrackRecord" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Reward</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Success?</th>
+                                <th scope="col">Dispute?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for engagement in engagements %}
+                                {% set is_success = engagement.rating_by_asker == engagement.rating_by_answerer == 1 %}
+                                {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
+                                <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
+                                    <th scope="row">{{ moment(engagement.timestamp).format('DD MMM YYYY') }}</th>
+                                    <td>{{ engagement.node.post.reward }}</td>
+                                    <td>{% if current_user.id == engagement.asker_id %}
+                                            Buyer
+                                        {% elif current_user.id == engagement.answerer_id %}
+                                            Seller
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ is_success }}</td>
+                                    <td>{{ is_dispute }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionActiveEngagements">
+                    <b>Active Engagements</b>
+                </button>
+            </h2>
+            <div id="accordionActiveEngagements" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    {% if posts_with_uncompleted_engagement %}
+                        <h5>Initiated by others</h5>
+                        {% for post in posts_with_uncompleted_engagement %}
+                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% endfor %}
+                    {% endif %}
+                    {% if nodes_with_uncompleted_engagement %}
+                        <h5>Initiated by me</h5>
+                        {% for node in nodes_with_uncompleted_engagement %}
+                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionOtherPosts">
+                    <b>Other Posts Created By Me</b>
+                </button>
+            </h2>
+            <div id="accordionOtherPosts" class="accordion-collapse collapse show"
                  aria-labelledby="panelsStayOpen-headingTwo">
                 <div class="accordion-body">
-                    <p class="card-text">Completed Engagements: TODO</p>
-                    <p class="card-text">Successful engagements: TODO</p>
-                    <p class="card-text">Disputed engagements: TODO</p>
-                    <p class="card-text">Average engagement duration: TODO</p>
+                    {% for post in user.posts.order_by(Post.timestamp.desc()).all() %}
+                        {% if post not in posts_with_uncompleted_engagement %}
+                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
+
         <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+            <h2 class="accordion-header">
                 <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true"
-                        aria-controls="panelsStayOpen-collapseThree">
-                    <b>Statistics as Answerer</b>
+                        data-bs-target="#accordionOtherInteractions">
+                    <b>Other Posts I Interacted With</b>
                 </button>
             </h2>
-            <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse show"
-                 aria-labelledby="panelsStayOpen-headingThree">
+            <div id="accordionOtherInteractions" class="accordion-collapse collapse show"
+                 aria-labelledby="panelsStayOpen-headingTwo">
                 <div class="accordion-body">
-                    <p class="card-text">Completed Engagements: TODO</p>
-                    <p class="card-text">Successful engagements: TODO</p>
-                    <p class="card-text">Disputed engagements: TODO</p>
-                    <p class="card-text">Average engagement duration: TODO</p>
+                    {% for node in user.nodes.order_by(Node.timestamp.desc()).all() %}
+                        {% if node.parent is not none and node not in nodes_with_uncompleted_engagement %}
+                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
+
     </div>
 {% endblock %}

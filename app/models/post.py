@@ -29,6 +29,7 @@ class Post(db.Model):
     type = db.Column(db.String(16), nullable=False)
     reward = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String(100), nullable=False)
+    is_open = db.Column(db.Boolean, default=True, nullable=False)
 
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)

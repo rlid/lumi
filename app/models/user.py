@@ -241,6 +241,8 @@ class User(UserMixin, db.Model):
 
     def create_node(self, parent_node):
         post = parent_node.post
+        if not post.is_open:
+            raise InvalidActionError('Cannot create node because the post is not open to new interactions')
         if self == post.creator:
             raise InvalidActionError('Cannot create node because the user is the post creator')
         node = None
@@ -270,12 +272,14 @@ class User(UserMixin, db.Model):
     # TODO: think whether this is the best place to ask to share reward, alternative place would be when the answerer
     # rates the engagement
     def create_engagement(self, node):
+        if not node.post.is_open:
+            raise InvalidActionError('Cannot create engagement because the post is not open to new interactions')
         if self != node.creator:
-            raise InvalidActionError('Cannot request for engagement because the user is not the node creator')
+            raise InvalidActionError('Cannot create engagement because the user is not the node creator')
         if self == node.post.creator:
-            raise InvalidActionError('Cannot request for engagement because the user cannot be the post creator')
+            raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
-            raise InvalidActionError('Cannot request for engagement because an uncompleted engagement already exists')
+            raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
         if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
@@ -293,11 +297,13 @@ class User(UserMixin, db.Model):
         return engagement
 
     def cancel_engagement(self, engagement):
+        if not engagement.node.post.is_open:
+            raise InvalidActionError('Cannot cancel engagement because the post is not open to new interactions')
         if self != engagement.sender:
-            raise InvalidActionError('Cannot delete engagement because the user is not the engagement sender.')
+            raise InvalidActionError('Cannot cancel engagement because the user is not the engagement sender')
 
         if engagement.state != Engagement.STATE_REQUESTED:
-            raise InvalidActionError('Cannot delete engagement because the engagement is not in requested state.')
+            raise InvalidActionError('Cannot cancel engagement because the engagement is not in requested state')
 
         engagement.state = Engagement.STATE_CANCELLED
         db.session.add(engagement)
@@ -310,6 +316,8 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def accept_engagement(self, engagement):
+        if not engagement.node.post.is_open:
+            raise InvalidActionError('Cannot accept engagement because the post is not open to new interactions')
         post = engagement.node.post
         if engagement.state != Engagement.STATE_REQUESTED:
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
