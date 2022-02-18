@@ -21,7 +21,8 @@
                        class_="btn btn-" + button_class(current_user, node.post),
                        disabled=not current_user.is_authenticated) }}
                 <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                   data-bs-toggle="modal" data-bs-target="#modalRequest">
+                   data-bs-toggle="modal" data-bs-target="#modalRequest"
+                        {% if not current_user.is_authenticated %}disabled{% endif %}>
                     Request for Engagement</button>
 
                 <div class="modal fade" id="modalRequest" tabindex="-1">
