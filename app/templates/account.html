@@ -6,35 +6,19 @@
     <div class="accordion accordion-flush mb-3">
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
+                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionBasicInfo">
                     <b>Basic Information</b>
                 </button>
             </h2>
-            <div id="accordionBasicInfo" class="accordion-collapse collapse">
+            <div id="accordionBasicInfo" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <p class="card-text">ID: {{ user.id }}</p>
-                    <p class="card-text">Member since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
-                    <p class="card-text">Average response time: TODO</p>
-                    <p class="card-text">Last seen: TODO</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accordionTrackRecord">
-                    <b>Track Record</b>
-                </button>
-            </h2>
-            <div id="accordionTrackRecord" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    {% if completed_engagements %}
-                        {{ render_track_record(completed_engagements) }}
-                    {% else %}
-                        You have no completed engagements.
-                    {% endif %}
+                    <p>ID: {{ user.id }}</p>
+                    <p>User since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
+                    <p>Average response time: TODO</p>
+                    <p>Last seen: TODO</p>
+                    <p>Last seen: TODO</p>
+                    <p><a href="{{ url_for('main.user', user_id=current_user.id) }}">My Public Profile</a></p>
                 </div>
             </div>
         </div>
@@ -60,7 +44,7 @@
                 <button class="accordion-button py-2"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionActiveInteractions">
-                    <b>Other Interactions - Active</b>
+                    <b>Other Interactions - Open</b>
                 </button>
             </h2>
             <div id="accordionActiveInteractions" class="accordion-collapse collapse show"
@@ -69,20 +53,27 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2 collapsed"
+                                <button class="accordion-button py-2"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionActiveInteractionsMyPosts">
                                     <b>My Posts</b>
                                 </button>
                             </h2>
-                            <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse"
+                            <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse show"
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
                                     {% for post in other_posts %}
                                         {% if post.is_open %}
                                             {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no other active posts created by you.
+                                        </small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -90,20 +81,27 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2 collapsed"
+                                <button class="accordion-button py-2"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionActiveInteractionsOtherPosts">
                                     <b>Other Posts</b>
                                 </button>
                             </h2>
-                            <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse"
+                            <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse show"
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
                                     {% for node in other_nodes %}
                                         {% if node.post.is_open %}
                                             {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no other active posts that you have contributed to.
+                                        </small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -117,7 +115,7 @@
                 <button class="accordion-button py-2"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionInactiveInteractions">
-                    <b>Other Interactions - Inactive</b>
+                    <b>Other Interactions - Archived</b>
                 </button>
             </h2>
             <div id="accordionInactiveInteractions" class="accordion-collapse collapse show"

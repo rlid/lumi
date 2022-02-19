@@ -108,7 +108,7 @@ def browse():
 @main.route('/user/<int:user_id>')
 def user(user_id):
     u = User.query.filter_by(id=user_id).first_or_404()
-    all_engagements = Engagement.query.filter(
+    completed_engagements = Engagement.query.filter(
         and_(
             or_(Engagement.asker_id == user_id, Engagement.answerer_id == user_id),
             Engagement.state == Engagement.STATE_COMPLETED
@@ -116,7 +116,7 @@ def user(user_id):
     ).order_by(
         Engagement.timestamp.desc()
     ).all()
-    return render_template("user.html", user=u, engagements=all_engagements)
+    return render_template("user.html", user=u, completed_engagements=completed_engagements)
 
 
 @main.route('/account')
@@ -169,7 +169,6 @@ def account():
     return render_template(
         "account.html",
         user=current_user,
-        completed_engagements=completed_engagements,
         uncompleted_engagements=uncompleted_engagements,
         other_posts=other_posts,
         other_nodes=other_nodes,
