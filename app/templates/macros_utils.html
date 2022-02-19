@@ -1,0 +1,31 @@
+{% macro render_track_record(engagements) %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Reward</th>
+                <th scope="col">Role</th>
+                <th scope="col">Success?</th>
+                <th scope="col">Dispute?</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for engagement in engagements %}
+                {% set is_success = engagement.rating_by_asker == engagement.rating_by_answerer == 1 %}
+                {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
+                <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
+                    <th scope="row">{{ moment(engagement.timestamp).format('DD MMM YYYY') }}</th>
+                    <td>{{ engagement.node.post.reward }}</td>
+                    <td>{% if current_user.id == engagement.asker_id %}
+                            Buyer
+                        {% elif current_user.id == engagement.answerer_id %}
+                            Seller
+                        {% endif %}
+                    </td>
+                    <td>{{ is_success }}</td>
+                    <td>{{ is_dispute }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}

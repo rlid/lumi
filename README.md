@@ -27,7 +27,7 @@
 
 ## SqlAlchemy
 
-- Test for not none in filter: `x != None`
+- Test for not none in filter: `x != None`, or `x.is_not(None)`
 
 ## Colour codes
 

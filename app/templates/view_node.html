@@ -91,7 +91,7 @@
             {{ form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
 
             {% if current_user == node.creator %}
-                {% if engagement is none %}
+                {% if engagement is none and engagement_request is none %}
                     <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
                        data-bs-toggle="modal" data-bs-target="#modalRequest">
                         Request for Engagement</button>
@@ -113,72 +113,70 @@
                         </div>
                       </div>
                     </div>
-                {% elif engagement.state == Engagement.STATE_REQUESTED %}
+                {% elif engagement_request is not none %}
                     <a id="btnCancel" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                       href="{{ url_for('main.cancel_engagement', engagement_id=engagement.id) }}">
+                       href="{{ url_for('main.cancel_engagement', engagement_id=engagement_request.id) }}">
                         Cancel Request
                     </a>
                 {% endif %}
             {% endif %}
+            {% if engagement_request is not none %}
+                {% if current_user == node.post.creator %}
+                    <a id="btnAccept" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                       href="{{ url_for('main.accept_engagement', engagement_id=engagement_request.id) }}">
+                        Accept Engagement</a>
+                {% endif %}
+            {% endif %}
             {% if engagement is not none %}
-                {% if engagement.state == Engagement.STATE_REQUESTED %}
-                    {% if current_user == node.post.creator %}
-                        <a id="btnAccept" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                           href="{{ url_for('main.accept_engagement', engagement_id=engagement.id) }}">
-                            Accept Engagement</a>
-                    {% endif %}
-                {% elif engagement.state == Engagement.STATE_ENGAGED %}
-                    {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
-                          (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
+                {% if (current_user == engagement.asker and engagement.rating_by_asker == 0) or
+                      (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
 
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-success border-{{- button_class(current_user, node.post) -}}"
-                                    data-bs-toggle="modal" data-bs-target="#modalRatePlus">
-                                &plus;
-                            </button>
-                            <button type="button" class="btn btn-{{- button_class(current_user, node.post) }}">
-                                Rate Engagement</button>
-                            <button type="button" class="btn btn-outline-danger border-{{- button_class(current_user, node.post) -}}"
-                                    data-bs-toggle="modal" data-bs-target="#modalRateMinus">
-                                &minus;
-                            </button>
-                        </div>
-                        <div class="modal fade" id="modalRatePlus" tabindex="-1">
-                          <div class="modal-dialog modal-fullscreen-sm-dow">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h6 class="modal-title">You rated this engagement as
-                                    <b class="text-success">successful (&plus;)</b></h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body text-center">
-                                <a id="btnRatePlus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1) }}"
-                                   class="btn btn-{{- button_class(current_user, node.post) -}}">
-                                    Confirm</a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                              </div>
-                            </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success border-{{- button_class(current_user, node.post) -}}"
+                                data-bs-toggle="modal" data-bs-target="#modalRatePlus">
+                            &plus;
+                        </button>
+                        <button type="button" class="btn btn-{{- button_class(current_user, node.post) }}">
+                            Rate Engagement</button>
+                        <button type="button" class="btn btn-outline-danger border-{{- button_class(current_user, node.post) -}}"
+                                data-bs-toggle="modal" data-bs-target="#modalRateMinus">
+                            &minus;
+                        </button>
+                    </div>
+                    <div class="modal fade" id="modalRatePlus" tabindex="-1">
+                      <div class="modal-dialog modal-fullscreen-sm-dow">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h6 class="modal-title">You rated this engagement as
+                                <b class="text-success">successful (&plus;)</b></h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body text-center">
+                            <a id="btnRatePlus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1) }}"
+                               class="btn btn-{{- button_class(current_user, node.post) -}}">
+                                Confirm</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                           </div>
                         </div>
-
-                        <div class="modal fade" id="modalRateMinus" tabindex="-1">
-                          <div class="modal-dialog modal-fullscreen-sm-down">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h6 class="modal-title">You rated this engagement as
-                                    <b class="text-danger">unsuccessful (&minus;)</b></h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body text-center">
-                                <a id="btnRateMinus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0) }}"
-                                   class="btn btn-{{- button_class(current_user, node.post) -}}">
-                                    Confirm</a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                              </div>
-                            </div>
+                      </div>
+                    </div>
+                    <div class="modal fade" id="modalRateMinus" tabindex="-1">
+                      <div class="modal-dialog modal-fullscreen-sm-down">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h6 class="modal-title">You rated this engagement as
+                                <b class="text-danger">unsuccessful (&minus;)</b></h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body text-center">
+                            <a id="btnRateMinus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0) }}"
+                               class="btn btn-{{- button_class(current_user, node.post) -}}">
+                                Confirm</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                           </div>
                         </div>
-                    {% endif %}
+                      </div>
+                    </div>
                 {% endif %}
             {% endif %}
         </div>

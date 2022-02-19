@@ -1,7 +1,9 @@
 {% extends "index.html" %}
+{% from "macros_models.html" import render_engagement with context %}
+{% from "macros_utils.html" import render_track_record with context %}
 
 {% block mid_col %}
-    <div class="accordion accordion-flush small mb-3">
+    <div class="accordion accordion-flush mb-3">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
@@ -28,35 +30,11 @@
             </h2>
             <div id="accordionTrackRecord" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Date</th>
-                                <th scope="col">Reward</th>
-                                <th scope="col">Role</th>
-                                <th scope="col">Success?</th>
-                                <th scope="col">Dispute?</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for engagement in engagements %}
-                                {% set is_success = engagement.rating_by_asker == engagement.rating_by_answerer == 1 %}
-                                {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
-                                <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
-                                    <th scope="row">{{ moment(engagement.timestamp).format('DD MMM YYYY') }}</th>
-                                    <td>{{ engagement.node.post.reward }}</td>
-                                    <td>{% if current_user.id == engagement.asker_id %}
-                                            Buyer
-                                        {% elif current_user.id == engagement.answerer_id %}
-                                            Seller
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ is_success }}</td>
-                                    <td>{{ is_dispute }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% if completed_engagements %}
+                        {{ render_track_record(completed_engagements) }}
+                    {% else %}
+                        You have no completed engagements.
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -70,36 +48,8 @@
             </h2>
             <div id="accordionActiveEngagements" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    {% if posts_with_uncompleted_engagement %}
-                        <h5>Initiated by others</h5>
-                        {% for post in posts_with_uncompleted_engagement %}
-                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
-                        {% endfor %}
-                    {% endif %}
-                    {% if nodes_with_uncompleted_engagement %}
-                        <h5>Initiated by me</h5>
-                        {% for node in nodes_with_uncompleted_engagement %}
-                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accordionOtherPosts">
-                    <b>Other Posts Created By Me</b>
-                </button>
-            </h2>
-            <div id="accordionOtherPosts" class="accordion-collapse collapse show"
-                 aria-labelledby="panelsStayOpen-headingTwo">
-                <div class="accordion-body">
-                    {% for post in user.posts.order_by(Post.timestamp.desc()).all() %}
-                        {% if post not in posts_with_uncompleted_engagement %}
-                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
-                        {% endif %}
+                    {% for engagement in uncompleted_engagements %}
+                        {{ render_engagement(engagement) }}
                     {% endfor %}
                 </div>
             </div>
@@ -107,19 +57,115 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accordionOtherInteractions">
-                    <b>Other Posts I Interacted With</b>
+                <button class="accordion-button py-2"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionActiveInteractions">
+                    <b>Other Interactions - Active</b>
                 </button>
             </h2>
-            <div id="accordionOtherInteractions" class="accordion-collapse collapse show"
+            <div id="accordionActiveInteractions" class="accordion-collapse collapse show"
                  aria-labelledby="panelsStayOpen-headingTwo">
-                <div class="accordion-body">
-                    {% for node in user.nodes.order_by(Node.timestamp.desc()).all() %}
-                        {% if node.parent is not none and node not in nodes_with_uncompleted_engagement %}
-                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
-                        {% endif %}
-                    {% endfor %}
+                <div class="accordion-body pe-0 pt-0">
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-2 collapsed"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionActiveInteractionsMyPosts">
+                                    <b>My Posts</b>
+                                </button>
+                            </h2>
+                            <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% for post in other_posts %}
+                                        {% if post.is_open %}
+                                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-2 collapsed"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionActiveInteractionsOtherPosts">
+                                    <b>Other Posts</b>
+                                </button>
+                            </h2>
+                            <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% for node in other_nodes %}
+                                        {% if node.post.is_open %}
+                                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-2"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionInactiveInteractions">
+                    <b>Other Interactions - Inactive</b>
+                </button>
+            </h2>
+            <div id="accordionInactiveInteractions" class="accordion-collapse collapse show"
+                 aria-labelledby="panelsStayOpen-headingTwo">
+                <div class="accordion-body pe-0 pt-0">
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-2 collapsed"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionInactiveInteractionsMyPosts">
+                                    <b>My Posts</b>
+                                </button>
+                            </h2>
+                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% for post in other_posts %}
+                                        {% if not post.is_open %}
+                                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-2 collapsed"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionInactiveInteractionsOtherPosts">
+                                    <b>Other Posts</b>
+                                </button>
+                            </h2>
+                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% for node in other_nodes %}
+                                        {% if not node.post.is_open %}
+                                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -122,49 +122,7 @@ def user(user_id):
 @main.route('/account')
 @login_required
 def account():
-    posts_with_uncompleted_engagement = db.session.query(
-        Post
-    ).join(
-        Node, Node.post_id == Post.id
-    ).join(
-        Engagement, Engagement.node_id == Node.id
-    ).filter(
-        Post.creator_id == current_user.id,
-        or_(
-            Engagement.state == Engagement.STATE_ENGAGED,
-            and_(
-                Engagement.state == Engagement.STATE_REQUESTED,
-                Post.is_open == True
-            )
-        )
-    ).group_by(
-        Post
-    ).order_by(
-        Post.timestamp.desc()
-    ).all()
-
-    nodes_with_uncompleted_engagement = db.session.query(
-        Node
-    ).join(
-        Post, Post.id == Node.post_id
-    ).join(
-        Engagement, Engagement.node_id == Node.id
-    ).filter(
-        Node.creator_id == current_user.id,
-        or_(
-            Engagement.state == Engagement.STATE_ENGAGED,
-            and_(
-                Engagement.state == Engagement.STATE_REQUESTED,
-                Post.is_open == True
-            )
-        )
-    ).group_by(
-        Node
-    ).order_by(
-        Node.timestamp.desc()
-    ).all()
-
-    all_engagements = Engagement.query.filter(
+    completed_engagements = Engagement.query.filter(
         and_(
             or_(Engagement.asker_id == current_user.id, Engagement.answerer_id == current_user.id),
             Engagement.state == Engagement.STATE_COMPLETED
@@ -173,14 +131,51 @@ def account():
         Engagement.timestamp.desc()
     ).all()
 
+    uncompleted_engagements = Engagement.query.filter(
+        or_(Engagement.sender_id == current_user.id, Engagement.receiver_id == current_user.id),
+        or_(
+            Engagement.state == Engagement.STATE_ENGAGED,
+            and_(Engagement.state == Engagement.STATE_REQUESTED, Post.is_open.is_(True))
+        )
+    ).join(
+        Node, Node.id == Engagement.node_id
+    ).join(
+        Post, Post.id == Node.post_id
+    ).order_by(
+        Engagement.timestamp.desc()
+    ).all()
+
+    post_ids_seen = set()
+    node_ids_seen = set()
+    for engagement in uncompleted_engagements:
+        if engagement.node.post_id not in post_ids_seen:
+            post_ids_seen.add(engagement.node.post_id)
+        if engagement.node_id not in node_ids_seen:
+            node_ids_seen.add(engagement.node_id)
+
+    other_posts = current_user.posts.filter(
+        Post.id.not_in(post_ids_seen)
+    ).order_by(
+        Post.timestamp.desc()
+    ).all()
+    other_nodes = current_user.nodes.filter(
+        Node.parent_id.is_not(None),
+        Node.id.not_in(node_ids_seen)
+    ).join(
+        Post, Post.id == Node.post_id
+    ).order_by(
+        Node.timestamp.desc()
+    ).all()
     return render_template(
         "account.html",
         user=current_user,
-        posts_with_uncompleted_engagement=posts_with_uncompleted_engagement,
-        nodes_with_uncompleted_engagement=nodes_with_uncompleted_engagement,
-        engagements=all_engagements,
+        completed_engagements=completed_engagements,
+        uncompleted_engagements=uncompleted_engagements,
+        other_posts=other_posts,
+        other_nodes=other_nodes,
         Post=Post,
-        Node=Node)
+        Node=Node,
+        Engagement=Engagement)
 
 
 @main.route('/post/<int:post_id>', methods=['GET', 'POST'])
@@ -205,8 +200,10 @@ def close_post(post_id):
         post.is_open = False
         db.session.add(post)
         db.session.commit()
+        # flash('Your post is no longer open for new contributions', category='warning')
 
-    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+    node = post.nodes.filter(Node.creator == current_user).first()
+    return redirect(url_for('main.view_node', node_id=node.id))
 
 
 @main.route('/node/<int:node_id>', methods=['GET', 'POST'])
@@ -242,12 +239,14 @@ def view_node(node_id):
 
     if current_user == node.creator or current_user == node.post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
+        engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()
         return render_template(
             "view_node.html",
             node=node,
             engagement=engagement,
+            engagement_request=engagement_request,
             messages_asc=messages_asc,
             form=form,
             Engagement=Engagement,

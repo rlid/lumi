@@ -9,11 +9,11 @@ app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 
-# db.drop_all()
-# db.create_all()
+db.drop_all()
+db.create_all()
 
 faker = Faker()
-N_DAYS = 5
+N_DAYS = 1
 N_USERS = 10
 P_POST = 0.5
 P_NODE = 0.5
@@ -67,7 +67,7 @@ for day in range(N_DAYS):
                             print(f'{post.creator} replied {m1}')
 
     for user in users:
-        for node in user.nodes.filter(Node.parent != None).all():
+        for node in user.nodes.filter(Node.parent.is_not(None)).all():
             engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
             if engagement is None:
                 if random.uniform(0, 1) < P_REQUEST_ENGAGE:

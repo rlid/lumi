@@ -68,29 +68,31 @@
         </div>
         {% if buttons %}
             <div class="card-footer py-0">
-                <a href="#"
-                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Share</b>
-                </a>
-                {% if current_user == post.creator %}
+                {% if post.is_open %}
                     <a href="#"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Edit</b>
+                        <b>Share</b>
                     </a>
-                    <a href="#"
-                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Mark as Done</b>
-                    </a>
-                    <a href="#"
-                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Delete</b>
-                    </a>
-                {% endif %}
-                {% if current_user != post.creator %}
-                    <a href="#"
-                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Report</b>
-                    </a>
+                    {% if current_user == post.creator %}
+                        <a href="#"
+                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                            <b>Edit</b>
+                        </a>
+                        <a href="{{ url_for('main.close_post', post_id=post.id) }}"
+                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                            <b>Close</b>
+                        </a>
+                    {% endif %}
+                    {% if current_user != post.creator %}
+                        <a href="#"
+                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                            <b>Report</b>
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <div class="text-muted small my-1">
+                        <b>This post is no longer accepting new contributions.</b>
+                    </div>
                 {% endif %}
             </div>
         {% endif %}
@@ -123,24 +125,91 @@
             {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
         {% endif %}
         "
-        style="
-            max-width:
-                {% if message.type >= Message.TYPE_REQUEST %}
-                    80%
-                {% else %}
-                    90%
-                {% endif %};
-            {% if message.type < Message.TYPE_REQUEST %}
-                border-radius: 10px;
-                {% if message.creator == message.node.creator %}
-                    border-bottom-right-radius: 0;
-                {% elif message.creator == message.node.post.creator %}
-                    border-bottom-left-radius: 0;
-                {% endif %}
-            {% endif %}
-        ">
+         style="
+                 max-width:
+                 {% if message.type >= Message.TYPE_REQUEST %}
+                     80%
+                 {% else %}
+                     90%
+                 {% endif %};
+                 {% if message.type < Message.TYPE_REQUEST %}
+                     border-radius: 10px;
+                     {% if message.creator == message.node.creator %}
+                         border-bottom-right-radius: 0;
+                     {% elif message.creator == message.node.post.creator %}
+                         border-bottom-left-radius: 0;
+                     {% endif %}
+                 {% endif %}
+                 ">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
         </div>
+    </div>
+{% endmacro %}
+
+
+{% macro render_engagement(engagement,
+    style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
+    label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+    {% set post = engagement.node.post %}
+    <div class="card mb-3 {{ style_map[post.type] }}">
+        <div class="card-body py-2">
+            <p class="small text-muted mb-1">{{ render_user(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}</p>
+            <div class="card-title">
+                <div class="btn-group btn-group-sm buy-sell" role="group">
+                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
+                       class="btn btn-{{- style_map[post.type] -}}">
+                        {{ label_map[post.type] }}
+                    </a>
+                    {% if post.reward > 0 %}
+                        <button type="button" class="btn btn-secondary" disabled>
+                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                        </button>
+                    {% endif %}
+                </div>
+                <a class="text-decoration-none text-dark" style="vertical-align: middle"
+                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                    <b>{{ post.title }}</b>
+                </a>
+            </div>
+            <a class="text-decoration-none text-dark"
+               href="{{ url_for("main.view_post", post_id=post.id) }}">
+                <div class="card-text">
+                    {% if engagement.state == Engagement.STATE_REQUESTED %}
+                        {% if current_user.id == engagement.sender_id %}
+                            <h6 class="mb-1"><span
+                                    class="badge rounded-pill bg-secondary">Request For Engagement Sent</span></h6>
+                        {% else %}
+                            <h6 class="mb-1"><span
+                                    class="badge rounded-pill bg-primary">Request For Engagement Received</span></h6>
+                        {% endif %}
+                    {% elif engagement.state == Engagement.STATE_ENGAGED %}
+                        <h6 class="mb-1"><span class="badge rounded-pill bg-success">Engagement In Progress</span></h6>
+                    {% endif %}
+                </div>
+            </a>
+        </div>
+        {#        <div class="card-footer py-1"#}
+        {#        {% if engagement.state == Engagement.STATE_REQUESTED %}#}
+        {#            {% if current_user.id == engagement.sender_id %}#}
+        {#                style="background-color: lightgrey;"#}
+        {#            {% else %}#}
+        {#                style="background-color: lightgrey;"#}
+        {#            {% endif %}#}
+        {#            {% elif engagement.state == Engagement.STATE_ENGAGED %}#}
+        {#                style="background-color: lightgrey;"#}
+        {#            {% endif %}#}
+        {#        >#}
+        {#            {% if engagement.state == Engagement.STATE_REQUESTED %}#}
+        {#                {% if current_user.id == engagement.sender_id %}#}
+        {#                    <small class="text-muted">Request For Engagement Sent</small>#}
+        {#                {% else %}#}
+        {#                    <small class="text-muted">Request For Engagement Received</small>#}
+        {#                {% endif %}#}
+        {#            {% elif engagement.state == Engagement.STATE_ENGAGED %}#}
+        {#                <small class="text-muted">Engagement In Progress</small>#}
+        {#            {% endif %}#}
+        {#        </div>#}
     </div>
 {% endmacro %}
