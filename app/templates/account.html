@@ -53,10 +53,10 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2"
+                                <button class="accordion-button py-1"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionActiveInteractionsMyPosts">
-                                    <b>My Posts</b>
+                                    <small><b>Posts by you</b></small>
                                 </button>
                             </h2>
                             <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse show"
@@ -71,7 +71,7 @@
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
-                                            There are no other active posts created by you.
+                                            There are no other posts you have created that are open for contributions.
                                         </small>
                                     {% endif %}
                                 </div>
@@ -81,10 +81,10 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2"
+                                <button class="accordion-button py-1"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionActiveInteractionsOtherPosts">
-                                    <b>Other Posts</b>
+                                    <small><b>Posts by others</b></small>
                                 </button>
                             </h2>
                             <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse show"
@@ -99,7 +99,7 @@
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
-                                            There are no other active posts that you have contributed to.
+                                            There are no other posts you have interacted with that are open for contributions.
                                         </small>
                                     {% endif %}
                                 </div>
@@ -124,20 +124,27 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2 collapsed"
+                                <button class="accordion-button py-1"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionInactiveInteractionsMyPosts">
-                                    <b>My Posts</b>
+                                    <small><b>Posts by you</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse"
+                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show"
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
                                     {% for post in other_posts %}
                                         {% if not post.is_open %}
                                             {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no other posts you have created that are archived.
+                                        </small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -146,20 +153,27 @@
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button py-2 collapsed"
+                                <button class="accordion-button py-1"
                                         type="button" data-bs-toggle="collapse"
                                         data-bs-target="#accordionInactiveInteractionsOtherPosts">
-                                    <b>Other Posts</b>
+                                    <small><b>Posts by others</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse"
+                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show"
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
                                     {% for node in other_nodes %}
                                         {% if not node.post.is_open %}
                                             {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no other posts you have interacted with.
+                                        </small>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
