@@ -1,7 +1,9 @@
+import uuid
 from datetime import datetime
 
 from sqlalchemy import event, select, case, and_, asc, desc
 from sqlalchemy.dialects.postgresql import UUID
+
 from app import db
 from app.models import Message
 
@@ -17,15 +19,15 @@ class Node(db.Model):
         'batch': False  # allows extension to fire for each instance before going to the next.
     }
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+    post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
 
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+    post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
 
-    parent_id = db.Column(db.Integer, db.ForeignKey('nodes.id'))
+    parent_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'))
     left = db.Column(db.Integer, nullable=False)
     right = db.Column(db.Integer, nullable=False)
 

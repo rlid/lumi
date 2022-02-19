@@ -29,7 +29,7 @@
             <div id="accordionTrackRecord" class="accordion-collapse collapse show">
                 <div class="accordion-body">
                     {% if completed_engagements %}
-                        {{ render_track_record(completed_engagements) }}
+                        {{ render_track_record(user, completed_engagements) }}
                     {% else %}
                         The user has no completed engagements.
                     {% endif %}

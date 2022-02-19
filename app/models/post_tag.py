@@ -6,7 +6,7 @@ from app import db
 class PostTag(db.Model):
     __tablename__ = "post_tags"
 
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), primary_key=True)
+    post_id = db.Column(UUID(as_uuid=True), db.ForeignKey("posts.id"), primary_key=True)
     tag_id = db.Column(db.String(64), db.ForeignKey("tags.id"), primary_key=True)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=True)

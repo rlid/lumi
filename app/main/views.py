@@ -177,7 +177,7 @@ def account():
         Engagement=Engagement)
 
 
-@main.route('/post/<int:post_id>', methods=['GET', 'POST'])
+@main.route('/post/<post_id>', methods=['GET', 'POST'])
 def view_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
     node = None
@@ -188,7 +188,7 @@ def view_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
-@main.route('/post/<int:post_id>/close')
+@main.route('/post/<post_id>/close')
 @login_required
 def close_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
@@ -205,7 +205,7 @@ def close_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
-@main.route('/node/<int:node_id>', methods=['GET', 'POST'])
+@main.route('/node/<node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
 
@@ -261,7 +261,7 @@ def view_node(node_id):
     return render_template("view_node_as_other_user.html", node=node, form=form)
 
 
-@main.route('/node/<int:node_id>/request-engagement')
+@main.route('/node/<node_id>/request-engagement')
 @login_required
 def request_engagement(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
@@ -293,7 +293,7 @@ def request_engagement(node_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
-@main.route('/engagement/<int:engagement_id>/cancel')
+@main.route('/engagement/<engagement_id>/cancel')
 @login_required
 def cancel_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
@@ -310,7 +310,7 @@ def cancel_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
-@main.route('/engagement/<int:engagement_id>/accept')
+@main.route('/engagement/<engagement_id>/accept')
 @login_required
 def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
@@ -330,7 +330,7 @@ def accept_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
-@main.route('/engagement/<int:engagement_id>/<int:is_success>')
+@main.route('/engagement/<engagement_id>/<int:is_success>')
 @login_required
 def rate_engagement(engagement_id, is_success):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
@@ -391,6 +391,7 @@ def on_join(data):
     node = Node.query.get(node_id)
     if current_user == node.creator or current_user == node.post.creator:
         join_room(node_id)
+        print(f'{current_user} has joined the chat.')
         # emit('notify_node', {'html': f'{current_user} has joined the chat.'}, to=node_id)
     else:
         disconnect()
@@ -428,11 +429,11 @@ def handle_message_sent(message):
                            Message=Message)
     emit('processed_message_sent',
          {
-             'id': message.id,
+             'id': str(message.id),
              'html': html,
              'new_section': new_section
          },
-         to=node.id)
+         to=str(node.id))
 
 
 @socketio.on('engagement_rated')
@@ -463,7 +464,7 @@ def handle_engagement_rated(message):
 #         )},
 #          to=message['node_id'])
 
-@sock.route('/sock/node/<int:node_id>')
+@sock.route('/sock/node/<node_id>')
 @login_required
 def sock_to_node(ws, node_id):
     node = Node.query.get(node_id)

@@ -1,10 +1,9 @@
+import uuid
 from datetime import datetime
 
-from app import db
-from utils import security_utils
-
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+
+from app import db
 
 _SINGLE_USE_TOKEN_NBYTES = 32
 

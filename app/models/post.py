@@ -1,11 +1,13 @@
+import uuid
 from datetime import datetime
-from sqlalchemy import event
 
 import bleach
 from bleach.html5lib_shim import Filter
 from bleach.sanitizer import Cleaner
 from markdown import Markdown
+from sqlalchemy import event
 from sqlalchemy.dialects.postgresql import UUID
+
 from app import db
 from app.models import PostTag
 from utils.markdown_ext import DelExtension
@@ -20,7 +22,7 @@ class Post(db.Model):
     TYPE_WARNING = 'warning'
     TYPE_INFO = 'info'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
 

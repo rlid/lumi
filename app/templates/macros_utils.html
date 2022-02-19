@@ -1,4 +1,4 @@
-{% macro render_track_record(engagements) %}
+{% macro render_track_record(user, engagements) %}
     <table class="table">
         <thead>
             <tr>
@@ -16,9 +16,9 @@
                 <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
                     <th scope="row">{{ moment(engagement.timestamp).format('DD MMM YYYY') }}</th>
                     <td>{{ engagement.node.post.reward }}</td>
-                    <td>{% if current_user.id == engagement.asker_id %}
+                    <td>{% if user.id == engagement.asker_id %}
                             Buyer
-                        {% elif current_user.id == engagement.answerer_id %}
+                        {% elif user.id == engagement.answerer_id %}
                             Seller
                         {% endif %}
                     </td>

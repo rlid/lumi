@@ -1,5 +1,8 @@
+import uuid
 from datetime import datetime
+
 from sqlalchemy.dialects.postgresql import UUID
+
 from app import db
 
 
@@ -12,10 +15,10 @@ class Engagement(db.Model):
     DEFAULT_REWARD_SHARE = 0.1
 
     __tablename__ = 'engagements'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
-    node_id = db.Column(db.Integer, db.ForeignKey('nodes.id'), nullable=False)
+    node_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'), nullable=False)
 
     asker_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     answerer_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)

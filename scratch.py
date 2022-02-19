@@ -13,8 +13,8 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 1
-N_USERS = 10
+N_DAYS = 20
+N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -32,8 +32,8 @@ tag_names = [word.capitalize() for word in faker.words(N_TAGS)]
 competence = {}
 credibility = {}
 for user in users:
-    competence[user] = random.uniform(0.4, 0.6)
-    credibility[user] = random.uniform(0.4, 0.6)
+    competence[user] = random.uniform(0.7, 0.9)
+    credibility[user] = random.uniform(0.75, 0.95)
 
 actual_success = {}
 

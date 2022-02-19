@@ -130,9 +130,6 @@ class User(UserMixin, db.Model):
                                            lazy='dynamic',
                                            cascade='all, delete-orphan')
 
-    def __repr__(self):
-        return f'u{self.id}'
-
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
