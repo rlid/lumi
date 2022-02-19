@@ -5,7 +5,7 @@ import bleach
 from bleach.html5lib_shim import Filter
 from bleach.sanitizer import Cleaner
 from markdown import Markdown
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 from app.models import PostTag
 from utils.markdown_ext import DelExtension
@@ -24,7 +24,7 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
 
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     type = db.Column(db.String(16), nullable=False)
     reward = db.Column(db.Integer, nullable=False)

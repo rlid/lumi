@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 
 
@@ -11,7 +11,7 @@ class PostTag(db.Model):
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=True)
 
-    creator_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), nullable=True)
 
 
 class Tag(db.Model):
@@ -22,7 +22,7 @@ class Tag(db.Model):
 
     name = db.Column(db.String(64), nullable=False)
 
-    creator_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"))
 
     post_tags = db.relationship("PostTag",
                                 foreign_keys=[PostTag.tag_id],

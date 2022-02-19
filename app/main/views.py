@@ -105,7 +105,7 @@ def browse():
         tags_not_in_filter_with_freq=tags_not_in_filter_with_freq)
 
 
-@main.route('/user/<int:user_id>')
+@main.route('/user/<user_id>')
 def user(user_id):
     u = User.query.filter_by(id=user_id).first_or_404()
     completed_engagements = Engagement.query.filter(

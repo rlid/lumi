@@ -54,7 +54,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
-@auth.route('/login/<int:user_id>')
+@auth.route('/login/<user_id>')
 def force_login(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     user.email_verified = True

@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 
 
@@ -17,11 +17,11 @@ class Engagement(db.Model):
 
     node_id = db.Column(db.Integer, db.ForeignKey('nodes.id'), nullable=False)
 
-    asker_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    answerer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    asker_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    answerer_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
-    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    sender_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    receiver_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     state = db.Column(db.Integer, default=STATE_REQUESTED, nullable=False)
 

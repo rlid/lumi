@@ -1,9 +1,11 @@
 import math
+import uuid
 from datetime import datetime, timedelta
 
 from authlib.jose.errors import BadSignatureError
 from flask import current_app
 from flask_login import UserMixin
+from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
@@ -11,7 +13,7 @@ from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Mes
 from app.models.errors import InvalidActionError, RewardDistributionError
 from utils import security_utils, authlib_ext
 
-_REMEMBER_ME_ID_NBYTES = 32
+_REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
 _REP_DECAY = 0.0
 
@@ -50,7 +52,7 @@ def _distribute_reward(node, amount, reward_share):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
     account_balance = db.Column(db.Integer, default=0, nullable=False)
@@ -69,10 +71,10 @@ class User(UserMixin, db.Model):
 
     use_markdown = db.Column(db.Boolean, default=False, nullable=False)
 
-    # length of str(unsigned 64-bit integer) = 20
+    # 16-byte UUID is 32-char hex string
     # length of separator = 1
     # base64 encoding of n bytes = ~1.3 * n, rounded to 1.5 for safety
-    remember_me_id = db.Column(db.String(21 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
+    remember_me_id = db.Column(db.String(32 + 1 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
 
     posts = db.relationship('Post',
                             backref=db.backref('creator'),
@@ -143,7 +145,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def reset_remember_id(self):
-        self.remember_me_id = f'{self.id}/{security_utils.random_urlsafe(nbytes=_REMEMBER_ME_ID_NBYTES)}'
+        self.remember_me_id = f'{self.id.hex}/{security_utils.random_urlsafe(nbytes=_REMEMBER_ME_ID_NBYTES)}'
         db.session.add(self)
         db.session.commit()
 
@@ -156,7 +158,7 @@ class User(UserMixin, db.Model):
     def generate_token(self, action, site_rid_hash=None, seconds_to_exp=_TOKEN_SECONDS_TO_EXPIRY):
         server_token = SingleUseToken.generate(timedelta_to_expiry=timedelta(seconds=seconds_to_exp))
         return authlib_ext.jws_compact_serialize_timed(
-            payload={action: self.id,
+            payload={action: self.id.hex,
                      'server_token': server_token.code,
                      'site_rid_hash': site_rid_hash},
             key=current_app.config['SECRET_KEY'],
@@ -173,7 +175,7 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def _verify_token_data(user, data, action, site_rid_hash=None):
-        id_match = user.id == data.get(action)
+        id_match = user.id.hex == data.get(action)
         server_token_is_valid = SingleUseToken.validate(data.get('server_token'))
         site_rid_match = site_rid_hash == data.get('site_rid_hash')
 

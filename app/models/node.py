@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import event, select, case, and_, asc, desc
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 from app.models import Message
 
@@ -20,7 +20,7 @@ class Node(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
 
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)

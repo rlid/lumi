@@ -67,7 +67,7 @@ for day in range(N_DAYS):
                             print(f'{post.creator} replied {m1}')
 
     for user in users:
-        for node in user.nodes.filter(Node.parent.is_not(None)).all():
+        for node in user.nodes.filter(Node.parent_id.is_not(None)).all():
             engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
             if engagement is None:
                 if random.uniform(0, 1) < P_REQUEST_ENGAGE:

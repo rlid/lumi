@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 
 
@@ -14,4 +14,4 @@ class Comment(db.Model):
 
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
 
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)

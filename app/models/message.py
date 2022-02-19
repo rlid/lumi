@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from sqlalchemy.dialects.postgresql import UUID
 from app import db
 
 
@@ -25,7 +25,7 @@ class Message(db.Model):
 
     engagement_id = db.Column(db.Integer, db.ForeignKey('engagements.id'))
 
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     def __repr__(self):
         return f'<m{self.id}>creator={self.creator},node={self.node},engagement={self.engagement}</m{self.id}>'
