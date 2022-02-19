@@ -159,7 +159,7 @@ class User(UserMixin, db.Model):
         server_token = SingleUseToken.generate(timedelta_to_expiry=timedelta(seconds=seconds_to_exp))
         return authlib_ext.jws_compact_serialize_timed(
             payload={action: self.id.hex,
-                     'server_token': server_token.code,
+                     'server_token': server_token.id.hex,
                      'site_rid_hash': site_rid_hash},
             key=current_app.config['SECRET_KEY'],
             seconds_to_exp=seconds_to_exp
