@@ -188,18 +188,17 @@ def view_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
-@main.route('/post/<post_id>/close')
+@main.route('/post/<post_id>/archive-toggle')
 @login_required
-def close_post(post_id):
+def toggle_archive_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
 
     if current_user != post.creator:
-        flash('Only the original poster can close the post for new chats.', category='danger')
+        flash('Only the original poster can change the archive status of the post.', category='danger')
     else:
-        post.is_open = False
+        post.is_open = not post.is_open
         db.session.add(post)
         db.session.commit()
-        # flash('Your post is no longer accepting new contributions', category='warning')
 
     node = post.nodes.filter(Node.creator == current_user).first()
     return redirect(url_for('main.view_node', node_id=node.id))
@@ -255,10 +254,12 @@ def view_node(node_id):
     form = MessageForm()
     if form.validate_on_submit():
         # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
-        user_node = current_user.create_node(node)
-        current_user.create_message(user_node, form.text.data)
-        return redirect(url_for('main.view_node', node_id=user_node.id))
-
+        if node.post.is_open:
+            user_node = current_user.create_node(node)
+            current_user.create_message(user_node, form.text.data)
+            return redirect(url_for('main.view_node', node_id=user_node.id))
+        else:
+            flash("Cannot send message because the post is now archived.", category='danger')
     return render_template("view_node_as_other_user.html", node=node, form=form)
 
 
@@ -280,7 +281,7 @@ def request_engagement(node_id):
     post = node.post
 
     if not post.is_open:
-        flash('Cannot request for engagement because the post is not open to new interactions.', category='danger')
+        flash('Cannot request for engagement because the post is archived.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
     if current_user == post.creator:
@@ -311,7 +312,7 @@ def cancel_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
 
     if not engagement.node.post.is_open:
-        flash('Cannot cancel engagement because the post is not open to new interactions.', category='danger')
+        flash('Cannot cancel engagement because the post is archived.', category='danger')
     elif current_user != engagement.sender:
         flash('Cannot cancel engagement requested by someone else.', category='danger')
     elif engagement.state != Engagement.STATE_REQUESTED:
@@ -329,7 +330,7 @@ def accept_engagement(engagement_id):
     post = engagement.node.post
 
     if not post.is_open:
-        flash('Cannot accept engagement because the post is not open to new interactions.', category='danger')
+        flash('Cannot accept engagement because the post is archived.', category='danger')
     elif engagement.state != Engagement.STATE_REQUESTED:
         flash('The request for engagement can no longer be accepted.', category='danger')
     elif current_user != post.creator:
@@ -412,8 +413,10 @@ def on_join(data):
 @socketio.on('message_sent')
 def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
+
     if (current_user != node.creator and current_user != node.post.creator) or \
-            not (node.post.is_open or message['engagement_id'] is not None):
+            (not node.post.is_open and message['engagement_id'] is None):
+        emit('notify_node', {'html': 'Cannot send message because the post is now archived.'}, to=message['node_id'])
         disconnect()
         return
 

@@ -241,7 +241,7 @@ class User(UserMixin, db.Model):
     def create_node(self, parent_node):
         post = parent_node.post
         if not post.is_open:
-            raise InvalidActionError('Cannot create node because the post is not open to new interactions')
+            raise InvalidActionError('Cannot create node because the post is archived')
         if self == post.creator:
             raise InvalidActionError('Cannot create node because the user is the post creator')
         node = None
@@ -263,6 +263,8 @@ class User(UserMixin, db.Model):
                 'Cannot create node message because the user is not the post creator or the node creator'
             )
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
+        if engagement is None and not node.post.is_open:
+            raise InvalidActionError('Cannot create message because the post is archived')
         message = Message(creator=self, node=node, engagement=engagement, text=text)
         db.session.add(message)
         db.session.commit()
@@ -272,7 +274,7 @@ class User(UserMixin, db.Model):
     # rates the engagement
     def create_engagement(self, node):
         if not node.post.is_open:
-            raise InvalidActionError('Cannot create engagement because the post is not open to new interactions')
+            raise InvalidActionError('Cannot create engagement because the post is archived')
         if self != node.creator:
             raise InvalidActionError('Cannot create engagement because the user is not the node creator')
         if self == node.post.creator:
@@ -297,7 +299,7 @@ class User(UserMixin, db.Model):
 
     def cancel_engagement(self, engagement):
         if not engagement.node.post.is_open:
-            raise InvalidActionError('Cannot cancel engagement because the post is not open to new interactions')
+            raise InvalidActionError('Cannot cancel engagement because the post is archived')
         if self != engagement.sender:
             raise InvalidActionError('Cannot cancel engagement because the user is not the engagement sender')
 
@@ -316,7 +318,7 @@ class User(UserMixin, db.Model):
 
     def accept_engagement(self, engagement):
         if not engagement.node.post.is_open:
-            raise InvalidActionError('Cannot accept engagement because the post is not open to new interactions')
+            raise InvalidActionError('Cannot accept engagement because the post is archived')
         post = engagement.node.post
         if engagement.state != Engagement.STATE_REQUESTED:
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')

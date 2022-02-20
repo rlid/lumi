@@ -1,3 +1,5 @@
+{% from "macros_form.html" import button_class %}
+
 {% macro render_user(user, capitalize=True) %}
     <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
         {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}{{ user }}{% endif %}
@@ -24,7 +26,7 @@
 {% endmacro %}
 
 {# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
-{% macro render_post_card(post, user_node=None, truncate_body=False, buttons=True, tag_limit=None,
+{% macro render_post_card(post, user_node=None, truncate_body=False, buttons=False, tag_limit=None,
     style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     <div class="card mb-3 {{ style_map[post.type] }}">
@@ -78,10 +80,36 @@
                            class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                             <b>Edit</b>
                         </a>
-                        <a href="{{ url_for('main.close_post', post_id=post.id) }}"
-                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                            <b>Archive</b>
-                        </a>
+
+                        <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                                data-bs-toggle="modal" data-bs-target="#modalShare">
+                            <b>Archive</b></button>
+                        <div class="modal fade" id="modalShare" tabindex="-1">
+                            <div class="modal-dialog modal-fullscreen-sm-down">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title">
+                                            Hide the post and stop accepting new contributions from other users?
+                                            Active
+                                            engagements are not affected.
+                                        </h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <a id="btnArchive"
+                                           class="btn btn-{{- button_class(current_user, user_node.post) -}}"
+                                           href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
+                                            Confirm
+                                        </a>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     {% endif %}
                     {% if current_user != post.creator %}
                         <a href="#"
@@ -90,9 +118,16 @@
                         </a>
                     {% endif %}
                 {% else %}
-                    <div class="text-muted small my-1">
-                        <b>This post is no longer accepting new contributions.</b>
-                    </div>
+                    {% if current_user == post.creator %}
+                        <a id="btnUnarchive" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                           href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
+                            <b>Unarchive</b>
+                        </a>
+                    {% else %}
+                        <div class="text-muted small my-1">
+                            <b>This post is no longer accepting new contributions.</b>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}
