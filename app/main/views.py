@@ -199,7 +199,7 @@ def close_post(post_id):
         post.is_open = False
         db.session.add(post)
         db.session.commit()
-        # flash('Your post is no longer open for new contributions', category='warning')
+        # flash('Your post is no longer accepting new contributions', category='warning')
 
     node = post.nodes.filter(Node.creator == current_user).first()
     return redirect(url_for('main.view_node', node_id=node.id))
@@ -232,6 +232,7 @@ def view_node(node_id):
         return render_template(
             "view_node_as_post_creator.html",
             post=node.post,
+            user_node=node,
             nodes=nodes,
             Engagement=Engagement,
             Message=Message)
@@ -259,6 +260,17 @@ def view_node(node_id):
         return redirect(url_for('main.view_node', node_id=user_node.id))
 
     return render_template("view_node_as_other_user.html", node=node, form=form)
+
+
+@main.route('/node/<node_id>/share')
+@login_required
+def share_node(node_id):
+    node = Node.query.filter_by(id=node_id).first_or_404()
+    if current_user != node.creator:
+        node = node.post.nodes.filter(Node.creator == current_user).first()
+        if node is None:
+            node = current_user.create_node(node)
+    return render_template('share_node.html', node=node)
 
 
 @main.route('/node/<node_id>/request-engagement')

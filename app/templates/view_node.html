@@ -35,7 +35,7 @@
 {% endmacro %}
 
 {% block mid_col %}
-    {{ render_post_card(node.post, truncate_body=False) }}
+    {{ render_post_card(node.post, user_node=node, truncate_body=False) }}
 
     {% set current = namespace(engagement_id=-1, timestamp=none, section_id=none) %}
 

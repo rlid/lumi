@@ -24,7 +24,7 @@
 {% endmacro %}
 
 {# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
-{% macro render_post_card(post, truncate_body=False, buttons=True, tag_limit=None,
+{% macro render_post_card(post, user_node=None, truncate_body=False, buttons=True, tag_limit=None,
     style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     <div class="card mb-3 {{ style_map[post.type] }}">
@@ -69,7 +69,7 @@
         {% if buttons %}
             <div class="card-footer py-0">
                 {% if post.is_open %}
-                    <a href="#"
+                    <a href="{% if user_node %}{{ url_for('main.share_node', node_id=user_node.id) }}{% endif %}"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                         <b>Share</b>
                     </a>
@@ -80,7 +80,7 @@
                         </a>
                         <a href="{{ url_for('main.close_post', post_id=post.id) }}"
                            class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                            <b>Close</b>
+                            <b>Archive</b>
                         </a>
                     {% endif %}
                     {% if current_user != post.creator %}

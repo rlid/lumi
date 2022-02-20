@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+
+{% block mid_col %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Here is your unique referral link for this post:</h5>
+            <div class="card-text">
+                <p class="my-3">
+                    {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
+                    <a href="{{ node_url }}">
+                        {{ node_url }}
+                    </a>
+                </p>
+                <p class="text-muted small">
+                    You can now share this link with your friends. The answerers are encouraged to share a portion of
+                    their reward with all referrers linking them and the asker. The reward will be distributed according
+                    to the <a href="#">Reward Distribution Rules</a>.
+                </p>
+                {{ render_post_card(node.post, buttons=False) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
