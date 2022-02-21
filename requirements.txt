@@ -12,6 +12,6 @@ markdown
 bleach
 flask-socketio
 eventlet
-https://github.com/benoitc/gunicorn/archive/ff58e0c6da83d5520916bc4cc109a529258d76e1.zip#egg=gunicorn==200.1.0
+https://github.com/benoitc/gunicorn/archive/ff58e0c6da83d5520916bc4cc109a529258d76e1.zip#egg=gunicorn==20.1.0
 flask-sock
 faker
