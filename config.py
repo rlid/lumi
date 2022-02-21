@@ -27,12 +27,7 @@ class Config:
     APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID")
     # For Sign in with Apple, the client secret is dynamic - it is a JWT generated using a private key issued by Apple.
     # This variable stores the private key, and this convention is assumed by Authlib and auth_utils.ApplePrivateKeyJWT
-    APPLE_CLIENT_SECRET = os.environ.get("APPLE_CLIENT_SECRET")
-    if APPLE_CLIENT_SECRET is None:
-        with open(os.environ.get("APPLE_KEY_FILE"), "r") as f:
-            APPLE_CLIENT_SECRET = f.read()
-    else:
-        APPLE_CLIENT_SECRET = APPLE_CLIENT_SECRET.replace('|', '\n')
+    APPLE_CLIENT_SECRET = os.environ.get("APPLE_CLIENT_SECRET").replace('|', '\n')
 
     @staticmethod
     def init_app(app):
