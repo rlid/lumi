@@ -32,7 +32,7 @@ class Config:
         with open(os.environ.get("APPLE_KEY_FILE"), "r") as f:
             APPLE_CLIENT_SECRET = f.read()
     else:
-        APPLE_CLIENT_SECRET = APPLE_CLIENT_SECRET.replace(' ', '\n')
+        APPLE_CLIENT_SECRET = APPLE_CLIENT_SECRET.replace('|', '\n')
 
     @staticmethod
     def init_app(app):
