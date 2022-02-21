@@ -15,7 +15,7 @@
 runtime: python39
 instance_class: F1
 
-entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT main:app
+entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT main:application
 
 env_variables:
   FLASK_CONFIG: "GAE"
