@@ -1,0 +1,1 @@
+gunicorn -c gunicorn.conf.py -b :8000 main:app
