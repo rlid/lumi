@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from app import create_app, db
 from app.models.user import User, Post, Node, Engagement
 
-app = create_app("AWS")
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 
