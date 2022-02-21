@@ -8,6 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     APP_VER = "20220209_1100"
     APP_NAME = "LumiAsk"
+    USE_SSL = False
 
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -30,6 +31,8 @@ class Config:
     if APPLE_CLIENT_SECRET is None:
         with open(os.environ.get("APPLE_KEY_FILE"), "r") as f:
             APPLE_CLIENT_SECRET = f.read()
+    else:
+        APPLE_CLIENT_SECRET = APPLE_CLIENT_SECRET.replace(' ', '\n')
 
     @staticmethod
     def init_app(app):
@@ -62,6 +65,7 @@ class DevConfig(Config):
 
 class GAEConfig(Config):
     APP_VER = "GAE-" + Config.APP_VER
+    USE_SSL = True
     SQLALCHEMY_DATABASE_URI = URL.create(
         drivername="postgresql+pg8000",
         username="lumi",
@@ -74,6 +78,7 @@ class GAEConfig(Config):
 
 class AWSConfig(Config):
     APP_VER = "AWS-" + Config.APP_VER
+    USE_SSL = True
     SQLALCHEMY_DATABASE_URI = "{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}".format(
         server_type="postgresql",
         driver="pg8000",
