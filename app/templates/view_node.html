@@ -349,7 +349,7 @@
 
 {% macro sock_script(section_id) %}
     <script>
-        const sock = new WebSocket('ws://' + location.host + '/sock/node/{{ node.id }}');
+        const sock = new WebSocket('wss://' + location.host + '/sock/node/{{ node.id }}');
         sock.addEventListener('message', message => {
             let template = document.createElement('template');
             template.innerHTML = message.data
