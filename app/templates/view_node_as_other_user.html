@@ -3,7 +3,7 @@
 {% from "macros_form.html" import text_area_style, button_class with context %}
 
 {% block mid_col %}
-    {{ render_post_card(node.post, user_node=node, truncate_body=False) }}
+    {{ render_post_card(node.post, user_node=node, truncate_body=False, buttons=True) }}
 
     <div class="mb-3">
         <form id="form" method="post">

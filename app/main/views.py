@@ -61,7 +61,8 @@ def browse():
             PostTag, PostTag.post_id == Post.id
         ).filter(
             PostTag.tag_id.in_(tag_ids_to_filter),
-            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
+            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
+            Post.is_open.is_(True)
         ).group_by(
             Post
         ).having(
@@ -70,7 +71,8 @@ def browse():
         tags_in_filter = Tag.query.filter(Tag.id.in_(tag_ids_to_filter)).all()
     else:
         post_query = Post.query.filter(
-            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL])
+            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
+            Post.is_open.is_(True)
         )
         tags_in_filter = []
 
@@ -196,9 +198,7 @@ def toggle_archive_post(post_id):
     if current_user != post.creator:
         flash('Only the original poster can change the archive status of the post.', category='danger')
     else:
-        post.is_open = not post.is_open
-        db.session.add(post)
-        db.session.commit()
+        current_user.toggle_archive(post)
 
     node = post.nodes.filter(Node.creator == current_user).first()
     return redirect(url_for('main.view_node', node_id=node.id))

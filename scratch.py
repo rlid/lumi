@@ -13,14 +13,16 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 1
+N_DAYS = 20
 N_USERS = 10
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
 P_REQUEST_ENGAGE = 0.2
+P_CANCEL_ENGAGE = 0.1
 P_ACCEPT_ENGAGE = 0.5
 P_RATE_ENGAGE = 0.5
+P_ARCHIVE = 0.75
 N_TAGS = 50
 
 users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
@@ -50,7 +52,7 @@ for day in range(N_DAYS):
                 print(f'{user} added {tag}')
 
     for user in users:
-        for post in Post.query.all():
+        for post in Post.query.filter(Post.is_open.is_(True)).all():
             if user != post.creator:
                 if random.uniform(0, 1) < P_NODE:
                     node = user.create_node(parent_node=random.choice(post.nodes.all()))
@@ -68,26 +70,31 @@ for day in range(N_DAYS):
 
     for user in users:
         for node in user.nodes.filter(Node.parent_id.is_not(None)).all():
-            engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
-            if engagement is None:
-                if random.uniform(0, 1) < P_REQUEST_ENGAGE:
-                    engagement = user.create_engagement(node)
-                    print(f'{user} created {engagement}')
+            if node.post.is_open:
+                engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
+                if engagement is None:
+                    if random.uniform(0, 1) < P_REQUEST_ENGAGE:
+                        engagement = user.create_engagement(node)
+                        if random.uniform(0, 1) < P_CANCEL_ENGAGE:
+                            user.cancel_engagement(engagement)
+                        else:
+                            print(f'{user} created {engagement}')
 
     for user in users:
         for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
-            if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
-                user.accept_engagement(engagement)
-                print(f'{user} accepted {engagement}')
-                for i in range(random.randint(1, 2)):
-                    m1 = [user.create_message(
-                        engagement.node, text=faker.text(100)
-                    ) for i in range(random.randint(1, 2))]
-                    print(f'{user} sent {m1}')
-                    m2 = [engagement.sender.create_message(
-                        engagement.node, text=faker.text(100)
-                    ) for i in range(random.randint(1, 2))]
-                    print(f'{post.creator} replied {m1}')
+            if engagement.node.post.is_open:
+                if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
+                    user.accept_engagement(engagement)
+                    print(f'{user} accepted {engagement}')
+                    for i in range(random.randint(1, 2)):
+                        m1 = [user.create_message(
+                            engagement.node, text=faker.text(100)
+                        ) for i in range(random.randint(1, 2))]
+                        print(f'{user} sent {m1}')
+                        m2 = [engagement.sender.create_message(
+                            engagement.node, text=faker.text(100)
+                        ) for i in range(random.randint(1, 2))]
+                        print(f'{post.creator} replied {m1}')
 
     for user in users:
         for engagement in user.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
@@ -112,6 +119,11 @@ for day in range(N_DAYS):
                     is_success = False
                 user.rate_engagement(engagement, is_success)
                 print(f'{user} rated {engagement} as {is_success} as asker')
+
+    for user in users:
+        for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_COMPLETED):
+            if random.uniform(0, 1) < P_ARCHIVE:
+                user.toggle_archive(engagement.node.post)
 
 print(len(Post.query.all()))
 print(len(Node.query.all()))
