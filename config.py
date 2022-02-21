@@ -72,10 +72,23 @@ class GAEConfig(Config):
             instance_name="lumiask:europe-west2:devins")})
 
 
+class AWSConfig(Config):
+    APP_VER = "AWS-" + Config.APP_VER
+    SQLALCHEMY_DATABASE_URI = "{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}".format(
+        server_type="postgresql",
+        driver="pg8000",
+        username=os.environ.get('RDS_USERNAME') or "lumi",
+        password=os.environ.get('RDS_PASSWORD'),
+        hostname=os.environ.get('RDS_HOSTNAME') or "localhost",
+        port=os.environ.get('RDS_PORT') or "5432",
+        database=os.environ.get('RDS_DB_NAME') or "devdb")
+
+
 config = {
     "DEV": DevConfig,
     "TEST": TestConfig,
     "GAE": GAEConfig,
+    "AWS": AWSConfig,
 
     "DEFAULT": DevConfig
 }
