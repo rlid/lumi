@@ -265,7 +265,7 @@
                 'message_sent',
                 {
                     node_id: "{{ node.id }}",
-                    engagement_id: {{ engagement.id if engagement is not none else 'null' }},
+                    engagement_id: {% if engagement is not none %}"{{ engagement.id }}"{% else %}'null'{% endif %},
                     text: textField.value,
                 });
             textField.value = '';

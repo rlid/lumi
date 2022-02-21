@@ -78,8 +78,8 @@ class AWSConfig(Config):
         server_type="postgresql",
         driver="pg8000",
         username=os.environ.get('RDS_USERNAME') or "lumi",
-        password=os.environ.get('RDS_PASSWORD'),
-        hostname=os.environ.get('RDS_HOSTNAME') or "localhost",
+        password=os.environ.get('RDS_PASSWORD') or os.environ.get('DB_PASSWORD'),
+        hostname=os.environ.get('RDS_HOSTNAME') or "lumi-4.cikyf0stsfwt.eu-west-2.rds.amazonaws.com",
         port=os.environ.get('RDS_PORT') or "5432",
         database=os.environ.get('RDS_DB_NAME') or "devdb")
 

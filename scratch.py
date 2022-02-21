@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from app import create_app, db
 from app.models.user import User, Post, Node, Engagement
 
-app = create_app("DEV")
+app = create_app("AWS")
 app_context = app.app_context()
 app_context.push()
 
@@ -13,8 +13,8 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 20
-N_USERS = 20
+N_DAYS = 1
+N_USERS = 10
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
