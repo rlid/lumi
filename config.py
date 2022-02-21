@@ -18,13 +18,13 @@ class Config:
     SITE_RID_HASH_DIGEST_SIZE = 32
 
     GOOGLE_SERVER_METADATA_URL = "https://accounts.google.com/.well-known/openid-configuration"
-    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID') or '276555255912-c7jq4clb41m3eac1fbsf4pqrd9h1acjp.apps.googleusercontent.com'
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
     APPLE_SERVER_METADATA_URL = "https://appleid.apple.com/.well-known/openid-configuration"
-    APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID")
-    APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID")
-    APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID")
+    APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID") or 'com.lumiask.client'
+    APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID") or '3WT485YTP5'
+    APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID") or 'V79GWHFDH4'
     # For Sign in with Apple, the client secret is dynamic - it is a JWT generated using a private key issued by Apple.
     # This variable stores the private key, and this convention is assumed by Authlib and auth_utils.ApplePrivateKeyJWT
     APPLE_CLIENT_SECRET = os.environ.get("APPLE_CLIENT_SECRET").replace('|', '\n')
