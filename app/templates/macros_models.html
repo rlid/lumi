@@ -82,16 +82,15 @@
                         </a>
 
                         <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                                data-bs-toggle="modal" data-bs-target="#modalShare">
+                                data-bs-toggle="modal" data-bs-target="#modalArchive">
                             <b>Archive</b></button>
-                        <div class="modal fade" id="modalShare" tabindex="-1">
+                        <div class="modal fade" id="modalArchive" tabindex="-1">
                             <div class="modal-dialog modal-fullscreen-sm-down">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h6 class="modal-title">
                                             Hide the post and stop accepting new contributions from other users?
-                                            Active
-                                            engagements are not affected.
+                                            Active engagements are not affected.
                                         </h6>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
@@ -112,10 +111,36 @@
 
                     {% endif %}
                     {% if current_user != post.creator %}
-                        <a href="#"
-                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                            <b>Report</b>
-                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                                data-bs-toggle="modal" data-bs-target="#modalReport">
+                            <b>Report</b></button>
+                        <div class="modal fade" id="modalReport" tabindex="-1">
+                            <div class="modal-dialog modal-fullscreen-sm-down">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title">
+                                            What is the reason for reporting this post?
+                                        </h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">
+                                            <div class="input-group input-group-sm mb-3">
+                                                <textarea name="reason" class="form-control"
+                                                          placeholder="Spam / Phishing / Harassment / Other illegal activities" required></textarea>
+                                            </div>
+                                            <input type="submit" id="btnReport"
+                                                    class="btn btn-{{- button_class(current_user, user_node.post) -}}">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     {% endif %}
                 {% else %}
                     {% if current_user == post.creator %}
@@ -160,22 +185,22 @@
             {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
         {% endif %}
         "
-         style="
-                 max-width:
-                 {% if message.type >= Message.TYPE_REQUEST %}
-                     80%
-                 {% else %}
-                     90%
-                 {% endif %};
-                 {% if message.type < Message.TYPE_REQUEST %}
-                     border-radius: 10px;
-                     {% if message.creator == message.node.creator %}
-                         border-bottom-right-radius: 0;
-                     {% elif message.creator == message.node.post.creator %}
-                         border-bottom-left-radius: 0;
-                     {% endif %}
-                 {% endif %}
-                 ">
+                                             style="
+                                                     max-width:
+                                                     {% if message.type >= Message.TYPE_REQUEST %}
+                                                         80%
+                                                     {% else %}
+                                                         90%
+                                                     {% endif %};
+                                                     {% if message.type < Message.TYPE_REQUEST %}
+                                                         border-radius: 10px;
+                                                         {% if message.creator == message.node.creator %}
+                                                             border-bottom-right-radius: 0;
+                                                         {% elif message.creator == message.node.post.creator %}
+                                                             border-bottom-left-radius: 0;
+                                                         {% endif %}
+                                                     {% endif %}
+                                                     ">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
         </div>

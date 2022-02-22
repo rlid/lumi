@@ -241,11 +241,19 @@ class User(UserMixin, db.Model):
     def toggle_archive(self, post):
         if self != post.creator:
             raise InvalidActionError(
-                'Cannot toggle the archive status of the post because the user is not the post creator.')
-        else:
-            post.is_archived = not post.is_archived
-            db.session.add(post)
-            db.session.commit()
+                'Cannot change the archive status of the post because the user is not the post creator.')
+        if post.is_reported:
+            raise InvalidActionError('Cannot change the archive status of the post because the post is reported.')
+        post.is_archived = not post.is_archived
+        db.session.add(post)
+        db.session.commit()
+
+    def report(self, post, reason):
+        post.is_reported = True
+        post.report_reason = f'{self}: {reason}\n' + post.report_reason
+        post.is_archived = True
+        db.session.add(post)
+        db.session.commit()
 
     def create_node(self, parent_node):
         post = parent_node.post

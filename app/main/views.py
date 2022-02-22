@@ -124,15 +124,6 @@ def user(user_id):
 @main.route('/account')
 @login_required
 def account():
-    completed_engagements = Engagement.query.filter(
-        and_(
-            or_(Engagement.asker_id == current_user.id, Engagement.answerer_id == current_user.id),
-            Engagement.state == Engagement.STATE_COMPLETED
-        )
-    ).order_by(
-        Engagement.timestamp.desc()
-    ).all()
-
     uncompleted_engagements = Engagement.query.filter(
         or_(Engagement.sender_id == current_user.id, Engagement.receiver_id == current_user.id),
         or_(
@@ -182,6 +173,11 @@ def account():
 @main.route('/post/<post_id>', methods=['GET', 'POST'])
 def view_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
+
+    if post.is_reported:
+        flash("The post is currently not available for viewing.", category='warning')
+        return redirect(url_for('main.index'))
+
     node = None
     if current_user.is_authenticated:
         node = post.nodes.filter(Node.creator == current_user).first()
@@ -197,6 +193,9 @@ def toggle_archive_post(post_id):
 
     if current_user != post.creator:
         flash('Only the original poster can change the archive status of the post.', category='danger')
+    elif post.is_reported:
+        flash('Cannot change the archive status of the post because the post is reported. '
+              'Please contact support for more information.', category='danger')
     else:
         current_user.toggle_archive(post)
 
@@ -204,9 +203,24 @@ def toggle_archive_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
+@main.route('/post/<post_id>/report', methods=['POST'])
+@login_required
+def report_post(post_id):
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    reason = request.form.get('reason')
+    current_user.report(post, reason)
+    flash('The post has been reported for investigation and it will not be visible in the meantime.',
+          category='warning')
+    return redirect(url_for('main.index'))
+
+
 @main.route('/node/<node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
+
+    if node.post.is_reported:
+        flash("The post is currently not available for viewing.", category='warning')
+        return redirect(url_for('main.index'))
 
     if current_user.is_authenticated and (current_user != node.creator and current_user != node.post.creator):
         user_node = node.post.nodes.filter(Node.creator == current_user).first()
@@ -268,10 +282,12 @@ def view_node(node_id):
 def share_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
     if current_user != node.creator:
-        node = node.post.nodes.filter(Node.creator == current_user).first()
-        if node is None:
-            node = current_user.create_node(node)
-    return render_template('share_node.html', node=node)
+        user_node = node.post.nodes.filter(Node.creator == current_user).first()
+        if user_node is None:
+            user_node = current_user.create_node(node)
+    else:
+        user_node = node
+    return render_template('share_node.html', node=user_node)
 
 
 @main.route('/node/<node_id>/request-engagement')

@@ -41,3 +41,12 @@ class MarkdownPostForm(PostForm):
 class MessageForm(FlaskForm):
     text = TextAreaField("Text", validators=[InputRequired()])
     submit = SubmitField("Send")
+
+
+class ReportPostForm(FlaskForm):
+    text = TextAreaField(
+        "Text",
+        validators=[InputRequired()],
+        render_kw={"placeholder": "Spam / Phishing / Harassment / Other illegal activities"}
+    )
+    submit = SubmitField("Send")
