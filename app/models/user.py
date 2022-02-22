@@ -221,7 +221,7 @@ class User(UserMixin, db.Model):
 
     def add_tag(self, post, name):
         if name.lower() not in ('buying', 'selling'):
-            self._add_tag(post, name)
+            return self._add_tag(post, name)
 
     def create_post(self, is_request, reward, title, body=None, tag_names=[]):
         post = Post(creator=self,
