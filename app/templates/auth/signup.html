@@ -12,7 +12,7 @@
         with Google</a>
 
     <div class="separator my-2"><span class="text-muted"> Or </span></div>
-    {{ render_form(form, button_style="success", floating_input_label=True) }}
+    {{ render_form(form, button_style="success", floating_input_label=True, no_floating_input_label=['adjective']) }}
 
     {% if not has_invite_code %}
         <p class="mt-3 text-center text-muted">Need an invite code?

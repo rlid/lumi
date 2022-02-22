@@ -21,9 +21,6 @@ class LogInForm(FlaskForm):
 class SignUpForm(FlaskForm):
     invite_code = StringField("Invite code", validators=[InputRequired()], render_kw={"placeholder": "Invite Code"})
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
-    adjective = StringField(
-        "Adjective",
-        render_kw={"placeholder": "Choose an adjective to describe yourself (optional - just for fun)"})
     password = PasswordField("Password",
                              validators=[
                                  InputRequired(),
@@ -37,6 +34,10 @@ class SignUpForm(FlaskForm):
                                          Length(min=8, message='Password must be at least 8 characters long.')
                                      ],
                                      render_kw={"placeholder": "Confirm Password"})
+    adjective = StringField(
+        "An adjective to describe yourself:",
+        render_kw={"placeholder": "Optional - just for fun!"})
+
     submit = SubmitField("Sign Up", render_kw={"class": "w-100"})
 
     def validate_email(self, field):
