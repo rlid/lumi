@@ -52,7 +52,7 @@ for day in range(N_DAYS):
                 print(f'{user} added {tag}')
 
     for user in users:
-        for post in Post.query.filter(Post.is_open.is_(True)).all():
+        for post in Post.query.filter(Post.is_archived.is_not(True)).all():
             if user != post.creator:
                 if random.uniform(0, 1) < P_NODE:
                     node = user.create_node(parent_node=random.choice(post.nodes.all()))
@@ -70,7 +70,7 @@ for day in range(N_DAYS):
 
     for user in users:
         for node in user.nodes.filter(Node.parent_id.is_not(None)).all():
-            if node.post.is_open:
+            if not node.post.is_archived:
                 engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
                 if engagement is None:
                     if random.uniform(0, 1) < P_REQUEST_ENGAGE:
@@ -82,7 +82,7 @@ for day in range(N_DAYS):
 
     for user in users:
         for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
-            if engagement.node.post.is_open:
+            if not engagement.node.post.is_archived:
                 if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
                     user.accept_engagement(engagement)
                     print(f'{user} accepted {engagement}')

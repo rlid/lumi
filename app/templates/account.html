@@ -63,7 +63,7 @@
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for post in other_posts %}
-                                        {% if post.is_open %}
+                                        {% if not post.is_archived %}
                                             {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
@@ -91,7 +91,7 @@
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in other_nodes %}
-                                        {% if node.post.is_open %}
+                                        {% if not node.post.is_archived %}
                                             {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
@@ -129,12 +129,11 @@
                                     <small><b>Posts by you</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for post in other_posts %}
-                                        {% if not post.is_open %}
+                                        {% if post.is_archived %}
                                             {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
@@ -158,12 +157,11 @@
                                     <small><b>Posts by others</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in other_nodes %}
-                                        {% if not node.post.is_open %}
+                                        {% if node.post.is_archived %}
                                             {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}

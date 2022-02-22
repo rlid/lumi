@@ -62,7 +62,7 @@ def browse():
         ).filter(
             PostTag.tag_id.in_(tag_ids_to_filter),
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
-            Post.is_open.is_(True)
+            Post.is_archived.is_not(True)
         ).group_by(
             Post
         ).having(
@@ -72,7 +72,7 @@ def browse():
     else:
         post_query = Post.query.filter(
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
-            Post.is_open.is_(True)
+            Post.is_archived.is_not(True)
         )
         tags_in_filter = []
 
@@ -137,7 +137,7 @@ def account():
         or_(Engagement.sender_id == current_user.id, Engagement.receiver_id == current_user.id),
         or_(
             Engagement.state == Engagement.STATE_ENGAGED,
-            and_(Engagement.state == Engagement.STATE_REQUESTED, Post.is_open.is_(True))
+            and_(Engagement.state == Engagement.STATE_REQUESTED, Post.is_archived.is_not(True))
         )
     ).join(
         Node, Node.id == Engagement.node_id
@@ -254,7 +254,7 @@ def view_node(node_id):
     form = MessageForm()
     if form.validate_on_submit():
         # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
-        if node.post.is_open:
+        if not node.post.is_archived:
             user_node = current_user.create_node(node)
             current_user.create_message(user_node, form.text.data)
             return redirect(url_for('main.view_node', node_id=user_node.id))
@@ -280,7 +280,7 @@ def request_engagement(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
     post = node.post
 
-    if not post.is_open:
+    if post.is_archived:
         flash('Cannot request for engagement because the post is archived.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
@@ -311,7 +311,7 @@ def request_engagement(node_id):
 def cancel_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
 
-    if not engagement.node.post.is_open:
+    if engagement.node.post.is_archived:
         flash('Cannot cancel engagement because the post is archived.', category='danger')
     elif current_user != engagement.sender:
         flash('Cannot cancel engagement requested by someone else.', category='danger')
@@ -329,7 +329,7 @@ def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
     post = engagement.node.post
 
-    if not post.is_open:
+    if post.is_archived:
         flash('Cannot accept engagement because the post is archived.', category='danger')
     elif engagement.state != Engagement.STATE_REQUESTED:
         flash('The request for engagement can no longer be accepted.', category='danger')
@@ -415,7 +415,7 @@ def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
 
     if (current_user != node.creator and current_user != node.post.creator) or \
-            (not node.post.is_open and message['engagement_id'] is None):
+            (node.post.is_archived and message['engagement_id'] is None):
         emit('notify_node', {'html': 'Cannot send message because the post is now archived.'}, to=message['node_id'])
         disconnect()
         return

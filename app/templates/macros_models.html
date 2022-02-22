@@ -70,7 +70,7 @@
         </div>
         {% if buttons %}
             <div class="card-footer py-0">
-                {% if post.is_open %}
+                {% if not post.is_archived %}
                     <a href="{% if user_node %}{{ url_for('main.share_node', node_id=user_node.id) }}{% endif %}"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                         <b>Share</b>
