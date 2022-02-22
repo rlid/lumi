@@ -1,8 +1,17 @@
 {% from "macros_form.html" import button_class %}
 
+{% macro render_user_plain(user, capitalize=True) %}
+    {% if user == current_user %}
+        {{ "You" if capitalize else "you" }}
+    {% else %}
+        {{ ("A " if capitalize else "a ") + user.adjective + " user" }}
+    {% endif %}
+{% endmacro %}
+
 {% macro render_user(user, capitalize=True) %}
-    <a class="text-decoration-none text-muted" href="{{ url_for("main.user", user_id=user.id) }}">
-        {% if user == current_user %}{{ "You" if capitalize else "you" }}{% else %}{{ user }}{% endif %}
+    <a class="text-decoration-none {% if user == current_user %}text-muted{% endif %}"
+       href="{{ url_for("main.user", user_id=user.id) }}">
+        {{ render_user_plain(user, capitalize) }}
     </a>
 {% endmacro %}
 
@@ -76,7 +85,7 @@
                         <b>Share</b>
                     </a>
                     {% if current_user == post.creator %}
-                        <a href="#"
+                        <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
                            class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                             <b>Edit</b>
                         </a>
@@ -127,11 +136,12 @@
                                     <div class="modal-body text-center">
                                         <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">
                                             <div class="input-group input-group-sm mb-3">
-                                                <textarea name="reason" class="form-control"
-                                                          placeholder="Spam / Phishing / Harassment / Other illegal activities" required></textarea>
+                                                <textarea name="reason" class="form-control" rows="4"
+                                                          placeholder="Spam / Harassment / Leaking personal information / Copyright infringement / Other illegal activities"
+                                                          required></textarea>
                                             </div>
                                             <input type="submit" id="btnReport"
-                                                    class="btn btn-{{- button_class(current_user, user_node.post) -}}">
+                                                   class="btn btn-{{- button_class(current_user, user_node.post) -}}">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                 Cancel
                                             </button>
@@ -203,6 +213,9 @@
                                                      ">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
+            {% if message.type in (Message.TYPE_REQUEST, Message.TYPE_CANCEL, Message.TYPE_ACCEPT, Message.TYPE_RATE) %}
+                by {{ render_user_plain(message.creator, capitalize=False) }}
+            {% endif %}
         </div>
     </div>
 {% endmacro %}

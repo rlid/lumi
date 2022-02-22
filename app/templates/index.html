@@ -33,7 +33,7 @@
                     {% endif %}
                     {% if tags_not_in_filter_with_freq %}
                         <div class="card-body bg-light py-2">
-                            <b>Popular tags:</b>
+                            <b>Top tags:</b>
                             {% for tag, freq in tags_not_in_filter_with_freq[:(15 if request.MOBILE else 30)] %}
                                 {{ render_tag(tag=tag, tags_in_filter=tags_in_filter, freq=freq, extra_class="mx-1 my-1", ignore_ids=[]) }}
                             {% endfor %}

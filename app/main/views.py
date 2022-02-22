@@ -1,6 +1,6 @@
 import re
 
-from flask import render_template, redirect, flash, url_for, Markup, request
+from flask import render_template, redirect, flash, url_for, Markup, request, abort
 from flask_login import login_required, current_user
 from flask_socketio import emit, join_room, disconnect
 from simple_websocket import ConnectionClosed
@@ -22,15 +22,8 @@ def index():
 def new_post():
     form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     if form.validate_on_submit():
-        title = form.title.data.strip()
-        body = form.body.data.replace('<br>', '')
-        body = body.replace('\r\n', '\n')
-        body = body.strip()
-        body = re.sub(r'(?<!\\)#\w+', lambda x: '\\' + x.group(0), body)
-        tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
-        # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
-        current_user.create_post(is_request=(form.is_request.data == '1'), reward=100 * int(form.reward.data),
-                                 title=title, body=body, tag_names=tag_names)
+        current_user.create_post(post_type=form.type.data, reward=100 * int(form.reward.data),
+                                 title=form.title.data, body=form.body.data)
         return redirect(url_for('main.browse'))
     if current_user.use_markdown:
         flash('Don\'t like Markdown? Switch to ' +
@@ -38,7 +31,40 @@ def new_post():
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("new_post.html", form=form, use_markdown=current_user.use_markdown)
+    return render_template("edit_post.html", form=form, title="New Post")
+
+
+@main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if current_user != post.creator:
+        abort(403)
+
+    form = MarkdownPostForm() if current_user.use_markdown else PostForm()
+    if form.validate_on_submit():
+        current_user.edit_post(post, title=form.title.data, body=form.body.data)
+        return redirect(url_for('main.browse'))
+
+    form.type.default = post.type
+    form.type.choices = [form.type.choices[0 if post.type == Post.TYPE_BUY else 1]]
+    form.process()
+    # form.is_request.default = 1 if post.type == Post.TYPE_BUY else 0
+    # form.is_request.render_kw = {"readonly": True}
+    # form.process()
+
+    form.reward.data = int(post.reward / 100)
+    form.reward.render_kw = {"readonly": None}
+
+    form.title.data = post.title
+    form.body.data = post.body[1:].replace('\\#', '#')
+    if current_user.use_markdown:
+        flash('Don\'t like Markdown? Switch to ' +
+              Markup(f'<a href={url_for("main.toggle_editor")}>simple editor</a>'), category='info')
+    else:
+        flash('Need more formatting options? Try the ' +
+              Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
+    return render_template('edit_post.html', form=form, title="Edit Post")
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -47,7 +73,11 @@ def toggle_editor():
     current_user.use_markdown = not current_user.use_markdown
     db.session.add(current_user)
     db.session.commit()
-    return redirect(url_for('main.new_post'))
+
+    redirect_url = request.referrer
+    if not redirect_url.startswith(request.root_url):
+        redirect_url = url_for('main.index')
+    return redirect(redirect_url)
 
 
 @main.route('/browse')

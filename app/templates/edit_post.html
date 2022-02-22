@@ -22,8 +22,8 @@
 
 {% block mid_col %}
     <div class="mb-3">
-    <h3 class="mb-3">Create a post</h3>
-    {% if use_markdown %}
+    <h3 class="mb-3">{{ title }}</h3>
+    {% if current_user.use_markdown %}
         {% if request.MOBILE %}
             {{ render_form(form, button_style="success", floating_input_label=True) }}
             <script>
@@ -43,8 +43,11 @@
             </script>
         {% else %}
             {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+
             <script>
+                let contentValue = '{{ form.body.data.replace('\n', ' \\n ') }}';
                 const editor = new toastui.Editor({
+                    initialValue: contentValue,
                     el: document.querySelector('#editor'),
                     height: '500px',
                     initialEditType: 'wysiwyg',
@@ -52,7 +55,7 @@
                     previewHighlight: true,
                     usageStatistics: false,
                     hideModeSwitch: false,
-                    placeholder: 'Details (optional)',
+                    placeholder: 'Details \n (optional)',
                     toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
                 });
 
@@ -73,6 +76,10 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guidelines for posting</h5>
             <ul class="small">
+                <li>Don't directly seek or offer <a href="https://www.gov.uk/government/publications/professions-regulated-by-law-in-the-uk-and-their-regulators/uk-regulated-professions-and-their-regulators">
+                    regulated professional services</a> (but it is totally fine to ask for recommendations / opinions
+                    of professional service companies). This is a place to ask friendly people on the Internet for
+                    informal help and tips, let's keep it casual and don't get too serious (yet)!</li>
                 <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the answer
                     can be verified by yourself once enough proof is presented by the answerer, or because the answerer
                     convinced you of their credential through proof, or because you are prepared to enter into multiple
@@ -85,7 +92,7 @@
                 <li>Spread the word and share your post on social media and other online communities, but <b>please
                     follow their rules and don't spam</b>. Generally, a good way is to ask the same question in the
                     community and offer to pay a reward using the link to your post here</li>
-                <li>Don't put any personal information in the post</li>
+                <li>Don't share personal information in the post</li>
                 <li>(Experimental) Enable Social Media mode to offer even more incentive for people to spread the word
                     by guaranteeing a reward for referral</li>
             </ul>

@@ -13,8 +13,8 @@ db.drop_all()
 db.create_all()
 
 faker = Faker()
-N_DAYS = 10
-N_USERS = 10
+N_DAYS = 5
+N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -25,7 +25,22 @@ P_RATE_ENGAGE = 0.5
 P_ARCHIVE = 0.75
 N_TAGS = 50
 
-users = [User(email=faker.email(), account_balance=100000) for i in range(N_USERS)]
+adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachable', 'adaptable', 'adventurous',
+              'affectionate', 'ambitious', 'amiable', 'compassionate', 'considerate', 'courageous', 'courteous',
+              'diligent', 'empathetic', 'exuberant', 'frank', 'generous', 'gregarious', 'impartial', 'intuitive',
+              'inventive', 'passionate', 'persistent', 'philosophical', 'practical', 'rational', 'reliable',
+              'resourceful', 'sensible', 'sincere', 'sympathetic', 'unassuming', 'witty', 'adaptable', 'adventurous',
+              'diligent', 'humble', 'courageous', 'efficient', 'enchanting', 'generous',
+              'likeable', 'sincere', 'non-judgemental', 'trustworthy', 'resourceful', 'well-read', 'wise',
+              'resilient', 'reliable', 'determined', 'strong', 'stupendous', 'exceptional', 'generous', 'kind',
+              'witty', 'extraordinary', 'breathtaking', 'flawless', 'magnificent',
+              'lively', 'versatile', 'amazing', 'fun-loving', 'well-travelled', 'outgoing', 'amicable', 'friendly',
+              'perseverant', 'enthusiastic', 'affectionate', 'thoughtful', 'modest', 'hygienic', 'considerate',
+              'courteous', 'optimistic', 'motivated', 'encouraging', 'eager', 'diplomatic', 'convivial',
+              'active', 'assertive', 'affable', 'supportive', 'steadfast', 'shy', 'laid-back',
+              'introverted', 'hopeful', 'focused', 'extroverted', 'cheerful', 'analytical',
+              'good-looking', 'hard-working', 'easy-going', 'bright', 'warm-hearted', 'honest']
+users = [User(email=faker.email(), account_balance=100000, adjective=random.choice(adjectives)) for i in range(N_USERS)]
 db.session.add_all(users)
 db.session.commit()
 
@@ -42,7 +57,7 @@ actual_success = {}
 for day in range(N_DAYS):
     for user in users:
         if random.uniform(0, 1) < P_POST:
-            post = user.create_post(is_request=random.choice([True, False]),
+            post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
                                     reward=100 * random.randint(1, 5),
                                     title=faker.text(100),
                                     body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))

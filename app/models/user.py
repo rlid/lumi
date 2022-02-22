@@ -1,4 +1,5 @@
 import math
+import re
 import uuid
 from datetime import datetime, timedelta
 
@@ -54,6 +55,8 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+
+    adjective = db.Column(db.String(20))
 
     account_balance = db.Column(db.Integer, default=0, nullable=False)
     committed_amount = db.Column(db.Integer, default=0, nullable=False)
@@ -211,32 +214,66 @@ class User(UserMixin, db.Model):
         if tag is None:
             tag = Tag(id=name.lower(), name=name, creator=self)
             db.session.add(tag)
-            db.session.commit()
         post_tag = post.post_tags.filter_by(tag=tag).first()
         if post_tag is None:
             post_tag = PostTag(post=post, tag=tag, creator=self)
             db.session.add(post_tag)
-            db.session.commit()
-        return post_tag
+            return post_tag
 
     def add_tag(self, post, name):
         if name.lower() not in ('buying', 'selling'):
-            return self._add_tag(post, name)
+            post_tag = self._add_tag(post, name)
+            if post_tag:
+                db.session.commit()
+                return post_tag
 
-    def create_post(self, is_request, reward, title, body=None, tag_names=[]):
+    def create_post(self, type, reward, title, body):
+        title = title.strip()
+        body = body.replace('<br>', '')  # remove <br> added by Toast UI
+        body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
+        body = body.strip()
+        # add '\' to hashtag so the '#' is preserved by the Markdown processor:
+        body = re.sub(r'(?<!\\)#\w+', lambda x: '\\' + x.group(0), body)
+        # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
+        tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
+
         post = Post(creator=self,
-                    type=Post.TYPE_BUY if is_request else Post.TYPE_SELL,
+                    type=type,
                     reward=reward,
                     title=title,
                     body=('m' if self.use_markdown else 's') + body)
-        for tag_name in tag_names:
-            self.add_tag(post, tag_name)
-        self._add_tag(post, 'Buying' if is_request else 'Selling')
-        node = Node(post=post, creator=self)
         db.session.add(post)
+
+        self._add_tag(post, 'Buying' if type == Post.TYPE_BUY else 'Selling')
+        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
+
+        node = Node(post=post, creator=self)
         db.session.add(node)
+
         db.session.commit()
         return post
+
+    def edit_post(self, post, title, body):
+        title = title.strip()
+        body = body.replace('<br>', '')  # remove <br> added by Toast UI
+        body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
+        body = body.strip()
+        # add '\' to hashtag so the '#' is preserved by the Markdown processor:
+        body = re.sub(r'(?<!\\)#\w+', lambda x: '\\' + x.group(0), body)
+        # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
+        tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
+
+        post.title = title
+        post.body = ('m' if self.use_markdown else 's') + body
+        db.session.add(post)
+
+        # reset all post tags
+        [db.session.delete(post_tag) for post_tag in post.post_tags]
+        self._add_tag(post, 'Buying' if post.type == Post.TYPE_BUY else 'Selling')
+        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
+
+        db.session.commit()
+
 
     def toggle_archive(self, post):
         if self != post.creator:
@@ -309,7 +346,7 @@ class User(UserMixin, db.Model):
                                     asker=self, answerer=node.post.creator)
 
         db.session.add(engagement)
-        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested by {self}')
+        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
         db.session.add(message)
         db.session.commit()
         return engagement
@@ -329,7 +366,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_CANCEL,
-                          text=f'Engagement cancelled by {self}')
+                          text=f'Engagement cancelled')
         db.session.add(message)
         db.session.commit()
 
@@ -353,7 +390,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_ACCEPT,
-                          text=f'Engagement accepted by {self}')
+                          text=f'Engagement accepted')
         db.session.add(message)
         db.session.commit()
 
@@ -418,7 +455,7 @@ class User(UserMixin, db.Model):
                           node=engagement.node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
-                          text=f'Engagement rated {"+" if is_success else "-"} by {self}')
+                          text=f'Engagement rated {"+" if is_success else "-"}')
         db.session.add(message)
 
         if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:

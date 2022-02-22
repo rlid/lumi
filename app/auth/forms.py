@@ -21,6 +21,9 @@ class LogInForm(FlaskForm):
 class SignUpForm(FlaskForm):
     invite_code = StringField("Invite code", validators=[InputRequired()], render_kw={"placeholder": "Invite Code"})
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
+    adjective = StringField(
+        "Adjective",
+        render_kw={"placeholder": "Choose an adjective to describe yourself (optional - just for fun)"})
     password = PasswordField("Password",
                              validators=[
                                  InputRequired(),

@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% from "macros_models.html" import render_message with context %}
+{% from "macros_models.html" import render_message, render_user with context %}
 
 {% block mid_col %}
     {{ render_post_card(post, user_node=user_node, buttons=True) }}
@@ -23,16 +23,17 @@
                    class="text-decoration-none
                     {% if messages[0].engagement is not none and messages[0].engagement.state < Engagement.STATE_COMPLETED %}
                         {% if messages[0].engagement.state == Engagement.STATE_ENGAGED %}
-                            text-success"><b>Active engagement with {{ node.creator }}</b>
-                   {% endif %}
+                            text-success"><b>Active engagement with</b>
+                        {% endif %}
                    {% else %}
                        {% if messages[0].type == Message.TYPE_REQUEST %}
-                           text-primary"><b>Engagement requested by {{ node.creator }}</b>
+                           text-primary"><b>Engagement requested by</b>
                        {% else %}
-                           text-muted"><b>Recent interactions with {{ node.creator }}</b>
+                           text-muted"><b>Recent interactions with</b>
                        {% endif %}
                    {% endif %}
                 </a>
+                <b>{{ render_user(node.creator, capitalize=False) }}</b>
             </div>
             <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none">
                 <div class="card-body pt-0">
