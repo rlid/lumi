@@ -19,38 +19,6 @@ _TOKEN_SECONDS_TO_EXPIRY = 600
 _REP_DECAY = 0.0
 
 
-def _distribute_reward(node, amount, reward_share):
-    nodes = node.nodes_before_inc().all()
-    referral_nodes = nodes[1:(len(nodes) - 1)]
-
-    if len(nodes) == 1:
-        raise RewardDistributionError('Cannot distribute reward from the root node')
-
-    answerer = node.creator if node.post.type == Post.TYPE_BUY else node.post.creator
-
-    # if the node is directly connected to the root node or if the answerer does not share:
-    if len(referral_nodes) == 0 or reward_share == 0:
-        # reward for answerer
-        answerer.account_balance += amount
-        db.session.add(answerer)
-    else:  # there is at least 1 referer and reward share is not 0:
-        remaining_amount = amount
-        answerer_reward = int((1.0 - reward_share) * remaining_amount)
-        answerer.account_balance += answerer_reward
-        db.session.add(answerer)
-
-        remaining_amount -= answerer_reward
-        i = len(referral_nodes)
-        while i > 0:
-            i = i - 1
-            referer_reward = int(0.5 * remaining_amount)
-            referral_nodes[i].creator.account_balance += referer_reward
-            db.session.add(referral_nodes[i].creator)
-            remaining_amount -= referer_reward
-        #  the initial referer gets all remaining amount
-        referral_nodes[i].creator.account_balance += remaining_amount
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -58,15 +26,14 @@ class User(UserMixin, db.Model):
 
     adjective = db.Column(db.String(20))
 
-    account_balance = db.Column(db.Integer, default=0, nullable=False)
-    committed_amount = db.Column(db.Integer, default=0, nullable=False)
+    total_balance_cent = db.Column(db.Integer, default=0, nullable=False)
+    reserved_balance_cent = db.Column(db.Integer, default=0, nullable=False)
+    reward_limit_cent = db.Column(db.Integer, default=500, nullable=False)
 
     sum_x = db.Column(db.Float, default=0.0, nullable=False)
     sum_abs_x = db.Column(db.Float, default=0.0, nullable=False)
     sum_i = db.Column(db.Float, default=0.0, nullable=False)
     sum_abs_i = db.Column(db.Float, default=0.0, nullable=False)
-
-    reward_limit = db.Column(db.Integer, default=500, nullable=False)
 
     email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
@@ -336,10 +303,12 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
-        if self.reward_limit < node.post.reward:
+        if round(node.post.reward - self.reward_limit, 4) > 0:
+            print(node.post.reward)
+            print(self.reward_limit)
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
-        if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
+        if node.post.type == Post.TYPE_SELL and self.total_balance - self.reserved_balance < node.post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
         if node.post.type == Post.TYPE_BUY:
@@ -382,13 +351,15 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        if self.reward_limit < engagement.node.post.reward:
+        if round(engagement.node.post.reward - self.reward_limit, 4) > 0:
+            print(engagement.node.post.reward)
+            print(self.reward_limit)
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_BUY and self.account_balance - self.committed_amount < post.reward:
+        if post.type == Post.TYPE_BUY and self.total_balance - self.reserved_balance < post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
-        self.committed_amount = self.committed_amount + post.reward
+        self.reserved_balance = self.reserved_balance + post.reward
         db.session.add(self)
 
         engagement.state = Engagement.STATE_ENGAGED
@@ -400,6 +371,30 @@ class User(UserMixin, db.Model):
                           text=f'Engagement accepted')
         db.session.add(message)
         db.session.commit()
+
+    @property
+    def total_balance(self):
+        return 0.01 * self.total_balance_cent
+
+    @total_balance.setter
+    def total_balance(self, value):
+        self.total_balance_cent = int(100 * value)
+
+    @property
+    def reserved_balance(self):
+        return 0.01 * self.reserved_balance_cent
+
+    @reserved_balance.setter
+    def reserved_balance(self, value):
+        self.reserved_balance_cent = int(100 * value)
+
+    @property
+    def reward_limit(self):
+        return 0.01 * self.reward_limit_cent
+
+    @reward_limit.setter
+    def reward_limit(self, value):
+        self.reward_limit_cent = int(100 * value)
 
     @property
     def reputation(self):
@@ -427,30 +422,30 @@ class User(UserMixin, db.Model):
         if success:
             r = self.reputation
             if r > 0.8:
-                self.reward_limit = min(1000, self.reward_limit + int(0.5 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.5 * x)
             elif r > 0.6:
-                self.reward_limit = min(1000, self.reward_limit + int(0.4 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.4 * x)
             elif r > 0.4:
-                self.reward_limit = min(1000, self.reward_limit + int(0.3 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.3 * x)
             elif r > 0.2:
-                self.reward_limit = min(1000, self.reward_limit + int(0.2 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.2 * x)
             elif r > 0:
-                self.reward_limit = min(1000, self.reward_limit + int(0.1 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.1 * x)
             else:
-                self.reward_limit = min(1000, self.reward_limit + int(0.05 * x))
+                self.reward_limit = min(10, self.reward_limit + 0.05 * x)
 
         if dispute_lost:
             r = self.reputation
             if r > 0.5:
-                self.reward_limit = max(1, int(0.75 * self.reward_limit))
+                self.reward_limit = max(1.0, 0.75 * self.reward_limit)
             elif r > 0:
-                self.reward_limit = max(1, int(0.5 * self.reward_limit))
+                self.reward_limit = max(1.0, 0.5 * self.reward_limit)
             elif r > -0.5:
-                self.reward_limit = max(1, min(int(0.5 * self.reward_limit), int(0.75 * x)))
+                self.reward_limit = max(1.0, min(0.5 * self.reward_limit, 0.75 * x))
             else:
-                self.reward_limit = max(1, int(0.5 * x))
+                self.reward_limit = max(1.0, 0.5 * x)
 
-    def update_reputation(self, x, success, dispute_lost):
+    def update_reputation(self, post_reward, success, dispute_lost):
         '''
         The visible reputation is only affected if the interaction is a success or if the user lose a dispute.
         This is to protect the side with a higher reputation - his visible reputation is not affected but the
@@ -458,7 +453,7 @@ class User(UserMixin, db.Model):
         the next dispute unless he starts to build a good track record
         '''
         #  decay the weights of past observations in ALL cases:
-        m = math.exp(-math.fabs(x) * _REP_DECAY)
+        m = math.exp(-math.fabs(post_reward) * _REP_DECAY)
         self.sum_x *= m
         self.sum_abs_x *= m
 
@@ -468,12 +463,12 @@ class User(UserMixin, db.Model):
 
         # add most recent observation only if it is a success or dispute lost
         if success or dispute_lost:
-            self.sum_x += x if success else -x
-            self.sum_abs_x += math.fabs(x)
+            self.sum_x += post_reward if success else -post_reward
+            self.sum_abs_x += math.fabs(post_reward)
             self.sum_i += 1 if success else -1
             self.sum_abs_i += 1
 
-        self.update_reward_limit(x, success, dispute_lost)
+        self.update_reward_limit(post_reward, success, dispute_lost)
 
     def rate_engagement(self, engagement, is_success):
         if engagement.state != Engagement.STATE_ENGAGED:
@@ -501,11 +496,12 @@ class User(UserMixin, db.Model):
             db.session.commit()
             return
 
-        reward = engagement.node.post.reward
+        reward_cent = engagement.node.post.reward_cent
+        reward = 0.01 * reward_cent
         if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
-            asker.committed_amount -= reward
-            asker.account_balance -= reward
-            _distribute_reward(node=engagement.node, amount=reward, reward_share=engagement.reward_share)
+            asker.reserved_balance_cent -= reward_cent
+            asker.total_balance_cent -= reward_cent
+            _distribute_reward(node=engagement.node, amount_cent=reward_cent)
 
             asker.update_reputation(reward, success=True, dispute_lost=False)
             answerer.update_reputation(reward, success=True, dispute_lost=False)
@@ -517,7 +513,7 @@ class User(UserMixin, db.Model):
             db.session.add(message)
 
         if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
-            asker.committed_amount -= reward
+            asker.reserved_balance_cent -= reward_cent
 
             asker_rep_if_dispute = asker.reputation_if_dispute_lost(reward)
             answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(reward)
@@ -541,7 +537,7 @@ class User(UserMixin, db.Model):
             db.session.add(message)
 
         if engagement.rating_by_answerer == -1:
-            asker.committed_amount -= reward
+            asker.reserved_balance_cent -= reward_cent
 
             message = Message(creator=self,
                               node=engagement.node,
@@ -554,6 +550,33 @@ class User(UserMixin, db.Model):
         db.session.add(asker)
         db.session.add(answerer)
         db.session.commit()
+
+
+def _distribute_reward(node, amount_cent):
+    nodes = node.nodes_before_inc().all()
+    referral_nodes = nodes[1:(len(nodes) - 1)]
+
+    if len(nodes) == 1:
+        raise RewardDistributionError('Cannot distribute reward from the root node')
+
+    answerer = node.creator if node.post.type == Post.TYPE_BUY else node.post.creator
+
+    platform_fee_cent = int(0.1 * amount_cent)
+    referral_fee_cent = int(0.1 * amount_cent)
+    answerer_fee_cent = amount_cent - platform_fee_cent - referral_fee_cent
+
+    i = len(referral_nodes)
+    while i > 0:
+        i = i - 1
+        referer_reward_cent = int(0.5 * referral_fee_cent)
+        referral_nodes[i].creator.total_balance_cent += referer_reward_cent
+        db.session.add(referral_nodes[i].creator)
+        referral_fee_cent -= referer_reward_cent
+    if referral_nodes:  # the initial referer gets all remaining amount:
+        referral_nodes[0].creator.total_balance_cent += referral_fee_cent
+        referral_fee_cent = 0
+    # the answerer gets the answerer fee and the referral fee if there is no referrer
+    answerer.total_balance_cent += answerer_fee_cent + referral_fee_cent
 
 
 @login_manager.user_loader

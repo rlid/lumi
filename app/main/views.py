@@ -23,7 +23,7 @@ def index():
 def new_post():
     form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     if form.validate_on_submit():
-        current_user.create_post(type=form.type.data, reward=100 * int(form.reward.data),
+        current_user.create_post(type=form.type.data, reward=form.reward.data,
                                  title=form.title.data, body=form.body.data)
         return redirect(url_for('main.browse'))
     if current_user.use_markdown:
@@ -40,6 +40,7 @@ def new_post():
 def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
     if current_user != post.creator:
+        flash('Cannot edit post that does not belong to you.', category='danger')
         abort(403)
 
     form = MarkdownPostForm() if current_user.use_markdown else PostForm()
@@ -54,7 +55,7 @@ def edit_post(post_id):
     # form.is_request.render_kw = {"readonly": True}
     # form.process()
 
-    form.reward.data = int(post.reward / 100)
+    form.reward.data = post.reward
     form.reward.render_kw = {"readonly": None}
 
     form.title.data = post.title
@@ -333,13 +334,13 @@ def request_engagement(node_id):
     if current_user == post.creator:
         flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if current_user.reward_limit < post.reward:
+    if round(post.reward - current_user.reward_limit, 4) > 0:
         flash('You currently cannot request for engagement on post worth more than $' +
-              f'{round(0.01 * current_user.reward_limit, 2):.2f}.',
+              f'{current_user.reward_limit:.2f}.',
               category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
-    if post.type == Post.TYPE_SELL and current_user.account_balance - current_user.committed_amount < post.reward:
+    if post.type == Post.TYPE_SELL and current_user.total_balance - current_user.reserved_balance < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
@@ -386,11 +387,11 @@ def accept_engagement(engagement_id):
         flash('The request for engagement can no longer be accepted.', category='danger')
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
-    elif current_user.reward_limit < post.reward:
+    elif round(post.reward - current_user.reward_limit, 4) > 0:
         flash('You currently cannot accept the engagement on post worth more than $' +
-              f'{round(0.01 * current_user.reward_limit, 2):.2f}.',
+              f'{current_user.reward_limit:.2f}.',
               category='warning')
-    elif post.type == Post.TYPE_BUY and current_user.account_balance - current_user.committed_amount < post.reward:
+    elif post.type == Post.TYPE_BUY and current_user.total_balance - current_user.reserved_balance < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
     else:

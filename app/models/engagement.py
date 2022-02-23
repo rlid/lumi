@@ -12,8 +12,6 @@ class Engagement(db.Model):
     STATE_COMPLETED = 2 * STATE_ENGAGED
     STATE_CANCELLED = 2 * STATE_COMPLETED
 
-    DEFAULT_REWARD_SHARE = 0.1
-
     __tablename__ = 'engagements'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
@@ -30,8 +28,6 @@ class Engagement(db.Model):
 
     rating_by_asker = db.Column(db.Integer, default=0, nullable=False)
     rating_by_answerer = db.Column(db.Integer, default=0, nullable=False)
-
-    reward_share = db.Column(db.Float, default=DEFAULT_REWARD_SHARE, nullable=False)
 
     messages = db.relationship('Message',
                                backref=db.backref('engagement'),

@@ -4,7 +4,7 @@
     {% if user == current_user %}
         {{ "You" if capitalize else "you" }}
     {% else %}
-        {{ ("A " if capitalize else "a ") + user.adjective + " user" }}
+        {{ ("A " if capitalize else "a ") + (user.adjective + " user" if user.adjective else "user") }}
     {% endif %}
 {% endmacro %}
 
@@ -50,7 +50,7 @@
                     </a>
                     {% if post.reward > 0 %}
                         <button type="button" class="btn btn-secondary" disabled>
-                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                            {{ "$%.2f"|format(post.reward) }}
                         </button>
                     {% endif %}
                 </div>
@@ -237,7 +237,7 @@
                     </a>
                     {% if post.reward > 0 %}
                         <button type="button" class="btn btn-secondary" disabled>
-                            {{ "$%.0f"|format(0.01 * post.reward) }}
+                            {{ "$%.2f"|format(post.reward) }}
                         </button>
                     {% endif %}
                 </div>

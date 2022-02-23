@@ -38,7 +38,7 @@ adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachab
 def sim_random():
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), account_balance=100000, adjective=random.choice(adjectives)) for i in
+    users = [User(email=faker.email(), total_balance=100, adjective=random.choice(adjectives)) for i in
              range(N_USERS)]
     db.session.add_all(users)
     db.session.commit()
@@ -57,7 +57,7 @@ def sim_random():
         for user in users:
             if random.uniform(0, 1) < P_POST:
                 post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                        reward=100 * random.randint(1, 5),
+                                        reward=random.randint(1, 5),
                                         title=faker.text(100),
                                         body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
                 print(f'{user} created {post}')
@@ -88,27 +88,29 @@ def sim_random():
                     engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
                     if engagement is None:
                         if random.uniform(0, 1) < P_REQUEST_ENGAGE:
-                            engagement = user.create_engagement(node)
-                            if random.uniform(0, 1) < P_CANCEL_ENGAGE:
-                                user.cancel_engagement(engagement)
-                            else:
-                                print(f'{user} created {engagement}')
+                            if round(user.reward_limit - node.post.reward, 4) >= 0:
+                                engagement = user.create_engagement(node)
+                                if random.uniform(0, 1) < P_CANCEL_ENGAGE:
+                                    user.cancel_engagement(engagement)
+                                else:
+                                    print(f'{user} created {engagement}')
 
         for user in users:
             for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
                 if not engagement.node.post.is_archived:
                     if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
-                        user.accept_engagement(engagement)
-                        print(f'{user} accepted {engagement}')
-                        for i in range(random.randint(1, 2)):
-                            m1 = [user.create_message(
-                                engagement.node, text=faker.text(100)
-                            ) for i in range(random.randint(1, 2))]
-                            print(f'{user} sent {m1}')
-                            m2 = [engagement.sender.create_message(
-                                engagement.node, text=faker.text(100)
-                            ) for i in range(random.randint(1, 2))]
-                            print(f'{post.creator} replied {m1}')
+                        if round(user.reward_limit - engagement.node.post.reward, 4) >= 0:
+                            user.accept_engagement(engagement)
+                            print(f'{user} accepted {engagement}')
+                            for i in range(random.randint(1, 2)):
+                                m1 = [user.create_message(
+                                    engagement.node, text=faker.text(100)
+                                ) for i in range(random.randint(1, 2))]
+                                print(f'{user} sent {m1}')
+                                m2 = [engagement.sender.create_message(
+                                    engagement.node, text=faker.text(100)
+                                ) for i in range(random.randint(1, 2))]
+                                print(f'{post.creator} replied {m1}')
 
         for user in users:
             for engagement in user.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
@@ -153,45 +155,31 @@ def sim_random():
 def sim_reset():
     db.drop_all()
     db.create_all()
-    u1 = User(email=faker.email(), account_balance=100000, adjective=random.choice(adjectives))
-    u2 = User(email=faker.email(), account_balance=100000, adjective=random.choice(adjectives))
-    db.session.add_all([u1, u2])
-    p = u1.create_post(type=Post.TYPE_BUY, reward=100, title=faker.text(100))
+    u1 = User(email=faker.email(), total_balance=100)
+    u2 = User(email=faker.email(), total_balance=100)
+    u3 = User(email=faker.email(), total_balance=100)
+    u4 = User(email=faker.email(), total_balance=100)
+    u5 = User(email=faker.email(), total_balance=100)
+    db.session.add_all([u1, u2, u3, u4, u5])
+    p = u1.create_post(type=Post.TYPE_SELL, reward=5, title=faker.text(100))
     n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
-    e = u2.create_engagement(n)
+    u2.create_message(n, 'u2')
+    n = u3.create_node(n)
+    u3.create_message(n, 'u3')
+    n = u4.create_node(n)
+    u4.create_message(n, 'u4')
+    n = u5.create_node(n)
+    e = u5.create_engagement(n)
     u1.accept_engagement(e)
     u1.rate_engagement(e, True)
-    u2.rate_engagement(e, True)
-
-    u3 = User(email=faker.email(), account_balance=100000, adjective=random.choice(adjectives))
-    db.session.add(u3)
-    n = u3.create_node(p.nodes.filter(Node.creator == u1).first())
-    e = u3.create_engagement(n)
-    u1.accept_engagement(e)
-    u1.rate_engagement(e, True)
-    u3.rate_engagement(e, True)
-
-    p = u2.create_post(type=Post.TYPE_BUY, reward=200, title=faker.text(100))
-    n = u3.create_node(p.nodes.filter(Node.creator == u2).first())
-    e = u3.create_engagement(n)
-    u2.accept_engagement(e)
-    u2.rate_engagement(e, True)
-    u3.rate_engagement(e, True)
-
-    p = u1.create_post(type=Post.TYPE_BUY, reward=100, title=faker.text(100))
-    n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
-    e = u2.create_engagement(n)
-    u1.accept_engagement(e)
-    u1.rate_engagement(e, False)
-    u2.rate_engagement(e, True)
-
+    u5.rate_engagement(e, True)
     db.session.commit()
 
 
 def sim_existing():
     u1 = User.query.get('6590d9ea-6208-4365-b3cb-5decea456b52')
     u2 = User.query.get('660d1e1e-6d1e-42a4-b2db-96287dcfb8f2')
-    p = u1.create_post(type=Post.TYPE_BUY, reward=610, title=faker.text(100))
+    p = u1.create_post(type=Post.TYPE_SELL, reward=610, title=faker.text(100))
     n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
     e = u2.create_engagement(n)
     u1.accept_engagement(e)
@@ -207,8 +195,8 @@ app_context.push()
 # db.drop_all()
 # db.create_all()
 
-sim_random()
-# sim_reset()
+# sim_random()
+sim_reset()
 # sim_existing()
 
 # db.session.commit()

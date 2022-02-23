@@ -29,13 +29,13 @@ class Post(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     type = db.Column(db.String(16), nullable=False)
-    reward = db.Column(db.Integer, nullable=False)
-    title = db.Column(db.String(100), nullable=False)
+    reward_cent = db.Column(db.Integer, nullable=False)
 
     is_archived = db.Column(db.Boolean, default=False, nullable=False)
     is_reported = db.Column(db.Boolean, default=False, nullable=False)
     report_reason = db.Column(db.Text, default='')
 
+    title = db.Column(db.String(100), nullable=False)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
 
@@ -57,6 +57,14 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'
+
+    @property
+    def reward(self):
+        return 0.01 * self.reward_cent
+
+    @reward.setter
+    def reward(self, value):
+        self.reward_cent = int(100 * value)
 
 
 @event.listens_for(Post.body, 'set')

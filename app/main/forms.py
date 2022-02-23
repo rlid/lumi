@@ -1,6 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, IntegerField, RadioField, TextAreaField
+from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField
 from wtforms.validators import InputRequired, NumberRange, Length, DataRequired
 from wtforms.validators import ValidationError
 
@@ -21,7 +21,7 @@ class PostForm(FlaskForm):
                       ],
                       validators=[InputRequired()]
                       )
-    reward = IntegerField("Reward / Price (in USD - $)",
+    reward = DecimalField("Reward / Price (in USD - $)",
                           validators=[InputRequired(), NumberRange(min=1)],
                           render_kw={"placeholder": "Price"})
     title = StringField("Title",
@@ -35,9 +35,8 @@ class PostForm(FlaskForm):
             raise ValidationError(f'Title cannot be less than {TITLE_MIN_LENGTH} characters')
 
     def validate_reward(self, field):
-        print(type(field.data))
-        if 100 * field.data > current_user.reward_limit:
-            raise ValidationError(f'Your current limit on reward / price is {int(0.01 * current_user.reward_limit)}.')
+        if round(float(field.data) - current_user.reward_limit, 4) > 0:
+            raise ValidationError(f'Your current limit on reward / price is {current_user.reward_limit:.2f}.')
 
 
 class MarkdownPostForm(PostForm):
