@@ -35,7 +35,7 @@ class PostForm(FlaskForm):
             raise ValidationError(f'Title cannot be less than {TITLE_MIN_LENGTH} characters')
 
     def validate_reward(self, field):
-        if round(float(field.data) - current_user.reward_limit, 4) > 0:
+        if 100 * field.data > current_user.reward_limit_cent:
             raise ValidationError(f'Your current limit on reward / price is {current_user.reward_limit:.2f}.')
 
 

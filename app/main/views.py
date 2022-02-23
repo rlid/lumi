@@ -334,10 +334,9 @@ def request_engagement(node_id):
     if current_user == post.creator:
         flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if round(post.reward - current_user.reward_limit, 4) > 0:
+    if post.reward_cent > current_user.reward_limit_cent:
         flash('You currently cannot request for engagement on post worth more than $' +
-              f'{current_user.reward_limit:.2f}.',
-              category='warning')
+              f'{current_user.reward_limit:.2f}.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
     if post.type == Post.TYPE_SELL and current_user.total_balance - current_user.reserved_balance < post.reward:
@@ -387,7 +386,7 @@ def accept_engagement(engagement_id):
         flash('The request for engagement can no longer be accepted.', category='danger')
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
-    elif round(post.reward - current_user.reward_limit, 4) > 0:
+    elif post.reward_cent > current_user.reward_limit_cent:
         flash('You currently cannot accept the engagement on post worth more than $' +
               f'{current_user.reward_limit:.2f}.',
               category='warning')

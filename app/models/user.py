@@ -303,9 +303,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
-        if round(node.post.reward - self.reward_limit, 4) > 0:
-            print(node.post.reward)
-            print(self.reward_limit)
+        if node.post.reward_cent > self.reward_limit_cent:
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
         if node.post.type == Post.TYPE_SELL and self.total_balance - self.reserved_balance < node.post.reward:
@@ -351,9 +349,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        if round(engagement.node.post.reward - self.reward_limit, 4) > 0:
-            print(engagement.node.post.reward)
-            print(self.reward_limit)
+        if engagement.node.post.reward_cent > self.reward_limit_cent:
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_BUY and self.total_balance - self.reserved_balance < post.reward:

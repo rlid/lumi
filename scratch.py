@@ -6,8 +6,8 @@ from app import create_app, db
 from app.models.user import User, Post, Node, Engagement
 
 faker = Faker()
-N_DAYS = 5
-N_USERS = 20
+N_DAYS = 10
+N_USERS = 10
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -88,7 +88,7 @@ def sim_random():
                     engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
                     if engagement is None:
                         if random.uniform(0, 1) < P_REQUEST_ENGAGE:
-                            if round(user.reward_limit - node.post.reward, 4) >= 0:
+                            if user.reward_limit_cent >= node.post.reward_cent:
                                 engagement = user.create_engagement(node)
                                 if random.uniform(0, 1) < P_CANCEL_ENGAGE:
                                     user.cancel_engagement(engagement)
@@ -99,7 +99,7 @@ def sim_random():
             for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
                 if not engagement.node.post.is_archived:
                     if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
-                        if round(user.reward_limit - engagement.node.post.reward, 4) >= 0:
+                        if user.reward_limit_cent >= engagement.node.post.reward_cent:
                             user.accept_engagement(engagement)
                             print(f'{user} accepted {engagement}')
                             for i in range(random.randint(1, 2)):
@@ -141,38 +141,45 @@ def sim_random():
                 if random.uniform(0, 1) < P_ARCHIVE:
                     user.toggle_archive(engagement.node.post)
 
-    print(len(Post.query.all()))
-    print(len(Node.query.all()))
-
-    print(Engagement.query.filter(and_(Engagement.state == Engagement.STATE_COMPLETED,
-                                       Engagement.rating_by_asker == 1)).count())
-
-    print(Engagement.query.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
-
     db.session.commit()
 
 
 def sim_reset():
+    from random import Random
+    random = Random(1)
+
     db.drop_all()
     db.create_all()
-    u1 = User(email=faker.email(), total_balance=100)
-    u2 = User(email=faker.email(), total_balance=100)
-    u3 = User(email=faker.email(), total_balance=100)
-    u4 = User(email=faker.email(), total_balance=100)
-    u5 = User(email=faker.email(), total_balance=100)
-    db.session.add_all([u1, u2, u3, u4, u5])
-    p = u1.create_post(type=Post.TYPE_SELL, reward=5, title=faker.text(100))
-    n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
-    u2.create_message(n, 'u2')
-    n = u3.create_node(n)
-    u3.create_message(n, 'u3')
-    n = u4.create_node(n)
-    u4.create_message(n, 'u4')
-    n = u5.create_node(n)
-    e = u5.create_engagement(n)
-    u1.accept_engagement(e)
-    u1.rate_engagement(e, True)
-    u5.rate_engagement(e, True)
+    u1 = User(email='1', total_balance=100)
+    u2 = User(email='2', total_balance=100)
+    u3 = User(email='3', total_balance=100)
+    u4 = User(email='4', total_balance=100)
+    u5 = User(email='5', total_balance=100)
+    users = [u1, u2, u3, u4, u5]
+    db.session.add_all(users)
+    p1b = u1.create_post(type=Post.TYPE_BUY, reward=1, title='')
+    p1s = u1.create_post(type=Post.TYPE_SELL, reward=5, title='')
+    p2b = u2.create_post(type=Post.TYPE_BUY, reward=2, title='')
+    p2s = u2.create_post(type=Post.TYPE_SELL, reward=4, title='')
+    p3b = u3.create_post(type=Post.TYPE_BUY, reward=3, title='')
+    p3s = u3.create_post(type=Post.TYPE_SELL, reward=3, title='')
+    p4b = u4.create_post(type=Post.TYPE_BUY, reward=4, title='')
+    p4s = u4.create_post(type=Post.TYPE_SELL, reward=2, title='')
+    p5b = u5.create_post(type=Post.TYPE_BUY, reward=5, title='')
+    p5s = u5.create_post(type=Post.TYPE_SELL, reward=1, title='')
+    posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
+
+    for day in range(10):
+        for user in users:
+            post = random.choice(posts)
+            if user != post.creator:
+                if user.reward_limit_cent >= post.reward_cent and post.creator.reward_limit_cent >= post.reward_cent:
+                    node = user.create_node(random.choice(post.nodes.all()))
+                    engagement = user.create_engagement(node)
+                    post.creator.accept_engagement(engagement)
+                    user.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)
+                    post.creator.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)
+
     db.session.commit()
 
 
@@ -195,9 +202,28 @@ app_context.push()
 # db.drop_all()
 # db.create_all()
 
-# sim_random()
-sim_reset()
+sim_random()
+# sim_reset()
 # sim_existing()
+
+users = User.query.all()
+
+print(f'Number of posts = {len(Post.query.all())}')
+print(f'Number of nodes (including root) = {len(Node.query.all())}')
+
+print(Engagement.query.filter(
+    Engagement.state == Engagement.STATE_COMPLETED,
+    Engagement.rating_by_asker == 1,
+    Engagement.rating_by_answerer == 1
+).count())
+print(Engagement.query.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
+
+print(sum([u.total_balance for u in users]))
+engagements = Engagement.query.filter(
+    Engagement.state == Engagement.STATE_COMPLETED,
+    Engagement.rating_by_asker == 1,
+    Engagement.rating_by_answerer == 1).all()
+print(0.1 * sum([e.node.post.reward for e in engagements]))
 
 # db.session.commit()
 # db.session.remove()
