@@ -14,7 +14,7 @@
                 {% set is_success = engagement.rating_by_asker == engagement.rating_by_answerer == 1 %}
                 {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
                 <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
-                    <th scope="row">{{ moment(engagement.timestamp).format('DD MMM YYYY') }}</th>
+                    <th scope="row">{{ moment(engagement.timestamp).format('HH:mm:ss') }}</th>
                     <td>{{ engagement.node.post.reward }}</td>
                     <td>{% if user.id == engagement.asker_id %}
                             Buyer

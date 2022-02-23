@@ -12,10 +12,15 @@
             </h2>
             <div id="accordionBasicInfo" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <p class="card-text">ID: {{ user.id }}</p>
-                    <p class="card-text">User since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
-                    <p class="card-text">Average response time: TODO</p>
-                    <p class="card-text">Last seen: TODO</p>
+                    <p>ID: {{ user.id }}</p>
+                    <p>Balance: {{ user.account_balance }}</p>
+                    <p>Reward Limit: {{ user.reward_limit }}</p>
+                    <p>Trustworthiness Score: {{ user.reputation }}</p>
+                    <p>Trustworthiness Value: {{ user.sum_x }} / {{ user.sum_abs_x }}</p>
+                    <p>Trustworthiness Count: {{ user.sum_i }} / {{ user.sum_abs_i }}</p>
+                    <p>User since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
+                    <p>Average response time: TODO</p>
+                    <p>Last seen: TODO</p>
                 </div>
             </div>
         </div>

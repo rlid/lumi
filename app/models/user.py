@@ -61,10 +61,12 @@ class User(UserMixin, db.Model):
     account_balance = db.Column(db.Integer, default=0, nullable=False)
     committed_amount = db.Column(db.Integer, default=0, nullable=False)
 
-    sum_value = db.Column(db.Float, default=0.0, nullable=False)
-    sum_abs_value = db.Column(db.Float, default=0.0, nullable=False)
-    sum_one = db.Column(db.Float, default=0.0, nullable=False)
-    sum_abs_one = db.Column(db.Float, default=0.0, nullable=False)
+    sum_x = db.Column(db.Float, default=0.0, nullable=False)
+    sum_abs_x = db.Column(db.Float, default=0.0, nullable=False)
+    sum_i = db.Column(db.Float, default=0.0, nullable=False)
+    sum_abs_i = db.Column(db.Float, default=0.0, nullable=False)
+
+    reward_limit = db.Column(db.Integer, default=500, nullable=False)
 
     email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
@@ -227,7 +229,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, type, reward, title, body):
+    def create_post(self, type, reward, title, body=''):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -273,7 +275,6 @@ class User(UserMixin, db.Model):
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
         db.session.commit()
-
 
     def toggle_archive(self, post):
         if self != post.creator:
@@ -335,6 +336,9 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
+        if self.reward_limit < node.post.reward:
+            raise InvalidActionError(
+                'Cannot create engagement because the post reward exceeds the reward limit of the user')
         if node.post.type == Post.TYPE_SELL and self.account_balance - self.committed_amount < node.post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
@@ -378,6 +382,9 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
+        if self.reward_limit < engagement.node.post.reward:
+            raise InvalidActionError(
+                'Cannot accept engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_BUY and self.account_balance - self.committed_amount < post.reward:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
@@ -396,22 +403,52 @@ class User(UserMixin, db.Model):
 
     @property
     def reputation(self):
-        return min(self.sum_value / self.sum_abs_value, self.sum_one / self.sum_abs_one)
+        if self.sum_abs_x == 0 or self.sum_abs_i == 0:
+            return 0
+        else:
+            return min(self.sum_x / self.sum_abs_x, self.sum_i / self.sum_abs_i)
 
     @property
     def competence(self):
-        return 0.5 * (self.sum_one + self.sum_abs_one) / self.sum_abs_one
+        return 0.5 * (self.sum_i + self.sum_abs_i) / self.sum_abs_i
 
     def reputation_if_dispute_lost(self, x):
         m = math.exp(-math.fabs(x) * _REP_DECAY)
-        s = -x + m * self.sum_value
-        s_abs = math.fabs(x) + m * self.sum_abs_value
+        s = -x + m * self.sum_x
+        s_abs = math.fabs(x) + m * self.sum_abs_x
 
         m1 = math.exp(-_REP_DECAY)
-        s1 = -1 + m1 * self.sum_one
-        s1_abs = 1 + m1 * self.sum_abs_one
+        s1 = -1 + m1 * self.sum_i
+        s1_abs = 1 + m1 * self.sum_abs_i
 
         return min(s / s_abs, s1 / s1_abs)
+
+    def update_reward_limit(self, x, success, dispute_lost):
+        if success:
+            r = self.reputation
+            if r > 0.8:
+                self.reward_limit = min(1000, self.reward_limit + int(0.5 * x))
+            elif r > 0.6:
+                self.reward_limit = min(1000, self.reward_limit + int(0.4 * x))
+            elif r > 0.4:
+                self.reward_limit = min(1000, self.reward_limit + int(0.3 * x))
+            elif r > 0.2:
+                self.reward_limit = min(1000, self.reward_limit + int(0.2 * x))
+            elif r > 0:
+                self.reward_limit = min(1000, self.reward_limit + int(0.1 * x))
+            else:
+                self.reward_limit = min(1000, self.reward_limit + int(0.05 * x))
+
+        if dispute_lost:
+            r = self.reputation
+            if r > 0.5:
+                self.reward_limit = max(1, int(0.75 * self.reward_limit))
+            elif r > 0:
+                self.reward_limit = max(1, int(0.5 * self.reward_limit))
+            elif r > -0.5:
+                self.reward_limit = max(1, min(int(0.5 * self.reward_limit), int(0.75 * x)))
+            else:
+                self.reward_limit = max(1, int(0.5 * x))
 
     def update_reputation(self, x, success, dispute_lost):
         '''
@@ -422,19 +459,21 @@ class User(UserMixin, db.Model):
         '''
         #  decay the weights of past observations in ALL cases:
         m = math.exp(-math.fabs(x) * _REP_DECAY)
-        self.sum_value *= m
-        self.sum_abs_value *= m
+        self.sum_x *= m
+        self.sum_abs_x *= m
 
         m1 = math.exp(-_REP_DECAY)
-        self.sum_one *= m1
-        self.sum_abs_one *= m1
+        self.sum_i *= m1
+        self.sum_abs_i *= m1
 
         # add most recent observation only if it is a success or dispute lost
         if success or dispute_lost:
-            self.sum_value += x if success else -x
-            self.sum_abs_value += math.fabs(x)
-            self.sum_one += 1 if success else -1
-            self.sum_abs_one += 1
+            self.sum_x += x if success else -x
+            self.sum_abs_x += math.fabs(x)
+            self.sum_i += 1 if success else -1
+            self.sum_abs_i += 1
+
+        self.update_reward_limit(x, success, dispute_lost)
 
     def rate_engagement(self, engagement, is_success):
         if engagement.state != Engagement.STATE_ENGAGED:
@@ -492,8 +531,8 @@ class User(UserMixin, db.Model):
             else:  # it is a draw, no punishment
                 # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
                 # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-                asker.update_reputation(reward, success=False, dispute_lost=False)
-                answerer.update_reputation(reward, success=False, dispute_lost=False)
+                asker.update_reputation(reward, success=False, dispute_lost=True)
+                answerer.update_reputation(reward, success=False, dispute_lost=True)
 
             message = Message(creator=self,
                               node=engagement.node,
