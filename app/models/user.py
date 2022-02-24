@@ -467,8 +467,11 @@ class User(UserMixin, db.Model):
         self.update_reward_limit(post_reward, success, dispute_lost)
 
     def rate_engagement(self, engagement, is_success):
+        if engagement.node.post.reward_cent > self.reward_limit_cent:
+            raise InvalidActionError(
+                'Cannot rate engagement because the post reward exceeds the reward limit of the user')
+
         if engagement.state != Engagement.STATE_ENGAGED:
-            print(engagement.state)
             raise InvalidActionError('Cannot rate engagement because it is not in engaged state')
         asker = engagement.asker
         answerer = engagement.answerer

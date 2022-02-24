@@ -283,6 +283,15 @@ def view_node(node_id):
             Message=Message)
 
     if current_user == node.creator or current_user == node.post.creator:
+        if node.post.reward_cent > current_user.reward_limit_cent:
+            flash('The reward of the post exceeds your current reward limit. '
+                  'You will not be able to rate engagement on this post until the limit is increased.',
+                  category='warning')
+        if (current_user == node.creator and node.post.reward_cent > node.post.creator.reward_limit_cent) or \
+                (current_user == node.post.creator and node.post.reward_cent > node.creator.reward_limit_cent):
+            flash('The reward of the post exceeds the current reward limit of the other user. '
+                  'The other user will not be able to rate engagement on this post until the limit is increased.',
+                  category='warning')
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
@@ -335,7 +344,7 @@ def request_engagement(node_id):
         flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
     if post.reward_cent > current_user.reward_limit_cent:
-        flash('You currently cannot request for engagement on post worth more than $' +
+        flash('You currently cannot request for engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
@@ -387,9 +396,9 @@ def accept_engagement(engagement_id):
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
     elif post.reward_cent > current_user.reward_limit_cent:
-        flash('You currently cannot accept the engagement on post worth more than $' +
+        flash('You currently cannot accept engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.',
-              category='warning')
+              category='danger')
     elif post.type == Post.TYPE_BUY and current_user.total_balance - current_user.reserved_balance < post.reward:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
@@ -402,6 +411,10 @@ def accept_engagement(engagement_id):
 @login_required
 def rate_engagement(engagement_id, is_success):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+
+    if engagement.node.reward_cent > current_user.reward_limit_cent:
+        flash('You currently cannot rate engagement on posts worth more than $' +
+              f'{current_user.reward_limit:.2f}.', category='warning')
 
     if current_user == engagement.node.creator or current_user == engagement.node.post.creator:
         current_user.rate_engagement(engagement, is_success)
@@ -469,8 +482,10 @@ def on_join(data):
 def handle_message_sent(message):
     node = Node.query.get(message['node_id'])
 
-    if (current_user != node.creator and current_user != node.post.creator) or \
-            (node.post.is_archived and message['engagement_id'] is None):
+    if current_user != node.creator and current_user != node.post.creator:
+        disconnect()
+        return
+    if node.post.is_archived and message['engagement_id'] is None:
         emit('notify_node', {'html': 'Cannot send message because the post is now archived.'}, to=message['node_id'])
         disconnect()
         return

@@ -7,7 +7,7 @@ from app.models.user import User, Post, Node, Engagement
 
 faker = Faker()
 N_DAYS = 10
-N_USERS = 10
+N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -87,34 +87,33 @@ def sim_random():
                 if not node.post.is_archived:
                     engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
                     if engagement is None:
-                        if random.uniform(0, 1) < P_REQUEST_ENGAGE:
-                            if user.reward_limit_cent >= node.post.reward_cent:
-                                engagement = user.create_engagement(node)
-                                if random.uniform(0, 1) < P_CANCEL_ENGAGE:
-                                    user.cancel_engagement(engagement)
-                                else:
-                                    print(f'{user} created {engagement}')
+                        if random.uniform(0, 1) < P_REQUEST_ENGAGE and user.reward_limit_cent >= node.post.reward_cent:
+                            engagement = user.create_engagement(node)
+                            if random.uniform(0, 1) < P_CANCEL_ENGAGE:
+                                user.cancel_engagement(engagement)
+                            else:
+                                print(f'{user} created {engagement}')
 
         for user in users:
             for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
-                if not engagement.node.post.is_archived:
-                    if random.uniform(0, 1) < P_ACCEPT_ENGAGE:
-                        if user.reward_limit_cent >= engagement.node.post.reward_cent:
-                            user.accept_engagement(engagement)
-                            print(f'{user} accepted {engagement}')
-                            for i in range(random.randint(1, 2)):
-                                m1 = [user.create_message(
-                                    engagement.node, text=faker.text(100)
-                                ) for i in range(random.randint(1, 2))]
-                                print(f'{user} sent {m1}')
-                                m2 = [engagement.sender.create_message(
-                                    engagement.node, text=faker.text(100)
-                                ) for i in range(random.randint(1, 2))]
-                                print(f'{post.creator} replied {m1}')
+                if not engagement.node.post.is_archived and \
+                        random.uniform(0, 1) < P_ACCEPT_ENGAGE and \
+                        user.reward_limit_cent >= engagement.node.post.reward_cent:
+                    user.accept_engagement(engagement)
+                    print(f'{user} accepted {engagement}')
+                    for i in range(random.randint(1, 2)):
+                        m1 = [user.create_message(
+                            engagement.node, text=faker.text(100)
+                        ) for i in range(random.randint(1, 2))]
+                        print(f'{user} sent {m1}')
+                        m2 = [engagement.sender.create_message(
+                            engagement.node, text=faker.text(100)
+                        ) for i in range(random.randint(1, 2))]
+                        print(f'{post.creator} replied {m1}')
 
         for user in users:
             for engagement in user.engagements_as_answerer.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
-                if random.uniform(0, 1) < P_RATE_ENGAGE:
+                if random.uniform(0, 1) < P_RATE_ENGAGE and user.reward_limit_cent >= engagement.node.post.reward_cent:
                     is_success = actual_success.get(engagement)
                     if is_success is None:
                         is_success = random.uniform(0, 1) < competence[user]
@@ -126,7 +125,7 @@ def sim_random():
                     print(f'{user} rated {engagement} {is_success} as answerer')
 
             for engagement in user.engagements_as_asker.filter(Engagement.state == Engagement.STATE_ENGAGED).all():
-                if random.uniform(0, 1) < P_RATE_ENGAGE:
+                if random.uniform(0, 1) < P_RATE_ENGAGE and user.reward_limit_cent >= engagement.node.post.reward_cent:
                     is_success = actual_success.get(engagement)
                     if is_success is None:
                         is_success = random.uniform(0, 1) < competence[user]
