@@ -11,7 +11,7 @@ requests
 markdown
 bleach
 flask-socketio
-eventlet
+eventlet==0.30.2
 gunicorn
 flask-sock
 faker
