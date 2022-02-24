@@ -12,11 +12,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message
 from app.models.errors import InvalidActionError, RewardDistributionError
+from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
 
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
-_REP_DECAY = 0.0
+_REP_DECAY = 0.1
 
 
 class User(UserMixin, db.Model):
@@ -101,6 +102,12 @@ class User(UserMixin, db.Model):
                                            foreign_keys=[Engagement.receiver_id],
                                            lazy='dynamic',
                                            cascade='all, delete-orphan')
+
+    payment_intents = db.relationship("PaymentIntent",
+                                      backref=db.backref('creator'),
+                                      foreign_keys=[PaymentIntent.creator_id],
+                                      lazy="dynamic",
+                                      cascade="all, delete-orphan")
 
     @property
     def password(self):
@@ -291,6 +298,12 @@ class User(UserMixin, db.Model):
         db.session.add(message)
         db.session.commit()
         return message
+
+    def create_payment_intent(self, stripe_id):
+        payment_intent = PaymentIntent(creator=self, stripe_id=stripe_id)
+        db.session.add(payment_intent)
+        db.session.commit()
+        return payment_intent
 
     # TODO: think whether this is the best place to ask to share reward, alternative place would be when the answerer
     # rates the engagement
