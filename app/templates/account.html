@@ -7,17 +7,59 @@
             <h2 class="accordion-header">
                 <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionBasicInfo">
-                    <b>Basic Information</b>
+                    <b>Account Information</b>
                 </button>
             </h2>
             <div id="accordionBasicInfo" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <p>ID: {{ user.id }}</p>
-                    <p>User since: {{ moment(user.timestamp).format('MMM YYYY') }}</p>
-                    <p>Average response time: TODO</p>
-                    <p>Last seen: TODO</p>
-                    <p>Last seen: TODO</p>
-                    <p><a href="{{ url_for('main.user', user_id=current_user.id) }}">My Public Profile</a></p>
+
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <div>
+                                <h6 class="my-0">Known As</h6>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted">A {{ user.adjective }} user</div>
+                                <small class="text-muted">
+                                    <a class="badge btn-primary text-decoration-none"
+                                       href="{{ url_for('main.user', user_id=current_user.id) }}">My Public Profile</a>
+                                </small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0">Balance</h6>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted">{{ '${0:.2f}'.format(user.total_balance) }}</div>
+                                <small>
+                                    <a class="badge btn-success text-decoration-none text-white"
+                                       href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_5']) }}">Top-up
+                                        $5</a>
+                                    <a class="badge btn-warning text-decoration-none text-white"
+                                       href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_10']) }}">Top-up
+                                        $10</a>
+                                    <a class="badge btn-danger text-decoration-none text-white"
+                                       href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_20']) }}">Top-up
+                                        $20</a>
+                                </small>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0">Reserved Balance</h6>
+                                <small class="text-muted"></small>
+                            </div>
+                            <span class="text-muted">{{ '${0:.2f}'.format(user.reserved_balance) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0">Reward Limit</h6>
+                                <small class="text-muted"></small>
+                            </div>
+                            <span class="text-muted">{{ '${0:.2f}'.format(user.reward_limit) }}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -98,7 +140,8 @@
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
-                                            There are no other posts you have interacted with that are open to contributions.
+                                            There are no other posts you have interacted with that are open to
+                                            contributions.
                                         </small>
                                     {% endif %}
                                 </div>

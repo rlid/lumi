@@ -126,11 +126,12 @@ def request_engagement(node_id):
         flash('You currently cannot request for engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-
-    if post.type == Post.TYPE_SELL and current_user.total_balance - current_user.reserved_balance < post.reward:
+    if post.type == Post.TYPE_SELL and \
+            current_user.total_balance_cent - current_user.reserved_balance_cent < post.reward_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
+    # the user must have his own node, and the request must be made on that node:
     user_node = node
     if current_user != node.creator:
         user_node = post.nodes.filter(Node.creator == current_user).first()
@@ -149,10 +150,11 @@ def request_engagement(node_id):
 @login_required
 def cancel_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-
-    if engagement.node.post.is_archived:
+    node = engagement.node
+    post = node.post
+    if post.is_archived:
         flash('Cannot cancel engagement because the post is archived.', category='danger')
-    elif current_user != engagement.sender:
+    elif current_user != node.creator:
         flash('Cannot cancel engagement requested by someone else.', category='danger')
     elif engagement.state != Engagement.STATE_REQUESTED:
         flash('Cannot cancel engagement because it has been accepted.', category='warning')
@@ -178,7 +180,8 @@ def accept_engagement(engagement_id):
         flash('You currently cannot accept engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.',
               category='danger')
-    elif post.type == Post.TYPE_BUY and current_user.total_balance - current_user.reserved_balance < post.reward:
+    elif post.type == Post.TYPE_BUY and \
+            current_user.total_balance_cent - current_user.reserved_balance_cent < post.reward_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
     else:
@@ -191,9 +194,9 @@ def accept_engagement(engagement_id):
 def rate_engagement(engagement_id, is_success):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
 
-    if engagement.node.reward_cent > current_user.reward_limit_cent:
-        flash('You currently cannot rate engagement on posts worth more than $' +
-              f'{current_user.reward_limit:.2f}.', category='warning')
+    # if engagement.node.reward_cent > current_user.reward_limit_cent:
+    #     flash('You currently cannot rate engagement on posts worth more than $' +
+    #           f'{current_user.reward_limit:.2f}.', category='warning')
 
     if current_user == engagement.node.creator or current_user == engagement.node.post.creator:
         current_user.rate_engagement(engagement, is_success)

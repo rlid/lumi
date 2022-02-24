@@ -145,17 +145,18 @@ def view_node(node_id):
             Message=Message)
 
     if current_user == node.creator or current_user == node.post.creator:
-        if node.post.reward_cent > current_user.reward_limit_cent:
-            flash('The reward of the post exceeds your current reward limit. '
-                  'You will not be able to rate engagement on this post until the limit is increased.',
-                  category='warning')
-        if (current_user == node.creator and node.post.reward_cent > node.post.creator.reward_limit_cent) or \
-                (current_user == node.post.creator and node.post.reward_cent > node.creator.reward_limit_cent):
-            flash('The reward of the post exceeds the current reward limit of the other user. '
-                  'The other user will not be able to rate engagement on this post until the limit is increased.',
-                  category='warning')
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
+        # if node.post.reward_cent > current_user.reward_limit_cent:
+        #     flash('The reward of the post exceeds your current reward limit. '
+        #           'You are not be able to rate engagements on this post until the limit is increased.',
+        #           category='warning')
+        if (engagement is not None or engagement_request is not None) and \
+                ((current_user == node.creator and node.post.reward_cent > node.post.creator.reward_limit_cent) or \
+                 (current_user == node.post.creator and node.post.reward_cent > node.creator.reward_limit_cent)):
+            flash('The reward of the post exceeds the current reward limit of the other user. This could be because a '
+                  'dispute involving the user occurred after this engagement was requested or entered into.',
+                  category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()
         return render_template(

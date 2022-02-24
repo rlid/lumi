@@ -299,8 +299,12 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return message
 
-    def create_payment_intent(self, stripe_id):
-        payment_intent = PaymentIntent(creator=self, stripe_id=stripe_id)
+    def create_payment_intent(self, stripe_session_id, stripe_payment_intent_id):
+        payment_intent = PaymentIntent(
+            creator=self,
+            stripe_session_id=stripe_session_id,
+            stripe_payment_intent_id=stripe_payment_intent_id
+        )
         db.session.add(payment_intent)
         db.session.commit()
         return payment_intent
@@ -308,26 +312,30 @@ class User(UserMixin, db.Model):
     # TODO: think whether this is the best place to ask to share reward, alternative place would be when the answerer
     # rates the engagement
     def create_engagement(self, node):
-        if node.post.is_archived:
+        post = node.post
+        if post.is_archived:
             raise InvalidActionError('Cannot create engagement because the post is archived')
         if self != node.creator:
             raise InvalidActionError('Cannot create engagement because the user is not the node creator')
-        if self == node.post.creator:
+        if self == post.creator:
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
-        if node.post.reward_cent > self.reward_limit_cent:
+        if post.reward_cent > self.reward_limit_cent:
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
-        if node.post.type == Post.TYPE_SELL and self.total_balance - self.reserved_balance < node.post.reward:
+        if post.type == Post.TYPE_SELL and \
+                self.total_balance_cent - self.reserved_balance_cent < post.reward_cent:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
-        if node.post.type == Post.TYPE_BUY:
-            engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
-                                    asker=node.post.creator, answerer=self)
+        if post.type == Post.TYPE_BUY:
+            engagement = Engagement(node=node, sender=self, receiver=post.creator,
+                                    asker=post.creator, answerer=self)
         else:
-            engagement = Engagement(node=node, sender=self, receiver=node.post.creator,
-                                    asker=self, answerer=node.post.creator)
+            engagement = Engagement(node=node, sender=self, receiver=post.creator,
+                                    asker=self, answerer=post.creator)
+            self.reserved_balance_cent += post.reward_cent
+            db.session.add(self)
 
         db.session.add(engagement)
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
@@ -336,18 +344,23 @@ class User(UserMixin, db.Model):
         return engagement
 
     def cancel_engagement(self, engagement):
-        if engagement.node.post.is_archived:
+        node = engagement.node
+        post = node.post
+        if post.is_archived:
             raise InvalidActionError('Cannot cancel engagement because the post is archived')
-        if self != engagement.sender:
-            raise InvalidActionError('Cannot cancel engagement because the user is not the engagement sender')
-
+        if self != node.creator:
+            raise InvalidActionError('Cannot cancel engagement because the user is not the node creator')
         if engagement.state != Engagement.STATE_REQUESTED:
             raise InvalidActionError('Cannot cancel engagement because the engagement is not in requested state')
 
         engagement.state = Engagement.STATE_CANCELLED
         db.session.add(engagement)
+        if post.type == Post.TYPE_SELL:
+            self.reserved_balance_cent -= post.reward_cent
+            db.session.add(self)
+
         message = Message(creator=self,
-                          node=engagement.node,
+                          node=node,
                           engagement=engagement,
                           type=Message.TYPE_CANCEL,
                           text=f'Engagement cancelled')
@@ -355,26 +368,29 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def accept_engagement(self, engagement):
-        if engagement.node.post.is_archived:
+        node = engagement.node
+        post = node.post
+        if post.is_archived:
             raise InvalidActionError('Cannot accept engagement because the post is archived')
-        post = engagement.node.post
         if engagement.state != Engagement.STATE_REQUESTED:
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        if engagement.node.post.reward_cent > self.reward_limit_cent:
+        if post.reward_cent > self.reward_limit_cent:
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_BUY and self.total_balance - self.reserved_balance < post.reward:
+        if post.type == Post.TYPE_BUY and \
+                self.total_balance_cent - self.reserved_balance_cent < post.reward_cent:
             raise InvalidActionError('Cannot accept engagement due to insufficient funds')
 
-        self.reserved_balance = self.reserved_balance + post.reward
-        db.session.add(self)
+        if post.type == Post.TYPE_BUY:
+            self.reserved_balance_cent += post.reward_cent
+            db.session.add(self)
 
         engagement.state = Engagement.STATE_ENGAGED
         db.session.add(engagement)
         message = Message(creator=self,
-                          node=engagement.node,
+                          node=node,
                           engagement=engagement,
                           type=Message.TYPE_ACCEPT,
                           text=f'Engagement accepted')
@@ -480,9 +496,9 @@ class User(UserMixin, db.Model):
         self.update_reward_limit(post_reward, success, dispute_lost)
 
     def rate_engagement(self, engagement, is_success):
-        if engagement.node.post.reward_cent > self.reward_limit_cent:
-            raise InvalidActionError(
-                'Cannot rate engagement because the post reward exceeds the reward limit of the user')
+        # if engagement.node.post.reward_cent > self.reward_limit_cent:
+        #     raise InvalidActionError(
+        #         'Cannot rate engagement as successful because the post reward exceeds the reward limit of the user')
 
         if engagement.state != Engagement.STATE_ENGAGED:
             raise InvalidActionError('Cannot rate engagement because it is not in engaged state')

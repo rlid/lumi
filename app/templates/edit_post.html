@@ -22,52 +22,51 @@
 
 {% block mid_col %}
     <div class="mb-3">
-    <h3 class="mb-3">{{ title }}</h3>
-    {% if current_user.use_markdown %}
-        {% if request.MOBILE %}
-            {{ render_form(form, button_style="success", floating_input_label=True) }}
-            <script>
-                const easyMDE = new EasyMDE({
-                    toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
-                        "unordered-list", "ordered-list", "|",
-                        "side-by-side", "preview", "guide"],
-                    minHeight: '100px',
-                    maxHeight: '200px',
-                    promptURLs: true,
-                    uploadImage: false,
-                    spellChecker: false,
-                    sideBySideFullscreen: false,
-                    status: false,
-                    placeholder: 'Details (optional)'
-                });
-            </script>
+        <h3 class="mb-3">{{ title }}</h3>
+        {% if current_user.use_markdown %}
+            {% if request.MOBILE %}
+                {{ render_form(form, button_style="success", floating_input_label=True) }}
+                <script>
+                    const easyMDE = new EasyMDE({
+                        toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
+                            "unordered-list", "ordered-list", "|",
+                            "side-by-side", "preview", "guide"],
+                        minHeight: '100px',
+                        maxHeight: '200px',
+                        promptURLs: true,
+                        uploadImage: false,
+                        spellChecker: false,
+                        sideBySideFullscreen: false,
+                        status: false,
+                        placeholder: 'Details (optional)'
+                    });
+                </script>
+            {% else %}
+                {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
+
+                <script>
+                    const editor = new toastui.Editor({
+                        {% if form.body.data %}initialValue: '{{ form.body.data.replace('\n', ' \\n ') }}',{% endif %}
+                        el: document.querySelector('#editor'),
+                        height: '500px',
+                        initialEditType: 'wysiwyg',
+                        previewStyle: 'vertical',
+                        previewHighlight: true,
+                        usageStatistics: false,
+                        hideModeSwitch: false,
+                        placeholder: 'Details \n (optional)',
+                        toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
+                    });
+
+                    function DoSubmit() {
+                        document.getElementById('body').value = editor.getMarkdown();
+                        return true;
+                    }
+                </script>
+            {% endif %}
         {% else %}
-            {{ render_form(form, button_style="success", floating_input_label=True, onsubmit="DoSubmit()") }}
-
-            <script>
-                let contentValue = '{{ form.body.data.replace('\n', ' \\n ') }}';
-                const editor = new toastui.Editor({
-                    initialValue: contentValue,
-                    el: document.querySelector('#editor'),
-                    height: '500px',
-                    initialEditType: 'wysiwyg',
-                    previewStyle: 'vertical',
-                    previewHighlight: true,
-                    usageStatistics: false,
-                    hideModeSwitch: false,
-                    placeholder: 'Details \n (optional)',
-                    toolbarItems: [['bold', 'italic', 'quote', 'strike', 'link', 'image', 'ul', 'ol', 'table']]
-                });
-
-                function DoSubmit() {
-                    document.getElementById('body').value = editor.getMarkdown();
-                    return true;
-                }
-            </script>
+            {{ render_form(form, button_style="success", floating_input_label=True, text_area_style="height: 15rem") }}
         {% endif %}
-    {% else %}
-        {{ render_form(form, button_style="success", floating_input_label=True, text_area_style="height: 15rem") }}
-    {% endif %}
     </div>
 {% endblock %}
 
@@ -76,14 +75,17 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guidelines for posting</h5>
             <ul class="small">
-                <li>Don't directly seek or offer <a href="https://www.gov.uk/government/publications/professions-regulated-by-law-in-the-uk-and-their-regulators/uk-regulated-professions-and-their-regulators">
+                <li>Don't directly seek or offer <a
+                        href="https://www.gov.uk/government/publications/professions-regulated-by-law-in-the-uk-and-their-regulators/uk-regulated-professions-and-their-regulators">
                     regulated professional services</a> (but it is totally fine to ask for recommendations / opinions
                     of professional service companies). This is a place to ask friendly people on the Internet for
-                    informal help and tips, let's keep it casual and don't get too serious (yet)!</li>
+                    informal help and tips, let's keep it casual and don't get too serious (yet)!
+                </li>
                 <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the answer
                     can be verified by yourself once enough proof is presented by the answerer, or because the answerer
                     convinced you of their credential through proof, or because you are prepared to enter into multiple
-                    engagements to cross-check the answers</li>
+                    engagements to cross-check the answers
+                </li>
                 <li>Be specific, give criteria on who you want to hear from if applicable</li>
                 <li>Use <b>hashtags</b> so the relevant people can find your post quicker, e.g. if your question is
                     about Japanese Rice Cooker, put #Japan and #RiceCooker somewhere in the Details section for them to
@@ -91,10 +93,12 @@
                 </li>
                 <li>Spread the word and share your post on social media and other online communities, but <b>please
                     follow their rules and don't spam</b>. Generally, a good way is to ask the same question in the
-                    community and offer to pay a reward using the link to your post here</li>
+                    community and offer to pay a reward using the link to your post here
+                </li>
                 <li>Don't share personal information in the post</li>
                 <li>(Experimental) Enable Social Media mode to offer even more incentive for people to spread the word
-                    by guaranteeing a reward for referral</li>
+                    by guaranteeing a reward for referral
+                </li>
             </ul>
         </div>
     </div>
@@ -105,44 +109,48 @@
                 <li>Payment is not required when the post is created</li>
                 <li>If someone takes an interest in your post and makes a <b>Request for Engagement</b>, the asker's
                     account balance will be checked before the engagement can be entered into, and a top-up will
-                    be required if the current balance is not enough for the reward</li>
+                    be required if the current balance is not enough for the reward
+                </li>
                 <li>If both parties rate the engagement as successful(+), the reward will be distributed according to
                     the <a href="#">reward distribution rules</a></li>
-                <li>As long as the asker rates the engagement as unsuccessful(&minus;), no reward will be distributed and the
-                    reserved amount will be released back to the asker's account</li>
+                <li>As long as the asker rates the engagement as unsuccessful(&minus;), no reward will be distributed
+                    and the
+                    reserved amount will be released back to the asker's account
+                </li>
                 <li>The <b>track record</b> of each user's past engagements is available for all users to see on the
                     user profile page, it is also used model a user's <b>trustworthiness on the platform</b> which
-                    limits the reward value of posts a user is allowed to participate in</li>
+                    limits the reward value of posts a user is allowed to participate in
+                </li>
             </ul>
 
-{#                You can ask for many things, e.g. find out more about a town / area / residential block I am about to visit / live in#}
-{#                ask people to share their experience of a school as a student / workplace as an employee#}
-{#                walk you through the process of buying a foreign product, e.g. snacks from Japan#}
-{#                help you to find out / test a specific use case of a product before you buy#}
-{#                If you know who are best positioned to help you, you can put criteria who you want to#}
-{#                hear from, e.g.#}
-{#                someone who used to live around there, or visited / lived in the block#}
-{#                someone who used to study / work there#}
-{#                someone who lives in the same country as you and buys Japanese snacks online#}
-{#                        regularly#}
-{#                    a current owner of the product I am interested in#}
-{#            <h5 class="text-muted">When do I pay?</h5>#}
-{#                <li>#}
-{#                The buyer's account balance will be checked before someone's engagement request can be accepted, and#}
-{#                a top-up will be required if the balance is not enough to cover the payment.#}
-{#                </li>#}
-{#                <li>#}
-{#                Once the engagement is accepted, the amount will be reserved in the buyer's account until both#}
-{#                parties have rated the engagement.#}
-{#                </li>#}
-{#                <li>#}
-{#                If they both rate the engagement as successful(+), the reward#}
-{#                will be distributed according to our <a href="#">reward distribution rules</a>.#}
-{#                </li>#}
-{#                <li>#}
-{#                If the buyer rates the engagement as unsuccessful(-), no reward will be distributed and the reserved#}
-{#                amount will be released back to the buyer.#}
-{#                </li>#}
+            {#                You can ask for many things, e.g. find out more about a town / area / residential block I am about to visit / live in#}
+            {#                ask people to share their experience of a school as a student / workplace as an employee#}
+            {#                walk you through the process of buying a foreign product, e.g. snacks from Japan#}
+            {#                help you to find out / test a specific use case of a product before you buy#}
+            {#                If you know who are best positioned to help you, you can put criteria who you want to#}
+            {#                hear from, e.g.#}
+            {#                someone who used to live around there, or visited / lived in the block#}
+            {#                someone who used to study / work there#}
+            {#                someone who lives in the same country as you and buys Japanese snacks online#}
+            {#                        regularly#}
+            {#                    a current owner of the product I am interested in#}
+            {#            <h5 class="text-muted">When do I pay?</h5>#}
+            {#                <li>#}
+            {#                The buyer's account balance will be checked before someone's engagement request can be accepted, and#}
+            {#                a top-up will be required if the balance is not enough to cover the payment.#}
+            {#                </li>#}
+            {#                <li>#}
+            {#                Once the engagement is accepted, the amount will be reserved in the buyer's account until both#}
+            {#                parties have rated the engagement.#}
+            {#                </li>#}
+            {#                <li>#}
+            {#                If they both rate the engagement as successful(+), the reward#}
+            {#                will be distributed according to our <a href="#">reward distribution rules</a>.#}
+            {#                </li>#}
+            {#                <li>#}
+            {#                If the buyer rates the engagement as unsuccessful(-), no reward will be distributed and the reserved#}
+            {#                amount will be released back to the buyer.#}
+            {#                </li>#}
         </div>
     </div>
     {{ render_navbar_side() }}
