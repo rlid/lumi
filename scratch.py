@@ -3,6 +3,7 @@ import random
 from faker import Faker
 
 from app import create_app, db
+from app.models import PlatformFee
 from app.models.user import User, Post, Node, Engagement
 
 faker = Faker()
@@ -218,11 +219,7 @@ print(Engagement.query.filter(
 print(Engagement.query.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
 
 print(sum([u.total_balance for u in users]))
-engagements = Engagement.query.filter(
-    Engagement.state == Engagement.STATE_COMPLETED,
-    Engagement.rating_by_asker == 1,
-    Engagement.rating_by_answerer == 1).all()
-print(0.1 * sum([e.node.post.reward for e in engagements]))
+print(sum([fee.amount for fee in PlatformFee.query.all()]))
 
 # db.session.commit()
 # db.session.remove()

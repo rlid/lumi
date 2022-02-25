@@ -2,7 +2,7 @@ import unittest
 from random import Random
 
 from app import create_app, db
-from app.models import User, Post, Node, Engagement
+from app.models import User, Post, Node, Engagement, PlatformFee
 
 
 class BasicsTestCase(unittest.TestCase):
@@ -37,10 +37,10 @@ class BasicsTestCase(unittest.TestCase):
         u1.rate_engagement(e, True)
         u5.rate_engagement(e, True)
         self.assertEqual(u1.total_balance_cent, 500)
-        self.assertEqual(u2.total_balance_cent, 1013)
-        self.assertEqual(u3.total_balance_cent, 1012)
-        self.assertEqual(u4.total_balance_cent, 1025)
-        self.assertEqual(u5.total_balance_cent, 1400)
+        self.assertEqual(u2.total_balance_cent, 1012)
+        self.assertEqual(u3.total_balance_cent, 1025)
+        self.assertEqual(u4.total_balance_cent, 1050)
+        self.assertEqual(u5.total_balance_cent, 1363)
 
     def test_leakage(self):
         u1 = User(email='1', total_balance=100)
@@ -76,11 +76,7 @@ class BasicsTestCase(unittest.TestCase):
 
         initial_balance = 5 * 100.0
         final_balance = sum([u.total_balance for u in users])
-        engagements = Engagement.query.filter(
-            Engagement.state == Engagement.STATE_COMPLETED,
-            Engagement.rating_by_asker == 1,
-            Engagement.rating_by_answerer == 1).all()
-        platform_fees = 0.1 * sum([e.node.post.reward for e in engagements])
+        platform_fees = sum([fee.amount for fee in PlatformFee.query.all()])
         self.assertAlmostEqual(initial_balance - final_balance, platform_fees)
 
 

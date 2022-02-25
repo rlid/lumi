@@ -35,6 +35,10 @@ class Engagement(db.Model):
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
+    platform_fee = db.relationship('PlatformFee',
+                                   backref=db.backref('engagement'),
+                                   uselist=False)
+
     def ping(self, utcnow):
         self.last_updated = utcnow
         db.session.add(self)

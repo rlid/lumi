@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee
 from app.models.errors import InvalidActionError, RewardDistributionError
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
@@ -274,7 +274,7 @@ class User(UserMixin, db.Model):
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
 
         if referral_budget is None:
-            referral_budget = 0.5 * reward  # Default is 50% of the OP reward
+            referral_budget = 0.4 * reward  # Default is 40% of the OP reward
         post = Post(creator=self,
                     type=type,
                     reward=reward,
@@ -492,16 +492,15 @@ class User(UserMixin, db.Model):
 
     def rate_engagement(self, engagement, is_success):
         node = engagement.node
-        post = node.post
+        asker = engagement.asker
+        answerer = engagement.answerer
 
-        # if post.reward_cent > self.reward_limit_cent:
+        # if node.total_reward_cent > self.reward_limit_cent:
         #     raise InvalidActionError(
         #         'Cannot rate engagement as successful because the post reward exceeds the reward limit of the user')
 
         if engagement.state != Engagement.STATE_ENGAGED:
             raise InvalidActionError('Cannot rate engagement because it is not in engaged state')
-        asker = engagement.asker
-        answerer = engagement.answerer
 
         if self != asker and self != answerer:
             raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
@@ -521,53 +520,22 @@ class User(UserMixin, db.Model):
                           text=f'Engagement rated {"+" if is_success else "-"}')
         db.session.add(message)
 
-        if engagement.rating_by_asker == 0 or engagement.rating_by_answerer == 0:
-            db.session.commit()
-            return
+        if engagement.rating_by_asker != 0 and engagement.rating_by_answerer != 0:
+            self._finalise_engagement(engagement)
+        db.session.commit()
 
-        reward_cent = node.total_reward_cent
-        reward = 0.01 * node.total_reward_cent
+    def _finalise_engagement(self, engagement):
         if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
-            asker.reserved_balance_cent -= reward_cent
-            asker.total_balance_cent -= reward_cent
-            _distribute_reward(node=node, amount_cent=reward_cent)
-
-            asker.update_reputation(reward, success=True, dispute_lost=False)
-            answerer.update_reputation(reward, success=True, dispute_lost=False)
-
-            message = Message(creator=self,
-                              node=node,
-                              type=Message.TYPE_COMPLETE,
-                              text=f'Engagement successful - reward has been distributed')
-            db.session.add(message)
-
-        if engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
-            asker.reserved_balance_cent -= reward_cent
-
-            asker_rep_if_dispute = asker.reputation_if_dispute_lost(reward)
-            answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(reward)
-
-            if asker_rep_if_dispute < answerer_rep_if_dispute:  # asker lost:
-                asker.update_reputation(reward, success=False, dispute_lost=True)
-                answerer.update_reputation(reward, success=False, dispute_lost=False)
-            elif asker_rep_if_dispute > answerer_rep_if_dispute:  # answerer lost:
-                asker.update_reputation(reward, success=False, dispute_lost=False)
-                answerer.update_reputation(reward, success=False, dispute_lost=True)
-            else:  # it is a draw, no punishment
-                # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
-                # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-                asker.update_reputation(reward, success=False, dispute_lost=True)
-                answerer.update_reputation(reward, success=False, dispute_lost=True)
-
-            message = Message(creator=self,
-                              node=node,
-                              type=Message.TYPE_COMPLETE,
-                              text=f'Engagement outcome disputed - no reward will be distributed')
-            db.session.add(message)
-
-        if engagement.rating_by_answerer == -1:
-            asker.reserved_balance_cent -= reward_cent
-
+            self._handle_success(engagement)
+        elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
+            self._handle_dispute(engagement)
+        elif engagement.rating_by_asker == 1 and engagement.rating_by_answerer == -1:
+            self._handle_success(engagement, fraction=0.5)  # Default fraction is 50% in this scenario
+        else:
+            node = engagement.node
+            asker = engagement.asker
+            asker.reserved_balance_cent -= node.total_reward_cent
+            db.session.add(asker)
             message = Message(creator=self,
                               node=node,
                               type=Message.TYPE_COMPLETE,
@@ -576,9 +544,58 @@ class User(UserMixin, db.Model):
 
         engagement.state = Engagement.STATE_COMPLETED
         db.session.add(engagement)
+
+    def _handle_success(self, engagement, fraction=1.0):
+        node = engagement.node
+        asker = engagement.asker
+        answerer = engagement.answerer
+
+        total_reward = 0.01 * _distribute_reward_cent(node=node, fraction=fraction)
+
+        asker.update_reputation(total_reward, success=True, dispute_lost=False)
+        answerer.update_reputation(total_reward, success=True, dispute_lost=False)
+
         db.session.add(asker)
         db.session.add(answerer)
-        db.session.commit()
+
+        message = Message(creator=self,
+                          node=node,
+                          type=Message.TYPE_COMPLETE,
+                          text=f'Engagement successful - reward has been distributed')
+        db.session.add(message)
+
+    def _handle_dispute(self, engagement):
+        node = engagement.node
+        asker = engagement.asker
+        answerer = engagement.answerer
+
+        total_reward_cent = node.total_reward_cent
+        total_reward = 0.01 * total_reward_cent
+        asker.reserved_balance_cent -= total_reward_cent
+
+        asker_rep_if_dispute = asker.reputation_if_dispute_lost(total_reward)
+        answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(total_reward)
+
+        if asker_rep_if_dispute < answerer_rep_if_dispute:  # asker lost:
+            asker.update_reputation(total_reward, success=False, dispute_lost=True)
+            answerer.update_reputation(total_reward, success=False, dispute_lost=False)
+        elif asker_rep_if_dispute > answerer_rep_if_dispute:  # answerer lost:
+            asker.update_reputation(total_reward, success=False, dispute_lost=False)
+            answerer.update_reputation(total_reward, success=False, dispute_lost=True)
+        else:  # it is a draw, punishment both
+            # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
+            # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
+            asker.update_reputation(total_reward, success=False, dispute_lost=True)
+            answerer.update_reputation(total_reward, success=False, dispute_lost=True)
+
+        db.session.add(asker)
+        db.session.add(answerer)
+
+        message = Message(creator=self,
+                          node=node,
+                          type=Message.TYPE_COMPLETE,
+                          text=f'Engagement outcome disputed - no reward will be distributed')
+        db.session.add(message)
 
     def reputation_if_dispute_lost(self, x):
         m = math.exp(-math.fabs(x) * _REP_DECAY)
@@ -644,31 +661,57 @@ class User(UserMixin, db.Model):
         self.update_reward_limit(post_reward, success, dispute_lost)
 
 
-def _distribute_reward(node, amount_cent):
-    nodes = node.nodes_before_inc().all()
-    referral_nodes = nodes[1:(len(nodes) - 1)]
+def _distribute_reward_cent(node, fraction):
+    post = node.post
+    if post.type == Post.TYPE_BUY:
+        buyer = post.creator
+        seller = node.creator
+    else:
+        buyer = node.creator
+        seller = post.creator
 
-    if len(nodes) == 1:
-        raise RewardDistributionError('Cannot distribute reward from the root node')
+    # fully release what has been reserved for this engagement but only deduct the fraction from the actual balance:
+    total_reward_cent = node.total_reward_cent
+    buyer.reserved_balance_cent -= total_reward_cent
+    total_reward_cent = round(fraction * total_reward_cent)
+    buyer.total_balance_cent -= total_reward_cent
+    db.session.add(buyer)
 
-    answerer = node.creator if node.post.type == Post.TYPE_BUY else node.post.creator
+    platform_fee_cent = round(0.1 * fraction * post.reward_cent)  # Default platform fee = 10% of OP reward
+    platform_fee = PlatformFee(amount_cent=platform_fee_cent)
+    db.session.add(platform_fee)
 
-    platform_fee_cent = round(0.1 * amount_cent)
-    referral_fee_cent = round(0.1 * amount_cent)
-    answerer_fee_cent = amount_cent - platform_fee_cent - referral_fee_cent
+    total_referrer_reward_cent = 0
+    if post.social_media_mode:
+        for node in node.nodes_before_inc():
+            referrer = node.creator
+            referrer_reward_cent = fraction * node.referral_reward
+            referrer.total_balance_cent += referrer_reward_cent
+            db.session.add(referrer)
+            total_referrer_reward_cent += referrer_reward_cent
+    else:
+        nodes = node.nodes_before_inc().all()  # all nodes including buyers and sellers
+        referrer_nodes = nodes[1:(len(nodes) - 1)]  # referrers only
+        if len(nodes) == 1:  # there is only OP's node - should never reach here
+            raise RewardDistributionError('Cannot distribute reward from the root node')
+        # Default total referral cap = 20% of OP reward:
+        total_referrer_reward_cent_cap = round(0.2 * fraction * post.reward_cent)
+        referrer_nodes.reverse()
+        for referrer_node in referrer_nodes:
+            referrer = referrer_node.creator
+            # Default strategy is to distribute 50% of remaining at each node in the chain:
+            referrer_reward_cent = round(
+                0.5 * (total_referrer_reward_cent_cap - total_referrer_reward_cent)
+            )
+            referrer.total_balance_cent += referrer_reward_cent
+            db.session.add(referrer)
+            total_referrer_reward_cent += referrer_reward_cent
 
-    i = len(referral_nodes)
-    while i > 0:
-        i = i - 1
-        referer_reward_cent = round(0.5 * referral_fee_cent)
-        referral_nodes[i].creator.total_balance_cent += referer_reward_cent
-        db.session.add(referral_nodes[i].creator)
-        referral_fee_cent -= referer_reward_cent
-    if referral_nodes:  # the initial referer gets all remaining amount:
-        referral_nodes[0].creator.total_balance_cent += referral_fee_cent
-        referral_fee_cent = 0
-    # the answerer gets the answerer fee and the referral fee if there is no referrer
-    answerer.total_balance_cent += answerer_fee_cent + referral_fee_cent
+    # the seller gets everything left
+    seller.total_balance_cent += total_reward_cent - platform_fee_cent - total_referrer_reward_cent
+    db.session.add(seller)
+
+    return total_reward_cent
 
 
 @login_manager.user_loader
