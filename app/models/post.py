@@ -32,6 +32,9 @@ class Post(db.Model):
     type = db.Column(db.String(16), nullable=False)
     reward_cent = db.Column(db.Integer, nullable=False)
 
+    social_media_mode = db.Column(db.Boolean, default=False, nullable=False)
+    referral_budget_cent = db.Column(db.Integer)
+
     is_archived = db.Column(db.Boolean, default=False, nullable=False)
     is_reported = db.Column(db.Boolean, default=False, nullable=False)
     report_reason = db.Column(db.Text, default='')
@@ -69,7 +72,15 @@ class Post(db.Model):
 
     @reward.setter
     def reward(self, value):
-        self.reward_cent = int(100 * value)
+        self.reward_cent = round(100 * value)
+
+    @property
+    def referral_budget(self):
+        return 0.01 * self.referral_budget_cent
+
+    @referral_budget.setter
+    def referral_budget(self, value):
+        self.referral_budget_cent = round(100 * value)
 
 
 @event.listens_for(Post.body, 'set')

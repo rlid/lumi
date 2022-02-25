@@ -26,7 +26,7 @@ class Node(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
 
-    post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
+    referral_reward_cent = db.Column(db.Integer)
 
     parent_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'))
     left = db.Column(db.Integer, nullable=False)
@@ -48,6 +48,30 @@ class Node(db.Model):
                                   backref=db.backref('node'),
                                   lazy='dynamic',
                                   cascade='all, delete-orphan')
+
+    @property
+    def referral_reward(self):
+        return 0.01 * self.referral_reward_cent
+
+    @referral_reward.setter
+    def referral_reward(self, value):
+        self.referral_reward_cent = round(100 * value)
+
+    @property
+    def total_referral_reward_cent(self):
+        return sum([node.referral_reward_cent for node in self.nodes_before_inc()])
+
+    @property
+    def total_reward_cent(self):
+        # TODO: Move Post.TYPE_SELL out of Post so it can be referenced here without causing circular import
+        if self.post.social_media_mode and self.post.type == 'sell':
+            return self.post.reward_cent + self.total_referral_reward_cent
+        else:
+            return self.post.reward_cent
+
+    @property
+    def remaining_referral_budget_cent(self):
+        return self.post.referral_budget - self.total_referral_reward_cent
 
     def ping(self, utcnow):
         self.last_updated = utcnow

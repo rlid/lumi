@@ -12,7 +12,7 @@ def jws_compact_serialize_timed(payload, key, seconds_to_exp, alg='HS256'):
     protected = {
         'alg': alg,
         'crit': ['exp'],
-        "exp": int(time.time()) + seconds_to_exp
+        "exp": round(time.time()) + seconds_to_exp
     }
     jws = JsonWebSignature()
     return jws.serialize_compact(protected, json.dumps(payload), key).decode()
@@ -32,7 +32,7 @@ def jws_compact_deserialize_timed(compact, key):
     except ValueError:
         raise BadSignatureError('"exp" is not an int')
 
-    if expiry < int(time.time()):
+    if expiry < round(time.time()):
         raise BadSignatureError("Signature expired")
 
     return payload
