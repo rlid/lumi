@@ -76,6 +76,68 @@
                     {% for engagement in uncompleted_engagements %}
                         {{ render_engagement(engagement) }}
                     {% endfor %}
+
+
+
+
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-1"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionActiveEngagementsMyPosts">
+                                    <small><b>Posts by you</b></small>
+                                </button>
+                            </h2>
+                            <div id="accordionActiveEngagementsMyPosts" class="accordion-collapse collapse show"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
+                                    {% for engagement in uncompleted_engagements %}
+                                        {% if engagement.node.post.creator == current_user %}
+                                            {{ render_engagement(engagement) }}
+                                            {% set ns.empty = False %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no active engagements on the posts you have created.
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-1"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionActiveEngagementsOtherPosts">
+                                    <small><b>Posts by others</b></small>
+                                </button>
+                            </h2>
+                            <div id="accordionActiveEngagementsOtherPosts" class="accordion-collapse collapse show"
+                                 aria-labelledby="panelsStayOpen-headingTwo">
+                                <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
+                                    {% for engagement in uncompleted_engagements %}
+                                        {% if engagement.node.post.creator != current_user %}
+                                            {{ render_engagement(engagement) }}
+                                            {% set ns.empty = False %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no active engagements involving you on the posts created by others.
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>

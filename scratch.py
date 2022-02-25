@@ -7,7 +7,7 @@ from app.models.user import User, Post, Node, Engagement
 
 faker = Faker()
 N_DAYS = 10
-N_USERS = 10
+N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -38,7 +38,7 @@ adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachab
 def sim_random():
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), total_balance=100, adjective=random.choice(adjectives)) for i in
+    users = [User(email=faker.email(), total_balance=1000, adjective=random.choice(adjectives)) for i in
              range(N_USERS)]
     db.session.add_all(users)
     db.session.commit()
@@ -195,7 +195,7 @@ def sim_existing():
     db.session.commit()
 
 
-app = create_app("DEV")
+app = create_app("AWS")
 app_context = app.app_context()
 app_context.push()
 # db.drop_all()
