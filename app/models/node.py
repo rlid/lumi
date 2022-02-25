@@ -21,6 +21,7 @@ class Node(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
@@ -47,6 +48,11 @@ class Node(db.Model):
                                   backref=db.backref('node'),
                                   lazy='dynamic',
                                   cascade='all, delete-orphan')
+
+    def ping(self, utcnow):
+        self.last_updated = utcnow
+        db.session.add(self)
+        self.post.ping(utcnow)
 
     def nodes_before_inc(self):
         return self.post.nodes.filter(Node.left <= self.left, self.left <= Node.right).order_by(Node.left)

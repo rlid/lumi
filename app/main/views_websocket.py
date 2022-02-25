@@ -41,7 +41,7 @@ def handle_message_sent(message):
     # last_timestamp = db.session.query(
     #     func.max(Message.timestamp).label('max_timestamp')
     # ).filter(Message.node_id == node.id).first().max_timestamp
-    # last_message = node.messages.filter(Node.timestamp == last_timestamp).first()
+    # last_message = node.messages.filter(Message.timestamp == last_timestamp).first()
 
     sub_query = db.session.query(
         func.max(Message.timestamp).label('max_timestamp')

@@ -24,6 +24,7 @@ class Post(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+    last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     completed = db.Column(db.Boolean, default=False, nullable=False)
 
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
@@ -54,6 +55,10 @@ class Post(db.Model):
                                 backref=db.backref("post", lazy="joined"),
                                 lazy="dynamic",
                                 cascade="all, delete-orphan")
+
+    def ping(self, utcnow):
+        self.last_updated = utcnow
+        db.session.add(self)
 
     def __repr__(self):
         return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'

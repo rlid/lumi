@@ -220,7 +220,7 @@ def account():
     ).join(
         Post, Post.id == Node.post_id
     ).order_by(
-        Engagement.timestamp.desc()
+        Engagement.last_updated.desc()
     ).all()
 
     post_ids_seen = set()
@@ -234,7 +234,7 @@ def account():
     other_posts = current_user.posts.filter(
         Post.id.not_in(post_ids_seen)
     ).order_by(
-        Post.timestamp.desc()
+        Post.last_updated.desc()
     ).all()
     other_nodes = current_user.nodes.filter(
         Node.parent_id.is_not(None),
@@ -242,7 +242,7 @@ def account():
     ).join(
         Post, Post.id == Node.post_id
     ).order_by(
-        Node.timestamp.desc()
+        Node.last_updated.desc()
     ).all()
     return render_template(
         "account.html",

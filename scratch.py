@@ -7,7 +7,7 @@ from app.models.user import User, Post, Node, Engagement
 
 faker = Faker()
 N_DAYS = 10
-N_USERS = 20
+N_USERS = 10
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -195,7 +195,7 @@ def sim_existing():
     db.session.commit()
 
 
-app = create_app("AWS")
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 # db.drop_all()

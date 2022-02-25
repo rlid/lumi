@@ -30,7 +30,7 @@ def user(user_id):
             Engagement.state == Engagement.STATE_COMPLETED
         )
     ).order_by(
-        Engagement.timestamp.desc()
+        Engagement.last_updated.desc()
     ).all()
     return render_template("user.html", user=u, completed_engagements=completed_engagements)
 
@@ -79,10 +79,10 @@ def browse():
         desc('freq')
     )
 
-    posts = post_query.order_by(Post.timestamp.desc()).all()
+    posts = post_query.order_by(Post.last_updated.desc()).all()
     sticky_posts = []
     if not tag_ids_to_filter:
-        sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.timestamp.desc()).all()
+        sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
     tags_not_in_filter_with_freq = tags_not_in_filter_query.all()
     return render_template(
         "index.html",

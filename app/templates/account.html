@@ -12,7 +12,6 @@
             </h2>
             <div id="accordionBasicInfo" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-
                     <ul class="list-group mb-3">
                         <li class="list-group-item d-flex justify-content-between">
                             <div>
@@ -28,10 +27,10 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between lh-sm">
                             <div>
-                                <h6 class="my-0">Balance</h6>
+                                <h6 class="my-0">Balance Available</h6>
                             </div>
                             <div class="text-end">
-                                <div class="text-muted">{{ '${0:.2f}'.format(user.total_balance) }}</div>
+                                <div class="text-muted">{{ '${0:.2f}'.format(user.total_balance - user.reserved_balance) }}</div>
                                 <small>
                                     <a class="badge btn-success text-decoration-none text-white"
                                        href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_5']) }}">Top-up
@@ -47,13 +46,6 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between lh-sm">
                             <div>
-                                <h6 class="my-0">Reserved Balance</h6>
-                                <small class="text-muted"></small>
-                            </div>
-                            <span class="text-muted">{{ '${0:.2f}'.format(user.reserved_balance) }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <div>
                                 <h6 class="my-0">Reward Limit</h6>
                                 <small class="text-muted"></small>
                             </div>
@@ -66,20 +58,13 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button py-2 collapsed" type="button" data-bs-toggle="collapse"
+                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionActiveEngagements">
                     <b>Active Engagements</b>
                 </button>
             </h2>
-            <div id="accordionActiveEngagements" class="accordion-collapse collapse">
-                <div class="accordion-body">
-                    {% for engagement in uncompleted_engagements %}
-                        {{ render_engagement(engagement) }}
-                    {% endfor %}
-
-
-
-
+            <div id="accordionActiveEngagements" class="accordion-collapse collapse show">
+                <div class="accordion-body pe-0 pt-0">
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
@@ -136,8 +121,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>

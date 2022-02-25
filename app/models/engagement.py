@@ -15,6 +15,7 @@ class Engagement(db.Model):
     __tablename__ = 'engagements'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+    last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
     node_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'), nullable=False)
 
@@ -33,6 +34,11 @@ class Engagement(db.Model):
                                backref=db.backref('engagement'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')
+
+    def ping(self, utcnow):
+        self.last_updated = utcnow
+        db.session.add(self)
+        self.node.ping(utcnow)
 
     def __str__(self):
         return f'<e{self.id}>state={self.state},sender={self.sender},node={self.node}</e{self.id}>'

@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+    last_seen = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
     adjective = db.Column(db.String(20))
 
@@ -185,6 +186,11 @@ class User(UserMixin, db.Model):
                                        action=action,
                                        site_rid_hash=site_rid_hash), user
 
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
     def _add_tag(self, post, name):
         tag = Tag.query.get(name.lower())
         if tag is None:
@@ -194,6 +200,7 @@ class User(UserMixin, db.Model):
         if post_tag is None:
             post_tag = PostTag(post=post, tag=tag, creator=self)
             db.session.add(post_tag)
+            post.ping(datetime.utcnow())
             return post_tag
 
     def add_tag(self, post, name):
@@ -225,8 +232,8 @@ class User(UserMixin, db.Model):
 
         node = Node(post=post, creator=self)
         db.session.add(node)
-
         db.session.commit()
+
         return post
 
     def edit_post(self, post, title, body):
@@ -241,6 +248,7 @@ class User(UserMixin, db.Model):
 
         post.title = title
         post.body = ('m' if self.use_markdown else 's') + body
+        post.ping(datetime.utcnow())
         db.session.add(post)
 
         # reset all post tags
@@ -257,6 +265,7 @@ class User(UserMixin, db.Model):
         if post.is_reported:
             raise InvalidActionError('Cannot change the archive status of the post because the post is reported.')
         post.is_archived = not post.is_archived
+        post.ping(datetime.utcnow())
         db.session.add(post)
         db.session.commit()
 
@@ -264,6 +273,7 @@ class User(UserMixin, db.Model):
         post.is_reported = True
         post.report_reason = f'{self}: {reason}\n' + post.report_reason
         post.is_archived = True
+        post.ping(datetime.utcnow())
         db.session.add(post)
         db.session.commit()
 
@@ -283,6 +293,7 @@ class User(UserMixin, db.Model):
         if node is None:
             node = Node(creator=self, post=parent_node.post, parent=parent_node)
             db.session.add(node)
+            post.ping(datetime.utcnow())
             db.session.commit()
         return node
 
@@ -296,6 +307,10 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create message because the post is archived')
         message = Message(creator=self, node=node, engagement=engagement, text=text)
         db.session.add(message)
+        if engagement is not None:
+            engagement.ping(datetime.utcnow())
+        else:
+            node.ping(datetime.utcnow())
         db.session.commit()
         return message
 
@@ -340,6 +355,7 @@ class User(UserMixin, db.Model):
         db.session.add(engagement)
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
         db.session.add(message)
+        node.ping(datetime.utcnow())
         db.session.commit()
         return engagement
 
@@ -365,6 +381,7 @@ class User(UserMixin, db.Model):
                           type=Message.TYPE_CANCEL,
                           text=f'Engagement cancelled')
         db.session.add(message)
+        engagement.ping(datetime.utcnow())
         db.session.commit()
 
     def accept_engagement(self, engagement):
@@ -395,6 +412,7 @@ class User(UserMixin, db.Model):
                           type=Message.TYPE_ACCEPT,
                           text=f'Engagement accepted')
         db.session.add(message)
+        engagement.ping(datetime.utcnow())
         db.session.commit()
 
     @property
@@ -424,9 +442,23 @@ class User(UserMixin, db.Model):
     @property
     def reputation(self):
         if self.sum_abs_x == 0 or self.sum_abs_i == 0:
-            return 0
+            return 1.0
         else:
             return min(self.sum_x / self.sum_abs_x, self.sum_i / self.sum_abs_i)
+
+    def percentile_rank(self, window_in_days=7):
+        min_engagements = 3
+        min_users = 5
+        if self.sum_abs_i < min_engagements:
+            return None
+        users = User.query.filter(
+            User.last_seen >= datetime.utcnow() - timedelta(days=window_in_days),
+            User.sum_abs_i >= min_engagements
+        ).all()
+        if len(users) < min_users:
+            return None
+        self_score = self.reputation
+        return sum([1 for user in users if user.reputation <= self_score]) / len(users)
 
     @property
     def competence(self):
@@ -496,7 +528,10 @@ class User(UserMixin, db.Model):
         self.update_reward_limit(post_reward, success, dispute_lost)
 
     def rate_engagement(self, engagement, is_success):
-        # if engagement.node.post.reward_cent > self.reward_limit_cent:
+        node = engagement.node
+        post = node.post
+
+        # if post.reward_cent > self.reward_limit_cent:
         #     raise InvalidActionError(
         #         'Cannot rate engagement as successful because the post reward exceeds the reward limit of the user')
 
@@ -504,17 +539,20 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot rate engagement because it is not in engaged state')
         asker = engagement.asker
         answerer = engagement.answerer
-        if self == asker:
-            engagement.rating_by_asker = 1 if is_success else -1
-            db.session.add(engagement)
-        elif self == answerer:
-            engagement.rating_by_answerer = 1 if is_success else -1
-            db.session.add(engagement)
-        else:
+
+        if self != asker and self != answerer:
             raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
 
+        if self == asker:
+            engagement.rating_by_asker = 1 if is_success else -1
+        elif self == answerer:
+            engagement.rating_by_answerer = 1 if is_success else -1
+
+        engagement.ping(datetime.utcnow())
+        db.session.add(engagement)
+
         message = Message(creator=self,
-                          node=engagement.node,
+                          node=node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
                           text=f'Engagement rated {"+" if is_success else "-"}')
@@ -524,18 +562,18 @@ class User(UserMixin, db.Model):
             db.session.commit()
             return
 
-        reward_cent = engagement.node.post.reward_cent
+        reward_cent = post.reward_cent
         reward = 0.01 * reward_cent
         if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
             asker.reserved_balance_cent -= reward_cent
             asker.total_balance_cent -= reward_cent
-            _distribute_reward(node=engagement.node, amount_cent=reward_cent)
+            _distribute_reward(node=node, amount_cent=reward_cent)
 
             asker.update_reputation(reward, success=True, dispute_lost=False)
             answerer.update_reputation(reward, success=True, dispute_lost=False)
 
             message = Message(creator=self,
-                              node=engagement.node,
+                              node=node,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement successful - reward has been distributed')
             db.session.add(message)
@@ -559,7 +597,7 @@ class User(UserMixin, db.Model):
                 answerer.update_reputation(reward, success=False, dispute_lost=True)
 
             message = Message(creator=self,
-                              node=engagement.node,
+                              node=node,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement outcome disputed - no reward will be distributed')
             db.session.add(message)
@@ -568,7 +606,7 @@ class User(UserMixin, db.Model):
             asker.reserved_balance_cent -= reward_cent
 
             message = Message(creator=self,
-                              node=engagement.node,
+                              node=node,
                               type=Message.TYPE_COMPLETE,
                               text=f'Engagement unsuccessful - no reward will be distributed')
             db.session.add(message)
