@@ -80,7 +80,8 @@
                                 {% elif rank > 0.5 %}
                                     Less than
                                 {% endif %}
-                                {{ '{0:.0f}%'.format((1 - rank) * 100) }} of active users have better track records.
+                                {{ '{0:.0f}%'.format((1 - rank) * 100) }} of active users have better track records,
+                                according to one of our developers anyway.
                             </div>
                         {% endif %}
                         {{ render_track_record(user, completed_engagements) }}

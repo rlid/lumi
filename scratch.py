@@ -199,24 +199,25 @@ def sim_existing():
     db.session.commit()
 
 
-def sim_all(n_days=50,
-            n_users=10,
+def sim_all(n_days=100,
+            n_users=100,
             n_tags=50,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
-            p_post=0.5,
-            p_social_media_mode=0.0,
+            p_post=0.25,
+            p_social_media_mode=1.0,
             p_share=0.3,
             p_message=0.5,
             p_request=0.2,
             p_cancel_given_request=0.1,
             p_accept_given_request=0.75,
             p_rate_given_accept=0.8,
-            p_rate_given_complete=0.75,
+            p_archive_given_complete=0.5,
             initial_balance=100):
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), total_balance=initial_balance, adjective=random.choice(adjectives)) for i in range(n_users)]
+    users = [User(email=faker.email(), total_balance=initial_balance, adjective=random.choice(adjectives)) for i in
+             range(n_users)]
     db.session.add_all(users)
     db.session.commit()
 
@@ -263,9 +264,9 @@ def sim_all(n_days=50,
                     if parent_node.post.social_media_mode:
                         user.create_node(
                             parent_node=parent_node,
-                            referral_reward_cent=random.randint(
-                                round(0.25 * parent_node.remaining_referral_budget_cent),
-                                round(0.75 * parent_node.remaining_referral_budget_cent)))
+                            referral_reward=random.uniform(
+                                round(0.25 * 0.01 * parent_node.remaining_referral_budget_cent),
+                                round(0.75 * 0.01 * parent_node.remaining_referral_budget_cent)))
                     else:
                         user.create_node(parent_node)
                     print('Post shared')
@@ -329,7 +330,6 @@ def sim_all(n_days=50,
                     [post.creator.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
                     print('Messages exchanged')
 
-            # engagements = user.engagements_received.filter_by(state=Engagement.STATE_ENGAGED).all()
             engagements = Engagement.query.filter(
                 Engagement.state == Engagement.STATE_ENGAGED,
                 or_(Engagement.receiver == user, Engagement.sender == user)
@@ -339,9 +339,12 @@ def sim_all(n_days=50,
                     is_success = actual_success.get(engagement)
                     if is_success is None:
                         is_success = random.uniform(0, 1) < competence[user]
-                        actual_success[engagement.answerer] = is_success
-                    if is_success and random.uniform(0, 1) > credibility[user]:
+                        actual_success[engagement] = is_success
+                    if is_success and user == engagement.asker and random.uniform(0, 1) > credibility[user]:
                         is_success = False
+                    if (not is_success) and user == engagement.answerer and random.uniform(0, 1) > credibility[user]:
+                        is_success = True
+
                     user.rate_engagement(engagement, is_success)
                     print('Engagement rated')
 
@@ -357,7 +360,7 @@ def sim_all(n_days=50,
                 Post
             ).all()
             for post in posts:
-                if random.uniform(0, 1) < p_rate_given_complete:
+                if random.uniform(0, 1) < p_archive_given_complete:
                     user.toggle_archive(post)
 
     db.session.commit()

@@ -17,8 +17,8 @@ from utils import security_utils, authlib_ext
 
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
-_REP_DECAY = 0.1
-
+_REP_DECAY = 0.01
+_REP_I_DECAY = 0.1
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -287,7 +287,10 @@ class User(UserMixin, db.Model):
         self._add_tag(post, 'Buying' if type == Post.TYPE_BUY else 'Selling')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
-        node = Node(post=post, creator=self, total_reward_cent=post.reward_cent)
+        if social_media_mode:
+            node = Node(post=post, creator=self, total_reward_cent=post.reward_cent, referral_reward_cent=0)
+        else:
+            node = Node(post=post, creator=self, total_reward_cent=post.reward_cent)
         db.session.add(node)
         db.session.commit()
 
@@ -373,7 +376,7 @@ class User(UserMixin, db.Model):
                     raise InvalidActionError(
                         'Cannot create node because referral reward exceeds the remaining referral budget')
             if post.type == Post.TYPE_SELL:
-                total_reward_cent = referral_reward
+                total_reward_cent += referral_reward_cent
 
         node = Node(creator=self,
                     post=parent.post,
@@ -619,15 +622,15 @@ class User(UserMixin, db.Model):
         db.session.add(message)
 
     def reputation_if_dispute_lost(self, x):
-        m = math.exp(-math.fabs(x) * _REP_DECAY)
-        s = -x + m * self.sum_x
-        s_abs = math.fabs(x) + m * self.sum_abs_x
+        m_x = math.exp(-math.fabs(x) * _REP_DECAY)
+        sum_x = -x + m_x * self.sum_x
+        sum_abs_x = math.fabs(x) + m_x * self.sum_abs_x
 
-        m1 = math.exp(-_REP_DECAY)
-        s1 = -1 + m1 * self.sum_i
-        s1_abs = 1 + m1 * self.sum_abs_i
+        m_i = math.exp(-_REP_I_DECAY)
+        sum_i = -1 + m_i * self.sum_i
+        sum_abs_i = 1 + m_i * self.sum_abs_i
 
-        return min(s / s_abs, s1 / s1_abs)
+        return min(sum_x / sum_abs_x, sum_i / sum_abs_i)
 
     def update_reward_limit(self, x, success, dispute_lost):
         if success:
@@ -664,13 +667,13 @@ class User(UserMixin, db.Model):
         the next dispute unless he starts to build a good track record
         '''
         #  decay the weights of past observations in ALL cases:
-        m = math.exp(-math.fabs(post_reward) * _REP_DECAY)
-        self.sum_x *= m
-        self.sum_abs_x *= m
+        m_x = math.exp(-math.fabs(post_reward) * _REP_DECAY)
+        self.sum_x *= m_x
+        self.sum_abs_x *= m_x
 
-        m1 = math.exp(-_REP_DECAY)
-        self.sum_i *= m1
-        self.sum_abs_i *= m1
+        m_i = math.exp(-_REP_I_DECAY)
+        self.sum_i *= m_i
+        self.sum_abs_i *= m_i
 
         # add most recent observation only if it is a success or dispute lost
         if success or dispute_lost:
@@ -706,7 +709,7 @@ def _distribute_reward_cent(node, fraction):
     if post.social_media_mode:
         for node in node.nodes_before_inc():
             referrer = node.creator
-            referrer_reward_cent = fraction * node.referral_reward
+            referrer_reward_cent = round(fraction * node.referral_reward)
             referrer.total_balance_cent += referrer_reward_cent
             db.session.add(referrer)
             total_referrer_reward_cent += referrer_reward_cent
