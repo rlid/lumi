@@ -6,5 +6,9 @@ class InvalidActionError(Error):
     pass
 
 
+class InsufficientFundsError(InvalidActionError):
+    pass
+
+
 class RewardDistributionError(Error):
     pass

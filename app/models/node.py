@@ -9,6 +9,8 @@ from app.models import Message
 
 
 # Contribution Node
+
+
 class Node(db.Model):
     '''
     https://docs.sqlalchemy.org/en/14/_modules/examples/nested_sets/nested_sets.html
@@ -19,13 +21,20 @@ class Node(db.Model):
         'batch': False  # allows extension to fire for each instance before going to the next.
     }
 
+    STATE_CHAT = 2 ** 10
+    STATE_REQUESTED = 2 * STATE_CHAT
+    STATE_ENGAGED = 2 * STATE_REQUESTED
+
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
+    state = db.Column(db.Integer, default=STATE_CHAT, nullable=False)
+
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
 
+    total_reward_cent = db.Column(db.Integer, nullable=False)
     referral_reward_cent = db.Column(db.Integer)
 
     parent_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'))
@@ -60,14 +69,6 @@ class Node(db.Model):
     @property
     def total_referral_reward_cent(self):
         return sum([node.referral_reward_cent for node in self.nodes_before_inc()])
-
-    @property
-    def total_reward_cent(self):
-        # TODO: Move Post.TYPE_SELL out of Post so it can be referenced here without causing circular import
-        if self.post.social_media_mode and self.post.type == 'sell':
-            return self.post.reward_cent + self.total_referral_reward_cent
-        else:
-            return self.post.reward_cent
 
     @property
     def remaining_referral_budget_cent(self):

@@ -1,14 +1,16 @@
 import random
 
 from faker import Faker
+from sqlalchemy import or_
 
 from app import create_app, db
 from app.models import PlatformFee
+from app.models.errors import InsufficientFundsError
 from app.models.user import User, Post, Node, Engagement
 
-faker = Faker()
+app = create_app("DEV")
 N_DAYS = 10
-N_USERS = 10
+N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
 P_MESSAGE = 1.0
@@ -19,6 +21,7 @@ P_RATE_ENGAGE = 0.5
 P_ARCHIVE = 0.75
 N_TAGS = 50
 
+faker = Faker()
 adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachable', 'adaptable', 'adventurous',
               'affectionate', 'ambitious', 'amiable', 'compassionate', 'considerate', 'courageous', 'courteous',
               'diligent', 'empathetic', 'exuberant', 'frank', 'generous', 'gregarious', 'impartial', 'intuitive',
@@ -42,7 +45,7 @@ def sim_random():
     users = [User(email=faker.email(), total_balance=1000, adjective=random.choice(adjectives)) for i in
              range(N_USERS)]
     db.session.add_all(users)
-    db.session.commit()
+    # db.session.commit()
 
     tag_names = [word.capitalize() for word in faker.words(N_TAGS)]
 
@@ -196,13 +199,177 @@ def sim_existing():
     db.session.commit()
 
 
-app = create_app("DEV")
+def sim_all(n_days=50,
+            n_users=10,
+            n_tags=50,
+            a_competence=0.8, d_competence=0.1,
+            a_credibility=0.85, d_credibility=0.1,
+            p_post=0.5,
+            p_social_media_mode=0.0,
+            p_share=0.3,
+            p_message=0.5,
+            p_request=0.2,
+            p_cancel_given_request=0.1,
+            p_accept_given_request=0.75,
+            p_rate_given_accept=0.8,
+            p_rate_given_complete=0.75,
+            initial_balance=100):
+    db.drop_all()
+    db.create_all()
+    users = [User(email=faker.email(), total_balance=initial_balance, adjective=random.choice(adjectives)) for i in range(n_users)]
+    db.session.add_all(users)
+    db.session.commit()
+
+    tag_names = [word.capitalize() for word in faker.words(n_tags)]
+
+    competence = {}
+    credibility = {}
+    for user in users:
+        competence[user] = random.uniform(a_competence - d_competence, a_competence + d_competence)
+        credibility[user] = random.uniform(a_credibility - d_credibility, a_credibility + d_credibility)
+
+    actual_success = {}
+
+    for day in range(n_days):
+        for user in users:
+            if random.uniform(0, 1) < p_post:
+                reward_cent = random.randint(100, user.reward_limit_cent)
+                if random.uniform(0, 1) < p_social_media_mode:
+                    post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
+                                            reward=0.01 * reward_cent,
+                                            title=faker.text(100),
+                                            body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))),
+                                            social_media_mode=True,
+                                            referral_budget=round(0.4 * 0.01 * reward_cent))
+                else:
+                    post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
+                                            reward=0.01 * reward_cent,
+                                            title=faker.text(100),
+                                            body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
+                print('Post created')
+                for i in range(random.randint(1, 5)):
+                    user.add_tag(post, random.choice(tag_names).capitalize())
+                    print('Tag added')
+
+            if random.uniform(0, 1) < p_share:
+                nodes = Node.query.join(
+                    Post, Post.id == Node.post_id
+                ).filter(
+                    Post.creator != user,  # not required in practice because the OP can share his own post
+                    Post.is_archived.is_not(True)
+                ).all()
+                if len(nodes) > 0:
+                    parent_node = random.choice(nodes)
+                    if parent_node.post.social_media_mode:
+                        user.create_node(
+                            parent_node=parent_node,
+                            referral_reward_cent=random.randint(
+                                round(0.25 * parent_node.remaining_referral_budget_cent),
+                                round(0.75 * parent_node.remaining_referral_budget_cent)))
+                    else:
+                        user.create_node(parent_node)
+                    print('Post shared')
+
+            if random.uniform(0, 1) < p_message:
+                nodes = user.nodes.join(
+                    Post, Post.id == Node.post_id
+                ).filter(
+                    Node.parent_id.is_(None),
+                    Post.is_archived.is_not(True)
+                ).all()
+                if len(nodes) > 0:
+                    node = random.choice(nodes)
+                    if random.uniform(0, 1) < 0.5:
+                        [user.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
+                        [node.post.creator.create_message(node, text=faker.text(100)) for i in
+                         range(random.randint(1, 2))]
+                        print('Messages exchanged')
+
+            if random.uniform(0, 1) < p_request:
+                nodes = user.nodes.join(
+                    Post, Post.id == Node.post_id
+                ).filter(
+                    Node.parent_id.is_not(None),
+                    Node.state == Node.STATE_CHAT,
+                    Post.is_archived.is_not(True),
+                    Node.total_reward_cent <= user.reward_limit_cent
+                ).all()
+                if len(nodes) > 0:
+                    node = random.choice(nodes)
+                    if node.post.type == Post.TYPE_SELL and user.balance_available_cent < node.total_reward_cent:
+                        user.total_balance_cent += 1000 * int(
+                            1 + (node.total_reward_cent - user.balance_available_cent) / 1000)
+                        print('Account topped up')
+                    engagement = user.create_engagement(node)
+                    print('Engagement requested')
+                    if random.uniform(0, 1) < p_cancel_given_request:
+                        user.cancel_engagement(engagement)
+                        print('Engagement cancelled')
+
+            engagement_requests = user.engagements_received.join(
+                Node, Node.id == Engagement.node_id,
+            ).join(
+                Post, Post.id == Node.post_id
+            ).filter(
+                Engagement.state == Engagement.STATE_REQUESTED,
+                Post.is_archived.is_not(True),
+                Node.total_reward_cent <= user.reward_limit_cent
+            ).all()
+            for engagement_request in engagement_requests:
+                node = engagement_request.node
+                post = node.post
+                if random.uniform(0, 1) < p_accept_given_request:
+                    if post.type == Post.TYPE_BUY and user.balance_available_cent < node.total_reward_cent:
+                        user.total_balance_cent += 1000 * int(
+                            1 + (node.total_reward_cent - user.balance_available_cent) / 1000)
+                        print('Account topped up')
+                    user.accept_engagement(engagement_request)
+                    print('Engagement accepted')
+                    [user.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
+                    [post.creator.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
+                    print('Messages exchanged')
+
+            # engagements = user.engagements_received.filter_by(state=Engagement.STATE_ENGAGED).all()
+            engagements = Engagement.query.filter(
+                Engagement.state == Engagement.STATE_ENGAGED,
+                or_(Engagement.receiver == user, Engagement.sender == user)
+            ).all()
+            for engagement in engagements:
+                if random.uniform(0, 1) < p_rate_given_accept:
+                    is_success = actual_success.get(engagement)
+                    if is_success is None:
+                        is_success = random.uniform(0, 1) < competence[user]
+                        actual_success[engagement.answerer] = is_success
+                    if is_success and random.uniform(0, 1) > credibility[user]:
+                        is_success = False
+                    user.rate_engagement(engagement, is_success)
+                    print('Engagement rated')
+
+            posts = Post.query.join(
+                Node, Node.post_id == Post.id
+            ).join(
+                Engagement, Engagement.node_id == Node.id
+            ).filter(
+                Post.creator == user,
+                Post.is_archived.is_not(True),
+                Engagement.state == Engagement.STATE_COMPLETED
+            ).group_by(
+                Post
+            ).all()
+            for post in posts:
+                if random.uniform(0, 1) < p_rate_given_complete:
+                    user.toggle_archive(post)
+
+    db.session.commit()
+
+
 app_context = app.app_context()
 app_context.push()
 # db.drop_all()
 # db.create_all()
 
-sim_random()
+sim_all()
+# sim_random()
 # sim_reset()
 # sim_existing()
 
@@ -211,15 +378,17 @@ users = User.query.all()
 print(f'Number of posts = {len(Post.query.all())}')
 print(f'Number of nodes (including root) = {len(Node.query.all())}')
 
-print(Engagement.query.filter(
+print('Number of successful engagements = ' + str(Engagement.query.filter(
     Engagement.state == Engagement.STATE_COMPLETED,
     Engagement.rating_by_asker == 1,
     Engagement.rating_by_answerer == 1
-).count())
-print(Engagement.query.filter(Engagement.state == Engagement.STATE_COMPLETED).count())
+).count()))
+print('Number of completed engagements = ' + str(Engagement.query.filter(
+    Engagement.state == Engagement.STATE_COMPLETED
+).count()))
 
-print(sum([u.total_balance for u in users]))
-print(sum([fee.amount for fee in PlatformFee.query.all()]))
+print('Total user balance = ' + str(sum([u.total_balance for u in users])))
+print('Total platform fee = ' + str(sum([fee.amount for fee in PlatformFee.query.all()])))
 
 # db.session.commit()
 # db.session.remove()

@@ -40,11 +40,11 @@ def top_up_success():
     if stripe_session_id is not None:
         payment_intent = PaymentIntent.query.filter_by(stripe_session_id=stripe_session_id).first()
         if payment_intent.succeeded:
-            flash(f"Your top-up successful. An email receipt has been sent to you.", "success")
+            flash(f"Your top-up is successful. An email receipt has been sent to you.", "success")
             return redirect(url_for('main.account'))
-        flash('Your top-up is being processed which usually takes a few seconds. '
-              'Please refresh this page to check your balance. '
-              'You will also receive an email receipt once your payment has cleared.', category='info')
+        flash('You have authorised the payment but it is being processed. '
+              'Please refresh this page in a few seconds to check your balance. '
+              'You will also receive an email receipt once the payment has cleared.', category='info')
     return redirect(url_for('main.account'))
 
 

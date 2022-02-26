@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
 from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee
-from app.models.errors import InvalidActionError, RewardDistributionError
+from app.models.errors import InvalidActionError, RewardDistributionError, InsufficientFundsError
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
 
@@ -287,7 +287,7 @@ class User(UserMixin, db.Model):
         self._add_tag(post, 'Buying' if type == Post.TYPE_BUY else 'Selling')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
-        node = Node(post=post, creator=self, referral_reward=0)
+        node = Node(post=post, creator=self, total_reward_cent=post.reward_cent)
         db.session.add(node)
         db.session.commit()
 
@@ -351,24 +351,35 @@ class User(UserMixin, db.Model):
             # check if a node exists already as 2 nodes with the same creator is not allowed
             # TODO: consider if it makes sense to make it more strict by raising an error if a node is found
             node = post.nodes.filter_by(creator=self).first()
+
         if node is None:
-            referral_reward_cent = None
-            if post.social_media_mode:
-                if referral_reward is None:
-                    # Default is 50% of the remaining referral budget:
-                    referral_reward_cent = round(0.5 * node.remaining_referral_budget_cent)
-                else:
-                    referral_reward_cent = round(100 * referral_reward)
-                    if referral_reward_cent > node.remaining_referral_budget_cent:
-                        raise InvalidActionError(
-                            'Cannot create node because referral reward exceeds the remaining referral budget')
-            node = Node(creator=self,
-                        post=parent_node.post,
-                        parent=parent_node,
-                        referral_reward_cent=referral_reward_cent)
+            node = self._create_node(parent=parent_node, referral_reward=referral_reward)
             db.session.add(node)
             post.ping(datetime.utcnow())
             db.session.commit()
+        return node
+
+    def _create_node(self, parent, referral_reward=None):
+        post = parent.post
+        total_reward_cent = parent.total_reward_cent
+        referral_reward_cent = None
+        if post.social_media_mode:
+            if referral_reward is None:
+                # Default is 50% of the remaining referral budget:
+                referral_reward_cent = round(0.5 * parent.remaining_referral_budget_cent)
+            else:
+                referral_reward_cent = round(100 * referral_reward)
+                if referral_reward_cent > parent.remaining_referral_budget_cent:
+                    raise InvalidActionError(
+                        'Cannot create node because referral reward exceeds the remaining referral budget')
+            if post.type == Post.TYPE_SELL:
+                total_reward_cent = referral_reward
+
+        node = Node(creator=self,
+                    post=parent.post,
+                    parent=parent,
+                    total_reward_cent=total_reward_cent,
+                    referral_reward_cent=referral_reward_cent)
         return node
 
     def create_message(self, node, text):
@@ -408,13 +419,13 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user is not the node creator')
         if self == post.creator:
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
-        if node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first() is not None:
+        if node.state != Node.STATE_CHAT:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
         if self.reward_limit_cent < node.total_reward_cent:
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_SELL and self.balance_available_cent < node.total_reward_cent:
-            raise InvalidActionError('Cannot create engagement as buyer due to insufficient funds')
+            raise InsufficientFundsError('Cannot create engagement as buyer due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
             engagement = Engagement(node=node, sender=self, receiver=post.creator,
@@ -429,6 +440,7 @@ class User(UserMixin, db.Model):
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
         db.session.add(message)
 
+        node.state = Node.STATE_REQUESTED
         node.ping(datetime.utcnow())
         db.session.commit()
 
@@ -458,6 +470,10 @@ class User(UserMixin, db.Model):
                           type=Message.TYPE_CANCEL,
                           text=f'Engagement cancelled')
         db.session.add(message)
+
+        node.state = Node.STATE_CHAT
+        node.ping(datetime.utcnow())
+
         db.session.commit()
 
     def accept_engagement(self, engagement):
@@ -473,7 +489,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_BUY and self.balance_available_cent < node.total_reward_cent:
-            raise InvalidActionError('Cannot accept engagement as buyer due to insufficient funds')
+            raise InsufficientFundsError('Cannot accept engagement as buyer due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
             self.reserved_balance_cent += node.total_reward_cent
@@ -488,6 +504,10 @@ class User(UserMixin, db.Model):
                           type=Message.TYPE_ACCEPT,
                           text=f'Engagement accepted')
         db.session.add(message)
+
+        node.state = Node.STATE_ENGAGED
+        node.ping(datetime.utcnow())
+
         db.session.commit()
 
     def rate_engagement(self, engagement, is_success):
@@ -543,7 +563,8 @@ class User(UserMixin, db.Model):
             db.session.add(message)
 
         engagement.state = Engagement.STATE_COMPLETED
-        db.session.add(engagement)
+        engagement.node.state = Node.STATE_CHAT
+
 
     def _handle_success(self, engagement, fraction=1.0):
         node = engagement.node
