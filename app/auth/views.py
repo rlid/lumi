@@ -63,7 +63,7 @@ def force_login(user_id):
     db.session.commit()
     login_user(user, False)
     flash('You have logged in.', category='success')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.account'))
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all

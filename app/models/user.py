@@ -31,7 +31,7 @@ class User(UserMixin, db.Model):
 
     total_balance_cent = db.Column(db.Integer, default=0, nullable=False)
     reserved_balance_cent = db.Column(db.Integer, default=0, nullable=False)
-    reward_limit_cent = db.Column(db.Integer, default=500, nullable=False)
+    value_limit_cent = db.Column(db.Integer, default=500, nullable=False)
 
     sum_x = db.Column(db.Float, default=0.0, nullable=False)
     sum_abs_x = db.Column(db.Float, default=0.0, nullable=False)
@@ -201,7 +201,7 @@ class User(UserMixin, db.Model):
 
     @property
     def reward_limit(self):
-        return 0.01 * self.reward_limit_cent
+        return 0.01 * self.value_limit_cent
 
     @property
     def reputation(self):
@@ -252,7 +252,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, type, reward_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
+    def create_post(self, type, value_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -263,10 +263,15 @@ class User(UserMixin, db.Model):
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
 
         if referral_budget_cent is None:
-            referral_budget_cent = round(0.4 * reward_cent)  # Default is 40% of the OP reward
+            if social_media_mode:
+                referral_budget_cent = round(0.4 * value_cent)  # Default is 40% of the post value in social media mode
+            else:
+                referral_budget_cent = round(0.2 * value_cent)  # Default is 20% of the post value in standard mode
+
         post = Post(creator=self,
                     type=type,
-                    reward_cent=reward_cent,
+                    value_cent=value_cent,
+                    platform_fee_cent=round(0.1 * value_cent),  # Default is 10% of the post value
                     social_media_mode=social_media_mode,
                     referral_budget_cent=referral_budget_cent,
                     title=title,
@@ -277,9 +282,20 @@ class User(UserMixin, db.Model):
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
         if social_media_mode:
-            node = Node(post=post, creator=self, total_reward_cent=post.reward_cent, referral_reward_cent=0)
+            node = Node(
+                post=post,
+                creator=self,
+                value_cent=post.value_cent,
+                answerer_reward_cent=post.value_cent - round(0.1 * post.value_cent),  # Default platform fee is 10%
+                referrer_reward_cent=0
+            )
         else:
-            node = Node(post=post, creator=self, total_reward_cent=post.reward_cent)
+            node = Node(
+                post=post,
+                creator=self,
+                value_cent=post.value_cent,
+                answerer_reward_cent=post.value_cent - round(0.1 * post.value_cent)  # Default platform fee is 10%
+            )
         db.session.add(node)
         db.session.commit()
 
@@ -330,7 +346,7 @@ class User(UserMixin, db.Model):
         db.session.add(post)
         db.session.commit()
 
-    def create_node(self, parent_node, referral_reward_cent=None):
+    def create_node(self, parent_node, referrer_reward_cent=None):
         post = parent_node.post
         if post.is_archived:
             raise InvalidActionError('Cannot create node because the post is archived')
@@ -345,31 +361,45 @@ class User(UserMixin, db.Model):
             node = post.nodes.filter_by(creator=self).first()
 
         if node is None:
-            node = self._create_node(parent=parent_node, referral_reward_cent=referral_reward_cent)
+            node = self._create_node(parent_node=parent_node, referrer_reward_cent=referrer_reward_cent)
             db.session.add(node)
             post.ping(datetime.utcnow())
             db.session.commit()
         return node
 
-    def _create_node(self, parent, referral_reward_cent=None):
-        post = parent.post
-        total_reward_cent = parent.total_reward_cent
+    def _create_node(self, parent_node, referrer_reward_cent=None):
+        post = parent_node.post
+        answerer_reward_cent = parent_node.answerer_reward_cent
         if post.social_media_mode:
-            if referral_reward_cent is None:
-                # Default is 50% of the remaining referral budget:
-                referral_reward_cent = round(0.5 * parent.remaining_referral_budget_cent)
+            sum_referrer_reward_cent = parent_node.sum_referrer_reward_cent
+            if referrer_reward_cent is None:
+                # Default for each referrer is 50% of the remaining referral budget:
+                referrer_reward_cent = round(0.5 * parent_node.remaining_referral_budget_cent)
             else:
-                if referral_reward_cent > parent.remaining_referral_budget_cent:
+                if referrer_reward_cent > parent_node.remaining_referral_budget_cent:
                     raise InvalidActionError(
                         'Cannot create node because referral reward exceeds the remaining referral budget')
-            if post.type == Post.TYPE_SELL:
-                total_reward_cent += parent.referral_reward_cent
+            sum_referrer_reward_cent += parent_node.referrer_reward_cent
+            if post.type == Post.TYPE_BUY:
+                answerer_reward_cent -= parent_node.referrer_reward_cent
+        else:
+            sum_referrer_reward_cent = 0
+            # Default total referral cap = 20% of OP reward:
+            total_referrer_reward_cent_cap = round(0.2 * post.value_cent)
+            for node in parent_node.nodes_before_inc()[1:]:
+                referrer_reward_cent = round(
+                    0.5 * (total_referrer_reward_cent_cap - sum_referrer_reward_cent)
+                )
+                sum_referrer_reward_cent += referrer_reward_cent
+            if post.type == Post.TYPE_BUY:
+                answerer_reward_cent = post.value_cent - post.platform_fee_cent - sum_referrer_reward_cent
 
         node = Node(creator=self,
-                    post=parent.post,
-                    parent=parent,
-                    total_reward_cent=total_reward_cent,
-                    referral_reward_cent=referral_reward_cent)
+                    post=parent_node.post,
+                    parent=parent_node,
+                    value_cent=answerer_reward_cent + sum_referrer_reward_cent + post.platform_fee_cent,
+                    answerer_reward_cent=answerer_reward_cent,
+                    referrer_reward_cent=referrer_reward_cent)
         return node
 
     def create_message(self, node, text):
@@ -414,10 +444,13 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.state != Node.STATE_CHAT:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
-        if self.reward_limit_cent < node.total_reward_cent:
+        # price limit checks
+        if self.value_limit_cent < node.value_cent:
+            # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
+            # value limit check is applied to the original post value as the referral reward could be set arbitrarily
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_SELL and self.balance_available_cent < node.total_reward_cent:
+        if post.type == Post.TYPE_SELL and self.balance_available_cent < node.value_cent:
             raise InsufficientFundsError('Cannot create engagement as buyer due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
@@ -426,7 +459,7 @@ class User(UserMixin, db.Model):
         else:
             engagement = Engagement(node=node, sender=self, receiver=post.creator,
                                     asker=self, answerer=post.creator)
-            self.reserved_balance_cent += node.total_reward_cent
+            self.reserved_balance_cent += node.value_cent
             db.session.add(self)
         db.session.add(engagement)
 
@@ -454,7 +487,7 @@ class User(UserMixin, db.Model):
         db.session.add(engagement)
 
         if post.type == Post.TYPE_SELL:
-            self.reserved_balance_cent -= node.total_reward_cent
+            self.reserved_balance_cent -= node.value_cent
             db.session.add(self)
 
         message = Message(creator=self,
@@ -478,14 +511,17 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        if self.reward_limit_cent < node.total_reward_cent:
+        # price limit checks
+        if self.value_limit_cent < node.value_cent:
+            # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
+            # value limit check is applied to the original post value as the referral reward could be set arbitrarily
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_BUY and self.balance_available_cent < node.total_reward_cent:
+        if post.type == Post.TYPE_BUY and self.balance_available_cent < node.value_cent:
             raise InsufficientFundsError('Cannot accept engagement as buyer due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
-            self.reserved_balance_cent += node.total_reward_cent
+            self.reserved_balance_cent += node.value_cent
             db.session.add(self)
 
         engagement.state = Engagement.STATE_ENGAGED
@@ -508,7 +544,9 @@ class User(UserMixin, db.Model):
         asker = engagement.asker
         answerer = engagement.answerer
 
-        # if node.total_reward_cent > self.reward_limit_cent:
+        # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
+        # value limit check is applied to the original post value as the referral reward could be set arbitrarily
+        # if self.value_limit_cent < node.value_cent:
         #     raise InvalidActionError(
         #         'Cannot rate engagement as successful because the post reward exceeds the reward limit of the user')
 
@@ -551,7 +589,7 @@ class User(UserMixin, db.Model):
         else:
             node = engagement.node
             asker = engagement.asker
-            asker.reserved_balance_cent -= node.total_reward_cent
+            asker.reserved_balance_cent -= node.value_cent
             db.session.add(asker)
             message = Message(creator=self,
                               node=node,
@@ -567,10 +605,10 @@ class User(UserMixin, db.Model):
         asker = engagement.asker
         answerer = engagement.answerer
 
-        total_reward_cent = _distribute_reward_cent(node=node, fraction=fraction)
+        value_cent = _distribute_reward_cent(node=node, fraction=fraction)
 
-        asker.update_reputation(total_reward_cent, success=True, dispute_lost=False)
-        answerer.update_reputation(total_reward_cent, success=True, dispute_lost=False)
+        asker.update_reputation(value_cent, success=True, dispute_lost=False)
+        answerer.update_reputation(value_cent, success=True, dispute_lost=False)
 
         db.session.add(asker)
         db.session.add(answerer)
@@ -586,43 +624,43 @@ class User(UserMixin, db.Model):
         asker = engagement.asker
         answerer = engagement.answerer
 
-        total_reward_cent = node.total_reward_cent
-        asker.reserved_balance_cent -= total_reward_cent
+        value_cent = node.value_cent
+        asker.reserved_balance_cent -= value_cent
 
-        rx_asker, ri_asker = asker.reputation_if_dispute_lost(total_reward_cent)
-        rx_answerer, ri_answerer = answerer.reputation_if_dispute_lost(total_reward_cent)
+        rx_asker, ri_asker = asker.reputation_if_dispute_lost(value_cent)
+        rx_answerer, ri_answerer = answerer.reputation_if_dispute_lost(value_cent)
 
         # 3-D lexical ordering by (min(rx, ri), rx, ri)
         if min(rx_asker, ri_asker) < min(rx_answerer, ri_answerer) or \
                 (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
                         rx_asker < rx_answerer
                 ) or \
                 (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
-                        rx_asker == rx_answerer and \
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                        rx_asker == rx_answerer and
                         ri_asker < ri_answerer
                 ):
             # asker lost:
-            asker.update_reputation(total_reward_cent, success=False, dispute_lost=True)
-            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=False)
+            asker.update_reputation(value_cent, success=False, dispute_lost=True)
+            answerer.update_reputation(value_cent, success=False, dispute_lost=False)
         elif min(rx_asker, ri_asker) > min(rx_answerer, ri_answerer) or \
                 (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
                         rx_asker > rx_answerer
                 ) or \
                 (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
-                        rx_asker == rx_answerer and \
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                        rx_asker == rx_answerer and
                         ri_asker > ri_answerer
                 ):  # answerer lost:
-            asker.update_reputation(total_reward_cent, success=False, dispute_lost=False)
-            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=True)
+            asker.update_reputation(value_cent, success=False, dispute_lost=False)
+            answerer.update_reputation(value_cent, success=False, dispute_lost=True)
         else:  # it is a draw, punishment both
             # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
             # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-            asker.update_reputation(total_reward_cent, success=False, dispute_lost=True)
-            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=True)
+            asker.update_reputation(value_cent, success=False, dispute_lost=True)
+            answerer.update_reputation(value_cent, success=False, dispute_lost=True)
 
         db.session.add(asker)
         db.session.add(answerer)
@@ -633,10 +671,10 @@ class User(UserMixin, db.Model):
                           text=f'Engagement outcome disputed - no reward will be distributed')
         db.session.add(message)
 
-    def reputation_if_dispute_lost(self, total_reward_cent):
-        m_x = math.exp(-abs(total_reward_cent) * REP_DECAY)
-        sum_x = -total_reward_cent + m_x * self.sum_x
-        sum_abs_x = abs(total_reward_cent) + m_x * self.sum_abs_x
+    def reputation_if_dispute_lost(self, value_cent):
+        m_x = math.exp(-abs(value_cent) * REP_DECAY)
+        sum_x = -value_cent + m_x * self.sum_x
+        sum_abs_x = abs(value_cent) + m_x * self.sum_abs_x
 
         m_i = math.exp(-REP_I_DECAY)
         sum_i = -1 + m_i * self.sum_i
@@ -644,37 +682,37 @@ class User(UserMixin, db.Model):
 
         return sum_x / sum_abs_x, sum_i / sum_abs_i
 
-    def update_reward_limit(self, total_reward_cent, success, dispute_lost):
+    def update_reward_limit(self, value_cent, success, dispute_lost):
         if success:
             r = self.reputation
             if r > 0.8:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.5 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.5 * value_cent))
             elif r > 0.6:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.4 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.4 * value_cent))
             elif r > 0.4:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.3 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.3 * value_cent))
             elif r > 0.2:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.2 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.2 * value_cent))
             elif r > 0:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.1 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.1 * value_cent))
             else:
-                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.05 * total_reward_cent))
+                self.value_limit_cent = min(1000, self.value_limit_cent + round(0.05 * value_cent))
 
         if dispute_lost:
             r = self.reputation
             if r > 0.5:
-                self.reward_limit_cent = max(100, round(0.75 * self.reward_limit_cent))
+                self.value_limit_cent = max(100, round(0.75 * self.value_limit_cent))
             elif r > 0:
-                self.reward_limit_cent = max(100, round(0.5 * self.reward_limit_cent))
+                self.value_limit_cent = max(100, round(0.5 * self.value_limit_cent))
             elif r > -0.5:
-                self.reward_limit_cent = max(
+                self.value_limit_cent = max(
                     100,
-                    round(min(0.5 * self.reward_limit_cent, 0.75 * total_reward_cent))
+                    round(min(0.5 * self.value_limit_cent, 0.75 * value_cent))
                 )
             else:
-                self.reward_limit_cent = max(100, round(0.5 * total_reward_cent))
+                self.value_limit_cent = max(100, round(0.5 * value_cent))
 
-    def update_reputation(self, total_reward_cent, success, dispute_lost):
+    def update_reputation(self, value_cent, success, dispute_lost):
         """
         The visible reputation is only affected if the interaction is a success or if the user lose a dispute.
         This is to protect the side with a higher reputation - his visible reputation is not affected but the
@@ -682,7 +720,7 @@ class User(UserMixin, db.Model):
         the next dispute unless he starts to build a good track record
         """
         #  decay the weights of past observations in ALL cases:
-        m_x = math.exp(-abs(total_reward_cent) * REP_DECAY)
+        m_x = math.exp(-abs(value_cent) * REP_DECAY)
         self.sum_x *= m_x
         self.sum_abs_x *= m_x
 
@@ -692,12 +730,12 @@ class User(UserMixin, db.Model):
 
         # add most recent observation only if it is a success or dispute lost
         if success or dispute_lost:
-            self.sum_x += total_reward_cent if success else -total_reward_cent
-            self.sum_abs_x += abs(total_reward_cent)
+            self.sum_x += value_cent if success else -value_cent
+            self.sum_abs_x += abs(value_cent)
             self.sum_i += 1 if success else -1
             self.sum_abs_i += 1
 
-        self.update_reward_limit(total_reward_cent, success, dispute_lost)
+        self.update_reward_limit(value_cent, success, dispute_lost)
 
 
 def _distribute_reward_cent(node, fraction):
@@ -710,49 +748,47 @@ def _distribute_reward_cent(node, fraction):
         seller = post.creator
 
     # fully release what has been reserved for this engagement but only deduct the fraction from the actual balance:
-    total_reward_cent = node.total_reward_cent
-    buyer.reserved_balance_cent -= total_reward_cent
-    total_reward_cent = round(fraction * total_reward_cent)
-    buyer.total_balance_cent -= total_reward_cent
+    value_cent = node.value_cent
+    buyer.reserved_balance_cent -= value_cent
+    value_cent = round(fraction * value_cent)
+    buyer.total_balance_cent -= value_cent
     db.session.add(buyer)
 
-    platform_fee_cent = round(0.1 * fraction * post.reward_cent)  # Default platform fee = 10% of OP reward
+    platform_fee_cent = round(fraction * post.platform_fee_cent)
     platform_fee = PlatformFee(amount_cent=platform_fee_cent)
     db.session.add(platform_fee)
 
-    total_referrer_reward_cent = 0
+    sum_referrer_reward_cent = 0
+    nodes = node.nodes_before_inc().all()  # all nodes including buyers and sellers
+    referrer_nodes = nodes[1:(len(nodes) - 1)]  # referrers only
     if post.social_media_mode:
-        nodes = node.nodes_before_inc().all()
-        referrer_nodes = nodes[1:(len(nodes) - 1)]
         for node in referrer_nodes:
             referrer = node.creator
-            referrer_reward_cent = round(fraction * node.referral_reward_cent)
+            referrer_reward_cent = round(fraction * node.referrer_reward_cent)
             referrer.total_balance_cent += referrer_reward_cent
             db.session.add(referrer)
-            total_referrer_reward_cent += referrer_reward_cent
+            sum_referrer_reward_cent += referrer_reward_cent
     else:
-        nodes = node.nodes_before_inc().all()  # all nodes including buyers and sellers
-        referrer_nodes = nodes[1:(len(nodes) - 1)]  # referrers only
         if len(nodes) == 1:  # there is only OP's node - should never reach here
             raise RewardDistributionError('Cannot distribute reward from the root node')
         # Default total referral cap = 20% of OP reward:
-        total_referrer_reward_cent_cap = round(0.2 * fraction * post.reward_cent)
+        total_referrer_reward_cent_cap = round(0.2 * fraction * post.value_cent)
         referrer_nodes.reverse()
         for referrer_node in referrer_nodes:
             referrer = referrer_node.creator
             # Default strategy is to distribute 50% of remaining at each node in the chain:
             referrer_reward_cent = round(
-                0.5 * (total_referrer_reward_cent_cap - total_referrer_reward_cent)
+                0.5 * (total_referrer_reward_cent_cap - sum_referrer_reward_cent)
             )
             referrer.total_balance_cent += referrer_reward_cent
             db.session.add(referrer)
-            total_referrer_reward_cent += referrer_reward_cent
+            sum_referrer_reward_cent += referrer_reward_cent
 
     # the seller gets everything left
-    seller.total_balance_cent += total_reward_cent - platform_fee_cent - total_referrer_reward_cent
+    seller.total_balance_cent += value_cent - platform_fee_cent - sum_referrer_reward_cent
     db.session.add(seller)
 
-    return total_reward_cent
+    return value_cent
 
 
 @login_manager.user_loader

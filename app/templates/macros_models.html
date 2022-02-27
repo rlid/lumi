@@ -52,11 +52,9 @@
                        class="btn btn-{{- style_map[post.type] -}}">
                         {{ label_map[post.type] }}
                     </a>
-                    {% if post.reward > 0 %}
-                        <button type="button" class="btn btn-secondary" disabled>
-                            {{ "$%.2f"|format(post.reward) }}
-                        </button>
-                    {% endif %}
+                    <button type="button" class="btn btn-secondary" disabled>
+                        {{ "$%.2f"|format(node.display_value(current_user)) }}
+                    </button>
                 </div>
                 <a class="text-decoration-none text-dark"
                    style="vertical-align: middle"
@@ -247,11 +245,9 @@
                        class="btn btn-{{- style_map[post.type] -}}">
                         {{ label_map[post.type] }}
                     </a>
-                    {% if post.reward > 0 %}
-                        <button type="button" class="btn btn-secondary" disabled>
-                            {{ "$%.2f"|format(post.reward) }}
-                        </button>
-                    {% endif %}
+                    <button type="button" class="btn btn-secondary" disabled>
+                        {{ "$%.2f"|format(engagement.node.display_value(current_user)) }}
+                    </button>
                 </div>
                 <a class="text-decoration-none text-dark" style="vertical-align: middle"
                    href="{{ url_for("main.view_node", node_id=engagement.node_id) }}">

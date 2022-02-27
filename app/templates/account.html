@@ -74,8 +74,7 @@
                                     <small><b>Posts by you</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionActiveEngagementsMyPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionActiveEngagementsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for engagement in uncompleted_engagements %}
@@ -102,8 +101,7 @@
                                     <small><b>Posts by others</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionActiveEngagementsOtherPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionActiveEngagementsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for engagement in uncompleted_engagements %}
@@ -130,11 +128,10 @@
                 <button class="accordion-button py-2 collapsed"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionActiveInteractions">
-                    <b>Other Interactions - Open</b>
+                    <b>Other Posts - Open</b>
                 </button>
             </h2>
-            <div id="accordionActiveInteractions" class="accordion-collapse collapse"
-                 aria-labelledby="panelsStayOpen-headingTwo">
+            <div id="accordionActiveInteractions" class="accordion-collapse collapse">
                 <div class="accordion-body pe-0 pt-0">
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">
@@ -145,8 +142,7 @@
                                     <small><b>Posts by you</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in other_root_nodes %}
@@ -173,8 +169,7 @@
                                     <small><b>Posts by others</b></small>
                                 </button>
                             </h2>
-                            <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse show"
-                                 aria-labelledby="panelsStayOpen-headingTwo">
+                            <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in other_child_nodes %}
@@ -202,11 +197,10 @@
                 <button class="accordion-button py-2 collapsed"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionInactiveInteractions">
-                    <b>Other Interactions - Archived</b>
+                    <b>Other Posts - Archived</b>
                 </button>
             </h2>
-            <div id="accordionInactiveInteractions" class="accordion-collapse collapse"
-                 aria-labelledby="panelsStayOpen-headingTwo">
+            <div id="accordionInactiveInteractions" class="accordion-collapse collapse">
                 <div class="accordion-body pe-0 pt-0">
                     <div class="accordion accordion-flush">
                         <div class="accordion-item">

@@ -88,35 +88,15 @@ def browse():
     )
 
     root_nodes = post_query.order_by(Node.last_updated.desc()).all()
-    sticky_posts = []
-    if not tag_ids_to_filter:
-        sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
-    tags_not_in_filter_with_freq = tags_not_in_filter_query.all()
+    # sticky_posts = []
+    # if not tag_ids_to_filter:
+    #     sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
     return render_template(
         "index.html",
-        sticky_posts=sticky_posts,
+        # sticky_posts=sticky_posts,
         root_nodes=root_nodes,
         tags_in_filter=tags_in_filter,
-        tags_not_in_filter_with_freq=tags_not_in_filter_with_freq)
-
-
-@main.route('/post/<post_id>', methods=['GET', 'POST'])
-def view_post(post_id):
-    post = Post.query.filter_by(id=post_id).first_or_404()
-
-    if post.is_reported:
-        flash("The post is currently not available for viewing.", category='warning')
-        return redirect(url_for('main.index'))
-
-    if post.social_media_mode:
-        abort(404)
-
-    node = None
-    if current_user.is_authenticated:
-        node = post.nodes.filter(Node.creator == current_user).first()
-    if node is None:
-        node = post.nodes.filter(Node.creator == post.creator).first()
-    return redirect(url_for('main.view_node', node_id=node.id))
+        tags_not_in_filter_with_freq=tags_not_in_filter_query.all())
 
 
 @main.route('/node/<node_id>', methods=['GET', 'POST'])
@@ -158,13 +138,19 @@ def view_node(node_id):
     if current_user == node.creator or current_user == node.post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
-        # if node.post.reward_cent > current_user.reward_limit_cent:
+        # if current_user.value_limit_cent < node.value_cent:
         #     flash('The reward of the post exceeds your current reward limit. '
         #           'You are not be able to rate engagements on this post until the limit is increased.',
         #           category='warning')
+
+
+        post = node.post
+        # price limit checks
+        # transaction_value_cent = post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
+        transaction_value_cent = node.value_cent
         if (engagement is not None or engagement_request is not None) and \
-                ((current_user == node.creator and node.post.reward_cent > node.post.creator.reward_limit_cent) or \
-                 (current_user == node.post.creator and node.post.reward_cent > node.creator.reward_limit_cent)):
+                ((current_user == node.creator and post.creator.value_limit_cent < transaction_value_cent) or
+                 (current_user == post.creator and node.creator.value_limit_cent < transaction_value_cent)):
             flash('The reward of the post exceeds the current reward limit of the other user. This could be because a '
                   'dispute involving the user occurred after this engagement was requested or entered into.',
                   category='warning')

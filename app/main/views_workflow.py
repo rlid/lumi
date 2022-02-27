@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, MarkdownPostForm
+from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormSocialMediaMode, PostFormSocialMediaMode
 from app.models.user import Post, Node, Engagement
 
 
@@ -14,14 +14,28 @@ def post_options():
     return render_template("post_options.html")
 
 
-@main.route('/post', methods=['GET', 'POST'])
+@main.route('/post/<int:standard_mode>', methods=['GET', 'POST'])
 @login_required
-def new_post():
-    form = MarkdownPostForm() if current_user.use_markdown else PostForm()
+def new_post(standard_mode):
+    if standard_mode == 1:
+        form = MarkdownPostForm() if current_user.use_markdown else PostForm()
+    else:
+        form = MarkdownPostFormSocialMediaMode() if current_user.use_markdown else PostFormSocialMediaMode()
     if form.validate_on_submit():
-        current_user.create_post(type=form.type.data, reward_cent=round(100 * form.reward.data),
-                                 title=form.title.data, body=form.body.data)
-        return redirect(url_for('main.browse'))
+        post_type = form.type.data
+        price_cent = round(100 * form.price.data)
+        if post_type == Post.TYPE_SELL:
+            # for SELL, make sure the seller gets exactly the reward after the 10% platform fee
+            # price (seller receives) = value - 0.1 * value = 0.9 * value => value = price / 0.9
+            value_cent = round(price_cent / 0.9)
+        else:
+            # for BUY, price (buyer pays) = value
+            value_cent = price_cent
+        post = current_user.create_post(type=post_type, value_cent=value_cent,
+                                        title=form.title.data, body=form.body.data,
+                                        social_media_mode=(standard_mode == 0))
+        return redirect(url_for('main.view_node', node_id=post.root_node.id))
+
     if current_user.use_markdown:
         flash('Don\'t like Markdown? Switch to ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>simple editor</a>'), category='info')
@@ -48,8 +62,8 @@ def edit_post(post_id):
     form.type.choices = [form.type.choices[0 if post.type == Post.TYPE_BUY else 1]]
     form.process()
 
-    form.reward.data = post.reward
-    form.reward.render_kw = {"readonly": None}
+    form.price.data = (0.01 * post.value_cent) if post.type == Post.TYPE_BUY else (0.01 * round(0.9 * post.value_cent))
+    form.price.render_kw = {"readonly": None}
 
     form.title.data = post.title
     form.body.data = post.body[1:].replace('\\#', '#')
@@ -128,12 +142,16 @@ def request_engagement(node_id):
     if current_user == post.creator:
         flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if post.reward_cent > current_user.reward_limit_cent:
+    if current_user.value_limit_cent < (
+            node.value_cent
+            # price limit checks
+            # post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
+    ):
         flash('You currently cannot request for engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
     if post.type == Post.TYPE_SELL and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < post.reward_cent:
+            current_user.total_balance_cent - current_user.reserved_balance_cent < post.value_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
@@ -182,12 +200,16 @@ def accept_engagement(engagement_id):
         flash('The request for engagement can no longer be accepted.', category='danger')
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
-    elif post.reward_cent > current_user.reward_limit_cent:
+    elif current_user.value_limit_cent < (
+            # price limit checks
+            engagement.node.value_cent
+            # post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
+    ):
         flash('You currently cannot accept engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.',
               category='danger')
     elif post.type == Post.TYPE_BUY and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < post.reward_cent:
+            current_user.total_balance_cent - current_user.reserved_balance_cent < post.value_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
     else:
@@ -200,7 +222,7 @@ def accept_engagement(engagement_id):
 def rate_engagement(engagement_id, is_success):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
 
-    # if engagement.node.reward_cent > current_user.reward_limit_cent:
+    # if engagement.node.value_cent > current_user.value_limit_cent:
     #     flash('You currently cannot rate engagement on posts worth more than $' +
     #           f'{current_user.reward_limit:.2f}.', category='warning')
 

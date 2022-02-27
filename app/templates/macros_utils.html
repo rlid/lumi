@@ -3,7 +3,7 @@
         <thead>
             <tr>
                 <th scope="col">Date</th>
-                <th scope="col">Reward</th>
+                <th scope="col">Value</th>
                 <th scope="col">Role</th>
                 <th scope="col">Success?</th>
                 <th scope="col">Dispute?</th>
@@ -15,7 +15,7 @@
                 {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
                 <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
                     <th scope="row">{{ moment(engagement.last_updated).format('HH:mm:ss') }}</th>
-                    <td>{{ '{0:.2f}'.format(engagement.node.post.reward) }}</td>
+                    <td>{{ '{0:.2f}'.format(engagement.node.value) }}</td>
                     <td>{% if user.id == engagement.asker_id %}
                             Buyer
                         {% elif user.id == engagement.answerer_id %}

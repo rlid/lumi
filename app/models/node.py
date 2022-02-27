@@ -5,17 +5,17 @@ from sqlalchemy import event, select, case, and_, asc, desc
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
-from app.models import Message
+from app.models import Message, Post
 
 
 # Contribution Node
 
 
 class Node(db.Model):
-    '''
+    """
     https://docs.sqlalchemy.org/en/14/_modules/examples/nested_sets/nested_sets.html
     https://docs.sqlalchemy.org/en/14/orm/self_referential.html#self-referential
-    '''
+    """
     __tablename__ = 'nodes'
     __mapper_args__ = {
         'batch': False  # allows extension to fire for each instance before going to the next.
@@ -34,8 +34,12 @@ class Node(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
 
-    total_reward_cent = db.Column(db.Integer, nullable=False)
-    referral_reward_cent = db.Column(db.Integer)
+    # sum of all referrer rewards if an engagement is successful on this node
+    # sum_referrer_reward_cent = db.Column(db.Integer, nullable=False)
+    value_cent = db.Column(db.Integer, nullable=False)
+    answerer_reward_cent = db.Column(db.Integer, nullable=False)
+    # the reward to the node creator as a referrer if the node is in a successful referral chain
+    referrer_reward_cent = db.Column(db.Integer)
 
     parent_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'))
     left = db.Column(db.Integer, nullable=False)
@@ -58,17 +62,32 @@ class Node(db.Model):
                                   lazy='dynamic',
                                   cascade='all, delete-orphan')
 
-    @property
-    def referral_reward(self):
-        return 0.01 * self.referral_reward_cent
+    def display_value(self, user):
+        post = self.post
+        if post.type == Post.TYPE_BUY:
+            if user == post.creator:
+                return 0.01 * self.value_cent
+            else:
+                return 0.01 * self.answerer_reward_cent
+        else:
+            if user == post.creator:
+                return 0.01 * self.answerer_reward_cent
+            else:
+                return 0.01 * self.value_cent
 
     @property
-    def total_referral_reward_cent(self):
-        return sum([node.referral_reward_cent for node in self.nodes_before_inc()])
+    def value(self):
+        return 0.01 * self.value_cent
+
+    @property
+    def sum_referrer_reward_cent(self):
+        """Sum of all referrer rewards if an engagement is successful on this node"""
+        return self.value_cent - self.answerer_reward_cent - self.post.platform_fee_cent
 
     @property
     def remaining_referral_budget_cent(self):
-        return self.post.referral_budget_cent - self.total_referral_reward_cent
+        """The remaining referral budget AFTER the referral reward for this node is claimed"""
+        return self.post.referral_budget_cent - self.sum_referrer_reward_cent - self.referrer_reward_cent
 
     def ping(self, utcnow):
         self.last_updated = utcnow
@@ -82,7 +101,8 @@ class Node(db.Model):
         return self.post.nodes.filter(Node.left.between(self.left, self.right)).order_by(Node.left)
 
     def __repr__(self):
-        return f'<n{self.id}{" ROOT" if self.parent is None else ""}>creator={self.creator},post={self.post}</n{self.id}>'
+        return f'<n{self.id}{" ROOT" if self.parent is None else ""}>' + \
+               f'creator={self.creator},post={self.post}</n{self.id}>'
 
     def messages_ordered(self, order_desc=True):
         return self.messages.order_by((desc if order_desc else asc)(Message.timestamp)).all()

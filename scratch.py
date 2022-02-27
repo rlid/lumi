@@ -61,7 +61,7 @@ def sim_random():
         for user in users:
             if random.uniform(0, 1) < P_POST:
                 post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                        reward_cent=100 * random.randint(1, 5),
+                                        value_cent=100 * random.randint(1, 5),
                                         title=faker.text(100),
                                         body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
                 print(f'{user} created {post}')
@@ -91,7 +91,7 @@ def sim_random():
                 if not node.post.is_archived:
                     engagement = node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
                     if engagement is None:
-                        if random.uniform(0, 1) < P_REQUEST_ENGAGE and user.reward_limit_cent >= node.post.reward_cent:
+                        if random.uniform(0, 1) < P_REQUEST_ENGAGE and user.value_limit_cent >= node.post.value_cent:
                             engagement = user.create_engagement(node)
                             if random.uniform(0, 1) < P_CANCEL_ENGAGE:
                                 user.cancel_engagement(engagement)
@@ -102,7 +102,7 @@ def sim_random():
             for engagement in user.engagements_received.filter(Engagement.state == Engagement.STATE_REQUESTED).all():
                 if not engagement.node.post.is_archived and \
                         random.uniform(0, 1) < P_ACCEPT_ENGAGE and \
-                        user.reward_limit_cent >= engagement.node.post.reward_cent:
+                        user.value_limit_cent >= engagement.node.post.value_cent:
                     user.accept_engagement(engagement)
                     print(f'{user} accepted {engagement}')
                     for i in range(random.randint(1, 2)):
@@ -160,23 +160,23 @@ def sim_reset():
     u5 = User(email='5', total_balance_cent=10000)
     users = [u1, u2, u3, u4, u5]
     db.session.add_all(users)
-    p1b = u1.create_post(type=Post.TYPE_BUY, reward_cent=100, title='')
-    p1s = u1.create_post(type=Post.TYPE_SELL, reward_cent=500, title='')
-    p2b = u2.create_post(type=Post.TYPE_BUY, reward_cent=200, title='')
-    p2s = u2.create_post(type=Post.TYPE_SELL, reward_cent=400, title='')
-    p3b = u3.create_post(type=Post.TYPE_BUY, reward_cent=300, title='')
-    p3s = u3.create_post(type=Post.TYPE_SELL, reward_cent=300, title='')
-    p4b = u4.create_post(type=Post.TYPE_BUY, reward_cent=400, title='')
-    p4s = u4.create_post(type=Post.TYPE_SELL, reward_cent=200, title='')
-    p5b = u5.create_post(type=Post.TYPE_BUY, reward_cent=500, title='')
-    p5s = u5.create_post(type=Post.TYPE_SELL, reward_cent=100, title='')
+    p1b = u1.create_post(type=Post.TYPE_BUY, value_cent=100, title='')
+    p1s = u1.create_post(type=Post.TYPE_SELL, value_cent=500, title='')
+    p2b = u2.create_post(type=Post.TYPE_BUY, value_cent=200, title='')
+    p2s = u2.create_post(type=Post.TYPE_SELL, value_cent=400, title='')
+    p3b = u3.create_post(type=Post.TYPE_BUY, value_cent=300, title='')
+    p3s = u3.create_post(type=Post.TYPE_SELL, value_cent=300, title='')
+    p4b = u4.create_post(type=Post.TYPE_BUY, value_cent=400, title='')
+    p4s = u4.create_post(type=Post.TYPE_SELL, value_cent=200, title='')
+    p5b = u5.create_post(type=Post.TYPE_BUY, value_cent=500, title='')
+    p5s = u5.create_post(type=Post.TYPE_SELL, value_cent=100, title='')
     posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
     for day in range(10):
         for user in users:
             post = random.choice(posts)
             if user != post.creator:
-                if user.reward_limit_cent >= post.reward_cent and post.creator.reward_limit_cent >= post.reward_cent:
+                if user.value_limit_cent >= post.value_cent and post.creator.value_limit_cent >= post.value_cent:
                     node = user.create_node(random.choice(post.nodes.all()))
                     engagement = user.create_engagement(node)
                     post.creator.accept_engagement(engagement)
@@ -189,7 +189,7 @@ def sim_reset():
 def sim_existing():
     u1 = User.query.get('6590d9ea-6208-4365-b3cb-5decea456b52')
     u2 = User.query.get('660d1e1e-6d1e-42a4-b2db-96287dcfb8f2')
-    p = u1.create_post(type=Post.TYPE_SELL, reward_cent=610, title=faker.text(100))
+    p = u1.create_post(type=Post.TYPE_SELL, value_cent=610, title=faker.text(100))
     n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
     e = u2.create_engagement(n)
     u1.accept_engagement(e)
@@ -235,17 +235,17 @@ def sim_all(n_days=50,
     for day in range(n_days):
         for user in users:
             if random.uniform(0, 1) < p_post:
-                reward_cent = random.randint(100, user.reward_limit_cent)
+                value_cent = random.randint(100, user.value_limit_cent)
                 if random.uniform(0, 1) < p_social_media_mode:
                     post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                            reward_cent=reward_cent,
+                                            value_cent=value_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))),
                                             social_media_mode=True,
-                                            referral_budget_cent=round(0.4 * reward_cent))
+                                            referral_budget_cent=round(0.4 * value_cent))
                 else:
                     post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                            reward_cent=reward_cent,
+                                            value_cent=value_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
                 print('Post created')
@@ -265,7 +265,7 @@ def sim_all(n_days=50,
                     if parent_node.post.social_media_mode:
                         user.create_node(
                             parent_node=parent_node,
-                            referral_reward_cent=random.randint(
+                            referrer_reward_cent=random.randint(
                                 round(0.25 * parent_node.remaining_referral_budget_cent),
                                 round(0.75 * parent_node.remaining_referral_budget_cent)))
                     else:
@@ -294,13 +294,13 @@ def sim_all(n_days=50,
                     Node.parent_id.is_not(None),
                     Node.state == Node.STATE_CHAT,
                     Post.is_archived.is_not(True),
-                    Node.total_reward_cent <= user.reward_limit_cent
+                    Node.value_cent <= user.value_limit_cent
                 ).all()
                 if len(nodes) > 0:
                     node = random.choice(nodes)
-                    if node.post.type == Post.TYPE_SELL and user.balance_available_cent < node.total_reward_cent:
+                    if node.post.type == Post.TYPE_SELL and user.balance_available_cent < node.value_cent:
                         user.total_balance_cent += 1000 * int(
-                            1 + (node.total_reward_cent - user.balance_available_cent) / 1000)
+                            1 + (node.value_cent - user.balance_available_cent) / 1000)
                         print('Account topped up')
                     engagement = user.create_engagement(node)
                     print('Engagement requested')
@@ -315,15 +315,15 @@ def sim_all(n_days=50,
             ).filter(
                 Engagement.state == Engagement.STATE_REQUESTED,
                 Post.is_archived.is_not(True),
-                Node.total_reward_cent <= user.reward_limit_cent
+                Node.value_cent <= user.value_limit_cent
             ).all()
             for engagement_request in engagement_requests:
                 node = engagement_request.node
                 post = node.post
                 if random.uniform(0, 1) < p_accept_given_request:
-                    if post.type == Post.TYPE_BUY and user.balance_available_cent < node.total_reward_cent:
+                    if post.type == Post.TYPE_BUY and user.balance_available_cent < node.value_cent:
                         user.total_balance_cent += 1000 * int(
-                            1 + (node.total_reward_cent - user.balance_available_cent) / 1000)
+                            1 + (node.value_cent - user.balance_available_cent) / 1000)
                         print('Account topped up')
                     user.accept_engagement(engagement_request)
                     print('Engagement accepted')

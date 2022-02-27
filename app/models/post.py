@@ -18,9 +18,9 @@ class Post(db.Model):
 
     TYPE_BUY = 'buy'
     TYPE_SELL = 'sell'
-    TYPE_ANNOUNCEMENT = 'announcement'
-    TYPE_WARNING = 'warning'
-    TYPE_INFO = 'info'
+    # TYPE_ANNOUNCEMENT = 'announcement'
+    # TYPE_WARNING = 'warning'
+    # TYPE_INFO = 'info'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
@@ -30,7 +30,8 @@ class Post(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     type = db.Column(db.String(16), nullable=False)
-    reward_cent = db.Column(db.Integer, nullable=False)
+    value_cent = db.Column(db.Integer, nullable=False)
+    platform_fee_cent = db.Column(db.Integer, nullable=False)
 
     social_media_mode = db.Column(db.Boolean, default=False, nullable=False)
     referral_budget_cent = db.Column(db.Integer)
@@ -65,14 +66,6 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'
-
-    @property
-    def reward(self):
-        return 0.01 * self.reward_cent
-
-    @property
-    def referral_budget(self):
-        return 0.01 * self.referral_budget_cent
 
     @property
     def root_node(self):
