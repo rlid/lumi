@@ -41,10 +41,12 @@
     {% set post = node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
         <div class="card-body py-2">
-            <p class="small text-muted mb-1">{{ render_user(post.creator) }}
-                posted {{ moment(post.timestamp).fromNow() }}</p>
+            <p class="small text-muted mb-1">
+                {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
+                {{ render_user(post.creator) }}
+                posted {{ moment(post.timestamp).fromNow() }}
+            </p>
             <div class="card-title">
-                 {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
                        class="btn btn-{{- style_map[post.type] -}}">
@@ -231,6 +233,7 @@
     <div class="card mb-3 {{ style_map[post.type] }}">
         <div class="card-body py-2">
             <p class="small text-muted mb-1">
+                {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 {% if current_user == post.creator %}
                     {{ render_user(engagement.node.creator) }} responded
                     {{ moment(engagement.last_updated).fromNow() }}
@@ -239,7 +242,6 @@
                 {% endif %}
             </p>
             <div class="card-title">
-                {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
                        class="btn btn-{{- style_map[post.type] -}}">
