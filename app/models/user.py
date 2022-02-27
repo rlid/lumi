@@ -375,8 +375,11 @@ class User(UserMixin, db.Model):
     def create_message(self, node, text):
         if self != node.creator and self != node.post.creator:
             raise InvalidActionError(
-                'Cannot create node message because the user is not the post creator or the node creator'
+                'Cannot create message because the user is not the post creator or the node creator'
             )
+        if node.parent is None:
+            raise InvalidActionError('Cannot create message on root node')
+
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         if engagement is None and node.post.is_archived:
             raise InvalidActionError('Cannot create message because the post is archived')
@@ -514,6 +517,10 @@ class User(UserMixin, db.Model):
 
         if self != asker and self != answerer:
             raise InvalidActionError('Cannot rate engagement because the user is not the asker or the answerer')
+
+        if (self == asker and engagement.rating_by_asker != 0) or \
+                (self == answerer and engagement.rating_by_answerer != 0):
+            raise InvalidActionError('Cannot rate engagement because the user has already rated')
 
         if self == asker:
             engagement.rating_by_asker = 1 if is_success else -1

@@ -149,9 +149,9 @@
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for post in other_posts %}
-                                        {% if not post.is_archived %}
-                                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                    {% for node in other_root_nodes %}
+                                        {% if not node.post.is_archived %}
+                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
@@ -177,9 +177,9 @@
                                  aria-labelledby="panelsStayOpen-headingTwo">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_nodes %}
+                                    {% for node in other_child_nodes %}
                                         {% if not node.post.is_archived %}
-                                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
@@ -220,9 +220,9 @@
                             <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for post in other_posts %}
-                                        {% if post.is_archived %}
-                                            {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                    {% for node in other_root_nodes %}
+                                        {% if node.post.is_archived %}
+                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}
@@ -248,9 +248,9 @@
                             <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_nodes %}
+                                    {% for node in other_child_nodes %}
                                         {% if node.post.is_archived %}
-                                            {{ render_post_card(node.post, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endif %}
                                     {% endfor %}

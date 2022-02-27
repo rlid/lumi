@@ -8,7 +8,6 @@ from app.main import main
 def index():
     return render_template("landing.html")
 
-
 @main.route('/how-it-works')
 def how_it_works():
     return render_template("landing.html", title="How It Works")

@@ -1,0 +1,44 @@
+{% extends "post_form.html" %}
+
+{% block mid_col %}
+    <h3 class="mb-3">Choose a mode to use</h3>
+    <a href="{{ url_for('main.new_post', standard_mode=1) }}" class="text-decoration-none">
+        <div class="card text-dark bg-light mb-3">
+            <h5 class="card-header">
+                Standard Mode
+            </h5>
+            <div class="card-body">
+                <div class="card-text">
+                    <ul>
+                        <li class="mb-3">Just like how it works on a traditional online forum
+                        </li>
+                        <li>Referral rewards are optional (at your answerer's / asker's discretion)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </a>
+    <a href="{{ url_for('main.new_post', standard_mode=0) }}" class="text-decoration-none">
+        <div class="card text-white bg-dark mb-3">
+            <h5 class="card-header">
+                Social Media (a.k.a. Stealth) Mode
+            </h5>
+            <div class="card-body">
+                <div class="card-text">
+                    <ul>
+                        <li class="mb-3">The post solely lives on and travels through your friends' social networks by
+                            sharing
+                        </li>
+                        <li class="mb-3">Share it with your friends (Chat/Email, Twitter, Reddit, ...) to kick off the
+                            chain reaction
+                        </li>
+                        <li>
+                            Referral rewards are guaranteed
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </a>
+{% endblock %}

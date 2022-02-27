@@ -74,6 +74,10 @@ class Post(db.Model):
     def referral_budget(self):
         return 0.01 * self.referral_budget_cent
 
+    @property
+    def root_node(self):
+        return self.nodes.filter_by(parent=None).first()
+
 
 @event.listens_for(Post.body, 'set')
 def on_changed_body(target, value, oldvalue, initiator):

@@ -2,7 +2,7 @@
 {% from "macros_models.html" import render_message, render_user with context %}
 
 {% block mid_col %}
-    {{ render_post_card(post, user_node=user_node, buttons=True) }}
+    {{ render_post_card(node, buttons=True) }}
     {% for node, last_timestamp in nodes %}
         {% set messages = node.messages_ordered(order_desc=True) %}
         <div class="card mb-3

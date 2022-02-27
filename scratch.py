@@ -1,7 +1,7 @@
 import random
 
 from faker import Faker
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 from app import create_app, db
 from app.models import PlatformFee
@@ -216,7 +216,8 @@ def sim_all(n_days=50,
             initial_balance_cent=100000):
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), total_balance_cent=initial_balance_cent, adjective=random.choice(adjectives)) for i in
+    users = [User(email=faker.email(), total_balance_cent=initial_balance_cent, adjective=random.choice(adjectives)) for
+             i in
              range(n_users)]
     db.session.add_all(users)
     db.session.commit()
@@ -275,7 +276,7 @@ def sim_all(n_days=50,
                 nodes = user.nodes.join(
                     Post, Post.id == Node.post_id
                 ).filter(
-                    Node.parent_id.is_(None),
+                    Node.parent_id.is_not(None),
                     Post.is_archived.is_not(True)
                 ).all()
                 if len(nodes) > 0:
@@ -327,12 +328,15 @@ def sim_all(n_days=50,
                     user.accept_engagement(engagement_request)
                     print('Engagement accepted')
                     [user.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
-                    [post.creator.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
+                    [node.creator.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
                     print('Messages exchanged')
 
             engagements = Engagement.query.filter(
                 Engagement.state == Engagement.STATE_ENGAGED,
-                or_(Engagement.receiver == user, Engagement.sender == user)
+                or_(
+                    and_(Engagement.asker == user, Engagement.rating_by_asker == 0),
+                    and_(Engagement.answerer == user, Engagement.rating_by_answerer == 0)
+                )
             ).all()
             for engagement in engagements:
                 if random.uniform(0, 1) < p_rate_given_accept:

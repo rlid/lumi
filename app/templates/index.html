@@ -47,10 +47,10 @@
         <div class="col-12 col-lg-8 col-xl-6">
             {% block mid_col %}
             {% for post in sticky_posts %}
-                {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+                {{ render_post_card(post.root_node, truncate_body=True, buttons=False, tag_limit=4) }}
             {% endfor %}
-            {% for post in posts %}
-                {{ render_post_card(post, truncate_body=True, buttons=False, tag_limit=4) }}
+            {% for node in root_nodes %}
+                {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
             {% endfor %}
             {% endblock %}
         </div>

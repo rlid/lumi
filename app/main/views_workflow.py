@@ -8,6 +8,12 @@ from app.main.forms import PostForm, MarkdownPostForm
 from app.models.user import Post, Node, Engagement
 
 
+@main.route('/post-options')
+@login_required
+def post_options():
+    return render_template("post_options.html")
+
+
 @main.route('/post', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -22,7 +28,7 @@ def new_post():
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("edit_post.html", form=form, title="New Post")
+    return render_template("post_form.html", form=form, title="New Post")
 
 
 @main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
@@ -53,7 +59,7 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('edit_post.html', form=form, title="Edit Post")
+    return render_template('post_form.html', form=form, title="Edit Post")
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -231,16 +237,15 @@ def account():
         if engagement.node_id not in node_ids_seen:
             node_ids_seen.add(engagement.node_id)
 
-    other_posts = current_user.posts.filter(
+    other_root_nodes = current_user.nodes.filter(
+        Node.parent_id.is_(None),
         Post.id.not_in(post_ids_seen)
     ).order_by(
-        Post.last_updated.desc()
+        Node.last_updated.desc()
     ).all()
-    other_nodes = current_user.nodes.filter(
+    other_child_nodes = current_user.nodes.filter(
         Node.parent_id.is_not(None),
         Node.id.not_in(node_ids_seen)
-    ).join(
-        Post, Post.id == Node.post_id
     ).order_by(
         Node.last_updated.desc()
     ).all()
@@ -248,8 +253,8 @@ def account():
         "account.html",
         user=current_user,
         uncompleted_engagements=uncompleted_engagements,
-        other_posts=other_posts,
-        other_nodes=other_nodes,
+        other_root_nodes=other_root_nodes,
+        other_child_nodes=other_child_nodes,
         Post=Post,
         Node=Node,
         Engagement=Engagement)

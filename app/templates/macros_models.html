@@ -35,14 +35,16 @@
 {% endmacro %}
 
 {# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
-{% macro render_post_card(post, user_node=None, truncate_body=False, buttons=False, tag_limit=None,
+{% macro render_post_card(node, truncate_body=False, buttons=False, tag_limit=None,
     style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+    {% set post = node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
         <div class="card-body py-2">
             <p class="small text-muted mb-1">{{ render_user(post.creator) }}
                 posted {{ moment(post.timestamp).fromNow() }}</p>
             <div class="card-title">
+                 {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
                        class="btn btn-{{- style_map[post.type] -}}">
@@ -54,8 +56,9 @@
                         </button>
                     {% endif %}
                 </div>
-                <a class="text-decoration-none text-dark" style="vertical-align: middle"
-                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                <a class="text-decoration-none text-dark"
+                   style="vertical-align: middle"
+                   href="{{ url_for("main.view_node", node_id=node.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
                 {% for post_tag in post.post_tags[:tag_limit] %}
@@ -63,10 +66,10 @@
                 {% endfor %}
             </div>
             {% if truncate_body %}
-                <a class="text-decoration-none text-dark"
-                   href="{{ url_for("main.view_post", post_id=post.id) }}">
+                <a class="text-decoration-none"
+                   href="{{ url_for("main.view_node", node_id=node.id) }}">
             {% endif %}
-            <div class="card-text small {{ 'truncated-sm' if truncate_body }}">
+            <div class="card-text small text-dark {{ 'truncated-sm' if truncate_body }}">
                 {% if post.body_html %}
                     {{ post.body_html | safe }}
                 {% else %}
@@ -80,7 +83,7 @@
         {% if buttons %}
             <div class="card-footer py-0">
                 {% if not post.is_archived %}
-                    <a href="{% if user_node %}{{ url_for('main.share_node', node_id=user_node.id) }}{% endif %}"
+                    <a href="{{ url_for('main.share_node', node_id=node.id) }}"
                        class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
                         <b>Share</b>
                     </a>
@@ -106,7 +109,7 @@
                                     </div>
                                     <div class="modal-body text-center">
                                         <a id="btnArchive"
-                                           class="btn btn-{{- button_class(current_user, user_node.post) -}}"
+                                           class="btn btn-{{- button_class(current_user, post) -}}"
                                            href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
                                             Confirm
                                         </a>
@@ -141,7 +144,7 @@
                                                           required></textarea>
                                             </div>
                                             <input type="submit" id="btnReport"
-                                                   class="btn btn-{{- button_class(current_user, user_node.post) -}}">
+                                                   class="btn btn-{{- button_class(current_user, post) -}}">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                 Cancel
                                             </button>
@@ -236,6 +239,7 @@
                 {% endif %}
             </p>
             <div class="card-title">
+                {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
                        class="btn btn-{{- style_map[post.type] -}}">
