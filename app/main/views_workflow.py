@@ -13,7 +13,7 @@ from app.models.user import Post, Node, Engagement
 def new_post():
     form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     if form.validate_on_submit():
-        current_user.create_post(type=form.type.data, reward=form.reward.data,
+        current_user.create_post(type=form.type.data, reward_cent=round(100 * form.reward.data),
                                  title=form.title.data, body=form.body.data)
         return redirect(url_for('main.browse'))
     if current_user.use_markdown:

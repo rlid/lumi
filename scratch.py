@@ -42,7 +42,7 @@ adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachab
 def sim_random():
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), total_balance=1000, adjective=random.choice(adjectives)) for i in
+    users = [User(email=faker.email(), total_balance_cent=100000, adjective=random.choice(adjectives)) for i in
              range(N_USERS)]
     db.session.add_all(users)
     # db.session.commit()
@@ -61,7 +61,7 @@ def sim_random():
         for user in users:
             if random.uniform(0, 1) < P_POST:
                 post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                        reward=random.randint(1, 5),
+                                        reward_cent=100 * random.randint(1, 5),
                                         title=faker.text(100),
                                         body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
                 print(f'{user} created {post}')
@@ -153,23 +153,23 @@ def sim_reset():
 
     db.drop_all()
     db.create_all()
-    u1 = User(email='1', total_balance=100)
-    u2 = User(email='2', total_balance=100)
-    u3 = User(email='3', total_balance=100)
-    u4 = User(email='4', total_balance=100)
-    u5 = User(email='5', total_balance=100)
+    u1 = User(email='1', total_balance_cent=10000)
+    u2 = User(email='2', total_balance_cent=10000)
+    u3 = User(email='3', total_balance_cent=10000)
+    u4 = User(email='4', total_balance_cent=10000)
+    u5 = User(email='5', total_balance_cent=10000)
     users = [u1, u2, u3, u4, u5]
     db.session.add_all(users)
-    p1b = u1.create_post(type=Post.TYPE_BUY, reward=1, title='')
-    p1s = u1.create_post(type=Post.TYPE_SELL, reward=5, title='')
-    p2b = u2.create_post(type=Post.TYPE_BUY, reward=2, title='')
-    p2s = u2.create_post(type=Post.TYPE_SELL, reward=4, title='')
-    p3b = u3.create_post(type=Post.TYPE_BUY, reward=3, title='')
-    p3s = u3.create_post(type=Post.TYPE_SELL, reward=3, title='')
-    p4b = u4.create_post(type=Post.TYPE_BUY, reward=4, title='')
-    p4s = u4.create_post(type=Post.TYPE_SELL, reward=2, title='')
-    p5b = u5.create_post(type=Post.TYPE_BUY, reward=5, title='')
-    p5s = u5.create_post(type=Post.TYPE_SELL, reward=1, title='')
+    p1b = u1.create_post(type=Post.TYPE_BUY, reward_cent=100, title='')
+    p1s = u1.create_post(type=Post.TYPE_SELL, reward_cent=500, title='')
+    p2b = u2.create_post(type=Post.TYPE_BUY, reward_cent=200, title='')
+    p2s = u2.create_post(type=Post.TYPE_SELL, reward_cent=400, title='')
+    p3b = u3.create_post(type=Post.TYPE_BUY, reward_cent=300, title='')
+    p3s = u3.create_post(type=Post.TYPE_SELL, reward_cent=300, title='')
+    p4b = u4.create_post(type=Post.TYPE_BUY, reward_cent=400, title='')
+    p4s = u4.create_post(type=Post.TYPE_SELL, reward_cent=200, title='')
+    p5b = u5.create_post(type=Post.TYPE_BUY, reward_cent=500, title='')
+    p5s = u5.create_post(type=Post.TYPE_SELL, reward_cent=100, title='')
     posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
     for day in range(10):
@@ -189,7 +189,7 @@ def sim_reset():
 def sim_existing():
     u1 = User.query.get('6590d9ea-6208-4365-b3cb-5decea456b52')
     u2 = User.query.get('660d1e1e-6d1e-42a4-b2db-96287dcfb8f2')
-    p = u1.create_post(type=Post.TYPE_SELL, reward=610, title=faker.text(100))
+    p = u1.create_post(type=Post.TYPE_SELL, reward_cent=610, title=faker.text(100))
     n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
     e = u2.create_engagement(n)
     u1.accept_engagement(e)
@@ -199,24 +199,24 @@ def sim_existing():
     db.session.commit()
 
 
-def sim_all(n_days=100,
-            n_users=100,
+def sim_all(n_days=50,
+            n_users=50,
             n_tags=50,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
             p_post=0.25,
             p_social_media_mode=1.0,
-            p_share=0.3,
+            p_share=0.75,
             p_message=0.5,
-            p_request=0.2,
+            p_request=0.75,
             p_cancel_given_request=0.1,
             p_accept_given_request=0.75,
             p_rate_given_accept=0.8,
             p_archive_given_complete=0.5,
-            initial_balance=100):
+            initial_balance_cent=100000):
     db.drop_all()
     db.create_all()
-    users = [User(email=faker.email(), total_balance=initial_balance, adjective=random.choice(adjectives)) for i in
+    users = [User(email=faker.email(), total_balance_cent=initial_balance_cent, adjective=random.choice(adjectives)) for i in
              range(n_users)]
     db.session.add_all(users)
     db.session.commit()
@@ -237,14 +237,14 @@ def sim_all(n_days=100,
                 reward_cent = random.randint(100, user.reward_limit_cent)
                 if random.uniform(0, 1) < p_social_media_mode:
                     post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                            reward=0.01 * reward_cent,
+                                            reward_cent=reward_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))),
                                             social_media_mode=True,
-                                            referral_budget=round(0.4 * 0.01 * reward_cent))
+                                            referral_budget_cent=round(0.4 * reward_cent))
                 else:
                     post = user.create_post(type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
-                                            reward=0.01 * reward_cent,
+                                            reward_cent=reward_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
                 print('Post created')
@@ -264,9 +264,9 @@ def sim_all(n_days=100,
                     if parent_node.post.social_media_mode:
                         user.create_node(
                             parent_node=parent_node,
-                            referral_reward=random.uniform(
-                                round(0.25 * 0.01 * parent_node.remaining_referral_budget_cent),
-                                round(0.75 * 0.01 * parent_node.remaining_referral_budget_cent)))
+                            referral_reward_cent=random.randint(
+                                round(0.25 * parent_node.remaining_referral_budget_cent),
+                                round(0.75 * parent_node.remaining_referral_budget_cent)))
                     else:
                         user.create_node(parent_node)
                     print('Post shared')

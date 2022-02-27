@@ -62,17 +62,13 @@ class Node(db.Model):
     def referral_reward(self):
         return 0.01 * self.referral_reward_cent
 
-    @referral_reward.setter
-    def referral_reward(self, value):
-        self.referral_reward_cent = round(100 * value)
-
     @property
     def total_referral_reward_cent(self):
         return sum([node.referral_reward_cent for node in self.nodes_before_inc()])
 
     @property
     def remaining_referral_budget_cent(self):
-        return self.post.referral_budget - self.total_referral_reward_cent
+        return self.post.referral_budget_cent - self.total_referral_reward_cent
 
     def ping(self, utcnow):
         self.last_updated = utcnow

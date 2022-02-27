@@ -17,8 +17,9 @@ from utils import security_utils, authlib_ext
 
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
-_REP_DECAY = 0.01
-_REP_I_DECAY = 0.1
+REP_I_DECAY = 0.1
+REP_DECAY = REP_I_DECAY / 1000
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -127,7 +128,7 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def get_id(self):
-        '''For Flask-Login remember-me security, see https://flask-login.readthedocs.io/en/latest/#alternative-tokens'''
+        """For Flask-Login remember-me security, see https://flask-login.readthedocs.io/en/latest/#alternative-tokens"""
         if self.remember_me_id is None:
             self.reset_remember_id()
         return self.remember_me_id
@@ -194,25 +195,13 @@ class User(UserMixin, db.Model):
     def total_balance(self):
         return 0.01 * self.total_balance_cent
 
-    @total_balance.setter
-    def total_balance(self, value):
-        self.total_balance_cent = round(100 * value)
-
     @property
     def reserved_balance(self):
         return 0.01 * self.reserved_balance_cent
 
-    @reserved_balance.setter
-    def reserved_balance(self, value):
-        self.reserved_balance_cent = round(100 * value)
-
     @property
     def reward_limit(self):
         return 0.01 * self.reward_limit_cent
-
-    @reward_limit.setter
-    def reward_limit(self, value):
-        self.reward_limit_cent = round(100 * value)
 
     @property
     def reputation(self):
@@ -220,6 +209,10 @@ class User(UserMixin, db.Model):
             return 1.0
         else:
             return min(self.sum_x / self.sum_abs_x, self.sum_i / self.sum_abs_i)
+
+    @property
+    def competence(self):
+        return 0.5 * (self.sum_i + self.sum_abs_i) / self.sum_abs_i
 
     def percentile_rank(self, window_in_days=7):
         min_engagements = 3
@@ -234,10 +227,6 @@ class User(UserMixin, db.Model):
             return None
         self_score = self.reputation
         return sum([1 for user in users if user.reputation <= self_score]) / len(users)
-
-    @property
-    def competence(self):
-        return 0.5 * (self.sum_i + self.sum_abs_i) / self.sum_abs_i
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -263,7 +252,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, type, reward, title, body='', social_media_mode=False, referral_budget=None):
+    def create_post(self, type, reward_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -273,14 +262,14 @@ class User(UserMixin, db.Model):
         # usernames = [name[1:] for name in re.findall(r'@\w+', body)]
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
 
-        if referral_budget is None:
-            referral_budget = 0.4 * reward  # Default is 40% of the OP reward
+        if referral_budget_cent is None:
+            referral_budget_cent = round(0.4 * reward_cent)  # Default is 40% of the OP reward
         post = Post(creator=self,
                     type=type,
-                    reward=reward,
-                    title=title,
+                    reward_cent=reward_cent,
                     social_media_mode=social_media_mode,
-                    referral_budget=referral_budget,
+                    referral_budget_cent=referral_budget_cent,
+                    title=title,
                     body=('m' if self.use_markdown else 's') + body)
         db.session.add(post)
 
@@ -296,7 +285,7 @@ class User(UserMixin, db.Model):
 
         return post
 
-    def edit_post(self, post, title, body, social_media_mode=None, referral_budget=None):
+    def edit_post(self, post, title, body, social_media_mode=None, referral_budget_cent=None):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -310,8 +299,8 @@ class User(UserMixin, db.Model):
         post.body = ('m' if self.use_markdown else 's') + body
         if social_media_mode is not None:
             post.social_media_mode = social_media_mode
-        if referral_budget is not None:
-            post.referral_budget = referral_budget
+        if referral_budget_cent is not None:
+            post.referral_budget_cent = referral_budget_cent
         post.ping(datetime.utcnow())
         db.session.add(post)
 
@@ -341,7 +330,7 @@ class User(UserMixin, db.Model):
         db.session.add(post)
         db.session.commit()
 
-    def create_node(self, parent_node, referral_reward=None):
+    def create_node(self, parent_node, referral_reward_cent=None):
         post = parent_node.post
         if post.is_archived:
             raise InvalidActionError('Cannot create node because the post is archived')
@@ -356,27 +345,25 @@ class User(UserMixin, db.Model):
             node = post.nodes.filter_by(creator=self).first()
 
         if node is None:
-            node = self._create_node(parent=parent_node, referral_reward=referral_reward)
+            node = self._create_node(parent=parent_node, referral_reward_cent=referral_reward_cent)
             db.session.add(node)
             post.ping(datetime.utcnow())
             db.session.commit()
         return node
 
-    def _create_node(self, parent, referral_reward=None):
+    def _create_node(self, parent, referral_reward_cent=None):
         post = parent.post
         total_reward_cent = parent.total_reward_cent
-        referral_reward_cent = None
         if post.social_media_mode:
-            if referral_reward is None:
+            if referral_reward_cent is None:
                 # Default is 50% of the remaining referral budget:
                 referral_reward_cent = round(0.5 * parent.remaining_referral_budget_cent)
             else:
-                referral_reward_cent = round(100 * referral_reward)
                 if referral_reward_cent > parent.remaining_referral_budget_cent:
                     raise InvalidActionError(
                         'Cannot create node because referral reward exceeds the remaining referral budget')
             if post.type == Post.TYPE_SELL:
-                total_reward_cent += referral_reward_cent
+                total_reward_cent += parent.referral_reward_cent
 
         node = Node(creator=self,
                     post=parent.post,
@@ -568,16 +555,15 @@ class User(UserMixin, db.Model):
         engagement.state = Engagement.STATE_COMPLETED
         engagement.node.state = Node.STATE_CHAT
 
-
     def _handle_success(self, engagement, fraction=1.0):
         node = engagement.node
         asker = engagement.asker
         answerer = engagement.answerer
 
-        total_reward = 0.01 * _distribute_reward_cent(node=node, fraction=fraction)
+        total_reward_cent = _distribute_reward_cent(node=node, fraction=fraction)
 
-        asker.update_reputation(total_reward, success=True, dispute_lost=False)
-        answerer.update_reputation(total_reward, success=True, dispute_lost=False)
+        asker.update_reputation(total_reward_cent, success=True, dispute_lost=False)
+        answerer.update_reputation(total_reward_cent, success=True, dispute_lost=False)
 
         db.session.add(asker)
         db.session.add(answerer)
@@ -594,23 +580,42 @@ class User(UserMixin, db.Model):
         answerer = engagement.answerer
 
         total_reward_cent = node.total_reward_cent
-        total_reward = 0.01 * total_reward_cent
         asker.reserved_balance_cent -= total_reward_cent
 
-        asker_rep_if_dispute = asker.reputation_if_dispute_lost(total_reward)
-        answerer_rep_if_dispute = answerer.reputation_if_dispute_lost(total_reward)
+        rx_asker, ri_asker = asker.reputation_if_dispute_lost(total_reward_cent)
+        rx_answerer, ri_answerer = answerer.reputation_if_dispute_lost(total_reward_cent)
 
-        if asker_rep_if_dispute < answerer_rep_if_dispute:  # asker lost:
-            asker.update_reputation(total_reward, success=False, dispute_lost=True)
-            answerer.update_reputation(total_reward, success=False, dispute_lost=False)
-        elif asker_rep_if_dispute > answerer_rep_if_dispute:  # answerer lost:
-            asker.update_reputation(total_reward, success=False, dispute_lost=False)
-            answerer.update_reputation(total_reward, success=False, dispute_lost=True)
+        # 3-D lexical ordering by (min(rx, ri), rx, ri)
+        if min(rx_asker, ri_asker) < min(rx_answerer, ri_answerer) or \
+                (
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        rx_asker < rx_answerer
+                ) or \
+                (
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        rx_asker == rx_answerer and \
+                        ri_asker < ri_answerer
+                ):
+            # asker lost:
+            asker.update_reputation(total_reward_cent, success=False, dispute_lost=True)
+            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=False)
+        elif min(rx_asker, ri_asker) > min(rx_answerer, ri_answerer) or \
+                (
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        rx_asker > rx_answerer
+                ) or \
+                (
+                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and \
+                        rx_asker == rx_answerer and \
+                        ri_asker > ri_answerer
+                ):  # answerer lost:
+            asker.update_reputation(total_reward_cent, success=False, dispute_lost=False)
+            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=True)
         else:  # it is a draw, punishment both
             # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
             # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-            asker.update_reputation(total_reward, success=False, dispute_lost=True)
-            answerer.update_reputation(total_reward, success=False, dispute_lost=True)
+            asker.update_reputation(total_reward_cent, success=False, dispute_lost=True)
+            answerer.update_reputation(total_reward_cent, success=False, dispute_lost=True)
 
         db.session.add(asker)
         db.session.add(answerer)
@@ -621,68 +626,71 @@ class User(UserMixin, db.Model):
                           text=f'Engagement outcome disputed - no reward will be distributed')
         db.session.add(message)
 
-    def reputation_if_dispute_lost(self, x):
-        m_x = math.exp(-math.fabs(x) * _REP_DECAY)
-        sum_x = -x + m_x * self.sum_x
-        sum_abs_x = math.fabs(x) + m_x * self.sum_abs_x
+    def reputation_if_dispute_lost(self, total_reward_cent):
+        m_x = math.exp(-abs(total_reward_cent) * REP_DECAY)
+        sum_x = -total_reward_cent + m_x * self.sum_x
+        sum_abs_x = abs(total_reward_cent) + m_x * self.sum_abs_x
 
-        m_i = math.exp(-_REP_I_DECAY)
+        m_i = math.exp(-REP_I_DECAY)
         sum_i = -1 + m_i * self.sum_i
         sum_abs_i = 1 + m_i * self.sum_abs_i
 
-        return min(sum_x / sum_abs_x, sum_i / sum_abs_i)
+        return sum_x / sum_abs_x, sum_i / sum_abs_i
 
-    def update_reward_limit(self, x, success, dispute_lost):
+    def update_reward_limit(self, total_reward_cent, success, dispute_lost):
         if success:
             r = self.reputation
             if r > 0.8:
-                self.reward_limit = min(10, self.reward_limit + 0.5 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.5 * total_reward_cent))
             elif r > 0.6:
-                self.reward_limit = min(10, self.reward_limit + 0.4 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.4 * total_reward_cent))
             elif r > 0.4:
-                self.reward_limit = min(10, self.reward_limit + 0.3 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.3 * total_reward_cent))
             elif r > 0.2:
-                self.reward_limit = min(10, self.reward_limit + 0.2 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.2 * total_reward_cent))
             elif r > 0:
-                self.reward_limit = min(10, self.reward_limit + 0.1 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.1 * total_reward_cent))
             else:
-                self.reward_limit = min(10, self.reward_limit + 0.05 * x)
+                self.reward_limit_cent = min(1000, self.reward_limit_cent + round(0.05 * total_reward_cent))
 
         if dispute_lost:
             r = self.reputation
             if r > 0.5:
-                self.reward_limit = max(1.0, 0.75 * self.reward_limit)
+                self.reward_limit_cent = max(100, round(0.75 * self.reward_limit_cent))
             elif r > 0:
-                self.reward_limit = max(1.0, 0.5 * self.reward_limit)
+                self.reward_limit_cent = max(100, round(0.5 * self.reward_limit_cent))
             elif r > -0.5:
-                self.reward_limit = max(1.0, min(0.5 * self.reward_limit, 0.75 * x))
+                self.reward_limit_cent = max(
+                    100,
+                    round(min(0.5 * self.reward_limit_cent, 0.75 * total_reward_cent))
+                )
             else:
-                self.reward_limit = max(1.0, 0.5 * x)
+                self.reward_limit_cent = max(100, round(0.5 * total_reward_cent))
 
-    def update_reputation(self, post_reward, success, dispute_lost):
-        '''
+    def update_reputation(self, total_reward_cent, success, dispute_lost):
+        """
         The visible reputation is only affected if the interaction is a success or if the user lose a dispute.
         This is to protect the side with a higher reputation - his visible reputation is not affected but the
         internal components of his reputation are weakened due to decay, and he will be in a weaker position in
         the next dispute unless he starts to build a good track record
-        '''
+        """
         #  decay the weights of past observations in ALL cases:
-        m_x = math.exp(-math.fabs(post_reward) * _REP_DECAY)
+        m_x = math.exp(-abs(total_reward_cent) * REP_DECAY)
         self.sum_x *= m_x
         self.sum_abs_x *= m_x
 
-        m_i = math.exp(-_REP_I_DECAY)
+        m_i = math.exp(-REP_I_DECAY)
         self.sum_i *= m_i
         self.sum_abs_i *= m_i
 
         # add most recent observation only if it is a success or dispute lost
         if success or dispute_lost:
-            self.sum_x += post_reward if success else -post_reward
-            self.sum_abs_x += math.fabs(post_reward)
+            self.sum_x += total_reward_cent if success else -total_reward_cent
+            self.sum_abs_x += abs(total_reward_cent)
             self.sum_i += 1 if success else -1
             self.sum_abs_i += 1
 
-        self.update_reward_limit(post_reward, success, dispute_lost)
+        self.update_reward_limit(total_reward_cent, success, dispute_lost)
 
 
 def _distribute_reward_cent(node, fraction):
@@ -707,9 +715,11 @@ def _distribute_reward_cent(node, fraction):
 
     total_referrer_reward_cent = 0
     if post.social_media_mode:
-        for node in node.nodes_before_inc():
+        nodes = node.nodes_before_inc().all()
+        referrer_nodes = nodes[1:(len(nodes) - 1)]
+        for node in referrer_nodes:
             referrer = node.creator
-            referrer_reward_cent = round(fraction * node.referral_reward)
+            referrer_reward_cent = round(fraction * node.referral_reward_cent)
             referrer.total_balance_cent += referrer_reward_cent
             db.session.add(referrer)
             total_referrer_reward_cent += referrer_reward_cent

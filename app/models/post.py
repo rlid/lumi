@@ -70,17 +70,9 @@ class Post(db.Model):
     def reward(self):
         return 0.01 * self.reward_cent
 
-    @reward.setter
-    def reward(self, value):
-        self.reward_cent = round(100 * value)
-
     @property
     def referral_budget(self):
         return 0.01 * self.referral_budget_cent
-
-    @referral_budget.setter
-    def referral_budget(self, value):
-        self.referral_budget_cent = round(100 * value)
 
 
 @event.listens_for(Post.body, 'set')
