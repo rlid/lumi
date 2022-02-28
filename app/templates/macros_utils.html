@@ -38,74 +38,74 @@
     {% if current_user == post.creator %}
         {% set n_nodes = post.nodes.count() - 1 %}
         {% if n_nodes > 0 %}
-            <div class="alert alert-success bg-white alert-dismissible fade show small py-1" role="alert">
-                {{ n_nodes }} users have shared or contributed to this post.
-                <button type="button" class="btn-close mt-1 py-1 pe-1" data-bs-dismiss="alert"></button>
+            <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
+                {{ n_nodes }} {% if n_nodes > 1 %}users{% else %}user{% endif %} have shared or contributed to this
+                post.
+                <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
             </div>
         {% endif %}
-        <div class="alert alert-success bg-white alert-dismissible fade show small py-1" role="alert">
+        <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             {% if post.type == Post.TYPE_BUY %}
-                You pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon successful engagement, of which:
+                Upon successful engagement, you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }}, of which:
                 <ul class="mb-0">
+                    <li>up to {{ '${0:.2f}'.format(0.01 * post.referral_budget_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
-                    <li>up to {{ '${0:.2f}'.format(0.01 * post.referral_budget_cent) }} goes to the referrers</li>
                     <li>
                         the remaining amount goes to the seller
                     </li>
                 </ul>
             {% else %}
-                The buyer pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon successful engagement, of
-                which:
+                Upon successful engagement, buyer pays :
                 <ul class="mb-0">
                     <li>
-                        {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
+                        {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} to you
                     </li>
-                    <li>up to {{ '${0:.2f}'.format(0.01 * post.referral_budget_cent) }} goes to the referrers</li>
+                    <li>up to {{ '${0:.2f}'.format(0.01 * post.referral_budget_cent) }} to the referrers</li>
                     <li>
-                        the remaining amount goes to the you
+                        {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} as the platform fee
                     </li>
                 </ul>
             {% endif %}
-            <button type="button" class="btn-close mt-1 py-1 pe-1" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
         </div>
     {% elif current_user == node.creator %}
-        <div class="alert alert-success bg-white alert-dismissible fade show small py-1" role="alert">
+        <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             <b>Share</b> - you can earn up to
             {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }}
             for each successful engagement your referral leads to, or
             <p></p>
             {% if post.type == Post.TYPE_SELL %}
-                <b>Request for Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon successful
-                engagement, of which:
+                <b>Request for Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
+                successful engagement, of which:
                 <ul class="mb-0">
+                    <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
-                    <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to the seller
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - the buyer pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
+                <b>Request for Engagement</b> - buyer pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
+                    <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
-                    <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to you
                     </li>
                 </ul>
             {% endif %}
-            <button type="button" class="btn-close mt-1 py-1 pe-1" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
         </div>
     {% else %}
         {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent = node.rewards_for_next_node_cent() %}
-        <div class="alert alert-success bg-white alert-dismissible fade show small py-1" role="alert">
+        <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             <b>Share</b> - you can earn up to
             {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }}
             for each successful engagement your referral leads to, or
@@ -114,28 +114,28 @@
                 <b>Request for Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon successful
                 engagement, of which:
                 <ul class="mb-0">
+                    <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
-                    <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to the seller
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - the buyer pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
-                successful engagement, of which:
+                <b>Request for Engagement</b> - buyer pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon successful
+                engagement, of which:
                 <ul class="mb-0">
+                    <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
-                    <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to you
                     </li>
                 </ul>
             {% endif %}
-            <button type="button" class="btn-close mt-1 py-1 pe-1" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
         </div>
     {% endif %}
 {% endmacro %}

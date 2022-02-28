@@ -35,9 +35,13 @@
     {% endif %}
 {% endmacro %}
 
+{% block left_col %}
+    {{ render_reward_info(node) }}
+{% endblock %}
+
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-    {{ render_reward_info(node) }}
+{#    {{ render_reward_info(node) }}#}
     {% set current = namespace(engagement_id=-1, timestamp=none, section_id=none) %}
     {% for message in messages_asc %}
         {% if message.engagement_id != current.engagement_id %}

@@ -3,9 +3,13 @@
 {% from "macros_form.html" import text_area_style, button_class with context %}
 {% from "macros_utils.html" import render_reward_info with context %}
 
+{% block left_col %}
+    {{ render_reward_info(node) }}
+{% endblock %}
+
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-    {{ render_reward_info(node) }}
+{#    {{ render_reward_info(node) }}#}
     <div class="mb-3">
         <form id="form" method="post">
             {{ form.hidden_tag() }}
