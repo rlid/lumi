@@ -205,15 +205,15 @@ def sim_all(n_days=20,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
             p_post=0.25,
-            p_social_media_mode=0.5,
+            p_social_media_mode=1.0,
             p_share=0.75,
             p_message=0.5,
             p_request=0.75,
             p_cancel_given_request=0.1,
-            p_accept_given_request=0.75,
+            p_accept_given_request=0.8,
             p_rate_given_accept=0.8,
             p_archive_given_complete=0.5,
-            initial_balance_cent=100000):
+            initial_balance_cent=10000):
     db.drop_all()
     db.create_all()
     users = [User(email=faker.email(), total_balance_cent=initial_balance_cent, adjective=random.choice(adjectives)) for

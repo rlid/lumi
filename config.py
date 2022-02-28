@@ -20,7 +20,7 @@ class Config:
     GOOGLE_SERVER_METADATA_URL = 'https://accounts.google.com/.well-known/openid-configuration'
     GOOGLE_CLIENT_ID = os.getenv(
         'GOOGLE_CLIENT_ID'
-    ) or '276555255912-c7jq4clb41m3eac1fbsf4pqrd9h1acjp.apps.googleusercontent.com'
+    ) or '175206125409-9kun97nija8cvt0k8f71j8cb4vidb8n4.apps.googleusercontent.com'
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')  # environment variable
 
     APPLE_SERVER_METADATA_URL = 'https://appleid.apple.com/.well-known/openid-configuration'
