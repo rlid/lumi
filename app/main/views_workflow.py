@@ -24,14 +24,7 @@ def new_post(standard_mode):
     if form.validate_on_submit():
         post_type = form.type.data
         price_cent = round(100 * form.price.data)
-        if post_type == Post.TYPE_SELL:
-            # for SELL, make sure the seller gets exactly the reward after the 10% platform fee
-            # price (seller receives) = value - 0.1 * value = 0.9 * value => value = price / 0.9
-            value_cent = round(price_cent / 0.9)
-        else:
-            # for BUY, price (buyer pays) = value
-            value_cent = price_cent
-        post = current_user.create_post(type=post_type, value_cent=value_cent,
+        post = current_user.create_post(post_type=post_type, price_cent=price_cent,
                                         title=form.title.data, body=form.body.data,
                                         social_media_mode=(standard_mode == 0))
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
@@ -62,7 +55,7 @@ def edit_post(post_id):
     form.type.choices = [form.type.choices[0 if post.type == Post.TYPE_BUY else 1]]
     form.process()
 
-    form.price.data = (0.01 * post.value_cent) if post.type == Post.TYPE_BUY else (0.01 * round(0.9 * post.value_cent))
+    form.price.data = 0.01 * post.price_cent
     form.price.render_kw = {"readonly": None}
 
     form.title.data = post.title
@@ -143,15 +136,15 @@ def request_engagement(node_id):
         flash('Cannot request for engagement on your own post.', category='danger')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
     if current_user.value_limit_cent < (
+            # value limit checks
+            # post.price_cent
             node.value_cent
-            # price limit checks
-            # post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
     ):
         flash('You currently cannot request for engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
     if post.type == Post.TYPE_SELL and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < post.value_cent:
+            current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
@@ -192,6 +185,7 @@ def cancel_engagement(engagement_id):
 @login_required
 def accept_engagement(engagement_id):
     engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+    node = engagement.node
     post = engagement.node.post
 
     if post.is_archived:
@@ -201,15 +195,15 @@ def accept_engagement(engagement_id):
     elif current_user != post.creator:
         flash('Only the original poster can accept the engagement.', category='danger')
     elif current_user.value_limit_cent < (
-            # price limit checks
-            engagement.node.value_cent
-            # post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
+            # value limit checks
+            # post.price_cent
+            node.value_cent
     ):
         flash('You currently cannot accept engagement on posts worth more than $' +
               f'{current_user.reward_limit:.2f}.',
               category='danger')
     elif post.type == Post.TYPE_BUY and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < post.value_cent:
+            current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
         flash('Insufficient funds, please top up before you proceed.', category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
     else:
@@ -259,24 +253,29 @@ def account():
         if engagement.node_id not in node_ids_seen:
             node_ids_seen.add(engagement.node_id)
 
-    other_root_nodes = current_user.nodes.filter(
-        Node.parent_id.is_(None),
-        Post.id.not_in(post_ids_seen)
-    ).order_by(
-        Node.last_updated.desc()
-    ).all()
-    other_child_nodes = current_user.nodes.filter(
-        Node.parent_id.is_not(None),
-        Node.id.not_in(node_ids_seen)
-    ).order_by(
+    # other_root_nodes = current_user.nodes.filter(
+    #     Post.id.not_in(post_ids_seen),
+    #     Node.parent_id.is_(None)
+    # ).order_by(
+    #     Node.last_updated.desc()
+    # ).all()
+    # other_child_nodes = current_user.nodes.filter(
+    #     Node.id.not_in(node_ids_seen),
+    #     Node.parent_id.is_not(None)
+    # ).order_by(
+    #     Node.last_updated.desc()
+    # ).all()
+
+    nodes = current_user.nodes.order_by(
         Node.last_updated.desc()
     ).all()
     return render_template(
         "account.html",
         user=current_user,
         uncompleted_engagements=uncompleted_engagements,
-        other_root_nodes=other_root_nodes,
-        other_child_nodes=other_child_nodes,
+        # other_root_nodes=other_root_nodes,
+        # other_child_nodes=other_child_nodes,
+        nodes=nodes,
         Post=Post,
         Node=Node,
         Engagement=Engagement)

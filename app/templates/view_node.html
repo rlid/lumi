@@ -36,9 +36,10 @@
 
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-
+    <div class="alert alert-secondary small py-1" role="alert">
+        You can earn up to {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }} by sharing this post.
+    </div>
     {% set current = namespace(engagement_id=-1, timestamp=none, section_id=none) %}
-
     {% for message in messages_asc %}
         {% if message.engagement_id != current.engagement_id %}
             {# message is the initial one or it does not belong to the previous div, start a new div block #}
@@ -74,15 +75,15 @@
         {% set current.timestamp = message.timestamp %}
     {% endfor %}
 
-    {% if current.engagement_id == -1 %}
-        {# no message, so need to create a div block #}
-        {% set current.section_id = "sectionNew" %}
-        <div class="rounded px-3 mb-3">
-        <div id="{{ current.section_id }}">
-    {% endif %}
-    {# before rendering the form, close the div tag for messages to display #}
-    </div>
-    {% if not node.post.is_archived or (engagement is not none and engagement.state == Engagement.STATE_ENGAGED) %}
+{% if current.engagement_id == -1 %}
+    {# no message, so need to create a div block #}
+    {% set current.section_id = "sectionNew" %}
+    <div class="rounded px-3 mb-3">
+    <div id="{{ current.section_id }}">
+{% endif %}
+{# before rendering the form, close the div tag for messages to display #}
+</div>
+{% if not node.post.is_archived or (engagement is not none and engagement.state == Engagement.STATE_ENGAGED) %}
     <form id="form">
         <div class="mb-3">
             {{ form.text(class_="form-control", placeholder="Message", style=text_area_style(current_user, node.post)) }}
@@ -93,25 +94,28 @@
             {% if current_user == node.creator %}
                 {% if engagement is none and engagement_request is none %}
                     <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                       data-bs-toggle="modal" data-bs-target="#modalRequest">
-                        Request for Engagement</button>
+                            data-bs-toggle="modal" data-bs-target="#modalRequest">
+                        Request for Engagement
+                    </button>
 
                     <div class="modal fade" id="modalRequest" tabindex="-1">
-                      <div class="modal-dialog modal-fullscreen-sm-down">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body text-center">
-                            <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                               href="{{ url_for('main.request_engagement', node_id=node.id) }}">
-                                Confirm
-                            </a>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          </div>
+                        <div class="modal-dialog modal-fullscreen-sm-down">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                                       href="{{ url_for('main.request_engagement', node_id=node.id) }}">
+                                        Confirm
+                                    </a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
                 {% elif engagement_request is not none %}
                     <a id="btnCancel" class="btn btn-{{- button_class(current_user, node.post) -}}"
@@ -132,61 +136,70 @@
                       (current_user == engagement.answerer and engagement.rating_by_answerer == 0) %}
 
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-success border-{{- button_class(current_user, node.post) -}}"
+                        <button type="button"
+                                class="btn btn-outline-success border-{{- button_class(current_user, node.post) -}}"
                                 data-bs-toggle="modal" data-bs-target="#modalRatePlus">
                             &plus;
                         </button>
                         <button type="button" class="btn btn-{{- button_class(current_user, node.post) }}">
-                            Rate Engagement</button>
-                        <button type="button" class="btn btn-outline-danger border-{{- button_class(current_user, node.post) -}}"
+                            Rate Engagement
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-danger border-{{- button_class(current_user, node.post) -}}"
                                 data-bs-toggle="modal" data-bs-target="#modalRateMinus">
                             &minus;
                         </button>
                     </div>
                     <div class="modal fade" id="modalRatePlus" tabindex="-1">
-                      <div class="modal-dialog modal-fullscreen-sm-dow">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h6 class="modal-title">You rated this engagement as
-                                <b class="text-success">successful (&plus;)</b></h6>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body text-center">
-                            <a id="btnRatePlus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1) }}"
-                               class="btn btn-{{- button_class(current_user, node.post) -}}">
-                                Confirm</a>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          </div>
+                        <div class="modal-dialog modal-fullscreen-sm-dow">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">You rated this engagement as
+                                        <b class="text-success">successful (&plus;)</b></h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <a id="btnRatePlus"
+                                       href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1) }}"
+                                       class="btn btn-{{- button_class(current_user, node.post) -}}">
+                                        Confirm</a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
                     <div class="modal fade" id="modalRateMinus" tabindex="-1">
-                      <div class="modal-dialog modal-fullscreen-sm-down">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h6 class="modal-title">You rated this engagement as
-                                <b class="text-danger">unsuccessful (&minus;)</b></h6>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body text-center">
-                            <a id="btnRateMinus" href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0) }}"
-                               class="btn btn-{{- button_class(current_user, node.post) -}}">
-                                Confirm</a>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          </div>
+                        <div class="modal-dialog modal-fullscreen-sm-down">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">You rated this engagement as
+                                        <b class="text-danger">unsuccessful (&minus;)</b></h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <a id="btnRateMinus"
+                                       href="{{ url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0) }}"
+                                       class="btn btn-{{- button_class(current_user, node.post) -}}">
+                                        Confirm</a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
                 {% endif %}
             {% endif %}
         </div>
     </form>
-    {% endif %}
-    {% if engagement.state == Engagement.STATE_ENGAGED %}
-        {# Active engagement uses card and card-body which means 2 divs, close the div tag for card-body #}
-        </div>
-    {% endif %}
+{% endif %}
+{% if engagement.state == Engagement.STATE_ENGAGED %}
+    {# Active engagement uses card and card-body which means 2 divs, close the div tag for card-body #}
     </div>
+{% endif %}
+</div>
     <div class="toast-container fixed-top ms-auto p-3">
         <div class="toast"
              id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
@@ -210,19 +223,24 @@
                 <li>Find out as much as necessary about each other before <b>Request for Engagement</b> or <b>Accept
                     Engagement</b>. Make sure you are comfortable with the other party's track record of past
                     engagements. Be wary of the answerer's proof of credentials, you are welcome to ask for more proof,
-                    as long as it is relevant</li>
+                    as long as it is relevant
+                </li>
                 <li><b>Request for Engagement</b> when you are ready to enter into an engagement and claim / pay the
-                    reward</li>
+                    reward
+                </li>
                 <li>If the asker's account balance is not enough for the reward, a top-up will be required before the
                     engagement can be entered into. The money will be reserved in the asker's account until the
-                    engagement is rated by both parties</li>
+                    engagement is rated by both parties
+                </li>
                 <li><b>Rate Engagement</b> once you are happy with the answer provided to or by you. The other party
                     needs to rate the engagement <b>within 72 hours</b> of the first rating. If no rating is received
-                    within the timeframe, it will be recorded as unsuccessful(&minus;)</li>
+                    within the timeframe, it will be recorded as unsuccessful(&minus;)
+                </li>
                 <li>If both parties rate the engagement as successful(+), the reward will be distributed according to
                     the <a href="#">reward distribution rules</a></li>
                 <li>Report suspicious behaviors including requests for identifiable or unnecessary personal information
-                    and suggestions to take interactions off-site as we cannot protect you outside our domain</li>
+                    and suggestions to take interactions off-site as we cannot protect you outside our domain
+                </li>
             </ul>
         </div>
     </div>
@@ -232,14 +250,18 @@
             <ul class="small">
                 <li>The <b>track record</b> of each user is available for all users to see on the user profile page</li>
                 <li>We use the track record to model each user's <b>trustworthiness on the platform</b>,
-                    which limits the reward value of posts a user is allowed to participate in</li>
+                    which limits the reward value of posts a user is allowed to participate in
+                </li>
                 <li>Even though no reward is paid out as long as the asker rates the engagement as &minus;,
                     both parties' track records will be on the line once an engagement is entered into, as it contain
-                    information about all engagements</li>
+                    information about all engagements
+                </li>
                 <li>A <b>dispute</b> arises if the asker rates &minus; and the answerer rates +, the party with a weaker
-                    trustworthiness on the platform will have its trustworthiness negatively impacted</li>
+                    trustworthiness on the platform will have its trustworthiness negatively impacted
+                </li>
                 <li>There will be no dispute as long as the answerer rates the engagement as &minus;, in which
-                    case the trustworthiness of neither party will be directly impacted</li>
+                    case the trustworthiness of neither party will be directly impacted
+                </li>
             </ul>
         </div>
     </div>
@@ -295,11 +317,13 @@
         let btnRatePlus = document.getElementById('btnRatePlus')
         if (btnRatePlus) {
             btnRatePlus.onclick = rate_event_handler;
-        };
+        }
+        ;
         let btnRateMinus = document.getElementById('btnRateMinus')
         if (btnRateMinus) {
             btnRateMinus.onclick = rate_event_handler;
-        };
+        }
+        ;
         socket.on('notify_node', message => {
             let toast = document.getElementById('nodeToast');
             let toastText = document.getElementById('nodeToastText');
@@ -318,31 +342,39 @@
         {#                node_id: "{{ node.id }}"#}
         {#            });#}
         {#    };#}
-        {#};#}
-        {#socket.on('processed_engagement_requested', message => {#}
-        {#    let toast = document.getElementById('nodeToast');#}
-        {#    let toastText = document.getElementById('nodeToastText');#}
-        {#    toastText.innerHTML = message.html;#}
-        {#    toast.hidden = false;#}
+        {
+            #};
+            #}
+            {#socket.on('processed_engagement_requested', message => {#}
+            {#    let toast = document.getElementById('nodeToast');#}
+            {#    let toastText = document.getElementById('nodeToastText');#}
+            {#    toastText.innerHTML = message.html;#}
+            {#    toast.hidden = false;#}
             {#location.reload();#}
-        {#});#}
-        {#let btnAccept = document.getElementById('btnAccept')#}
-        {#if (btnAccept) {#}
-        {#    btnAccept.onclick = event => {#}
-        {#        socket.emit(#}
-        {#            'engagement_accepted',#}
-        {#            {#}
-        {#                node_id: "{{ node.id }}"#}
-        {#            });#}
-        {#    };#}
-        {#};#}
-        {#socket.on('processed_engagement_accepted', message => {#}
-        {#    let toast = document.getElementById('nodeToast');#}
-        {#    let toastText = document.getElementById('nodeToastText');#}
-        {#    toastText.innerHTML = message.html;#}
-        {#    toast.hidden = false;#}
-            {#location.reload();#}
-        {#});#}
+            {#})
+                ;
+                #}
+                {#let btnAccept = document.getElementById('btnAccept')#}
+                {#if (btnAccept) {#}
+                {#    btnAccept.onclick = event => {#}
+                {#        socket.emit(#}
+                {#            'engagement_accepted',#}
+                {#            {#}
+                {#                node_id: "{{ node.id }}"#}
+                {#            });#}
+                {#    };#}
+                {
+                    #};
+                    #}
+                    {#socket.on('processed_engagement_accepted', message => {#}
+                    {#    let toast = document.getElementById('nodeToast');#}
+                    {#    let toastText = document.getElementById('nodeToastText');#}
+                    {#    toastText.innerHTML = message.html;#}
+                    {#    toast.hidden = false;#}
+                    {#location.reload();#}
+                    {#})
+                        ;
+        #}
     </script>
 {% endmacro %}
 
@@ -351,7 +383,8 @@
     <script>
         const sock = new WebSocket(
             {% if config['USE_SSL'] %}'wss://'{% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
-        );
+        )
+        ;
         sock.addEventListener('message', message => {
             let template = document.createElement('template');
             template.innerHTML = message.data

@@ -112,7 +112,8 @@
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
-                                            There are no active engagements involving you on the posts created by others.
+                                            There are no active engagements involving you on the posts created by
+                                            others.
                                         </small>
                                     {% endif %}
                                 </div>
@@ -128,7 +129,7 @@
                 <button class="accordion-button py-2 collapsed"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionActiveInteractions">
-                    <b>Other Posts - Open</b>
+                    <b>Posts - Active</b>
                 </button>
             </h2>
             <div id="accordionActiveInteractions" class="accordion-collapse collapse">
@@ -145,11 +146,9 @@
                             <div id="accordionActiveInteractionsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_root_nodes %}
-                                        {% if not node.post.is_archived %}
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
-                                            {% set ns.empty = False %}
-                                        {% endif %}
+                                    {% for node in nodes if node.parent is none and not node.post.is_archived %}
+                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% set ns.empty = False %}
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
@@ -172,11 +171,9 @@
                             <div id="accordionActiveInteractionsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_child_nodes %}
-                                        {% if not node.post.is_archived %}
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
-                                            {% set ns.empty = False %}
-                                        {% endif %}
+                                    {% for node in nodes if node.parent is not none and not node.post.is_archived %}
+                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% set ns.empty = False %}
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
@@ -197,7 +194,7 @@
                 <button class="accordion-button py-2 collapsed"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionInactiveInteractions">
-                    <b>Other Posts - Archived</b>
+                    <b>Posts - Archived</b>
                 </button>
             </h2>
             <div id="accordionInactiveInteractions" class="accordion-collapse collapse">
@@ -214,11 +211,9 @@
                             <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_root_nodes %}
-                                        {% if node.post.is_archived %}
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
-                                            {% set ns.empty = False %}
-                                        {% endif %}
+                                    {% for node in nodes if node.parent is none and node.post.is_archived %}
+                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% set ns.empty = False %}
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">
@@ -242,11 +237,9 @@
                             <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show">
                                 <div class="accordion-body">
                                     {% set ns = namespace(empty=True) %}
-                                    {% for node in other_child_nodes %}
-                                        {% if node.post.is_archived %}
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
-                                            {% set ns.empty = False %}
-                                        {% endif %}
+                                    {% for node in nodes if node.parent is not none and node.post.is_archived %}
+                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {% set ns.empty = False %}
                                     {% endfor %}
                                     {% if ns.empty %}
                                         <small class="text-muted">

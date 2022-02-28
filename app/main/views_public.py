@@ -102,17 +102,18 @@ def browse():
 @main.route('/node/<node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
+    post = node.post
 
-    if node.post.is_reported:
+    if post.is_reported:
         flash("The post is currently not available for viewing.", category='warning')
         return redirect(url_for('main.index'))
 
-    if current_user.is_authenticated and (current_user != node.creator and current_user != node.post.creator):
-        user_node = node.post.nodes.filter(Node.creator == current_user).first()
+    if current_user.is_authenticated and (current_user != node.creator and current_user != post.creator):
+        user_node = post.nodes.filter(Node.creator == current_user).first()
         if user_node is not None:
             return redirect(url_for('main.view_node', node_id=user_node.id))
 
-    if current_user == node.creator and current_user == node.post.creator:
+    if current_user == node.creator and current_user == post.creator:
         # TODO: experiment with not using group_by, process the Cartesian products in Python into a dict of
         #  node:message so the database is queried only once
         nodes = db.session.query(
@@ -135,24 +136,23 @@ def view_node(node_id):
             Engagement=Engagement,
             Message=Message)
 
-    if current_user == node.creator or current_user == node.post.creator:
+    if current_user == node.creator or current_user == post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
-        # if current_user.value_limit_cent < node.value_cent:
-        #     flash('The reward of the post exceeds your current reward limit. '
-        #           'You are not be able to rate engagements on this post until the limit is increased.',
-        #           category='warning')
-
+        if current_user.value_limit_cent < node.value_cent:
+            flash('The value of the post exceeds your current limit. '
+                  f'You are not be able to {"request for" if current_user == node.creator else "accept"} engagements.',
+                  category='warning')
 
         post = node.post
-        # price limit checks
-        # transaction_value_cent = post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)
+        # value limit checks
+        # transaction_value_cent = post.price_cent
         transaction_value_cent = node.value_cent
         if (engagement is not None or engagement_request is not None) and \
                 ((current_user == node.creator and post.creator.value_limit_cent < transaction_value_cent) or
                  (current_user == post.creator and node.creator.value_limit_cent < transaction_value_cent)):
-            flash('The reward of the post exceeds the current reward limit of the other user. This could be because a '
-                  'dispute involving the user occurred after this engagement was requested or entered into.',
+            flash('The post value exceeds the current limit of the other user. This could be because a '
+                  'dispute involving the user occurred after the current request for engagement was made / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()

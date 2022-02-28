@@ -64,16 +64,63 @@ class Node(db.Model):
 
     def display_value(self, user):
         post = self.post
-        if post.type == Post.TYPE_BUY:
-            if user == post.creator:
-                return 0.01 * self.value_cent
-            else:
-                return 0.01 * self.answerer_reward_cent
+        user_node = None
+        if user == self.creator:
+            user_node = self  # heuristics for performance (trying to avoid the database query below)
+        elif user.is_authenticated:
+            user_node = post.nodes.filter_by(creator=user).first()
+        if user_node is None:
+            user_node = self
+
+        if (post.type == Post.TYPE_BUY and user == post.creator) or \
+                (post.type == Post.TYPE_SELL and user != post.creator):
+            # viewer is a buyer - display full value
+            answerer_reward_cent, sum_referrer_reward_cent = user_node.rewards_for_next_node_cent()
+            return 0.01 * (answerer_reward_cent + sum_referrer_reward_cent + post.platform_fee_cent)
         else:
-            if user == post.creator:
-                return 0.01 * self.answerer_reward_cent
+            # viewer is a seller - display answerer reward only
+            return 0.01 * self.answerer_reward_cent
+
+    def display_referrer_reward(self, user):
+        post = self.post
+        if post.social_media_mode:
+            user_node = None
+            if user == self.creator:
+                user_node = self  # heuristics for performance (trying to avoid the database query below)
+            elif user.is_authenticated:
+                user_node = post.nodes.filter_by(creator=user).first()
+            if user_node is None:
+                return 0.005 * self.remaining_referral_budget_cent  # Default is 50% of remaining
             else:
-                return 0.01 * self.value_cent
+                return 0.01 * user_node.referrer_reward_cent
+        else:
+            return 0.005 * post.referral_budget_cent
+
+    def _sum_referrer_reward_inc_cent(self):
+        """Sum of all referrer rewards assuming the successful engagement is on the next node"""
+        post = self.post
+        if post.social_media_mode:
+            return self.sum_referrer_reward_cent + self.referrer_reward_cent
+        else:
+            sum_referrer_reward_cent = 0
+            total_referrer_reward_cent_cap = post.referral_budget_cent
+            for node in self.nodes_before_inc()[1:]:
+                referrer_reward_cent = round(
+                    0.5 * (total_referrer_reward_cent_cap - sum_referrer_reward_cent)  # Default is 50% of remaining
+                )
+                sum_referrer_reward_cent += referrer_reward_cent
+            return sum_referrer_reward_cent
+
+    def rewards_for_next_node_cent(self):
+        post = self.post
+        answerer_reward_cent = self.answerer_reward_cent
+        sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()
+        if post.type == Post.TYPE_BUY:
+            if post.social_media_mode:
+                answerer_reward_cent -= self.referrer_reward_cent
+            else:
+                answerer_reward_cent = post.price_cent - post.platform_fee_cent - sum_referrer_reward_cent
+        return answerer_reward_cent, sum_referrer_reward_cent
 
     @property
     def value(self):

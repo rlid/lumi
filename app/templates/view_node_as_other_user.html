@@ -4,7 +4,9 @@
 
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-
+    <div class="alert alert-secondary small py-1" role="alert">
+        You can earn up to {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }} by sharing this post.
+    </div>
     <div class="mb-3">
         <form id="form" method="post">
             {{ form.hidden_tag() }}
@@ -13,34 +15,35 @@
                        class_="form-control",
                        placeholder="Message",
                        style=text_area_style(current_user, node.post),
-                       disabled=not current_user.is_authenticated)
-                }}
+                       disabled=not current_user.is_authenticated) }}
             </div>
             <div class="d-flex justify-content-between">
                 {{ form.submit(
                        class_="btn btn-" + button_class(current_user, node.post),
                        disabled=not current_user.is_authenticated) }}
                 <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                   data-bs-toggle="modal" data-bs-target="#modalRequest"
+                        data-bs-toggle="modal" data-bs-target="#modalRequest"
                         {% if not current_user.is_authenticated %}disabled{% endif %}>
-                    Request for Engagement</button>
+                    Request for Engagement
+                </button>
 
                 <div class="modal fade" id="modalRequest" tabindex="-1">
-                  <div class="modal-dialog modal-fullscreen-sm-down">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body text-center">
-                        <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                           href="{{ url_for('main.request_engagement', node_id=node.id) }}">
-                            Confirm
-                        </a>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                      </div>
+                    <div class="modal-dialog modal-fullscreen-sm-down">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">
+                                    Confirm
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
             </div>
         </form>
@@ -53,20 +56,23 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Think you can help or know someone who can?</h5>
             {% if not current_user.is_authenticated %}
-                 <p class="small"><a href="#"> Log in</a> to contribute and earn rewards.</p>
+                <p class="small"><a href="#"> Log in</a> to contribute and earn rewards.</p>
             {% endif %}
             <ul class="small">
                 <li><b>Send</b> the poster a message to get something clarified, or to let him know how you / they may
-                    help</li>
+                    help
+                </li>
                 <li><b>Request for Engagement</b> when you are ready to engage, and earn / pay a reward if the
-                    engagement is rated as successful(+) by both of you</li>
+                    engagement is rated as successful(+) by both of you
+                </li>
                 <li><b>Share</b> it with a friend or on social media / online communities with your circle of friends.
                     The answerer is encouraged to reward you for any successful engagement referred through you, both
                     directly or indirectly, and sometimes a reward is even guaranteed. <strong>Make sure to use the
-                    Share button to generate your unique referer link</strong></li>
+                        Share button to generate your unique referer link</strong></li>
                 <li>Feel free to spread the word but <b>please follow the rules of each community and don't spam</b>.
                     Generally, a good way is to ask the same question in the community and offer to pay a reward using
-                    the link to the post here</li>
+                    the link to the post here
+                </li>
             </ul>
         </div>
     </div>

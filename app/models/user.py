@@ -252,7 +252,9 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, type, value_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
+    def create_post(self, post_type, price_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
+
+
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -264,37 +266,43 @@ class User(UserMixin, db.Model):
 
         if referral_budget_cent is None:
             if social_media_mode:
-                referral_budget_cent = round(0.4 * value_cent)  # Default is 40% of the post value in social media mode
+                referral_budget_cent = round(0.4 * price_cent)  # Default is 40% of the post value in social media mode
             else:
-                referral_budget_cent = round(0.2 * value_cent)  # Default is 20% of the post value in standard mode
+                referral_budget_cent = round(0.2 * price_cent)  # Default is 20% of the post value in standard mode
+
+        platform_fee_cent = round(0.1 * price_cent)  # Default is 10% of the post value
+        if post_type == Post.TYPE_BUY:
+            value_cent = price_cent
+        else:
+            value_cent = price_cent + platform_fee_cent
 
         post = Post(creator=self,
-                    type=type,
-                    value_cent=value_cent,
-                    platform_fee_cent=round(0.1 * value_cent),  # Default is 10% of the post value
+                    type=post_type,
+                    price_cent=price_cent,
+                    platform_fee_cent=platform_fee_cent,
                     social_media_mode=social_media_mode,
                     referral_budget_cent=referral_budget_cent,
                     title=title,
                     body=('m' if self.use_markdown else 's') + body)
         db.session.add(post)
 
-        self._add_tag(post, 'Buying' if type == Post.TYPE_BUY else 'Selling')
+        self._add_tag(post, 'Buying' if post_type == Post.TYPE_BUY else 'Selling')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
         if social_media_mode:
             node = Node(
                 post=post,
                 creator=self,
-                value_cent=post.value_cent,
-                answerer_reward_cent=post.value_cent - round(0.1 * post.value_cent),  # Default platform fee is 10%
+                value_cent=value_cent,
+                answerer_reward_cent=value_cent - platform_fee_cent,
                 referrer_reward_cent=0
             )
         else:
             node = Node(
                 post=post,
                 creator=self,
-                value_cent=post.value_cent,
-                answerer_reward_cent=post.value_cent - round(0.1 * post.value_cent)  # Default platform fee is 10%
+                value_cent=value_cent,
+                answerer_reward_cent=value_cent - platform_fee_cent
             )
         db.session.add(node)
         db.session.commit()
@@ -369,9 +377,9 @@ class User(UserMixin, db.Model):
 
     def _create_node(self, parent_node, referrer_reward_cent=None):
         post = parent_node.post
-        answerer_reward_cent = parent_node.answerer_reward_cent
+        answerer_reward_cent, sum_referrer_reward_cent = parent_node.rewards_for_next_node_cent()
+
         if post.social_media_mode:
-            sum_referrer_reward_cent = parent_node.sum_referrer_reward_cent
             if referrer_reward_cent is None:
                 # Default for each referrer is 50% of the remaining referral budget:
                 referrer_reward_cent = round(0.5 * parent_node.remaining_referral_budget_cent)
@@ -379,20 +387,6 @@ class User(UserMixin, db.Model):
                 if referrer_reward_cent > parent_node.remaining_referral_budget_cent:
                     raise InvalidActionError(
                         'Cannot create node because referral reward exceeds the remaining referral budget')
-            sum_referrer_reward_cent += parent_node.referrer_reward_cent
-            if post.type == Post.TYPE_BUY:
-                answerer_reward_cent -= parent_node.referrer_reward_cent
-        else:
-            sum_referrer_reward_cent = 0
-            # Default total referral cap = 20% of OP reward:
-            total_referrer_reward_cent_cap = round(0.2 * post.value_cent)
-            for node in parent_node.nodes_before_inc()[1:]:
-                referrer_reward_cent = round(
-                    0.5 * (total_referrer_reward_cent_cap - sum_referrer_reward_cent)
-                )
-                sum_referrer_reward_cent += referrer_reward_cent
-            if post.type == Post.TYPE_BUY:
-                answerer_reward_cent = post.value_cent - post.platform_fee_cent - sum_referrer_reward_cent
 
         node = Node(creator=self,
                     post=parent_node.post,
@@ -444,10 +438,10 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
         if node.state != Node.STATE_CHAT:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
-        # price limit checks
+        # value limit checks
+        # if self.value_limit_cent < post.price_cent:
+        # value limit check is applied to the original post value as the referral reward could be set arbitrarily
         if self.value_limit_cent < node.value_cent:
-            # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
-            # value limit check is applied to the original post value as the referral reward could be set arbitrarily
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_SELL and self.balance_available_cent < node.value_cent:
@@ -511,10 +505,10 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot accept engagement because it is not in requested state')
         if self != post.creator:
             raise InvalidActionError('Cannot accept engagement because the user is not the post creator')
-        # price limit checks
+        # value limit checks
+        # if self.value_limit_cent < post.price_cent:
+        # value limit check is applied to the original post value as the referral reward could be set arbitrarily
         if self.value_limit_cent < node.value_cent:
-            # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
-            # value limit check is applied to the original post value as the referral reward could be set arbitrarily
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_BUY and self.balance_available_cent < node.value_cent:
@@ -544,8 +538,8 @@ class User(UserMixin, db.Model):
         asker = engagement.asker
         answerer = engagement.answerer
 
-        # if self.value_limit_cent < (post.value_cent if post.type == Post.TYPE_BUY else round(0.9 * post.value_cent)):
         # value limit check is applied to the original post value as the referral reward could be set arbitrarily
+        # if self.value_limit_cent < post.price_cent:
         # if self.value_limit_cent < node.value_cent:
         #     raise InvalidActionError(
         #         'Cannot rate engagement as successful because the post reward exceeds the reward limit of the user')
@@ -772,7 +766,7 @@ def _distribute_reward_cent(node, fraction):
         if len(nodes) == 1:  # there is only OP's node - should never reach here
             raise RewardDistributionError('Cannot distribute reward from the root node')
         # Default total referral cap = 20% of OP reward:
-        total_referrer_reward_cent_cap = round(0.2 * fraction * post.value_cent)
+        total_referrer_reward_cent_cap = round(0.2 * fraction * post.price_cent)
         referrer_nodes.reverse()
         for referrer_node in referrer_nodes:
             referrer = referrer_node.creator

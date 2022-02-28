@@ -14,7 +14,8 @@ class TUIEditorField(TextAreaField):
 
 
 class PostForm(FlaskForm):
-    referral_budget = 0.2
+    platform_fee = 0.1  # Default
+    referral_budget = 0.2  # Default for standard mode
 
     type = RadioField("Are you buying or selling?",
                       choices=[
@@ -37,20 +38,21 @@ class PostForm(FlaskForm):
             raise ValidationError(f'Title cannot be less than {TITLE_MIN_LENGTH} characters')
 
     def validate_price(self, field):
-        # price limit checks
+        # value limit checks
         # if current_user.value_limit_cent < 100 * field.data:
         #     raise ValidationError(f'Your current price limit is {current_user.reward_limit:.2f}.')
 
         if self.type.data == Post.TYPE_BUY:
-            if current_user.value_limit_cent < 100 * field.data:
+            if current_user.value_limit_cent < round(100 * field.data):
                 raise ValidationError(f'Your current limit on buying price is {current_user.reward_limit:.2f}.')
         if self.type.data == Post.TYPE_SELL:
-            value_cent = round(round(100 * field.data) / 0.9)
+            value_cent = round(100 * field.data)
+            value_cent += round(self.platform_fee * value_cent)
             value_cent += round(self.referral_budget * value_cent)
             if current_user.value_limit_cent < value_cent:
                 raise ValidationError(
                     'Your current limit on selling price is ' +
-                    f'{current_user.reward_limit / (1 + self.referral_budget) * 0.9:.2f}.'
+                    f'{current_user.reward_limit / (1 + self.platform_fee + self.referral_budget):.2f}.'
                 )
 
 

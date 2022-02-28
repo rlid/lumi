@@ -6,7 +6,7 @@
     {% set n_nodes = node.post.nodes.count() - 1 %}
     {% if n_nodes > 0 %}
         <div class="alert alert-secondary small py-1" role="alert">
-            {{ node.post.nodes.count() - 1 }} other users have shared or contributed to this post.
+            {{ n_nodes }} users have shared or contributed to this post.
         </div>
     {% endif %}
     {% for node, last_timestamp in nodes %}
@@ -39,7 +39,7 @@
                        {% endif %}
                    {% endif %}
                 </a>
-                <b>{{ render_user(node.creator, capitalize=False) }}</b>
+                {{ render_user(node.creator, capitalize=False) }}
             </div>
             <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none">
                 <div class="card-body pt-0">

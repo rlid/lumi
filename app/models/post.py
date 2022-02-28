@@ -30,7 +30,7 @@ class Post(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     type = db.Column(db.String(16), nullable=False)
-    value_cent = db.Column(db.Integer, nullable=False)
+    price_cent = db.Column(db.Integer, nullable=False)
     platform_fee_cent = db.Column(db.Integer, nullable=False)
 
     social_media_mode = db.Column(db.Boolean, default=False, nullable=False)

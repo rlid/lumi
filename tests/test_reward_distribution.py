@@ -26,7 +26,7 @@ class BasicsTestCase(unittest.TestCase):
         u4 = User(email='4', total_balance_cent=1000)
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
-        p = u1.create_post(type=Post.TYPE_BUY, value_cent=500, title='')
+        p = u1.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
         n = u3.create_node(n)
         n = u4.create_node(n)
@@ -48,7 +48,7 @@ class BasicsTestCase(unittest.TestCase):
         u4 = User(email='4', total_balance_cent=1000)
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
-        p = u1.create_post(type=Post.TYPE_SELL, value_cent=400, title='')
+        p = u1.create_post(post_type=Post.TYPE_SELL, price_cent=200, title='')
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
         n = u3.create_node(n)
         n = u4.create_node(n)
@@ -57,11 +57,11 @@ class BasicsTestCase(unittest.TestCase):
         u1.accept_engagement(e)
         u1.rate_engagement(e, True)
         u5.rate_engagement(e, True)
-        self.assertEqual(u1.total_balance_cent, 1360)
-        self.assertEqual(u2.total_balance_cent, 1010)
-        self.assertEqual(u3.total_balance_cent, 1020)
-        self.assertEqual(u4.total_balance_cent, 1040)
-        self.assertEqual(u5.total_balance_cent, 530)
+        self.assertEqual(u1.total_balance_cent, 1200)
+        self.assertEqual(u2.total_balance_cent, 1005)
+        self.assertEqual(u3.total_balance_cent, 1010)
+        self.assertEqual(u4.total_balance_cent, 1020)
+        self.assertEqual(u5.total_balance_cent, 745)
 
     def test_social_media_mode_buy(self):
         u1 = User(email='1', total_balance_cent=1000)
@@ -71,8 +71,8 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
         p = u1.create_post(
-            type=Post.TYPE_BUY,
-            value_cent=500,
+            post_type=Post.TYPE_BUY,
+            price_cent=500,
             title='',
             social_media_mode=True)
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
@@ -97,12 +97,12 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
         p = u1.create_post(
-            type=Post.TYPE_SELL,
-            value_cent=300,
+            post_type=Post.TYPE_SELL,
+            price_cent=300,
             title='',
             social_media_mode=True,
             referral_budget_cent=200)
-        n = u2.create_node(p.nodes.filter(Node.creator == u1).first(), 40)
+        n = u2.create_node(p.nodes.filter(Node.creator == u1).first(), referrer_reward_cent=40)
         n = u3.create_node(n, referrer_reward_cent=50)
         n = u4.create_node(n, referrer_reward_cent=20)
         n = u5.create_node(n, referrer_reward_cent=90)
@@ -110,11 +110,11 @@ class BasicsTestCase(unittest.TestCase):
         u1.accept_engagement(e)
         u1.rate_engagement(e, True)
         u5.rate_engagement(e, True)
-        self.assertEqual(u1.total_balance_cent, 1270)
+        self.assertEqual(u1.total_balance_cent, 1300)
         self.assertEqual(u2.total_balance_cent, 1040)
         self.assertEqual(u3.total_balance_cent, 1050)
         self.assertEqual(u4.total_balance_cent, 1020)
-        self.assertEqual(u5.total_balance_cent, 590)
+        self.assertEqual(u5.total_balance_cent, 560)
 
     def test_reputation_standard_mode(self):
         u1 = User(email='1', total_balance_cent=10000)
@@ -124,7 +124,7 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=10000)
         db.session.add_all([u1, u2, u3, u4, u5])
 
-        p1 = u1.create_post(type=Post.TYPE_BUY, value_cent=400, title='')
+        p1 = u1.create_post(post_type=Post.TYPE_BUY, price_cent=400, title='')
         n12 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
         e = u2.create_engagement(n12)
         u1.accept_engagement(e)
@@ -161,7 +161,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u1.value_limit_cent, 800)
         self.assertEqual(u4.value_limit_cent, 200)
 
-        p2 = u2.create_post(type=Post.TYPE_BUY, value_cent=300, title='')
+        p2 = u2.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
         n23 = u3.create_node(p2.nodes.filter(Node.creator == u2).first())
         e = u3.create_engagement(n23)
         u2.accept_engagement(e)
@@ -182,7 +182,7 @@ class BasicsTestCase(unittest.TestCase):
         u3 = User(email='3', total_balance_cent=10000)
         db.session.add_all([u1, u2, u3])
 
-        p1 = u1.create_post(type=Post.TYPE_SELL, value_cent=400, title='')
+        p1 = u1.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
         n12 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
         e = u2.create_engagement(n12)
         u1.accept_engagement(e)
@@ -210,16 +210,16 @@ class BasicsTestCase(unittest.TestCase):
         u1.rate_engagement(e, True)
         u3.rate_engagement(e, True)
 
-        p2 = u2.create_post(type=Post.TYPE_BUY, value_cent=500, title='')
+        p2 = u2.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
         n23 = u3.create_node(p2.nodes.filter(Node.creator == u2).first())
         e = u3.create_engagement(n23)
         u2.accept_engagement(e)
         u2.rate_engagement(e, False)
         u3.rate_engagement(e, True)
-        a = -500 + math.exp(-500 * REP_DECAY) * 400 + math.exp(-900 * REP_DECAY) * 400 + math.exp(
-            -1300 * REP_DECAY) * 400
-        b = 500 + math.exp(-500 * REP_DECAY) * 400 + math.exp(-900 * REP_DECAY) * 400 + math.exp(
-            -1300 * REP_DECAY) * 400
+        a = -500 + math.exp(-500 * REP_DECAY) * 440 + math.exp(-940 * REP_DECAY) * 440 + math.exp(
+            -1380 * REP_DECAY) * 440
+        b = 500 + math.exp(-500 * REP_DECAY) * 440 + math.exp(-940 * REP_DECAY) * 440 + math.exp(
+            -1380 * REP_DECAY) * 440
         self.assertAlmostEqual(u2.sum_x, a)
         self.assertAlmostEqual(u3.sum_x, a)
         self.assertAlmostEqual(u2.reputation, a / b)
@@ -236,8 +236,8 @@ class BasicsTestCase(unittest.TestCase):
         db.session.add_all([u1, u2, u3, u4, u5])
 
         p1 = u1.create_post(
-            type=Post.TYPE_SELL,
-            value_cent=300,
+            post_type=Post.TYPE_SELL,
+            price_cent=300,
             title='',
             social_media_mode=True)
         n2 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
@@ -255,34 +255,34 @@ class BasicsTestCase(unittest.TestCase):
 
         u1.rate_engagement(e3, True)
         u3.rate_engagement(e3, False)
-        self.assertAlmostEqual(u1.sum_x, -360)
-        self.assertAlmostEqual(u3.sum_x, -360)
+        self.assertAlmostEqual(u1.sum_x, -(300 + 60 + 30))
+        self.assertAlmostEqual(u3.sum_x, -(300 + 60 + 30))
         self.assertAlmostEqual(u1.reputation, -1.0)
         self.assertAlmostEqual(u3.reputation, -1.0)
-        self.assertEqual(u1.value_limit_cent, 180)
-        self.assertEqual(u3.value_limit_cent, 180)
+        self.assertEqual(u1.value_limit_cent, round(0.5 * (300 + 60 + 30)))
+        self.assertEqual(u3.value_limit_cent, round(0.5 * (300 + 60 + 30)))
 
         u1.rate_engagement(e4, False)
         u4.rate_engagement(e4, True)
-        a = 195 - math.exp(-195 * REP_DECAY) * 360
-        b = 195 + math.exp(-195 * REP_DECAY) * 360
+        a = round(0.5 * (300 + 60 + 30 + 30)) - math.exp(-210 * REP_DECAY) * 390
+        b = round(0.5 * (300 + 60 + 30 + 30)) + math.exp(-210 * REP_DECAY) * 390
         self.assertAlmostEqual(u1.sum_x, a)
-        self.assertAlmostEqual(u4.sum_x, 195)
+        self.assertAlmostEqual(u4.sum_x, 210)
         self.assertAlmostEqual(u1.reputation, a / b)
         self.assertAlmostEqual(u4.reputation, 1.0)
-        self.assertEqual(u1.value_limit_cent, 190)
-        self.assertEqual(u4.value_limit_cent, 598)
+        self.assertEqual(u1.value_limit_cent, 195 + round(210 * 0.05))
+        self.assertEqual(u4.value_limit_cent, 500 + round(210 * 0.5))
 
         u1.rate_engagement(e5, True)
         u5.rate_engagement(e5, True)
-        a = 405 + math.exp(-405 * REP_DECAY) * 195 - math.exp(-600 * REP_DECAY) * 360
-        b = 405 + math.exp(-405 * REP_DECAY) * 195 + math.exp(-600 * REP_DECAY) * 360
-        self.assertAlmostEqual(u1.sum_x, 405 + math.exp(-405 * REP_DECAY) * 195 - math.exp(-600 * REP_DECAY) * 360)
-        self.assertAlmostEqual(u5.sum_x, 405)
+        a = (300 + 60 + 30 + 30 + 15) + math.exp(-435 * REP_DECAY) * 210 - math.exp(-645 * REP_DECAY) * 390
+        b = (300 + 60 + 30 + 30 + 15) + math.exp(-435 * REP_DECAY) * 210 + math.exp(-645 * REP_DECAY) * 390
+        self.assertAlmostEqual(u1.sum_x, a)
+        self.assertAlmostEqual(u5.sum_x, 435)
         self.assertAlmostEqual(u1.reputation, a / b)
         self.assertAlmostEqual(u5.reputation, 1.0)
-        self.assertEqual(u1.value_limit_cent, 271)
-        self.assertEqual(u5.value_limit_cent, 702)
+        self.assertEqual(u1.value_limit_cent, 195 + round(210 * 0.05) + round(435 * 0.2))
+        self.assertEqual(u5.value_limit_cent, 500 + round(435 * 0.5))
 
     def test_leakage(self):
         u1 = User(email='1', total_balance_cent=10000)
@@ -292,16 +292,16 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=10000)
         users = [u1, u2, u3, u4, u5]
         db.session.add_all(users)
-        p1b = u1.create_post(type=Post.TYPE_BUY, value_cent=100, title='')
-        p1s = u1.create_post(type=Post.TYPE_SELL, value_cent=500, title='')
-        p2b = u2.create_post(type=Post.TYPE_BUY, value_cent=200, title='')
-        p2s = u2.create_post(type=Post.TYPE_SELL, value_cent=400, title='')
-        p3b = u3.create_post(type=Post.TYPE_BUY, value_cent=300, title='')
-        p3s = u3.create_post(type=Post.TYPE_SELL, value_cent=300, title='')
-        p4b = u4.create_post(type=Post.TYPE_BUY, value_cent=400, title='')
-        p4s = u4.create_post(type=Post.TYPE_SELL, value_cent=200, title='')
-        p5b = u5.create_post(type=Post.TYPE_BUY, value_cent=500, title='')
-        p5s = u5.create_post(type=Post.TYPE_SELL, value_cent=100, title='')
+        p1b = u1.create_post(post_type=Post.TYPE_BUY, price_cent=100, title='')
+        p1s = u1.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='')
+        p2b = u2.create_post(post_type=Post.TYPE_BUY, price_cent=200, title='')
+        p2s = u2.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
+        p3b = u3.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
+        p3s = u3.create_post(post_type=Post.TYPE_SELL, price_cent=300, title='')
+        p4b = u4.create_post(post_type=Post.TYPE_BUY, price_cent=400, title='')
+        p4s = u4.create_post(post_type=Post.TYPE_SELL, price_cent=200, title='')
+        p5b = u5.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
+        p5s = u5.create_post(post_type=Post.TYPE_SELL, price_cent=100, title='')
         posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
         random = Random(1)
@@ -309,8 +309,9 @@ class BasicsTestCase(unittest.TestCase):
             for user in users:
                 post = random.choice(posts)
                 if user != post.creator:
-                    if user.value_limit_cent >= post.value_cent and post.creator.value_limit_cent >= post.value_cent:
-                        node = user.create_node(random.choice(post.nodes.all()))
+                    parent_node = random.choice(post.nodes.all())
+                    if user.value_limit_cent >= parent_node.value_cent and post.creator.value_limit_cent >= parent_node.value_cent:
+                        node = user.create_node(parent_node)
                         engagement = user.create_engagement(node)
                         post.creator.accept_engagement(engagement)
                         user.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)
@@ -320,7 +321,3 @@ class BasicsTestCase(unittest.TestCase):
         final_balance = sum([u.total_balance for u in users])
         platform_fees = sum([fee.amount for fee in PlatformFee.query.all()])
         self.assertAlmostEqual(initial_balance - final_balance, platform_fees)
-
-
-if __name__ == '__main__':
-    unittest.main()
