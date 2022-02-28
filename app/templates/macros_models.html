@@ -40,7 +40,7 @@
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     {% set post = node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
-        <div class="card-body py-2">
+        <div class="card-body pt-2 pb-1">
             <p class="small text-muted mb-1">
                 {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 {{ render_user(post.creator) }}
@@ -229,7 +229,7 @@
     label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
     {% set post = engagement.node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
-        <div class="card-body py-2">
+        <div class="card-body pt-2 pb-1">
             <p class="small text-muted mb-1">
                 {% if post.social_media_mode %}<span class="badge bg-dark">Social Media Mode</span>{% endif %}
                 {% if current_user == post.creator %}
