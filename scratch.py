@@ -199,8 +199,8 @@ def sim_existing():
     db.session.commit()
 
 
-def sim_all(n_days=50,
-            n_users=50,
+def sim_all(n_days=20,
+            n_users=10,
             n_tags=50,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
