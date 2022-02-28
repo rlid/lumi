@@ -19,10 +19,10 @@
                             </div>
                             <div class="text-end">
                                 <div class="text-muted">A {{ user.adjective }} user</div>
-                                <small class="text-muted">
+                                <span class="text-muted">
                                     <a class="badge btn-primary text-decoration-none"
                                        href="{{ url_for('main.user', user_id=current_user.id) }}">My Public Profile</a>
-                                </small>
+                                </span>
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between lh-sm">
@@ -31,7 +31,7 @@
                             </div>
                             <div class="text-end">
                                 <div class="text-muted">{{ '${0:.2f}'.format(user.total_balance - user.reserved_balance) }}</div>
-                                <small>
+                                <span>
                                     <a class="badge btn-success text-decoration-none text-white"
                                        href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_5']) }}">Top-up
                                         $5</a>
@@ -41,7 +41,7 @@
                                     <a class="badge btn-danger text-decoration-none text-white"
                                        href="{{ url_for('main.top_up', price_id=config['STRIPE_PRICE_20']) }}">Top-up
                                         $20</a>
-                                </small>
+                                </span>
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between lh-sm">

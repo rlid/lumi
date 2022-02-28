@@ -145,7 +145,8 @@ def request_engagement(node_id):
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
     if post.type == Post.TYPE_SELL and \
             current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
-        flash('Insufficient funds, please top up before you proceed.', category='warning')
+        flash('Insufficient funds, please ' +
+              Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
         return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
 
     # the user must have his own node, and the request must be made on that node:
@@ -204,7 +205,8 @@ def accept_engagement(engagement_id):
               category='danger')
     elif post.type == Post.TYPE_BUY and \
             current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
-        flash('Insufficient funds, please top up before you proceed.', category='warning')
+        flash('Insufficient funds, please ' +
+              Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
         return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
     else:
         current_user.accept_engagement(engagement)
