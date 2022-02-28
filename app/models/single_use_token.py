@@ -33,6 +33,9 @@ class SingleUseToken(db.Model):
         if token is None:
             return False
         elif datetime.utcnow() > token.expiry:
+            db.session.delete(token)
+            db.session.commit()
+            print(f'Deleted {token}.')
             return False
         else:
             db.session.delete(token)
