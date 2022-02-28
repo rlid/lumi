@@ -73,11 +73,11 @@ class Node(db.Model):
             else:
                 return 0.01 * self.value_cent
 
-        answerer_reward_cent, sum_referrer_reward_cent = self.rewards_for_next_node_cent()
+        answerer_reward_cent, sum_referrer_reward_cent, value_cent = self.rewards_for_next_node_cent()
         if post.type == Post.TYPE_BUY:
             return 0.01 * answerer_reward_cent
         else:
-            return 0.01 * (answerer_reward_cent + sum_referrer_reward_cent + self.post.platform_fee_cent)
+            return 0.01 * value_cent
 
     def display_referrer_reward(self, user):
         post = self.post
@@ -110,6 +110,7 @@ class Node(db.Model):
 
     def rewards_for_next_node_cent(self):
         post = self.post
+        value_cent = self.value_cent
         answerer_reward_cent = self.answerer_reward_cent
         sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()
         if post.type == Post.TYPE_BUY:
@@ -117,7 +118,12 @@ class Node(db.Model):
                 answerer_reward_cent -= self.referrer_reward_cent
             else:
                 answerer_reward_cent = post.price_cent - post.platform_fee_cent - sum_referrer_reward_cent
-        return answerer_reward_cent, sum_referrer_reward_cent
+        else:
+            if post.social_media_mode:
+                value_cent += self.referrer_reward_cent
+            else:
+                value_cent = answerer_reward_cent + post.platform_fee_cent + sum_referrer_reward_cent
+        return answerer_reward_cent, sum_referrer_reward_cent, value_cent
 
     @property
     def value(self):

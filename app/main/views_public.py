@@ -135,6 +135,7 @@ def view_node(node_id):
             node=node,
             user_node=node,
             nodes=nodes,
+            Post=Post,
             Engagement=Engagement,
             Message=Message)
 
@@ -165,6 +166,7 @@ def view_node(node_id):
             engagement_request=engagement_request,
             messages_asc=messages_asc,
             form=form,
+            Post=Post,
             Engagement=Engagement,
             Message=Message)
 
@@ -177,4 +179,4 @@ def view_node(node_id):
             return redirect(url_for('main.view_node', node_id=user_node.id))
         else:
             flash("Cannot send message because the post is now archived.", category='danger')
-    return render_template("view_node_as_other_user.html", node=node, form=form)
+    return render_template("view_node_as_other_user.html", node=node, form=form, Post=Post)

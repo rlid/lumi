@@ -377,7 +377,7 @@ class User(UserMixin, db.Model):
 
     def _create_node(self, parent_node, referrer_reward_cent=None):
         post = parent_node.post
-        answerer_reward_cent, sum_referrer_reward_cent = parent_node.rewards_for_next_node_cent()
+        answerer_reward_cent, sum_referrer_reward_cent, value_cent = parent_node.rewards_for_next_node_cent()
 
         if post.social_media_mode:
             if referrer_reward_cent is None:
@@ -391,7 +391,7 @@ class User(UserMixin, db.Model):
         node = Node(creator=self,
                     post=parent_node.post,
                     parent=parent_node,
-                    value_cent=answerer_reward_cent + sum_referrer_reward_cent + post.platform_fee_cent,
+                    value_cent=value_cent,
                     answerer_reward_cent=answerer_reward_cent,
                     referrer_reward_cent=referrer_reward_cent)
         return node

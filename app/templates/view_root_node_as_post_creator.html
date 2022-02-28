@@ -1,14 +1,12 @@
 {% extends "index.html" %}
 {% from "macros_models.html" import render_message, render_user with context %}
+{% from "macros_utils.html" import render_reward_info with context %}
 
 {% block mid_col %}
     {{ render_post_card(node, buttons=True) }}
-    {% set n_nodes = node.post.nodes.count() - 1 %}
-    {% if n_nodes > 0 %}
-        <div class="alert alert-secondary small py-1" role="alert">
-            {{ n_nodes }} users have shared or contributed to this post.
-        </div>
-    {% endif %}
+
+    {{ render_reward_info(node) }}
+
     {% for node, last_timestamp in nodes %}
         {% set messages = node.messages_ordered(order_desc=True) %}
         <div class="card mb-3
