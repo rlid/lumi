@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% from "macros_models.html" import render_message with context %}
 {% from "macros_form.html" import text_area_style, button_class with context %}
+{% from "macros_utils.html" import render_reward_info with context %}
 
 {% macro engagement_style(engagement) %}
     {% if engagement.state == Engagement.STATE_COMPLETED %}
@@ -36,9 +37,7 @@
 
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-    <div class="alert alert-secondary small py-1" role="alert">
-        You can earn up to {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }} by sharing this post.
-    </div>
+    {{ render_reward_info(node) }}
     {% set current = namespace(engagement_id=-1, timestamp=none, section_id=none) %}
     {% for message in messages_asc %}
         {% if message.engagement_id != current.engagement_id %}

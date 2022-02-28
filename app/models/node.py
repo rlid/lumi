@@ -64,37 +64,34 @@ class Node(db.Model):
 
     def display_value(self, user):
         post = self.post
-        user_node = None
-        if user == self.creator:
-            user_node = self  # heuristics for performance (trying to avoid the database query below)
-        elif user.is_authenticated:
-            user_node = post.nodes.filter_by(creator=user).first()
-        if user_node is None:
-            user_node = self
+        if user == post.creator:
+            return 0.01 * post.price_cent
 
-        if (post.type == Post.TYPE_BUY and user == post.creator) or \
-                (post.type == Post.TYPE_SELL and user != post.creator):
-            # viewer is a buyer - display full value
-            answerer_reward_cent, sum_referrer_reward_cent = user_node.rewards_for_next_node_cent()
-            return 0.01 * (answerer_reward_cent + sum_referrer_reward_cent + post.platform_fee_cent)
+        if user == self.creator:
+            if post.type == Post.TYPE_BUY:
+                return 0.01 * self.answerer_reward_cent
+            else:
+                return 0.01 * self.value_cent
+
+        answerer_reward_cent, sum_referrer_reward_cent = self.rewards_for_next_node_cent()
+        if post.type == Post.TYPE_BUY:
+            return 0.01 * answerer_reward_cent
         else:
-            # viewer is a seller - display answerer reward only
-            return 0.01 * self.answerer_reward_cent
+            return 0.01 * (answerer_reward_cent + sum_referrer_reward_cent + self.post.platform_fee_cent)
 
     def display_referrer_reward(self, user):
         post = self.post
+        if user == post.creator:
+            return 0
+
         if post.social_media_mode:
-            user_node = None
             if user == self.creator:
-                user_node = self  # heuristics for performance (trying to avoid the database query below)
-            elif user.is_authenticated:
-                user_node = post.nodes.filter_by(creator=user).first()
-            if user_node is None:
-                return 0.005 * self.remaining_referral_budget_cent  # Default is 50% of remaining
+                return 0.01 * self.referrer_reward_cent
             else:
-                return 0.01 * user_node.referrer_reward_cent
+                # TODO: make this (up to) 100% of remaining in power user mode
+                return 0.01 * round(0.5 * self.remaining_referral_budget_cent)
         else:
-            return 0.005 * post.referral_budget_cent
+            return 0.01 * round(0.5 * post.referral_budget_cent)
 
     def _sum_referrer_reward_inc_cent(self):
         """Sum of all referrer rewards assuming the successful engagement is on the next node"""
