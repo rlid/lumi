@@ -52,11 +52,11 @@ def handle_message_sent(message):
 
     message = current_user.create_message(node, message['text'])
 
-    new_section = message.engagement_id != last_message.engagement_id
+    new_section = last_message is None or message.engagement_id != last_message.engagement_id
     html = render_template('message.html',
                            message=message,
                            viewer=current_user,
-                           last_timestamp=last_message.timestamp,
+                           last_timestamp=last_message.timestamp if last_message is not None else None,
                            gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
                            # available here. TODO: try to match the logic for existing messages
                            Message=Message)

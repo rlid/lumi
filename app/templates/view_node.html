@@ -81,7 +81,7 @@
 {% if current.engagement_id == -1 %}
     {# no message, so need to create a div block #}
     {% set current.section_id = "sectionNew" %}
-    <div class="rounded px-3 mb-3">
+    <div class="px-3 mb-3">
     <div id="{{ current.section_id }}">
 {% endif %}
 {# before rendering the form, close the div tag for messages to display #}
@@ -335,49 +335,6 @@
             toast.hidden = false;
             {#location.reload();#}
         });
-
-        {#let btnRequest = document.getElementById('btnRequest')#}
-        {#if (btnRequest) {#}
-        {#    btnRequest.onclick = event => {#}
-        {#        socket.emit(#}
-        {#            'engagement_requested',#}
-        {#            {#}
-        {#                node_id: "{{ node.id }}"#}
-        {#            });#}
-        {#    };#}
-        {
-            #};
-            #}
-            {#socket.on('processed_engagement_requested', message => {#}
-            {#    let toast = document.getElementById('nodeToast');#}
-            {#    let toastText = document.getElementById('nodeToastText');#}
-            {#    toastText.innerHTML = message.html;#}
-            {#    toast.hidden = false;#}
-            {#location.reload();#}
-            {#})
-                ;
-                #}
-                {#let btnAccept = document.getElementById('btnAccept')#}
-                {#if (btnAccept) {#}
-                {#    btnAccept.onclick = event => {#}
-                {#        socket.emit(#}
-                {#            'engagement_accepted',#}
-                {#            {#}
-                {#                node_id: "{{ node.id }}"#}
-                {#            });#}
-                {#    };#}
-                {
-                    #};
-                    #}
-                    {#socket.on('processed_engagement_accepted', message => {#}
-                    {#    let toast = document.getElementById('nodeToast');#}
-                    {#    let toastText = document.getElementById('nodeToastText');#}
-                    {#    toastText.innerHTML = message.html;#}
-                    {#    toast.hidden = false;#}
-                    {#location.reload();#}
-                    {#})
-                        ;
-        #}
     </script>
 {% endmacro %}
 
