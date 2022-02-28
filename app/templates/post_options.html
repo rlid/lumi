@@ -1,7 +1,7 @@
-{% extends "post_form.html" %}
+{% extends "index.html" %}
 
 {% block mid_col %}
-    <h3 class="mb-3">Choose a mode to use</h3>
+    <h3 class="mb-3">Choose a mode for your post</h3>
     <a href="{{ url_for('main.new_post', standard_mode=1) }}" class="text-decoration-none">
         <div class="card text-dark bg-light mb-3">
             <h5 class="card-header">
