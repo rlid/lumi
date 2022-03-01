@@ -19,7 +19,7 @@ class BasicsTestCase(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_standard_mode_buy(self):
+    def test_public_buy(self):
         u1 = User(email='1', total_balance_cent=1000)
         u2 = User(email='2', total_balance_cent=1000)
         u3 = User(email='3', total_balance_cent=1000)
@@ -41,7 +41,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u4.total_balance_cent, 1050)
         self.assertEqual(u5.total_balance_cent, 1363)
 
-    def test_standard_mode_sell(self):
+    def test_public_sell(self):
         u1 = User(email='1', total_balance_cent=1000)
         u2 = User(email='2', total_balance_cent=1000)
         u3 = User(email='3', total_balance_cent=1000)
@@ -63,7 +63,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u4.total_balance_cent, 1020)
         self.assertEqual(u5.total_balance_cent, 745)
 
-    def test_social_media_mode_buy(self):
+    def test_private_buy(self):
         u1 = User(email='1', total_balance_cent=1000)
         u2 = User(email='2', total_balance_cent=1000)
         u3 = User(email='3', total_balance_cent=1000)
@@ -74,7 +74,7 @@ class BasicsTestCase(unittest.TestCase):
             post_type=Post.TYPE_BUY,
             price_cent=500,
             title='',
-            social_media_mode=True)
+            is_private=True)
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
         n = u3.create_node(n)
         n = u4.create_node(n)
@@ -89,7 +89,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u4.total_balance_cent, 1025)
         self.assertEqual(u5.total_balance_cent, 1275)
 
-    def test_social_media_mode_sell(self):
+    def test_private_sell(self):
         u1 = User(email='1', total_balance_cent=1000)
         u2 = User(email='2', total_balance_cent=1000)
         u3 = User(email='3', total_balance_cent=1000)
@@ -100,7 +100,7 @@ class BasicsTestCase(unittest.TestCase):
             post_type=Post.TYPE_SELL,
             price_cent=300,
             title='',
-            social_media_mode=True,
+            is_private=True,
             referral_budget_cent=200)
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first(), referrer_reward_cent=40)
         n = u3.create_node(n, referrer_reward_cent=50)
@@ -116,7 +116,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u4.total_balance_cent, 1020)
         self.assertEqual(u5.total_balance_cent, 560)
 
-    def test_reputation_standard_mode(self):
+    def test_reputation_public(self):
         u1 = User(email='1', total_balance_cent=10000)
         u2 = User(email='2', total_balance_cent=10000)
         u3 = User(email='3', total_balance_cent=10000)
@@ -176,7 +176,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u2.value_limit_cent, 700)
         self.assertEqual(u3.value_limit_cent, 225)
 
-    def test_reputation_standard_mode_tie(self):
+    def test_reputation_public_tie(self):
         u1 = User(email='1', total_balance_cent=10000)
         u2 = User(email='2', total_balance_cent=10000)
         u3 = User(email='3', total_balance_cent=10000)
@@ -227,7 +227,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u2.value_limit_cent, 500)
         self.assertEqual(u2.value_limit_cent, 500)
 
-    def test_reputation_social_media_mode(self):
+    def test_reputation_private(self):
         u1 = User(email='1', total_balance_cent=10000)
         u2 = User(email='2', total_balance_cent=10000)
         u3 = User(email='3', total_balance_cent=10000)
@@ -239,7 +239,7 @@ class BasicsTestCase(unittest.TestCase):
             post_type=Post.TYPE_SELL,
             price_cent=300,
             title='',
-            social_media_mode=True)
+            is_private=True)
         n2 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
         n3 = u3.create_node(n2)
         n4 = u4.create_node(n3)

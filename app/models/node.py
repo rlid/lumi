@@ -84,7 +84,7 @@ class Node(db.Model):
         if user == post.creator:
             return 0
 
-        if post.social_media_mode:
+        if post.is_private:
             if user == self.creator:
                 return 0.01 * self.referrer_reward_cent
             else:
@@ -96,7 +96,7 @@ class Node(db.Model):
     def _sum_referrer_reward_inc_cent(self):
         """Sum of all referrer rewards assuming the successful engagement is on the next node"""
         post = self.post
-        if post.social_media_mode:
+        if post.is_private:
             return self.sum_referrer_reward_cent + self.referrer_reward_cent
         else:
             sum_referrer_reward_cent = 0
@@ -114,12 +114,12 @@ class Node(db.Model):
         answerer_reward_cent = self.answerer_reward_cent
         sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()
         if post.type == Post.TYPE_BUY:
-            if post.social_media_mode:
+            if post.is_private:
                 answerer_reward_cent -= self.referrer_reward_cent
             else:
                 answerer_reward_cent = post.price_cent - post.platform_fee_cent - sum_referrer_reward_cent
         else:
-            if post.social_media_mode:
+            if post.is_private:
                 value_cent += self.referrer_reward_cent
             else:
                 value_cent = answerer_reward_cent + post.platform_fee_cent + sum_referrer_reward_cent

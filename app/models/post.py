@@ -33,7 +33,7 @@ class Post(db.Model):
     price_cent = db.Column(db.Integer, nullable=False)
     platform_fee_cent = db.Column(db.Integer, nullable=False)
 
-    social_media_mode = db.Column(db.Boolean, default=False, nullable=False)
+    is_private = db.Column(db.Boolean, default=False, nullable=False)
     referral_budget_cent = db.Column(db.Integer)
 
     is_archived = db.Column(db.Boolean, default=False, nullable=False)

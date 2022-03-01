@@ -252,7 +252,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, post_type, price_cent, title, body='', social_media_mode=False, referral_budget_cent=None):
+    def create_post(self, post_type, price_cent, title, body='', is_private=False, referral_budget_cent=None):
 
 
         title = title.strip()
@@ -265,10 +265,10 @@ class User(UserMixin, db.Model):
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
 
         if referral_budget_cent is None:
-            if social_media_mode:
-                referral_budget_cent = round(0.4 * price_cent)  # Default is 40% of the post value in social media mode
+            if is_private:
+                referral_budget_cent = round(0.4 * price_cent)  # Default is 40% of the post value in private mode
             else:
-                referral_budget_cent = round(0.2 * price_cent)  # Default is 20% of the post value in standard mode
+                referral_budget_cent = round(0.2 * price_cent)  # Default is 20% of the post value in public mode
 
         platform_fee_cent = round(0.1 * price_cent)  # Default is 10% of the post value
         if post_type == Post.TYPE_BUY:
@@ -280,7 +280,7 @@ class User(UserMixin, db.Model):
                     type=post_type,
                     price_cent=price_cent,
                     platform_fee_cent=platform_fee_cent,
-                    social_media_mode=social_media_mode,
+                    is_private=is_private,
                     referral_budget_cent=referral_budget_cent,
                     title=title,
                     body=('m' if self.use_markdown else 's') + body)
@@ -289,7 +289,7 @@ class User(UserMixin, db.Model):
         self._add_tag(post, 'Buying' if post_type == Post.TYPE_BUY else 'Selling')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
 
-        if social_media_mode:
+        if is_private:
             node = Node(
                 post=post,
                 creator=self,
@@ -309,7 +309,7 @@ class User(UserMixin, db.Model):
 
         return post
 
-    def edit_post(self, post, title, body, social_media_mode=None, referral_budget_cent=None):
+    def edit_post(self, post, title, body, is_private=None, referral_budget_cent=None):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -321,8 +321,8 @@ class User(UserMixin, db.Model):
 
         post.title = title
         post.body = ('m' if self.use_markdown else 's') + body
-        if social_media_mode is not None:
-            post.social_media_mode = social_media_mode
+        if is_private is not None:
+            post.is_private = is_private
         if referral_budget_cent is not None:
             post.referral_budget_cent = referral_budget_cent
         post.ping(datetime.utcnow())
@@ -379,7 +379,7 @@ class User(UserMixin, db.Model):
         post = parent_node.post
         answerer_reward_cent, sum_referrer_reward_cent, value_cent = parent_node.rewards_for_next_node_cent()
 
-        if post.social_media_mode:
+        if post.is_private:
             if referrer_reward_cent is None:
                 # Default for each referrer is 50% of the remaining referral budget:
                 referrer_reward_cent = round(0.5 * parent_node.remaining_referral_budget_cent)
@@ -755,7 +755,7 @@ def _distribute_reward_cent(node, fraction):
     sum_referrer_reward_cent = 0
     nodes = node.nodes_before_inc().all()  # all nodes including buyers and sellers
     referrer_nodes = nodes[1:(len(nodes) - 1)]  # referrers only
-    if post.social_media_mode:
+    if post.is_private:
         for node in referrer_nodes:
             referrer = node.creator
             referrer_reward_cent = round(fraction * node.referrer_reward_cent)

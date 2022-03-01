@@ -16,7 +16,7 @@ class BasicsTestCase(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_buy_post_standard_mode(self):
+    def test_buy_post_public(self):
         poster = User(email='poster', total_balance_cent=1000)
         referrer = User(email='contributor', total_balance_cent=1000)
         other_user = User(email='other_user', total_balance_cent=1000)
@@ -41,7 +41,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertAlmostEqual(node.display_referrer_reward(referrer), 0.5 * 0.2 * 5)
         self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.2 * 5)
 
-    def test_sell_post_standard_mode(self):
+    def test_sell_post_public(self):
         poster = User(email='poster', total_balance_cent=1000)
         referrer = User(email='contributor', total_balance_cent=1000)
         other_user = User(email='other_user', total_balance_cent=1000)
@@ -67,13 +67,13 @@ class BasicsTestCase(unittest.TestCase):
         self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.2 * 5)
 
 
-    def test_buy_post_social_media_mode(self):
+    def test_buy_post_private(self):
         poster = User(email='poster', total_balance_cent=1000)
         referrer = User(email='contributor', total_balance_cent=1000)
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='', social_media_mode=True)
+        post = poster.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='', is_private=True)
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)
@@ -93,13 +93,13 @@ class BasicsTestCase(unittest.TestCase):
         self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.5 * 0.4 * 5)
 
 
-    def test_sell_post_social_media_mode(self):
+    def test_sell_post_private(self):
         poster = User(email='poster', total_balance_cent=1000)
         referrer = User(email='contributor', total_balance_cent=1000)
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='', social_media_mode=True)
+        post = poster.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='', is_private=True)
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)

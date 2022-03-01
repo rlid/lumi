@@ -205,7 +205,7 @@ def sim_all(n_days=20,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
             p_post=0.25,
-            p_social_media_mode=1.0,
+            p_private=1.0,
             p_share=0.75,
             p_message=0.5,
             p_request=0.75,
@@ -236,12 +236,12 @@ def sim_all(n_days=20,
         for user in users:
             if random.uniform(0, 1) < p_post:
                 value_cent = random.randint(100, user.value_limit_cent)
-                if random.uniform(0, 1) < p_social_media_mode:
+                if random.uniform(0, 1) < p_private:
                     post = user.create_post(post_type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
                                             price_cent=value_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))),
-                                            social_media_mode=True,
+                                            is_private=True,
                                             referral_budget_cent=round(0.4 * value_cent))
                 else:
                     post = user.create_post(post_type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
@@ -262,7 +262,7 @@ def sim_all(n_days=20,
                 ).all()
                 if len(nodes) > 0:
                     parent_node = random.choice(nodes)
-                    if parent_node.post.social_media_mode:
+                    if parent_node.post.is_private:
                         user.create_node(
                             parent_node=parent_node,
                             referrer_reward_cent=random.randint(

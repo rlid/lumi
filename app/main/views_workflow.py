@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormSocialMediaMode, PostFormSocialMediaMode
+from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormPrivate, PostFormPrivate
 from app.models.user import Post, Node, Engagement
 
 
@@ -14,19 +14,19 @@ def post_options():
     return render_template("post_options.html")
 
 
-@main.route('/post/<int:standard_mode>', methods=['GET', 'POST'])
+@main.route('/post/<int:is_private>', methods=['GET', 'POST'])
 @login_required
-def new_post(standard_mode):
-    if standard_mode == 1:
+def new_post(is_private):
+    if is_private == 0:
         form = MarkdownPostForm() if current_user.use_markdown else PostForm()
     else:
-        form = MarkdownPostFormSocialMediaMode() if current_user.use_markdown else PostFormSocialMediaMode()
+        form = MarkdownPostFormPrivate() if current_user.use_markdown else PostFormPrivate()
     if form.validate_on_submit():
         post_type = form.type.data
         price_cent = round(100 * form.price.data)
         post = current_user.create_post(post_type=post_type, price_cent=price_cent,
                                         title=form.title.data, body=form.body.data,
-                                        social_media_mode=(standard_mode == 0))
+                                        is_private=(is_private == 1))
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
     if current_user.use_markdown:

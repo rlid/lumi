@@ -50,7 +50,7 @@ def browse():
             Node.parent_id.is_(None),
             PostTag.tag_id.in_(tag_ids_to_filter),
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
-            Post.social_media_mode.is_not(True),
+            Post.is_private.is_not(True),
             Post.is_archived.is_not(True)
         ).group_by(
             Node
@@ -64,7 +64,7 @@ def browse():
         ).filter(
             Node.parent_id.is_(None),
             Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
-            Post.social_media_mode.is_not(True),
+            Post.is_private.is_not(True),
             Post.is_archived.is_not(True)
         )
         tags_in_filter = []

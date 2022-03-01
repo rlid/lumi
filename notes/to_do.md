@@ -1,6 +1,6 @@
 # To-Do
 
-## Implement social media mode
+## Implement private mode
 - Purpose: guarantee referral reward is paid (answerer cannot cheat)
 - Hide the post on the site and make the root node inaccessible, so the answerer is forced to share the reward
 - Total referral reward is capped at [20%] of total reward
@@ -12,7 +12,7 @@
 - (slight) problem: some incentive for a referer to use multiple accounts to create a chain referrals to extract max value from the total referral reward
   - the inventive is typically too small to justify the effort (create accounts and get all accounts to above withdrawal threshold)
   - the pattern will be easier to detect (accounts with only referral activities, because user is incentivised to reach withdraw threshold as quickly as possible)
-- Option for mode switching: a post will start in social media mode for certain duration and then be accessible from main site when the referral reward will be discretionary (and will incentivise distance to answerer)
+- Option for mode switching: a post will start in private mode for certain duration and then be accessible from main site when the referral reward will be discretionary (and will incentivise distance to answerer)
   - the time limit changes the distribution inventive that favours short distance to asker, in the sense that it is better to find an answerer before the mode change to guarantee a referral reward
 
 

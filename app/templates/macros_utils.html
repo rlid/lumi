@@ -41,10 +41,10 @@
             {% if n_nodes > 0 %}
                 {{ n_nodes }} {% if n_nodes > 1 %}users{% else %}user{% endif %} have shared or contributed to this
                 post.
-            {% elif post.social_media_mode %}
+            {% elif post.is_private %}
                 Share your post and let others join the search! Send it to your friends or share it on Twitter,
                 Facebook, Twitter, Reddit... whatever your favorite online community is. Your post is in
-                <b>Social Media Mode</b>, which means it solely relies on the power of your social networks to reach
+                <b>Private Mode</b>, which means it solely relies on the power of your social networks to reach
                 the people you are looking for.
             {% else %}
                 Share your post and let others join the search! Send it to your friends or share it on Twitter,
