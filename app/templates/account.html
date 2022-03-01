@@ -18,7 +18,8 @@
                                 <h6 class="my-0">Known As</h6>
                             </div>
                             <div class="text-end">
-                                <div class="text-muted">A {{ user.adjective }} user</div>
+                                <div class="text-muted">A {% if user.adjective %}{{ user.adjective }}{% endif %} user
+                                </div>
                                 <span class="text-muted">
                                     <a class="badge btn-primary text-decoration-none"
                                        href="{{ url_for('main.user', user_id=current_user.id) }}">My Public Profile</a>

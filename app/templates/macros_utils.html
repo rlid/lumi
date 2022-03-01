@@ -39,7 +39,7 @@
         {% set n_nodes = post.nodes.count() - 1 %}
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             {% if n_nodes > 0 %}
-                {{ n_nodes }} {% if n_nodes > 1 %}users{% else %}user{% endif %} have shared or contributed to this
+                {{ n_nodes }} {% if n_nodes > 1 %}users have{% else %}user has{% endif %} shared or contributed to this
                 post.
             {% elif post.is_private %}
                 Share your post and let others join the search! Send it to your friends or share it on Twitter,
