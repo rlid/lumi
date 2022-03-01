@@ -21,7 +21,7 @@ def privacy():
 
 @main.route('/cookie')
 def cookie():
-    return render_template("privacy.html", title="Cookie Policy")
+    return render_template("cookie.html", title="Cookie Policy")
 
 
 @main.route('/alerts')
