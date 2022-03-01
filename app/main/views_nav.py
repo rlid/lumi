@@ -19,6 +19,11 @@ def privacy():
     return render_template("privacy.html", title="Privacy Policy")
 
 
+@main.route('/cookie')
+def cookie():
+    return render_template("privacy.html", title="Cookie Policy")
+
+
 @main.route('/alerts')
 @login_required
 def alerts():
