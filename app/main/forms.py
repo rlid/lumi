@@ -43,13 +43,12 @@ class PostForm(FlaskForm):
         #     raise ValidationError(f'Your current price limit is {current_user.reward_limit:.2f}.')
         price_cent = round(100 * field.data)
         if self.type.data == Post.TYPE_BUY:
-            if current_user.value_limit_cent < round(100 * price_cent):
+            if current_user.value_limit_cent < price_cent:
                 raise ValidationError(f'Your current limit on buying price is {current_user.reward_limit:.2f}.')
         if self.type.data == Post.TYPE_SELL:
             value_cent = price_cent
             value_cent += round(self.platform_fee * price_cent)
             value_cent += round(self.referral_budget * price_cent)
-            print(value_cent)
             if current_user.value_limit_cent < value_cent:
                 raise ValidationError(
                     'Your current limit on selling price is ' +
