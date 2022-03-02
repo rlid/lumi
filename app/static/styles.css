@@ -6,7 +6,7 @@ Apple iPhone SE
 */
 
 @media (max-width: 340px) {
-    .hide-3b {
+    .hide-340 {
       display: none;
     }
 }
@@ -32,7 +32,7 @@ Apple iPhone 13 Pro
 */
 
 @media (max-width: 414px) {
-    .hide-4b {
+    .hide-414 {
       display: none;
     }
 }
