@@ -25,7 +25,7 @@
                 {{ render_nav_item("main.post_options", "Post", "bi-plus-square", visible_from="sm") }}
                 {{ render_nav_item("main.how_it_works", "How It Works", "bi-signpost-split", visible_from="md") }}
                 {{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}
-                {{ render_nav_item(text="Help", icon="bi-question-circle", link="mailto:support@lumiask.com", visible_from="sm") }}
+                {{ render_nav_item(text="Help", icon="bi-question-circle", link="https://api.whatsapp.com/send?phone=+447774523701", visible_from="sm") }}
             </ul>
             <ul class="navbar-nav ms-auto mb-2">
                 <li class="nav-item">
@@ -95,8 +95,8 @@
                 {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}
                 {{ render_nav_item_bottom("main.post_options", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", extra_class="hide-4b") }}
-                {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", "sm") }}
-                {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle", "sm") }}
+                {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", visible_from="sm") }}
+                {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle", visible_from="sm") }}
                 {% if request.MOBILE %}
                     {{ render_nav_item_bottom(link="javascript:history.forward()", icon="bi-arrow-90deg-right", extra_class="ms-auto", alt="Forward") }}
                 {% endif %}
@@ -105,7 +105,8 @@
                 {{ render_nav_item_bottom(link="https://fb.me/KnowbleApp", icon="bi-facebook") }}
                 {{ render_nav_item_bottom(link="https://www.linkedin.com/company/knowbleapp", icon="bi-linkedin") }}
                 {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord") }}
-                {{ render_nav_item_bottom(link="mailto:info@lumiask.com", icon="bi-envelope-fill") }}
+                {{ render_nav_item_bottom(link="https://api.whatsapp.com/send?phone=+447774523701", icon="bi-whatsapp") }}
+                {{ render_nav_item_bottom(link="mailto:info@lumiask.com", icon="bi-envelope-fill", extra_class="hide-3b") }}
             {% endif %}
         </ul>
     </div>
