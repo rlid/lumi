@@ -1,6 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField
+from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField, IntegerRangeField
 from wtforms.validators import InputRequired, NumberRange, Length
 from wtforms.validators import ValidationError
 
@@ -68,6 +68,11 @@ class MarkdownPostForm(PostForm):
 
 class MarkdownPostFormPrivate(MarkdownPostForm):
     referral_budget = 0.4  # Default for private mode
+
+
+class ShareForm(FlaskForm):
+    percentage = IntegerRangeField('Percentage')
+    submit = SubmitField('Adjust')
 
 
 class MessageForm(FlaskForm):

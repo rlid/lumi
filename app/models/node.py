@@ -89,7 +89,7 @@ class Node(db.Model):
                 return 0.01 * self.referrer_reward_cent
             else:
                 # TODO: make this (up to) 100% of remaining in power user mode
-                return 0.01 * round(0.5 * self.remaining_referral_budget_cent)
+                return 0.01 * self.remaining_referral_budget_cent
         else:
             return 0.01 * round(0.5 * post.referral_budget_cent)
 

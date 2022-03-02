@@ -4,8 +4,9 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormPrivate, PostFormPrivate
+from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormPrivate, PostFormPrivate, ShareForm
 from app.models.user import Post, Node, Engagement
+from utils.math import round_js
 
 
 @main.route('/post-options')
@@ -110,7 +111,7 @@ def report_post(post_id):
     return redirect(url_for('main.index'))
 
 
-@main.route('/node/<node_id>/share')
+@main.route('/node/<node_id>/share', methods=['GET', 'POST'])
 @login_required
 def share_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
@@ -120,7 +121,19 @@ def share_node(node_id):
             user_node = current_user.create_node(node)
     else:
         user_node = node
-    return render_template('share_node.html', node=user_node)
+
+    form = ShareForm()
+    if form.validate_on_submit():
+        if node.post.is_private and node.nodes_after__inc().count() == 1:
+            node.referrer_reward_cent = round_js(
+                0.01 * form.percentage.data * node.parent.remaining_referral_budget_cent)
+            db.session.add(node)
+            db.session.commit()
+            flash(f'Your referrer reward is adjusted to ${0.01 * node.referrer_reward_cent:.2f}', category='info')
+            return redirect(url_for('main.share_node', node_id=node_id))
+        else:
+            flash('You cannot adjust your referrer reward.', category='warning')
+    return render_template('share_node.html', node=user_node, form=form)
 
 
 @main.route('/node/<node_id>/request-engagement')

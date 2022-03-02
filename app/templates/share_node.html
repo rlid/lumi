@@ -1,23 +1,79 @@
 {% extends "index.html" %}
+{% from "macros_form.html" import render_form %}
 
 {% block mid_col %}
     <div class="card">
-        <div class="card-body">
+        <div class="card-body pb-0">
             <h5 class="card-title">Here is your unique referral link for this post:</h5>
-            <div class="card-text">
+            <div class="card-text small">
                 <p class="my-3">
                     {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
                     <a href="{{ node_url }}">
                         {{ node_url }}
                     </a>
                 </p>
-                <p class="text-muted small">
-                    You can now share this link with your friends. Every time a reward is paid out, a portion of it
-                    will be shared with all referrers linking the asker to the answerer, distributed according to the
+                <p class="text-muted">
+                    You can now share this link with your friends. Upon each successful engagement, a referral reward
+                    will be shared among all referrers linking the buyer and the seller, distributed according to the
                     <a href="#">reward distribution rules</a>.
                 </p>
                 {{ render_post_card(node, buttons=False) }}
+
+                {% if node.post.is_private and current_user != node.post.creator %}
+                    <div class="mt-4">
+                        <h6>How much referral reward to claim?</h6>
+                        <p class="text-muted mb-1">
+                            The default is to claim half of the remaining referral budget (the total budget of
+                            {{ '${0:.2f}'.format(node.parent.display_referrer_reward(current_user)) }}
+                            is set by the OP) but you can choose a different amount, between:
+                        </p>
+                        <ul class="text-muted">
+                            <li>0% - you are a good friend and just want to help</li>
+                            <li>100% - you will put in lots of effort helping OP to connect, and don't need others to
+                                spread the word further (or you are just cheeky!)
+                            </li>
+                        </ul>
+
+                        <div class="mt-0 mb-3 p-2 border rounded">
+                            <p>Your current choice:
+                                $<span id="valueBox">
+                                {{- '{0:.2f}'.format(node.display_referrer_reward(current_user)) -}}
+                            </span>
+                                {% set percentage = (100 * node.display_referrer_reward(current_user) / node.parent.display_referrer_reward(current_user))|round|int %}
+                                (<span id="percentBox">
+                                {{- percentage -}}
+                            </span>% of the pot)
+                            </p>
+                            <form id="form" method="post">
+                                {{ form.hidden_tag() }}
+                                <div class="row">
+                                    <div class="col">
+                                        {{ form.percentage(
+                                            class_="form-range",
+                                            min=0,
+                                            max=100,
+                                            value=percentage,
+                                            step=25,
+                                            oninput="showValue(this.value)") }}
+                                    </div>
+                                    <div class="col-auto">
+                                        {{ form.submit(class_="btn btn-primary btn-sm") }}
+                                    </div>
+                                </div>
+                            </form>
+                            <script>
+                                function showValue(newValue) {
+                                    document.getElementById("valueBox").innerHTML = (0.0001 * newValue * {{ node.parent.remaining_referral_budget_cent }}).toFixed(2);
+                                    document.getElementById("percentBox").innerHTML = newValue;
+                                }
+                            </script>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+
+
 {% endblock %}
