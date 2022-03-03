@@ -33,7 +33,8 @@ csp = {
         'https://static.hotjar.com'
         'https://unpkg.com',
         'https://uicdn.toast.com'
-    ]
+    ],
+    'img-src': '\'self\' data:image/svg+xml'
 }
 
 
