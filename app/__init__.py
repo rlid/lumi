@@ -27,6 +27,7 @@ talisman = Talisman()
 csp = {
     'default-src': [
         '\'self\'',
+        'https://lumiask.com'
         'https://cdnjs.cloudflare.com',
         'https://cdn.jsdelivr.net',
         'https://www.googletagmanager.com',
