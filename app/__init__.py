@@ -34,7 +34,7 @@ csp = {
         'https://unpkg.com',
         'https://uicdn.toast.com'
     ],
-    'img-src': '\'self\' data:image/svg+xml'
+    'img-src': '\'self\' data:'
 }
 
 
