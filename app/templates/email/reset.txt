@@ -1,0 +1,10 @@
+Hi there,
+
+To reset your password, please visit the link below:
+
+{{ url_for("auth.password_reset", token=token, _external=True) }}
+
+If you have not requested a password reset please ignore this message.
+
+Cheers,
+Team LumiAsk

@@ -158,7 +158,11 @@ def resend_confirmation():
         return redirect(url_for("main.index"))
 
     token = current_user.generate_token(action="confirm")
-    print(url_for("auth.confirm", token=token, _external=True))
+    send_email(
+        sender='LumiAsk <welcome@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
+        body_text=render_template('email/confirm.txt', token=token),
+        body_html=render_template('email/confirm.html', token=token)
+    )
     flash(f'A new confirmation email has been sent to {current_user.email}.',
           category="info")
     return redirect(url_for("main.index"))
@@ -214,7 +218,11 @@ def password_reset_request():
                     site_rid,
                     digest_size=Config.SITE_RID_HASH_DIGEST_SIZE
                 ))
-            print(url_for("auth.password_reset", token=token, _external=True))
+            send_email(
+                sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Reset your password',
+                body_text=render_template('email/reset.txt', token=token),
+                body_html=render_template('email/reset.html', token=token)
+            )
             flash(f'An email with instructions to reset your password has been sent to {form.email.data}.',
                   category='info')
             return redirect(url_for('main.index'))
