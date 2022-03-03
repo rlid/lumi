@@ -26,18 +26,14 @@ sock = Sock()
 talisman = Talisman()
 csp = {
     'default-src': [
-        '\'self\'',
-        'https://lumiask.com'
+        '\'unsafe-inline\' \'self\'',
         'https://cdnjs.cloudflare.com',
         'https://cdn.jsdelivr.net',
         'https://www.googletagmanager.com',
         'https://static.hotjar.com'
         'https://unpkg.com',
         'https://uicdn.toast.com'
-    ],
-    'style-src': '\'unsafe-inline\' \'self\'',
-    'script-src': '\'unsafe-inline\' \'self\'',
-    'font-src': '*'
+    ]
 }
 
 
