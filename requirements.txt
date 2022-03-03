@@ -3,6 +3,8 @@ Authlib==1.0.0rc1
 bidict==0.21.4
 bleach==4.1.0
 Bootstrap-Flask==2.0.1
+boto3==1.21.11
+botocore==1.24.11
 certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.12
@@ -25,6 +27,7 @@ h11==0.13.0
 idna==3.3
 itsdangerous==2.1.0
 Jinja2==3.0.3
+jmespath==0.10.0
 Markdown==3.3.6
 MarkupSafe==2.1.0
 packaging==21.3
@@ -33,12 +36,16 @@ pycparser==2.21
 pyparsing==3.0.7
 python-dateutil==2.8.2
 python-engineio==4.3.1
+python-http-client==3.3.6
 python-socketio==5.5.2
 requests==2.27.1
+s3transfer==0.5.2
 scramp==1.4.1
+sendgrid==6.9.6
 simple-websocket==0.5.1
 six==1.16.0
 SQLAlchemy==1.4.31
+starkbank-ecdsa==2.0.3
 stripe==2.66.0
 urllib3==1.26.8
 webencodings==0.5.1

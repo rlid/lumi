@@ -14,6 +14,10 @@
 
 - `gcloud app logs tail -s default`
 
+## AWS
+
+- Using the EB CLI with AWS CodeCommit: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli-codecommit.html
+
 ## Git
 
 - `git remote add [name] [url]` for each additional repo
