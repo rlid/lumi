@@ -10,6 +10,7 @@ from app.models.invite_code import InviteCode
 from app.models.user import User
 from config import Config
 from utils import security_utils
+from utils.email import send_email
 
 
 # intended user: is_authenticated no | signup_method email | email_verified all
@@ -103,7 +104,11 @@ def signup():
         db.session.commit()
         session.pop("invite_code")
         token = user.generate_token(action="confirm")
-        print(url_for("auth.confirm", token=token, _external=True))
+        send_email(
+            sender='LumiAsk <welcome@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
+            body_text=render_template('email/confirm.txt', token=token),
+            body_html=render_template('email/confirm.html', token=token)
+        )
         flash(f'A confirmation email has been sent to {form.email.data}.',
               category="info")
         login_user(user, remember=False)

@@ -1,15 +1,15 @@
+# using SendGrid's Python Library
+# https://github.com/sendgrid/sendgrid-python
+import os
 
-
-
-# The email body for recipients with non-HTML email clients.
-from utils.aws import send_email
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 body_text = ("Amazon SES Test (Python)\r\n"
              "This email was sent with Amazon SES using the "
              "AWS SDK for Python (Boto)."
              )
 
-# The HTML body of the email.
 body_html = """<html>
 <head></head>
 <body>
@@ -21,10 +21,26 @@ body_html = """<html>
 </body>
 </html>
             """
-send_email(
-    sender='sender@lumiask.com',
-    recipient='recipient@lumiask.com',
-    subject="Amazon SES Test (SDK for Python)",
-    body_text=body_text,
-    body_html=body_html
-)
+# send_email(
+#     sender='sender@lumiask.com',
+#     recipient='recipient@lumiask.com',
+#     subject="Amazon SES Test (SDK for Python)",
+#     body_text=body_text,
+#     body_html=body_html
+# )
+
+
+message = Mail(
+    from_email='sender@lumiask.com',
+    to_emails='recipient@lumiask.com',
+    subject='Sending with Twilio SendGrid is Fun',
+    plain_text_content=body_text,
+    html_content=body_html)
+try:
+    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    response = sg.send(message)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+except Exception as e:
+    print(e.message)

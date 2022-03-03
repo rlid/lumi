@@ -1,0 +1,8 @@
+Thanks for signing up!
+
+Please click on the link below to activate your account:
+
+{{ url_for("auth.confirm", token=token, _external=True) }}
+
+Cheers,
+Team LumiAsk
