@@ -8,6 +8,7 @@ from flask_moment import Moment
 from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -22,6 +23,7 @@ moment = Moment()
 mobility = Mobility()
 socketio = SocketIO()
 sock = Sock()
+talisman = Talisman()
 
 
 def create_app(config_name):
@@ -37,6 +39,7 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
+    talisman.init_app(app)
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 

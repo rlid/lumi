@@ -1,319 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Confirm your LumiAsk account</title>
     <style>
-        /* -------------------------------------
-            GLOBAL RESETS
-        ------------------------------------- */
-        img {
-            border: none;
-            -ms-interpolation-mode: bicubic;
-            max-width: 100%;
-        }
-
         body {
-            background-color: #f6f6f6;
             font-family: sans-serif;
-            -webkit-font-smoothing: antialiased;
-            font-size: 14px;
-            line-height: 1.4;
-            margin: 0;
-            padding: 0;
+            background-color: #eeeeee;
+            max-width: 600px;
+            -moz-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
             -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
         }
 
-        table {
-            border-collapse: separate;
-            mso-table-lspace: 0;
-            mso-table-rspace: 0;
-            width: 100%;
-        }
-
-        table td {
-            font-family: sans-serif;
+        p {
             font-size: 14px;
-            vertical-align: top;
-        }
-
-        /* -------------------------------------
-            BODY & CONTAINER
-        ------------------------------------- */
-        .body {
-            background-color: #f6f6f6;
-            width: 100%;
-        }
-
-        /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
-        .container {
-            display: block;
-            Margin: 0 auto !important;
-            /* makes it centered */
-            max-width: 580px;
-            padding: 10px;
-            width: 580px;
-        }
-
-        /* This should also be a block element, so that it will fill 100% of the .container */
-        .content {
-            box-sizing: border-box;
-            display: block;
-            Margin: 0 auto;
-            max-width: 580px;
-            padding: 10px;
-        }
-
-        /* -------------------------------------
-            HEADER, FOOTER, MAIN
-        ------------------------------------- */
-        .main {
-            background: #fff;
-            border-radius: 3px;
-            width: 100%;
-        }
-
-        .wrapper {
-            box-sizing: border-box;
-            padding: 20px;
-        }
-
-        .footer {
-            clear: both;
-            padding-top: 10px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .footer td,
-        .footer p,
-        .footer span,
-        .footer a {
-            color: #999999;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        /* -------------------------------------
-            TYPOGRAPHY
-        ------------------------------------- */
-        h1,
-        h2,
-        h3,
-        h4 {
-            color: #000000;
-            font-family: sans-serif;
-            font-weight: 400;
-            line-height: 1.4;
-            margin: 0 0 30px;
-        }
-
-        p,
-        ul,
-        ol {
-            font-family: sans-serif;
-            font-size: 14px;
-            font-weight: normal;
-            margin: 0 0 15px;
-        }
-
-        p li,
-        ul li,
-        ol li {
-            list-style-position: inside;
-            margin-left: 5px;
-        }
-
-        a {
-            color: #3498db;
-            text-decoration: underline;
-        }
-
-        /* -------------------------------------
-            BUTTONS
-        ------------------------------------- */
-        .btn > tbody > tr > td {
-            padding-bottom: 15px;
-        }
-
-        .btn table {
-            width: auto;
-        }
-
-        .btn table td {
-            background-color: #ffffff;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .btn a {
-            background-color: #ffffff;
-            border: solid 1px #3498db;
-            border-radius: 5px;
-            box-sizing: border-box;
-            color: #3498db;
-            cursor: pointer;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: bold;
-            margin: 0;
-            padding: 12px 25px;
-            text-decoration: none;
-            text-transform: capitalize;
-        }
-
-        .btn-primary table td {
-            background-color: #3498db;
-        }
-
-        .btn-primary a {
-            background-color: #3498db;
-            border-color: #3498db;
-            color: #ffffff;
-        }
-
-        /* -------------------------------------
-            OTHER STYLES THAT MIGHT BE USEFUL
-        ------------------------------------- */
-        .powered-by a {
-            text-decoration: none;
-        }
-
-        hr {
-            border: 0;
-            border-bottom: 1px solid #f6f6f6;
-            Margin: 20px 0;
-        }
-
-        /* -------------------------------------
-            RESPONSIVE AND MOBILE FRIENDLY STYLES
-        ------------------------------------- */
-        @media only screen and (max-width: 620px) {
-            table[class=body] h1 {
-                font-size: 28px !important;
-                margin-bottom: 10px !important;
-            }
-
-            table[class=body] p,
-            table[class=body] ul,
-            table[class=body] ol,
-            table[class=body] td,
-            table[class=body] span,
-            table[class=body] a {
-                font-size: 16px !important;
-            }
-
-            table[class=body] .wrapper,
-            table[class=body] .content {
-                padding: 0 !important;
-            }
-
-            table[class=body] .container {
-                padding: 0 !important;
-                width: 100% !important;
-            }
-
-            table[class=body] .main {
-                border-left-width: 0 !important;
-                border-radius: 0 !important;
-                border-right-width: 0 !important;
-            }
-
-            table[class=body] .btn table {
-                width: 100% !important;
-            }
-
-            table[class=body] .btn a {
-                width: 100% !important;
-            }
-        }
-
-        @media all {
-            .ExternalClass p,
-            .ExternalClass span,
-            .ExternalClass font,
-            .ExternalClass td,
-            .ExternalClass div {
-                line-height: 100%;
-            }
-
-            .apple-link a {
-                color: inherit !important;
-                font-family: inherit !important;
-                font-size: inherit !important;
-                font-weight: inherit !important;
-                line-height: inherit !important;
-                text-decoration: none !important;
-            }
-
-            .btn-primary table td:hover {
-                background-color: #34495e !important;
-            }
-
-            .btn-primary a:hover {
-                background-color: #34495e !important;
-                border-color: #34495e !important;
-            }
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-<!-- start preheader -->
-  <div class="preheader" style="display: none">
-    Welcome to LumiAsk! You are just one step away from activating your account.
-  </div>
-<table class="body">
-    <tr>
-        <td class="container">
-            <div class="content">
-                <table class="main">
-                    <!-- START MAIN CONTENT AREA -->
-                    <tr>
-                        <td class="wrapper">
-                            <h1>Thanks for signing up!</h1>
-                            <p>Please tap the button below to verify your email address. If you didn't
-                                create an account with <a href="https://lumiask.com">LumiAsk</a>, you can safely delete
-                                this email.</p>
-                            <div style="text-align: center; margin: 2rem">
-                                <a href="{{ url_for("auth.confirm", token=token, _external=True) }}"
-                                   style="display: inline-block; padding: 8px 16px; font-weight: bold; font-size: 1.2em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                                    Verify Email Now</a>
-                            </div>
-                            <p>If that doesn't work, copy and paste the following link in your browser:
-                            {{ url_for("auth.confirm", token=token, _external=True) }}</p>
-                            <p style="margin-top: 3rem">
-                                Cheers,
-                                <br>
-                                Team LumiAsk
-                            </p>
-                        </td>
-                    </tr>
-                    <!-- END MAIN CONTENT AREA -->
-                </table>
-
-                <!-- START FOOTER -->
-                <div class="footer">
-                    <table>
-                        <tr>
-                            <td class="content-block">
-                                <span class="apple-link">&copy; 2022 LumiAsk.com</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="content-block powered-by">
-                                Created by <a href="https://www.linkedin.com/company/knowbleltd">Knowble</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <!-- END FOOTER -->
-
-                <!-- END CENTERED WHITE CONTAINER -->
+    <div class="preheader" style="display: none">
+        Welcome to LumiAsk! You are just one step away from activating your account.
+    </div>
+    <main style="width: 100%">
+        <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
+            <h2 style="font-weight: normal">Thanks for signing up!</h2>
+            <p>Please tap the button below to verify
+                your email address. If you didn't create an account with <a href="https://lumiask.com">LumiAsk</a>, you
+                can
+                safely delete this email.</p>
+            <div style="text-align: center; margin: 2rem">
+                <a href="{{ url_for("auth.confirm", token=token, _external=True) }}"
+                   style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                    Verify Email Now</a>
             </div>
-        </td>
-    </tr>
-</table>
+            <p>If that doesn't work, copy and paste the following link in your browser:
+                {{ url_for("auth.confirm", token=token, _external=True) }}</p>
+            <p style="margin-top: 3rem">
+                Cheers,
+                <br>
+                Team LumiAsk
+            </p>
+        </div>
+    </main>
 </body>
 </html>
