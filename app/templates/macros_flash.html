@@ -37,7 +37,6 @@
 
 {% macro render_flash(messages=None, dismissible=False, dismiss_animate=False,
                          category_map={
-                             'privacy': 'background-color: #ffffff',
                              'success':'background-color: mediumspringgreen;',
                              'info':'background-color: cyan;',
                              'warning':'background-color: yellow;',
@@ -51,23 +50,13 @@
             {% if messages -%} {# don't output anything if there are no messages #}
                 {% for cat, msg in messages %}
                     <div class="toast" role="alert" data-bs-delay="10000"
-                         {% if cat == "privacy" %}data-bs-autohide="false"{% endif %}
                          style="{{ category_map[cat] }}">
-                     {% if cat == "privacy" %}
-                         {{ msg }}
-                     {% else %}
                         <div class="d-flex">
                             <div class="toast-body">
-                                {% if cat == "privacy" %}
-                                    {{ msg }}
-                                {% else %}
-{#                                     <small>{{ msg }}</small>#}
-                                    {{ msg }}
-                                {% endif %}
+                                {{ msg }}
                             </div>
                             <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                    {% endif %}
                     </div>
                 {%- endfor -%}
             {% endif -%}

@@ -18,20 +18,6 @@ def before_request():
                   'to request another confirmation email.', category='warning')
             return redirect(url_for('main.browse'))
 
-    # if session.get('allow_cookie') is None:
-    #     flash(Markup(
-    #         '<div class="toast-header bg-light"><strong class="me-auto">Cookie Notice</strong><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div>') + \
-    #           Markup(
-    #               '<div class="toast-body pt-2"><p class="mb-1">This site only uses essential cookies by default. ' +
-    #               'We’d also like to use analytics cookies so we can measure and improve the performance of our site. Do you want to allow analytics cookies?</p><div style="font-size:1.1rem">' +
-    #               f'<a class="badge btn-primary text-decoration-none" href={url_for("main.allow_cookie", choice=1)}>' +
-    #               'Accept</a> ' +
-    #               f'<a class="badge btn-primary text-decoration-none" href={url_for("main.allow_cookie", choice=0)}>' +
-    #               'Reject</a> ' +
-    #               f'<a class="badge btn-primary text-decoration-none" href={url_for("main.cookie")}>' +
-    #               'Learn More</a></div></div>')
-    #           , category='privacy')
-
 
 @main.route('/')
 def index():
@@ -41,7 +27,7 @@ def index():
 @main.route('/allow_cookie/<int:choice>')
 def allow_cookie(choice):
     session['allow_cookie'] = choice == 1
-    return redirect(url_for('main.index'))
+    return redirect(request.referrer)
 
 
 @main.route('/reset_cookie')
