@@ -24,6 +24,17 @@ mobility = Mobility()
 socketio = SocketIO()
 sock = Sock()
 talisman = Talisman()
+csp = {
+    'default-src': [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com',
+        'https://cdn.jsdelivr.net',
+        'https://www.googletagmanager.com',
+        'https://static.hotjar.com'
+        'https://unpkg.com',
+        'https://uicdn.toast.com'
+    ]
+}
 
 
 def create_app(config_name):
@@ -39,7 +50,7 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    talisman.init_app(app)
+    talisman.init_app(app, content_security_policy=csp)
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
