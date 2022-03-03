@@ -8,7 +8,7 @@ from flask_moment import Moment
 from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-from flask_talisman import Talisman
+from flask_talisman import Talisman, GOOGLE_CSP_POLICY
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -25,16 +25,7 @@ socketio = SocketIO()
 sock = Sock()
 talisman = Talisman()
 csp = {
-    'default-src': [
-        '\'self\'',
-        'https://lumiask.com'
-        'https://cdnjs.cloudflare.com',
-        'https://cdn.jsdelivr.net',
-        'https://www.googletagmanager.com',
-        'https://static.hotjar.com'
-        'https://unpkg.com',
-        'https://uicdn.toast.com'
-    ]
+    'default-src': '*'
 }
 
 
@@ -52,6 +43,7 @@ def create_app(config_name):
     mobility.init_app(app)
     socketio.init_app(app)
     talisman.init_app(app, content_security_policy=csp)
+
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
