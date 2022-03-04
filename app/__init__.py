@@ -28,12 +28,16 @@ csp = {
     'default-src': [
         '\'unsafe-inline\' \'self\'',
         '*.cloudflare.com',
-        '*.jsdelivr.net',
+        '*.jsdelivr.net'
+    ],
+    'script-src': [
         '*.googletagmanager.com',
+        '*.google-analytics.com',
         '*.hotjar.com',
         '*.unpkg.com',
         '*.toast.com'
     ],
+    'connect-src': 'wss://*.hotjar.com',
     'img-src': '\'self\' data:'
 }
 
