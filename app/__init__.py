@@ -26,19 +26,16 @@ sock = Sock()
 talisman = Talisman()
 csp = {
     'default-src': [
-        '\'unsafe-inline\' \'self\'',
-    ],
-    'script-src': [
+        '\'unsafe-inline\' \'self\''
         '*.jsdelivr.net',
         '*.cloudflare.com',
         '*.unpkg.com',
         '*.toast.com',
         '*.googletagmanager.com',
         '*.google-analytics.com',
-        '*.hotjar.com'
+        '*.hotjar.com',
+        'wss://*.hotjar.com'
     ],
-    'style-src': '*.jsdelivr.net',
-    'connect-src': 'wss://*.hotjar.com',
     'img-src': '\'self\' data:'
 }
 
