@@ -124,12 +124,12 @@ def share_node(node_id):
 
     form = ShareForm()
     if form.validate_on_submit():
-        if node.post.is_private and node.nodes_after__inc().count() == 1:
-            node.referrer_reward_cent = round_js(
-                0.01 * form.percentage.data * node.parent.remaining_referral_budget_cent)
-            db.session.add(node)
+        if user_node.post.is_private and user_node.nodes_after__inc().count() == 1:
+            user_node.referrer_reward_cent = round_js(
+                0.01 * form.percentage.data * user_node.parent.remaining_referral_budget_cent)
+            db.session.add(user_node)
             db.session.commit()
-            flash(f'Your referrer reward is adjusted to ${0.01 * node.referrer_reward_cent:.2f}', category='info')
+            flash(f'Your referrer reward is adjusted to ${0.01 * user_node.referrer_reward_cent:.2f}', category='info')
             return redirect(url_for('main.share_node', node_id=node_id))
         else:
             flash('You cannot adjust your referrer reward.', category='warning')
