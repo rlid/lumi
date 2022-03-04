@@ -34,18 +34,15 @@
     {% endif %}
 {% endmacro %}
 
-{# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
-{% macro render_post_card(node, truncate_body=False, buttons=False, tag_limit=None,
-    style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
-    label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+{% macro render_card(node, above_title=None, after_title=None, card_text=None, card_footer=None,
+    style_map={'buy':'info', 'sell':'warning'},
+    label_map={'buy':'Buying', 'sell':'Selling'}) %}
     {% set post = node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
-        <div class="card-body pt-2 pb-1">
-            <p class="small text-muted mb-1">
-                {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
-                {{ render_user(post.creator) }}
-                posted {{ moment(post.timestamp).fromNow() }}
-            </p>
+        <div class="card-body pt-2 pb-{%- if card_text -%}2{% else %}0{% endif %}">
+            {% if above_title %}
+                {{ above_title }}
+            {% endif %}
             <div class="card-title">
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
@@ -61,122 +58,160 @@
                    href="{{ url_for("main.view_node", node_id=node.id) }}">
                     <b>{{ post.title }}</b>
                 </a>
-                {% for post_tag in post.post_tags[:tag_limit] %}
-                    {{ render_tag(post_tag.tag) }}
-                {% endfor %}
-            </div>
-            {% if truncate_body %}
-                <a class="text-decoration-none"
-                   href="{{ url_for("main.view_node", node_id=node.id) }}">
-            {% endif %}
-            <div class="card-text small text-dark {{ 'truncated-sm' if truncate_body }}">
-                {% if post.body_html %}
-                    {{ post.body_html | safe }}
-                {% else %}
-                    {{ post.body[1:] }}
+                {% if after_title %}
+                    {{ after_title }}
                 {% endif %}
             </div>
-            {% if truncate_body %}
-                </a>
+            {% if card_text %}
+                {{ card_text }}
             {% endif %}
         </div>
-        {% if buttons %}
-            <div class="card-footer py-0">
-                {% if not post.is_archived %}
-                    <a href="{{ url_for('main.share_node', node_id=node.id) }}"
-                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Share</b>
-                    </a>
-                    {% if current_user == post.creator %}
-                        <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
-                           class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                            <b>Edit</b>
-                        </a>
+        {% if card_footer %}
+            {{ card_footer }}
+        {% endif %}
+    </div>
+{% endmacro %}
 
-                        <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                                data-bs-toggle="modal" data-bs-target="#modalArchive">
-                            <b>Archive</b></button>
-                        <div class="modal fade" id="modalArchive" tabindex="-1">
-                            <div class="modal-dialog modal-fullscreen-sm-down">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h6 class="modal-title">
-                                            Hide the post and stop accepting new contributions from other users?
-                                            Active engagements are not affected.
-                                        </h6>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <a id="btnArchive"
-                                           class="btn btn-{{- button_class(current_user, post) -}}"
-                                           href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
-                                            Confirm
-                                        </a>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                            Cancel
-                                        </button>
-                                    </div>
+{% macro post_above_title(post) %}
+    <p class="small text-muted mb-1">
+        {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
+        {{ render_user(post.creator) }}
+        posted {{ moment(post.timestamp).fromNow() }}
+    </p>
+{% endmacro %}
+
+{% macro post_after_title(post, tag_limit) %}
+    {% for post_tag in post.post_tags[:tag_limit] %}
+        {{ render_tag(post_tag.tag) }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro post_card_text(node, truncate_body) %}
+    {% set post = node.post %}
+    {% if truncate_body %}
+        <a class="text-decoration-none" href="{{ url_for("main.view_node", node_id=node.id) }}">
+    {% endif %}
+<div class="card-text small text-dark {{ 'truncated-sm' if truncate_body }}">
+    {% if post.body_html %}
+        {{ post.body_html | safe }}
+    {% else %}
+        {{ post.body[1:] }}
+    {% endif %}
+</div>
+{% if truncate_body %}
+    </a>
+{% endif %}
+{% endmacro %}
+
+
+{% macro post_card_footer(node, buttons) %}
+    {% if buttons %}
+        {% set post = node.post %}
+        <div class="card-footer py-0">
+            {% if not post.is_archived %}
+                <a href="{{ url_for('main.share_node', node_id=node.id) }}"
+                   class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                    <b>Share</b>
+                </a>
+                {% if current_user == post.creator %}
+                    <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
+                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                        <b>Edit</b>
+                    </a>
+
+                    <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                            data-bs-toggle="modal" data-bs-target="#modalArchive">
+                        <b>Archive</b></button>
+                    <div class="modal fade" id="modalArchive" tabindex="-1">
+                        <div class="modal-dialog modal-fullscreen-sm-down">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">
+                                        Hide the post and stop accepting new contributions from other users?
+                                        Active engagements are not affected.
+                                    </h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <a id="btnArchive"
+                                       class="btn btn-{{- button_class(current_user, post) -}}"
+                                       href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
+                                        Confirm
+                                    </a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                    {% endif %}
-                    {% if current_user != post.creator %}
-                        <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                                data-bs-toggle="modal" data-bs-target="#modalReport">
-                            <b>Report</b></button>
-                        <div class="modal fade" id="modalReport" tabindex="-1">
-                            <div class="modal-dialog modal-fullscreen-sm-down">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h6 class="modal-title">
-                                            What is the reason for reporting this post?
-                                        </h6>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">
-                                            <div class="input-group input-group-sm mb-3">
+                {% endif %}
+                {% if current_user != post.creator %}
+                    <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                            data-bs-toggle="modal" data-bs-target="#modalReport">
+                        <b>Report</b></button>
+                    <div class="modal fade" id="modalReport" tabindex="-1">
+                        <div class="modal-dialog modal-fullscreen-sm-down">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">
+                                        What is the reason for reporting this post?
+                                    </h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">
+                                        <div class="input-group input-group-sm mb-3">
                                                 <textarea name="reason" class="form-control" rows="4"
                                                           placeholder="Spam / Harassment / Leaking personal information / Copyright infringement / Other illegal activities"
                                                           required></textarea>
-                                            </div>
-                                            <input type="submit" id="btnReport"
-                                                   class="btn btn-{{- button_class(current_user, post) -}}">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                Cancel
-                                            </button>
-                                        </form>
-                                    </div>
+                                        </div>
+                                        <input type="submit" id="btnReport"
+                                               class="btn btn-{{- button_class(current_user, post) -}}">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                    {% endif %}
-                {% else %}
-                    {% if current_user == post.creator %}
-                        <a id="btnUnarchive" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                           href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
-                            <b>Unarchive</b>
-                        </a>
-                    {% else %}
-                        <div class="text-muted small my-1">
-                            <b>This post is no longer accepting new contributions.</b>
-                        </div>
-                    {% endif %}
                 {% endif %}
-            </div>
-        {% endif %}
-    </div>
+            {% else %}
+                {% if current_user == post.creator %}
+                    <a id="btnUnarchive" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                       href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
+                        <b>Unarchive</b>
+                    </a>
+                {% else %}
+                    <div class="text-muted small my-1">
+                        <b>This post is no longer accepting new contributions.</b>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
+{% macro render_post_card(node, tag_limit=None, truncate_body=False, buttons=False) %}
+    {{ render_card(
+           node,
+           above_title=post_above_title(node.post),
+           after_title=post_after_title(node.post, tag_limit=tag_limit),
+           card_text=post_card_text(node, truncate_body=truncate_body),
+           card_footer=post_card_footer(node, buttons=buttons)) }}
 {% endmacro %}
 
 
 {% macro render_message(message, viewer, last_timestamp=None, gap_in_seconds=300) %}
     {% if last_timestamp is none or (last_timestamp - message.timestamp).total_seconds()|abs > gap_in_seconds %}
         <div class="card my-3 small mx-auto text-center border-0" style="width:80%">
-            <div class="card-body py-0 text-muted small">
+            <div class="card-body py-0 text-muted small bg-light">
                 {{ moment(message.timestamp).calendar() }}
             </div>
         </div>
@@ -224,73 +259,65 @@
 {% endmacro %}
 
 
-{% macro render_engagement(engagement,
-    style_map={'buy':'info', 'sell':'warning', 'announcement':'success'},
-    label_map={'buy':'Buying', 'sell':'Selling', 'announcement':'Announcement'}) %}
+{% macro engagement_above_title(engagement) %}
     {% set post = engagement.node.post %}
-    <div class="card mb-3 {{ style_map[post.type] }}">
-        <div class="card-body pt-2 pb-1">
-            <p class="small text-muted mb-1">
-                {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
-                {% if current_user == post.creator %}
-                    {{ render_user(engagement.node.creator) }} responded
-                    {{ moment(engagement.last_updated).fromNow() }}
+    <p class="small text-muted mb-1">
+        {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
+        {% if current_user == post.creator %}
+            {{ render_user(engagement.node.creator) }} responded
+            {{ moment(engagement.last_updated).fromNow() }}
+        {% else %}
+            {{ render_user(post.creator) }} posted {{ moment(post.timestamp).fromNow() }}
+        {% endif %}
+    </p>
+{% endmacro %}
+
+{% macro engagement_card_text(engagement) %}
+    <a class="text-decoration-none text-dark"
+       href="{{ url_for("main.view_node", node_id=engagement.node_id) }}">
+        <div class="card-text">
+            {% if engagement.state == Engagement.STATE_REQUESTED %}
+                {% if current_user.id == engagement.sender_id %}
+                    <h6 class="mb-1"><span
+                            class="badge rounded-pill bg-secondary">Request For Engagement Sent</span></h6>
                 {% else %}
-                    {{ render_user(post.creator) }} posted {{ moment(post.timestamp).fromNow() }}
+                    <h6 class="mb-1"><span
+                            class="badge rounded-pill bg-primary">Request For Engagement Received</span></h6>
                 {% endif %}
-            </p>
-            <div class="card-title">
-                <div class="btn-group btn-group-sm buy-sell" role="group">
-                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
-                       class="btn btn-{{- style_map[post.type] -}}">
-                        {{ label_map[post.type] }}
-                    </a>
-                    <button type="button" class="btn btn-secondary" disabled>
-                        {{ "$%.2f"|format(engagement.node.display_value(current_user)) }}
-                    </button>
-                </div>
-                <a class="text-decoration-none text-dark" style="vertical-align: middle"
-                   href="{{ url_for("main.view_node", node_id=engagement.node_id) }}">
-                    <b>{{ post.title }}</b>
-                </a>
-            </div>
-            <a class="text-decoration-none text-dark"
-               href="{{ url_for("main.view_node", node_id=engagement.node_id) }}">
-                <div class="card-text">
-                    {% if engagement.state == Engagement.STATE_REQUESTED %}
-                        {% if current_user.id == engagement.sender_id %}
-                            <h6 class="mb-1"><span
-                                    class="badge rounded-pill bg-secondary">Request For Engagement Sent</span></h6>
-                        {% else %}
-                            <h6 class="mb-1"><span
-                                    class="badge rounded-pill bg-primary">Request For Engagement Received</span></h6>
-                        {% endif %}
-                    {% elif engagement.state == Engagement.STATE_ENGAGED %}
-                        <h6 class="mb-1"><span class="badge rounded-pill bg-success">Engagement In Progress</span></h6>
-                    {% endif %}
-                </div>
-            </a>
+            {% elif engagement.state == Engagement.STATE_ENGAGED %}
+                <h6 class="mb-1"><span class="badge rounded-pill bg-success">Engagement In Progress</span></h6>
+            {% endif %}
         </div>
-        {#        <div class="card-footer py-1"#}
-        {#        {% if engagement.state == Engagement.STATE_REQUESTED %}#}
-        {#            {% if current_user.id == engagement.sender_id %}#}
-        {#                style="background-color: lightgrey;"#}
-        {#            {% else %}#}
-        {#                style="background-color: lightgrey;"#}
-        {#            {% endif %}#}
-        {#            {% elif engagement.state == Engagement.STATE_ENGAGED %}#}
-        {#                style="background-color: lightgrey;"#}
-        {#            {% endif %}#}
-        {#        >#}
-        {#            {% if engagement.state == Engagement.STATE_REQUESTED %}#}
-        {#                {% if current_user.id == engagement.sender_id %}#}
-        {#                    <small class="text-muted">Request For Engagement Sent</small>#}
-        {#                {% else %}#}
-        {#                    <small class="text-muted">Request For Engagement Received</small>#}
-        {#                {% endif %}#}
-        {#            {% elif engagement.state == Engagement.STATE_ENGAGED %}#}
-        {#                <small class="text-muted">Engagement In Progress</small>#}
-        {#            {% endif %}#}
-        {#        </div>#}
-    </div>
+    </a>
+{% endmacro %}
+
+{% macro render_engagement(engagement) %}
+    {{ render_card(
+           engagement.node,
+           above_title=engagement_above_title(engagement),
+           card_text=engagement_card_text(engagement)) }}
+{% endmacro %}
+
+{% macro notification_above_title(notification) %}
+    <p class="small mb-1">
+        <a class="text-decoration-none text-dark"
+           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">
+            {{ notification.read() }}
+            {{ moment(notification.timestamp).fromNow() }}
+        </a>
+    </p>
+{% endmacro %}
+
+{% macro render_notification(notification) %}
+{#    <div class="px-3 py-2 border rounded mb-3 bg-{{- 'light' if notification.is_read else 'white' -}}">#}
+{#        {{ notification.read() }} on post#}
+{#        <a class="text-decoration-none"#}
+{#           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">#}
+{#             {{ notification.node.post.title }}#}
+{#        </a>#}
+{#        <p class="mb-0">#}
+{#            <small class="text-muted">{{ moment(notification.timestamp).calendar() }}</small>#}
+{#        </p>#}
+{#    </div>#}
+        {{ render_card(notification.node) }}
 {% endmacro %}

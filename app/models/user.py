@@ -194,6 +194,10 @@ class User(UserMixin, db.Model):
                                        site_rid_hash=site_rid_hash), user
 
     @property
+    def num_unread_notifications(self):
+        return self.notifications.filter(Notification.is_read.is_not(True)).count()
+
+    @property
     def balance_available_cent(self):
         return self.total_balance_cent - self.reserved_balance_cent
 
@@ -377,8 +381,11 @@ class User(UserMixin, db.Model):
             node = self._create_node(parent_node=parent_node, referrer_reward_cent=referrer_reward_cent)
             db.session.add(node)
 
-            notification = Notification(target=post.creator, node=node, message='A user created a contribution point')
-            db.session.add(notification)
+            Notification.push(
+                target=post.creator,
+                node=node,
+                message='A user created a contribution point on your post.'
+            )
 
             post.ping(datetime.utcnow())
             db.session.commit()
@@ -420,12 +427,11 @@ class User(UserMixin, db.Model):
         message = Message(creator=self, node=node, engagement=engagement, text=text)
         db.session.add(message)
 
-        notification = Notification(
+        Notification.push(
             target=node.creator if self != node.creator else post.creator,
             node=node,
-            message='A user sent you a message'
+            message='A user sent you a message.'
         )
-        db.session.add(notification)
 
         if engagement is not None:
             engagement.ping(datetime.utcnow())
@@ -475,8 +481,11 @@ class User(UserMixin, db.Model):
             db.session.add(self)
         db.session.add(engagement)
 
-        notification = Notification(target=post.creator, node=node, message='A user sent you a request for engagement')
-        db.session.add(notification)
+        Notification.push(
+            target=post.creator,
+            node=node,
+            message='A user sent you a request for engagement on your post.'
+        )
 
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
         db.session.add(message)
@@ -501,8 +510,10 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
-        notification = Notification(target=post.creator, node=node, message='A user cancelled a request for engagement')
-        db.session.add(notification)
+        Notification.push(
+            target=post.creator,
+            node=node,
+            message='A user cancelled a request for engagement on your post.')
 
         if post.type == Post.TYPE_SELL:
             self.reserved_balance_cent -= node.value_cent
@@ -546,12 +557,11 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
-        notification = Notification(
+        Notification.push(
             target=node.creator,
             node=node,
-            message='A user accepted your request for engagement'
+            message='A user accepted your request for engagement.'
         )
-        db.session.add(notification)
 
         message = Message(creator=self,
                           node=node,
@@ -594,12 +604,11 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
-        notification = Notification(
+        Notification.push(
             target=asker if self != asker else answerer,
             node=node,
-            message='A user rated an engagement with you'
+            message='A user rated an engagement with you.'
         )
-        db.session.add(notification)
 
         message = Message(creator=self,
                           node=node,
@@ -788,12 +797,11 @@ def _distribute_reward_cent(node, fraction):
     buyer.total_balance_cent -= value_cent
     db.session.add(buyer)
 
-    notification = Notification(
+    Notification.push(
         target=buyer,
         node=node,
-        message=f'You spent ${0.01 * value_cent:.2f} as buyer on an engagement'
+        message=f'You spent ${0.01 * value_cent:.2f} as buyer on an engagement.'
     )
-    db.session.add(notification)
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
     platform_fee = PlatformFee(amount_cent=platform_fee_cent)
@@ -810,12 +818,11 @@ def _distribute_reward_cent(node, fraction):
             db.session.add(referrer)
             sum_referrer_reward_cent += referrer_reward_cent
 
-            notification = Notification(
+            Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement.'
             )
-            db.session.add(notification)
     else:
         if len(nodes) == 1:  # there is only OP's node - should never reach here
             raise RewardDistributionError('Cannot distribute reward from the root node')
@@ -832,24 +839,22 @@ def _distribute_reward_cent(node, fraction):
             db.session.add(referrer)
             sum_referrer_reward_cent += referrer_reward_cent
 
-            notification = Notification(
+            Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} on an engagement'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement.'
             )
-            db.session.add(notification)
 
     # the seller gets everything left
     answerer_reward_cent = value_cent - platform_fee_cent - sum_referrer_reward_cent
     seller.total_balance_cent += answerer_reward_cent
     db.session.add(seller)
 
-    notification = Notification(
+    Notification.push(
         target=seller,
         node=node,
-        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller on an engagement'
+        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller on an engagement.'
     )
-    db.session.add(notification)
 
     return value_cent
 

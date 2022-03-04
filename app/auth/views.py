@@ -44,13 +44,20 @@ def login():
 
 @auth.route('/login/<user_id>')
 def force_login(user_id):
+    print('==============================================1')
     user = User.query.filter_by(id=user_id).first_or_404()
+    print('==============================================2')
     user.email_verified = True
+    print('==============================================3')
     db.session.add(user)
+    print('==============================================4')
     db.session.commit()
+    print('==============================================5')
     login_user(user, False)
+    print('==============================================6')
     flash('You have logged in.', category='success')
-    return redirect(url_for('main.account'))
+    print('==============================================7')
+    return redirect(url_for('main.browse'))
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all

@@ -153,7 +153,7 @@ class Node(db.Model):
     def nodes_before_inc(self):
         return self.post.nodes.filter(Node.left <= self.left, self.left <= Node.right).order_by(Node.left)
 
-    def nodes_after__inc(self):
+    def nodes_after_inc(self):
         return self.post.nodes.filter(Node.left.between(self.left, self.right)).order_by(Node.left)
 
     def __repr__(self):

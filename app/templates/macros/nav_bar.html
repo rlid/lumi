@@ -91,7 +91,7 @@
                         icon="bi-arrow-90deg-left",
                         extra_class="me-auto") }}
                 {% endif %}
-                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=5, extra_class="hide-340") }}
+                {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=current_user.num_unread_notifications, extra_class="hide-340") }}
                 {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}
                 {{ render_nav_item_bottom("main.post_options", "Post", "bi-plus-square") }}
                 {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", extra_class="hide-414") }}

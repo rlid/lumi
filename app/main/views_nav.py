@@ -61,12 +61,6 @@ def cookie():
     return render_template('docs/cookie.html', title='Cookie Policy')
 
 
-@main.route('/alerts')
-@login_required
-def alerts():
-    return render_template('landing.html', title='Alerts')
-
-
 @main.route('/engagements')
 @login_required
 def engagements():

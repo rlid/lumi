@@ -53,14 +53,14 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    talisman.init_app(
-        app,
-        content_security_policy=csp,
-        content_security_policy_report_only=True,
-        content_security_policy_report_uri='/csp-report',
-        session_cookie_samesite='None'  # need this to be None for Sign in with Apple to work. See
-        # https://www.bscotch.net/post/sign-in-with-apple-implementation-hurdles
-    )
+    # talisman.init_app(
+    #     app,
+    #     content_security_policy=csp,
+    #     content_security_policy_report_only=True,
+    #     content_security_policy_report_uri='/csp-report',
+    #     session_cookie_samesite='None'  # need this to be None for Sign in with Apple to work. See
+    #     # https://www.bscotch.net/post/sign-in-with-apple-implementation-hurdles
+    # )
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 

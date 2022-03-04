@@ -5,6 +5,7 @@ from sqlalchemy import and_, or_
 from app import db
 from app.main import main
 from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormPrivate, PostFormPrivate, ShareForm
+from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
 
@@ -294,3 +295,10 @@ def account():
         Post=Post,
         Node=Node,
         Engagement=Engagement)
+
+
+@main.route('/alerts')
+@login_required
+def alerts():
+    notifications = current_user.notifications.order_by(Notification.timestamp.desc())
+    return render_template('alerts.html', title='Alerts', notifications=notifications)
