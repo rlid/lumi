@@ -7,6 +7,7 @@ from app.models.message import Message
 from app.models.engagement import Engagement
 from app.models.platform_fee import PlatformFee
 from app.models.post import Post
+from app.models.notification import Notification
 from app.models.node import Node
 from app.models.user import User
 from app.models.payment import PaymentIntent

@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee, Notification
 from app.models.errors import InvalidActionError, RewardDistributionError, InsufficientFundsError
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
@@ -110,6 +110,12 @@ class User(UserMixin, db.Model):
                                       foreign_keys=[PaymentIntent.creator_id],
                                       lazy="dynamic",
                                       cascade="all, delete-orphan")
+
+    notifications = db.relationship("Notification",
+                                    backref=db.backref('target'),
+                                    foreign_keys=[Notification.target_id],
+                                    lazy="dynamic",
+                                    cascade="all, delete-orphan")
 
     @property
     def password(self):
@@ -254,7 +260,6 @@ class User(UserMixin, db.Model):
 
     def create_post(self, post_type, price_cent, title, body='', is_private=False, referral_budget_cent=None):
 
-
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -371,6 +376,10 @@ class User(UserMixin, db.Model):
         if node is None:
             node = self._create_node(parent_node=parent_node, referrer_reward_cent=referrer_reward_cent)
             db.session.add(node)
+
+            notification = Notification(target=post.creator, node=node, message='A user created a contribution point')
+            db.session.add(notification)
+
             post.ping(datetime.utcnow())
             db.session.commit()
         return node
@@ -397,7 +406,8 @@ class User(UserMixin, db.Model):
         return node
 
     def create_message(self, node, text):
-        if self != node.creator and self != node.post.creator:
+        post = node.post
+        if self != node.creator and self != post.creator:
             raise InvalidActionError(
                 'Cannot create message because the user is not the post creator or the node creator'
             )
@@ -405,10 +415,18 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create message on root node')
 
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
-        if engagement is None and node.post.is_archived:
+        if engagement is None and post.is_archived:
             raise InvalidActionError('Cannot create message because the post is archived')
         message = Message(creator=self, node=node, engagement=engagement, text=text)
         db.session.add(message)
+
+        notification = Notification(
+            target=node.creator if self != node.creator else post.creator,
+            node=node,
+            message='A user sent you a message'
+        )
+        db.session.add(notification)
+
         if engagement is not None:
             engagement.ping(datetime.utcnow())
         else:
@@ -457,6 +475,9 @@ class User(UserMixin, db.Model):
             db.session.add(self)
         db.session.add(engagement)
 
+        notification = Notification(target=post.creator, node=node, message='A user sent you a request for engagement')
+        db.session.add(notification)
+
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
         db.session.add(message)
 
@@ -479,6 +500,9 @@ class User(UserMixin, db.Model):
         engagement.state = Engagement.STATE_CANCELLED
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
+
+        notification = Notification(target=post.creator, node=node, message='A user cancelled a request for engagement')
+        db.session.add(notification)
 
         if post.type == Post.TYPE_SELL:
             self.reserved_balance_cent -= node.value_cent
@@ -521,6 +545,14 @@ class User(UserMixin, db.Model):
         engagement.state = Engagement.STATE_ENGAGED
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
+
+        notification = Notification(
+            target=node.creator,
+            node=node,
+            message='A user accepted your request for engagement'
+        )
+        db.session.add(notification)
+
         message = Message(creator=self,
                           node=node,
                           engagement=engagement,
@@ -562,6 +594,13 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
+        notification = Notification(
+            target=asker if self != asker else answerer,
+            node=node,
+            message='A user rated an engagement with you'
+        )
+        db.session.add(notification)
+
         message = Message(creator=self,
                           node=node,
                           engagement=engagement,
@@ -585,6 +624,7 @@ class User(UserMixin, db.Model):
             asker = engagement.asker
             asker.reserved_balance_cent -= node.value_cent
             db.session.add(asker)
+
             message = Message(creator=self,
                               node=node,
                               type=Message.TYPE_COMPLETE,
@@ -748,6 +788,13 @@ def _distribute_reward_cent(node, fraction):
     buyer.total_balance_cent -= value_cent
     db.session.add(buyer)
 
+    notification = Notification(
+        target=buyer,
+        node=node,
+        message=f'You spent ${0.01 * value_cent:.2f} as buyer on an engagement'
+    )
+    db.session.add(notification)
+
     platform_fee_cent = round(fraction * post.platform_fee_cent)
     platform_fee = PlatformFee(amount_cent=platform_fee_cent)
     db.session.add(platform_fee)
@@ -762,6 +809,13 @@ def _distribute_reward_cent(node, fraction):
             referrer.total_balance_cent += referrer_reward_cent
             db.session.add(referrer)
             sum_referrer_reward_cent += referrer_reward_cent
+
+            notification = Notification(
+                target=referrer,
+                node=node,
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement'
+            )
+            db.session.add(notification)
     else:
         if len(nodes) == 1:  # there is only OP's node - should never reach here
             raise RewardDistributionError('Cannot distribute reward from the root node')
@@ -778,9 +832,24 @@ def _distribute_reward_cent(node, fraction):
             db.session.add(referrer)
             sum_referrer_reward_cent += referrer_reward_cent
 
+            notification = Notification(
+                target=referrer,
+                node=node,
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} on an engagement'
+            )
+            db.session.add(notification)
+
     # the seller gets everything left
-    seller.total_balance_cent += value_cent - platform_fee_cent - sum_referrer_reward_cent
+    answerer_reward_cent = value_cent - platform_fee_cent - sum_referrer_reward_cent
+    seller.total_balance_cent += answerer_reward_cent
     db.session.add(seller)
+
+    notification = Notification(
+        target=seller,
+        node=node,
+        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller on an engagement'
+    )
+    db.session.add(notification)
 
     return value_cent
 

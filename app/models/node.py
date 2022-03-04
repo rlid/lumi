@@ -5,7 +5,7 @@ from sqlalchemy import event, select, case, and_, asc, desc
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
-from app.models import Message, Post
+from app.models import Message, Post, Notification
 
 
 # Contribution Node
@@ -61,6 +61,12 @@ class Node(db.Model):
                                   backref=db.backref('node'),
                                   lazy='dynamic',
                                   cascade='all, delete-orphan')
+
+    notifications = db.relationship("Notification",
+                                    backref=db.backref('node'),
+                                    foreign_keys=[Notification.node_id],
+                                    lazy="dynamic",
+                                    cascade="all, delete-orphan")
 
     def display_value(self, user):
         post = self.post
