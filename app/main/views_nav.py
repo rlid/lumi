@@ -53,12 +53,12 @@ def how_it_works():
 
 @main.route('/privacy')
 def privacy():
-    return render_template('privacy.html', title='Privacy Policy')
+    return render_template('docs/privacy.html', title='Privacy Policy')
 
 
 @main.route('/cookie')
 def cookie():
-    return render_template('cookie.html', title='Cookie Policy')
+    return render_template('docs/cookie.html', title='Cookie Policy')
 
 
 @main.route('/alerts')
@@ -86,4 +86,4 @@ def guidelines():
 
 @main.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('docs/about.html')

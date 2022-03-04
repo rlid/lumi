@@ -36,7 +36,7 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_form.html", form=form, title="New Post")
+    return render_template("post_create_edit.html", form=form, title="New Post")
 
 
 @main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
@@ -67,7 +67,7 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('post_form.html', form=form, title="Edit Post")
+    return render_template('post_create_edit.html', form=form, title="Edit Post")
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -133,7 +133,7 @@ def share_node(node_id):
             return redirect(url_for('main.share_node', node_id=node_id))
         else:
             flash('You cannot adjust your referrer reward.', category='warning')
-    return render_template('share_node.html', node=user_node, form=form)
+    return render_template('node_share.html', node=user_node, form=form)
 
 
 @main.route('/node/<node_id>/request-engagement')

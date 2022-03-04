@@ -1,7 +1,7 @@
 {% extends "index.html" %}
-{% from "macros_models.html" import render_post_card with context %}
-{% from "macros_form.html" import text_area_style, button_class with context %}
-{% from "macros_utils.html" import render_reward_info with context %}
+{% from "macros/render_models.html" import render_post_card with context %}
+{% from "macros/form.html" import text_area_style, button_class with context %}
+{% from "macros/utils.html" import render_reward_info with context %}
 
 {% block left_col %}
     {{ render_reward_info(node) }}

@@ -81,8 +81,8 @@ class BasicsTestCase(unittest.TestCase):
         self.assertAlmostEqual(root_node.display_value(other_user), 5 - 0.1 * 5)
 
         self.assertAlmostEqual(root_node.display_referrer_reward(poster), 0)
-        self.assertAlmostEqual(root_node.display_referrer_reward(referrer), 0.5 * 0.4 * 5)
-        self.assertAlmostEqual(root_node.display_referrer_reward(other_user), 0.5 * 0.4 * 5)
+        self.assertAlmostEqual(root_node.display_referrer_reward(referrer), 0.4 * 5)
+        self.assertAlmostEqual(root_node.display_referrer_reward(other_user), 0.4 * 5)
 
         self.assertAlmostEqual(node.display_value(poster), 5)
         self.assertAlmostEqual(node.display_value(referrer), 5 - 0.1 * 5)
@@ -90,7 +90,7 @@ class BasicsTestCase(unittest.TestCase):
 
         self.assertAlmostEqual(node.display_referrer_reward(poster), 0)
         self.assertAlmostEqual(node.display_referrer_reward(referrer), 0.5 * 0.4 * 5)
-        self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.5 * 0.4 * 5)
+        self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.4 * 5)
 
 
     def test_sell_post_private(self):
@@ -107,8 +107,8 @@ class BasicsTestCase(unittest.TestCase):
         self.assertAlmostEqual(root_node.display_value(other_user), 5 + 0.1 * 5)
 
         self.assertAlmostEqual(root_node.display_referrer_reward(poster), 0)
-        self.assertAlmostEqual(root_node.display_referrer_reward(referrer), 0.5 * 0.4 * 5)
-        self.assertAlmostEqual(root_node.display_referrer_reward(other_user), 0.5 * 0.4 * 5)
+        self.assertAlmostEqual(root_node.display_referrer_reward(referrer), 0.4 * 5)
+        self.assertAlmostEqual(root_node.display_referrer_reward(other_user), 0.4 * 5)
 
         self.assertAlmostEqual(node.display_value(poster), 5)
         self.assertAlmostEqual(node.display_value(referrer), 5 + 0.1 * 5)
@@ -116,4 +116,4 @@ class BasicsTestCase(unittest.TestCase):
 
         self.assertAlmostEqual(node.display_referrer_reward(poster), 0)
         self.assertAlmostEqual(node.display_referrer_reward(referrer), 0.5 * 0.4 * 5)
-        self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.5 * 0.4 * 5)
+        self.assertAlmostEqual(node.display_referrer_reward(other_user), 0.5 * 0.4 * 5)

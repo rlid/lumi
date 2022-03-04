@@ -131,7 +131,7 @@ def view_node(node_id):
             desc('max_timestamp')
         ).all()
         return render_template(
-            "view_root_node_as_post_creator.html",
+            "node_view_as_post_creator.html",
             node=node,
             user_node=node,
             nodes=nodes,
@@ -160,7 +160,7 @@ def view_node(node_id):
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
         form = MessageForm()
         return render_template(
-            "view_node.html",
+            "node_view.html",
             node=node,
             engagement=engagement,
             engagement_request=engagement_request,
@@ -179,4 +179,4 @@ def view_node(node_id):
             return redirect(url_for('main.view_node', node_id=user_node.id))
         else:
             flash("Cannot send message because the post is now archived.", category='danger')
-    return render_template("view_node_as_other_user.html", node=node, form=form, Post=Post)
+    return render_template("node_view_as_other.html", node=node, form=form, Post=Post)
