@@ -14,7 +14,7 @@
                         {{ notification.read() }}
                     </a>
                 </div>
-                <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} ms-5">
+                <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} small ms-5">
                     {{ render_notification(notification) }}
                 </div>
             </li>

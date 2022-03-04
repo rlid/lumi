@@ -484,7 +484,7 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=post.creator,
             node=node,
-            message='A user sent you a request for engagement on your post.'
+            message='A user sent you a request for engagement.'
         )
 
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
@@ -513,7 +513,7 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=post.creator,
             node=node,
-            message='A user cancelled a request for engagement on your post.')
+            message='A user cancelled a request for engagement.')
 
         if post.type == Post.TYPE_SELL:
             self.reserved_balance_cent -= node.value_cent
@@ -800,7 +800,7 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=buyer,
         node=node,
-        message=f'You spent ${0.01 * value_cent:.2f} as buyer on an engagement.'
+        message=f'You spent ${0.01 * value_cent:.2f} as buyer.'
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
@@ -821,7 +821,7 @@ def _distribute_reward_cent(node, fraction):
             Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement.'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.'
             )
     else:
         if len(nodes) == 1:  # there is only OP's node - should never reach here
@@ -842,7 +842,7 @@ def _distribute_reward_cent(node, fraction):
             Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer on an engagement.'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.'
             )
 
     # the seller gets everything left
@@ -853,7 +853,7 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=seller,
         node=node,
-        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller on an engagement.'
+        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller.'
     )
 
     return value_cent
