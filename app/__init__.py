@@ -27,16 +27,17 @@ talisman = Talisman()
 csp = {
     'default-src': [
         '\'unsafe-inline\' \'self\'',
-        '*.cloudflare.com',
-        '*.jsdelivr.net'
     ],
     'script-src': [
+        '*.jsdelivr.net',
+        '*.cloudflare.com',
+        '*.unpkg.com',
+        '*.toast.com',
         '*.googletagmanager.com',
         '*.google-analytics.com',
-        '*.hotjar.com',
-        '*.unpkg.com',
-        '*.toast.com'
+        '*.hotjar.com'
     ],
+    'style-src': '*.jsdelivr.net',
     'connect-src': 'wss://*.hotjar.com',
     'img-src': '\'self\' data:'
 }
