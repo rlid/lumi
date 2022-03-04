@@ -26,7 +26,7 @@ sock = Sock()
 talisman = Talisman()
 csp = {
     'default-src': [
-        '\'unsafe-inline\' \'self\''
+        '\'unsafe-inline\' \'self\'',
         '*.jsdelivr.net',
         '*.cloudflare.com',
         '*.unpkg.com',
