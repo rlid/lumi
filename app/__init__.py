@@ -8,7 +8,7 @@ from flask_moment import Moment
 from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-from flask_talisman import Talisman
+from flask_talisman import Talisman, GOOGLE_CSP_POLICY
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -27,12 +27,12 @@ talisman = Talisman()
 csp = {
     'default-src': [
         '\'unsafe-inline\' \'self\'',
-        'https://cdnjs.cloudflare.com',
-        'https://cdn.jsdelivr.net',
-        'https://www.googletagmanager.com',
-        'https://static.hotjar.com',
-        'https://unpkg.com',
-        'https://uicdn.toast.com'
+        '*.cloudflare.com',
+        '*.jsdelivr.net',
+        '*.googletagmanager.com',
+        '*.hotjar.com',
+        '*.unpkg.com',
+        '*.toast.com'
     ],
     'img-src': '\'self\' data:'
 }
