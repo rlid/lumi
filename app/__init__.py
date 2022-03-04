@@ -8,6 +8,7 @@ from flask_moment import Moment
 from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+from flask_sslify import SSLify
 from flask_talisman import Talisman, GOOGLE_CSP_POLICY
 
 from config import config
@@ -23,6 +24,7 @@ moment = Moment()
 mobility = Mobility()
 socketio = SocketIO()
 sock = Sock()
+sslify = SSLify()
 talisman = Talisman()
 csp = {
     'default-src': [
@@ -53,17 +55,18 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    talisman.init_app(
-        app,
-        force_https=False,
-        strict_transport_security=False,
-        content_security_policy=csp,
-        content_security_policy_report_only=True,
-        content_security_policy_report_uri='/csp-report',
-        referrer_policy='unsafe-url',
-        session_cookie_secure=False,
-        session_cookie_http_only=False
-    )
+    sslify.init_app(app)
+    # talisman.init_app(
+    #     app,
+    #     force_https=False,
+    #     strict_transport_security=False,
+    #     content_security_policy=csp,
+    #     content_security_policy_report_only=True,
+    #     content_security_policy_report_uri='/csp-report',
+    #     referrer_policy='unsafe-url',
+    #     session_cookie_secure=False,
+    #     session_cookie_http_only=False
+    # )
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
