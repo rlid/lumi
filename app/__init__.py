@@ -60,6 +60,7 @@ def create_app(config_name):
         content_security_policy=csp,
         content_security_policy_report_only=True,
         content_security_policy_report_uri='/csp-report',
+        session_cookie_samesite='None',
         x_content_type_options=False,
         x_xss_protection=False
     )
