@@ -19,12 +19,12 @@
                 </p>
                 {{ render_post_card(node, buttons=False) }}
 
-                {% if node.post.is_private and current_user != node.post.creator %}
+                {% if node.post.is_private and current_user != node.post.creator and node.parent.remaining_referral_budget_cent > 0 %}
                     <div class="mt-4">
                         <h6>How much referral reward to claim?</h6>
                         <p class="text-muted mb-1">
                             The default is to claim half of the remaining referral budget (the total budget of
-                            {{ '${0:.2f}'.format(node.parent.display_referrer_reward(current_user)) }}
+                            {{ '${0:.2f}'.format(0.01 * node.parent.remaining_referral_budget_cent) }}
                             is set by the OP) but you can choose a different amount, between:
                         </p>
                         <ul class="text-muted">
@@ -37,9 +37,9 @@
                         <div class="mt-0 mb-3 p-2 border rounded">
                             <p>Your current choice:
                                 $<span id="valueBox">
-                                {{- '{0:.2f}'.format(node.display_referrer_reward(current_user)) -}}
+                                {{- '{0:.2f}'.format(0.01 * node.referrer_reward_cent) -}}
                             </span>
-                                {% set percentage = (100 * node.display_referrer_reward(current_user) / node.parent.display_referrer_reward(current_user))|round|int %}
+                                {% set percentage = (100 * node.referrer_reward_cent / node.parent.remaining_referral_budget_cent)|round|int %}
                                 (<span id="percentBox">
                                 {{- percentage -}}
                             </span>% of the pot)
