@@ -8,8 +8,7 @@ from flask_moment import Moment
 from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-from flask_sslify import SSLify
-from flask_talisman import Talisman, GOOGLE_CSP_POLICY
+from flask_talisman import Talisman
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -54,12 +53,13 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    # SSLify(app)
     talisman.init_app(
         app,
         content_security_policy=csp,
         content_security_policy_report_only=True,
-        content_security_policy_report_uri='/csp-report'
+        content_security_policy_report_uri='/csp-report',
+        session_cookie_samesite='None'  # need this to be None for Sign in with Apple to work. See
+        # https://www.bscotch.net/post/sign-in-with-apple-implementation-hurdles
     )
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']

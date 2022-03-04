@@ -275,27 +275,26 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
 
         redirect_uri = url_for(f"auth.{callback_endpoint}", _external=True)
         response = oauth_provider.authorize_redirect(redirect_uri)
-        print(f"response.response = {response.response}")
+        # print(f"response.response = {response.response}")
         return response
 
     # intended user: is_authenticated no | signup_method email | email_verified n/a
-    @talisman(session_cookie_samesite='None')
     def callback():
-        print('=====DEBUG BEGIN=====')
-        state = request.form.get('state') or request.args.get('state')
-        print(state, session.get(f'_state_{oauth_provider.name}_{state}'))
-        print(type(session))
-        print(session)
-        print(session.keys())
-        print('=====DEBUG END=====')
+        # print('=====DEBUG BEGIN=====')
+        # state = request.form.get('state') or request.args.get('state')
+        # print(state, session.get(f'_state_{oauth_provider.name}_{state}'))
+        # print(type(session))
+        # print(session)
+        # print(session.keys())
+        # print('=====DEBUG END=====')
         try:
             token = oauth_provider.authorize_access_token()
         except MismatchingStateError as e:
             flash('Error', category='danger')
             return redirect(url_for("auth.signup"))
-        print(f"token = {token}")
+        # print(f"token = {token}")
         userinfo = token.get("userinfo")
-        print(f"userinfo = {userinfo}")
+        # print(f"userinfo = {userinfo}")
 
         if userinfo and userinfo.get("email_verified"):
             email = userinfo["email"].lower()

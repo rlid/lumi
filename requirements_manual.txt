@@ -19,4 +19,3 @@ stripe
 boto3
 sendgrid
 flask-talisman
-Flask-SSLify
