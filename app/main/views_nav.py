@@ -24,6 +24,11 @@ def index():
     return render_template('landing.html')
 
 
+@main.route('/csp-report', methods=['POST'])
+def csp_report():
+    return '', 200
+
+
 @main.route('/allow_cookie/<int:choice>')
 def allow_cookie(choice):
     session['allow_cookie'] = choice == 1

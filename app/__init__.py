@@ -26,7 +26,7 @@ sock = Sock()
 talisman = Talisman()
 csp = {
     'default-src': [
-        '\'unsafe-inline\' \'self\'',
+        '\'unsafe-inline\' \'self\' data:',
         '*.jsdelivr.net',
         '*.cloudflare.com',
         '*.unpkg.com',
@@ -35,8 +35,7 @@ csp = {
         '*.google-analytics.com',
         '*.hotjar.com',
         'wss://*.hotjar.com'
-    ],
-    'img-src': '\'self\' data:'
+    ]
 }
 
 
