@@ -279,7 +279,9 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
 
     # intended user: is_authenticated no | signup_method email | email_verified n/a
     def callback():
-        print('=====DEBUG=====', request.form.get('state') or request.args.get('state'), session.get('_apple_authlib_state_'))
+        print('=====DEBUG BEGIN=====')
+        state = request.form.get('state') or request.args.get('state')
+        print(state, session.get(f'_state_{oauth_provider.name}_{state}'))
         print(session)
         print(session.keys())
         print('=====DEBUG END=====')
