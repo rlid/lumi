@@ -59,8 +59,7 @@ def create_app(config_name):
         app,
         content_security_policy=csp,
         content_security_policy_report_only=True,
-        content_security_policy_report_uri='/csp-report',
-        session_cookie_samesite='None'
+        content_security_policy_report_uri='/csp-report'
     )
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']

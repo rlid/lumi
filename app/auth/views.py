@@ -4,7 +4,7 @@ from authlib.integrations.base_client import MismatchingStateError
 from flask import render_template, redirect, request, url_for, flash, Markup, session
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import db, oauth
+from app import db, oauth, talisman
 from app.auth import auth
 from app.auth.forms import LogInForm, SignUpForm, ChangePasswordForm, PasswordResetRequestForm, PasswordResetForm
 from app.models.invite_code import InviteCode
@@ -279,6 +279,7 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
         return response
 
     # intended user: is_authenticated no | signup_method email | email_verified n/a
+    @talisman(session_cookie_samesite='None')
     def callback():
         print('=====DEBUG BEGIN=====')
         state = request.form.get('state') or request.args.get('state')
