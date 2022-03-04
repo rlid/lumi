@@ -24,7 +24,6 @@ moment = Moment()
 mobility = Mobility()
 socketio = SocketIO()
 sock = Sock()
-sslify = SSLify()
 talisman = Talisman()
 csp = {
     'default-src': [
@@ -55,7 +54,7 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    sslify.init_app(app)
+    SSLify(app)
     # talisman.init_app(
     #     app,
     #     force_https=False,
