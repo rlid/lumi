@@ -27,6 +27,7 @@ talisman = Talisman()
 csp = {
     'default-src': [
         '\'unsafe-inline\' \'self\' data:',
+        'wss://lumiask.com',
         '*.jsdelivr.net',
         '*.cloudflare.com',
         '*.unpkg.com',
