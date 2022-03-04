@@ -30,7 +30,7 @@ csp = {
         'https://cdnjs.cloudflare.com',
         'https://cdn.jsdelivr.net',
         'https://www.googletagmanager.com',
-        'https://static.hotjar.com'
+        'https://static.hotjar.com',
         'https://unpkg.com',
         'https://uicdn.toast.com'
     ],
