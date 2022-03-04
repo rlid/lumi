@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from authlib.integrations.base_client import MismatchingStateError
 from flask import render_template, redirect, request, url_for, flash, Markup, session
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -286,7 +287,11 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
         print(session)
         print(session.keys())
         print('=====DEBUG END=====')
-        token = oauth_provider.authorize_access_token()
+        try:
+            token = oauth_provider.authorize_access_token()
+        except MismatchingStateError as e:
+            flash('Error', category='danger')
+            return redirect(url_for("auth.signup"))
         print(f"token = {token}")
         userinfo = token.get("userinfo")
         print(f"userinfo = {userinfo}")
