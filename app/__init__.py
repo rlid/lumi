@@ -53,14 +53,14 @@ def create_app(config_name):
     moment.init_app(app)
     mobility.init_app(app)
     socketio.init_app(app)
-    # talisman.init_app(
-    #     app,
-    #     content_security_policy=csp,
-    #     content_security_policy_report_only=True,
-    #     content_security_policy_report_uri='/csp-report',
-    #     session_cookie_secure=False,
-    #     session_cookie_http_only=False
-    # )
+    talisman.init_app(
+        app,
+        content_security_policy=csp,
+        content_security_policy_report_only=True,
+        content_security_policy_report_uri='/csp-report',
+        session_cookie_secure=False,
+        session_cookie_http_only=False
+    )
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
