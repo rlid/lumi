@@ -3,7 +3,7 @@
 {% import "macros/nav_bar.html" as navbar %}
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     {% block head %}
         {% block meta %}
@@ -40,46 +40,53 @@
         {% endblock %}
     {% endblock %}
 </head>
-<body class="bg-light">
+<body class="d-flex h-100 bg-light">
 {% block body %}
-    {{ navbar.render_navbar(current_user) }}
-    <div class="container-fluid">
-        {{ flash.render_flash(dismissible=True, dismiss_animate=True) }}
-    </div>
-    <main>
-        {% block main %}
-            <div class="container my-3 pb-5">
-                {% block main_container %}
-                {% endblock %}
-            </div>
-        {% endblock %}
-    </main>
-    {% if session.get('allow_cookie') is none %}
-        <div class="toast-container fixed-bottom ms-auto" style="bottom:{{- 70 if current_user.is_authenticated else 60 -}}px;right:10px">
-            <div class="toast" role="alert" data-bs-delay="10000"
-                 data-bs-autohide="false"
-                 style="background-color: #ffffff">
-
-                <div class="toast-header bg-light"><strong class="me-auto">Cookie Notice</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    <div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <header class="mb-auto">
+            {{ navbar.render_navbar(current_user) }}
+        </header>
+        <div class="container-fluid">
+            {{ flash.render_flash(dismissible=True, dismiss_animate=True) }}
+        </div>
+        <main>
+            {% block main %}
+                <div class="container my-5 py-3">
+                    {% block main_container %}
+                    {% endblock %}
                 </div>
-                <div class="toast-body pt-2"><p class="mb-1">This site only uses essential cookies by default. We’d also
-                    like to use analytics cookies so we can measure and improve the performance of our site. Do you want
-                    to allow analytics cookies?</p>
-                    <div style="font-size:1.1rem">
-                        <a class="badge btn-primary text-decoration-none" href=/allow_cookie/1>Accept</a>
-                        <a class="badge btn-primary text-decoration-none" href=/allow_cookie/0>Reject</a>
-                        <a class="badge btn-primary text-decoration-none" href=/cookie>Learn More</a>
+            {% endblock %}
+        </main>
+        {% if session.get('allow_cookie') is none %}
+            <div class="toast-container fixed-bottom ms-auto"
+                 style="bottom:{{- 70 if current_user.is_authenticated else 60 -}}px;right:10px">
+                <div class="toast" role="alert" data-bs-delay="10000"
+                     data-bs-autohide="false"
+                     style="background-color: #ffffff">
+
+                    <div class="toast-header bg-light"><strong class="me-auto">Cookie Notice</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body pt-2"><p class="mb-1">This site only uses essential cookies by default. We’d
+                        also
+                        like to use analytics cookies so we can measure and improve the performance of our site. Do you
+                        want
+                        to allow analytics cookies?</p>
+                        <div style="font-size:1.1rem">
+                            <a class="badge btn-primary text-decoration-none" href=/allow_cookie/1>Accept</a>
+                            <a class="badge btn-primary text-decoration-none" href=/allow_cookie/0>Reject</a>
+                            <a class="badge btn-primary text-decoration-none" href=/cookie>Learn More</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    {% endif %}
-    <footer>
-        {% block footer %}
-            {{ navbar.render_navbar_bottom(current_user) }}
-        {% endblock %}
-    </footer>
+        {% endif %}
+        <footer class="mt-auto">
+            {% block footer %}
+                {{ navbar.render_navbar_bottom(current_user) }}
+            {% endblock %}
+        </footer>
+    </div>
 {% endblock %}
 </body>
 </html>

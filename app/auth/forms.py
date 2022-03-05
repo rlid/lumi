@@ -34,9 +34,9 @@ class SignUpForm(FlaskForm):
                                          Length(min=8, message='Password must be at least 8 characters long.')
                                      ],
                                      render_kw={"placeholder": "Confirm Password"})
-    adjective = StringField(
-        "An adjective to describe yourself:",
-        render_kw={"placeholder": "Optional - just for fun!"})
+    # adjective = StringField(
+    #     "An adjective to describe yourself:",
+    #     render_kw={"placeholder": "Optional - just for fun!"})
 
     submit = SubmitField("Sign Up", render_kw={"class": "w-100"})
 
