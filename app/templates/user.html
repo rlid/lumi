@@ -18,7 +18,8 @@
                                 <h6 class="my-0">Known as</h6>
                             </div>
                             <div class="text-end">
-                                <div class="text-muted">A {% if user.adjective %}{{ user.adjective }}{% endif %} user</div>
+                                <div class="text-muted">A {% if user.adjective %}{{ user.adjective }}{% endif %} user
+                                </div>
                                 <small class="text-muted">
                                 </small>
                             </div>
@@ -87,6 +88,50 @@
                         {{ render_track_record(user, completed_engagements) }}
                     {% else %}
                         The user has no completed engagements.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item bg-light">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionActivePosts">
+                    <b>Public Posts - Active</b>
+                </button>
+            </h2>
+            <div id="accordionActivePosts" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    {% set ns = namespace(empty=True) %}
+                    {% for node in nodes if not node.post.is_archived %}
+                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% set ns.empty = False %}
+                    {% endfor %}
+                    {% if ns.empty %}
+                        <small class="text-muted">
+                            The user has no active public posts.
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item bg-light">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionArchivedPosts">
+                    <b>Public Posts - Archived</b>
+                </button>
+            </h2>
+            <div id="accordionArchivedPosts" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    {% set ns = namespace(empty=True) %}
+                    {% for node in nodes if node.post.is_archived %}
+                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        {% set ns.empty = False %}
+                    {% endfor %}
+                    {% if ns.empty %}
+                        <small class="text-muted">
+                            The user has no archived public posts.
+                        </small>
                     {% endif %}
                 </div>
             </div>

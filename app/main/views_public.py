@@ -6,6 +6,7 @@ from sqlalchemy import distinct, not_
 from sqlalchemy import func, desc, and_, or_
 
 from app import db
+from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
 from app.main.forms import MessageForm
 from app.models.user import Message
@@ -32,7 +33,17 @@ def user(user_id):
     ).order_by(
         Engagement.last_updated.desc()
     ).all()
-    return render_template("user.html", user=u, completed_engagements=completed_engagements)
+    nodes = u.nodes.join(
+        Post, Post.id == Node.post_id
+    ).filter(
+        Node.parent_id.is_(None),
+        Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
+        Post.is_private.is_not(True),
+        Post.is_archived.is_not(True)
+    ).order_by(
+        Node.timestamp.desc()
+    ).all()
+    return render_template("user.html", user=u, nodes=nodes, completed_engagements=completed_engagements)
 
 
 @main.route('/browse')
@@ -91,12 +102,19 @@ def browse():
     # sticky_posts = []
     # if not tag_ids_to_filter:
     #     sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
+
+    login_form = LogInForm()
+    signup_form = SignUpForm()
+
     return render_template(
         "index.html",
         # sticky_posts=sticky_posts,
         root_nodes=root_nodes,
         tags_in_filter=tags_in_filter,
-        tags_not_in_filter_with_freq=tags_not_in_filter_query.all())
+        tags_not_in_filter_with_freq=tags_not_in_filter_query.all(),
+        login_form=login_form,
+        signup_form=signup_form
+    )
 
 
 @main.route('/node/<node_id>', methods=['GET', 'POST'])

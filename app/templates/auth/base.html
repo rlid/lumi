@@ -3,15 +3,24 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <main class="my-auto py-5">
-        <div class="rounded border shadow col col-sm-8 col-md-6 col-lg-5 col-xl-4 mx-auto my-3 p-4">
-            {% block content %}
-                <div class="text-center">
-                    <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="40" height="40"
-                         class='mb-4'>
-                    {#<h1 class="h3 my-3 fw-normal">{% block label %}Label{% endblock %}</h1>#}
-                </div>
-            {% endblock %}
+    <main class="my-auto my-5">
+        <div class="my-5 py-3">
+            <div class="border shadow mx-auto px-{%- if request.MOBILE %}4{%- else %}5{% endif %} pb-2"
+                 style="border-radius: 1rem; max-width: 30rem">
+                {% block content %}
+                    <div class="pt-4 mb-4">
+                        <h2 class="fw-bold mb-0">
+                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                    {% if request.MOBILE %}
+                                 width="32" height="32"
+                                    {% else %}
+                                 width="40" height="40"
+                                    {% endif %}
+                                 class="d-inline-block align-text-bottom">{% block title %}Title{% endblock %}
+                        </h2>
+                    </div>
+                {% endblock %}
+            </div>
         </div>
     </main>
 {% endblock %}

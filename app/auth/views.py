@@ -28,9 +28,9 @@ def login():
             if user.signup_method == "email":
                 if user.verify_password(form.password.data):
                     login_user(user, form.remember_me.data)
-                    next_url = request.args.get('next')
-                    if next_url is None or not next_url.startswith('/') or '/auth/logout' in next_url:
-                        next_url = url_for('main.index')
+                    next_url = request.args.get('next') or request.referrer
+                    if next_url is None or not (next_url.startswith('/') or next_url.startswith(request.host_url)):
+                        next_url = url_for('main.account')
                     return redirect(next_url)
                 flash('Invalid username or password', category='danger')
             else:

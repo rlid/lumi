@@ -1,6 +1,7 @@
 from flask import render_template, redirect, flash, Markup, url_for, session, request
 from flask_login import login_required, current_user
 
+from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
 
 
@@ -12,7 +13,8 @@ def before_request():
                 and request.blueprint != 'auth' \
                 and request.endpoint != 'static' \
                 and request.endpoint != 'main.index' \
-                and request.endpoint != 'main.browse':
+                and request.endpoint != 'main.browse' \
+                and request.endpoint != 'main.account':
             flash('Your access is restricted because your email address is not verified. ' +
                   Markup(f'<a href={url_for("auth.resend_confirmation")}>Click here</a> ') +
                   'to request another confirmation email.', category='warning')
@@ -21,7 +23,9 @@ def before_request():
 
 @main.route('/')
 def index():
-    return render_template('landing.html')
+    login_form = LogInForm()
+    signup_form = SignUpForm()
+    return render_template('landing.html', login_form=login_form, signup_form=signup_form)
 
 
 @main.route('/csp-report', methods=['POST'])

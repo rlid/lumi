@@ -130,31 +130,6 @@
                         modal_body='Hide the post and stop accepting contributions from other users? Active engagements are not affected.',
                         confirm_url=url_for('main.toggle_archive_post', post_id=post.id)) }}
 
-                    <div class="modal fade" id="modalArchive" tabindex="-1">
-                        <div class="modal-dialog modal-fullscreen-sm-down">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h6 class="modal-title">
-                                        Hide this post and stop accepting new contributions from other users?
-                                        Active engagements are not affected.
-                                    </h6>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body text-center">
-                                    <a id="btnArchive"
-                                       class="btn btn-{{- button_class(current_user, post) -}}"
-                                       href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
-                                        Confirm
-                                    </a>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 {% endif %}
                 {% if current_user != post.creator %}
                     <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"

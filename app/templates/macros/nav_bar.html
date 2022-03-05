@@ -1,3 +1,6 @@
+{% from "macros/utils.html" import render_form_modal %}
+{% from "macros/form.html" import render_login_form, render_signup_form %}
+
 {% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="nav-item">
@@ -40,20 +43,40 @@
                                 Log Out
                             </a>
                         {% else %}
-                            <a class="btn text-nowrap btn-outline-success text-white"
-                               href="{{ url_for('auth.login') }}">
-                                Log In
-                            </a>
-                            <a class="btn text-nowrap btn-success"
-                               href="{{ url_for('auth.signup') }}">
-                                Sign Up
-                            </a>
+                            {% if login_form %}
+                                <button type="button" class="btn btn-outline-success text-nowrap text-white"
+                                        data-bs-toggle="modal" data-bs-target="#modalLogin">
+                                    Log In
+                                </button>
+                            {% else %}
+                                <a class="btn btn-outline-success text-nowrap text-white"
+                                   href="{{ url_for('auth.login') }}">
+                                    Log In
+                                </a>
+                            {% endif %}
+                            {% if signup_form %}
+                                <button type="button" class="btn btn-success text-nowrap"
+                                        data-bs-toggle="modal" data-bs-target="#modalSignup">
+                                    Sign Up
+                                </button>
+                            {% else %}
+                                <a class="btn btn-success text-nowrap"
+                                   href="{{ url_for('auth.signup') }}">
+                                    Sign Up
+                                </a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </li>
             </ul>
         </div>
     </nav>
+    {% if login_form %}
+        {{ render_form_modal(modal_id='modalLogin', modal_title='Log in', modal_body=render_login_form(login_form)) }}
+    {% endif %}
+    {% if signup_form %}
+        {{ render_form_modal(modal_id='modalSignup', modal_title='Sign up', modal_body=render_signup_form(signup_form)) }}
+    {% endif %}
 {% endmacro %}
 
 
