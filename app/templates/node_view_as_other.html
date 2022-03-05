@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% from "macros/render_models.html" import render_post_card with context %}
 {% from "macros/form.html" import text_area_style, button_class with context %}
-{% from "macros/utils.html" import render_reward_info with context %}
+{% from "macros/utils.html" import render_reward_info, render_modal with context %}
 
 {% block left_col %}
     {{ render_reward_info(node) }}
@@ -29,25 +29,11 @@
                         {% if not current_user.is_authenticated %}disabled{% endif %}>
                     Request for Engagement
                 </button>
-
-                <div class="modal fade" id="modalRequest" tabindex="-1">
-                    <div class="modal-dialog modal-fullscreen-sm-down">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h6 class="modal-title">Are you sure you want to request for engagement?</h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <a id="btnRequest" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                                   href="{{ url_for('main.request_engagement', node_id=node.id) }}">
-                                    Confirm
-                                </a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{ render_modal(
+                    modal_id='modalRequest',
+                    modal_title='Request for engagement?',
+                    modal_body='You will send a request for the user user to accept.',
+                    confirm_url=url_for('main.request_engagement', node_id=node.id)) }}
             </div>
         </form>
     </div>
