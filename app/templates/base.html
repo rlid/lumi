@@ -43,20 +43,20 @@
 <body class="d-flex h-100 bg-light">
 {% block body %}
     <div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
-        <header class="mb-auto">
+        <header>
             {{ navbar.render_navbar(current_user) }}
         </header>
         <div class="container-fluid">
             {{ flash.render_flash(dismissible=True, dismiss_animate=True) }}
         </div>
-        <main>
-            {% block main %}
+        {% block main %}
+            <main>
                 <div class="container my-5 py-3">
                     {% block main_container %}
                     {% endblock %}
                 </div>
-            {% endblock %}
-        </main>
+            </main>
+        {% endblock %}
         {% if session.get('allow_cookie') is none %}
             <div class="toast-container fixed-bottom ms-auto"
                  style="bottom:{{- 70 if current_user.is_authenticated else 60 -}}px;right:10px">
@@ -81,7 +81,7 @@
                 </div>
             </div>
         {% endif %}
-        <footer class="mt-auto">
+        <footer>
             {% block footer %}
                 {{ navbar.render_navbar_bottom(current_user) }}
             {% endblock %}
