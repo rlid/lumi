@@ -10,13 +10,16 @@
                 {% block content %}
                     <div class="pt-4 mb-4">
                         <h2 class="fw-bold mb-0">
-                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                    {% if request.MOBILE %}
-                                 width="32" height="32"
-                                    {% else %}
-                                 width="40" height="40"
-                                    {% endif %}
-                                 class="d-inline-block align-text-bottom">{% block title %}Title{% endblock %}
+                            {% if request.MOBILE %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="32" height="32"
+                                     class="d-inline-block align-text-bottom">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="40" height="40"
+                                     class="d-inline-block align-text-top">
+                            {% endif %}
+                            {% block title %}Title{% endblock %}
                         </h2>
                     </div>
                 {% endblock %}

@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, MarkdownPostForm, MarkdownPostFormPrivate, PostFormPrivate, ShareForm
+from app.main.forms import PostForm, ShareForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
@@ -19,10 +19,10 @@ def post_options():
 @main.route('/post/<int:is_private>', methods=['GET', 'POST'])
 @login_required
 def new_post(is_private):
-    if is_private == 0:
-        form = MarkdownPostForm() if current_user.use_markdown else PostForm()
-    else:
-        form = MarkdownPostFormPrivate() if current_user.use_markdown else PostFormPrivate()
+    form = PostForm()
+    if is_private == 1:
+        form.referral_budget = 0.4  # Default for private mode
+
     if form.validate_on_submit():
         post_type = form.type.data
         price_cent = round(100 * form.price.data)
@@ -48,7 +48,8 @@ def edit_post(post_id):
         flash('Cannot edit post that does not belong to you.', category='danger')
         abort(403)
 
-    form = MarkdownPostForm() if current_user.use_markdown else PostForm()
+    form = PostForm()
+    form.edit_mode = True
     if form.validate_on_submit():
         current_user.edit_post(post, title=form.title.data, body=form.body.data)
         return redirect(url_for('main.browse'))

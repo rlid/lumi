@@ -9,18 +9,17 @@ from app.models import Post
 TITLE_MIN_LENGTH = 5
 
 
-class TUIEditorField(TextAreaField):
-    pass
-
-
 class PostForm(FlaskForm):
     platform_fee = 0.1  # Default
     referral_budget = 0.2  # Default for public mode
+    # if editing existing post, do not validate price because user's current value limit might be lower than when he
+    # made the post:
+    edit_mode = False
 
-    type = RadioField("Are you buying or selling?",
+    type = RadioField("Choose a type:",
                       choices=[
-                          (Post.TYPE_BUY, "Buying - I am asking a question / making a request"),
-                          (Post.TYPE_SELL, "Selling - I am answering questions / offering my service"),
+                          (Post.TYPE_BUY, "I am asking a question or making a request"),
+                          (Post.TYPE_SELL, "(Experimental) I am answering questions or offering my service"),
                       ],
                       validators=[InputRequired()]
                       )
@@ -41,33 +40,22 @@ class PostForm(FlaskForm):
         # value limit checks
         # if current_user.value_limit_cent < 100 * field.data:
         #     raise ValidationError(f'Your current price limit is {current_user.reward_limit:.2f}.')
-        price_cent = round(100 * field.data)
-        if self.type.data == Post.TYPE_BUY:
-            if current_user.value_limit_cent < price_cent:
-                raise ValidationError(f'Your current limit on buying price is {current_user.reward_limit:.2f}.')
-        if self.type.data == Post.TYPE_SELL:
-            value_cent = price_cent
-            value_cent += round(self.platform_fee * price_cent)
-            value_cent += round(self.referral_budget * price_cent)
-            if current_user.value_limit_cent < value_cent:
-                raise ValidationError(
-                    'Your current limit on selling price is ' +
-                    f'{0.01 * int(100 * current_user.reward_limit / (1 + self.platform_fee + self.referral_budget)):.2f}.'
-                )
-
-
-class PostFormPrivate(PostForm):
-    referral_budget = 0.4  # Default for private mode
-
-
-class MarkdownPostForm(PostForm):
-    body = TextAreaField("Details (optional)", render_kw={"style": "display:none;"})
-    editor = TUIEditorField()
-    submit = SubmitField("Post", render_kw={"class": "w-100"})
-
-
-class MarkdownPostFormPrivate(MarkdownPostForm):
-    referral_budget = 0.4  # Default for private mode
+        if not self.edit_mode:
+            # do not validate price in edit mode because user's current value limit might be lower than when he made the
+            # post
+            price_cent = round(100 * field.data)
+            if self.type.data == Post.TYPE_BUY:
+                if current_user.value_limit_cent < price_cent:
+                    raise ValidationError(f'Your current limit on buying price is {current_user.reward_limit:.2f}.')
+            if self.type.data == Post.TYPE_SELL:
+                value_cent = price_cent
+                value_cent += round(self.platform_fee * price_cent)
+                value_cent += round(self.referral_budget * price_cent)
+                if current_user.value_limit_cent < value_cent:
+                    raise ValidationError(
+                        'Your current limit on selling price is ' +
+                        f'{0.01 * int(100 * current_user.reward_limit / (1 + self.platform_fee + self.referral_budget)):.2f}.'
+                    )
 
 
 class ShareForm(FlaskForm):

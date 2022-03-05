@@ -178,16 +178,19 @@
 {% macro render_form_modal(modal_id, modal_title, modal_body) %}
     <div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content shadow" style="border-radius: 1rem">
+            <div class="modal-content shadow bg-light" style="border-radius: 1rem">
                 <div class="modal-header px-{%- if request.MOBILE %}4{%- else %}5{% endif %} pt-4 pb-2 border-bottom-0">
                     <h2 class="fw-bold mb-0">
-                        <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                             {% if request.MOBILE %}
-                                width="32" height="32"
-                                {% else %}
-                                width="40" height="40"
-                             {% endif %}
-                             class='d-inline-block align-text-bottom'> {{ modal_title }}</h2>
+                        {% if request.MOBILE %}
+                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                 width="32" height="32"
+                                 class="d-inline-block align-text-bottom">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                 width="40" height="40"
+                                 class="d-inline-block align-text-top">
+                        {% endif %}
+                        {{ modal_title }}</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-{%- if request.MOBILE %}4{%- else %}5{% endif %}">
