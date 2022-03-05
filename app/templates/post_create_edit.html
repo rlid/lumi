@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% from "macros/form.html" import render_form %}
+{% from "macros/form.html" import render_editor_form %}
 {% from "macros/nav_bar.html" import render_navbar_side %}
 
 {% block link %}
@@ -19,51 +19,6 @@
         <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     {% endif %}
 {% endblock %}
-
-{% macro render_editor_form(form, type=None) %}
-    <form method="post" {% if type == 'tui' %}onsubmit="DoSubmit(){% endif %}">
-        {{ form.hidden_tag() }}
-        <div class="mb-3">
-            {{ form.type.label(class_='form-label') }}
-            {% for item in form.type %}
-                <div class="form-check">
-                    {{ item(class_='form-check-input') }}
-                    {{ item.label(class_='form-check-label') }}
-                </div>
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-3">
-            {% if form.price.errors %}
-                {{ form.price(class_='form-control is-invalid', style='border-radius: .5rem') }}
-            {% else %}
-                {{ form.price(class_='form-control', style='border-radius: .5rem') }}
-            {% endif %}
-            {{ form.price.label() }}
-            {% for error in form.price.errors %}
-                <div class="invalid-feedback" style="display: block;">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-3">
-            {% if form.title.errors %}
-                {{ form.title(class_='form-control is-invalid', style='border-radius: .5rem') }}
-            {% else %}
-                {{ form.title(class_='form-control', style='border-radius: .5rem') }}
-            {% endif %}
-            {{ form.title.label() }}
-            {% for error in form.title.errors %}
-                <div class="invalid-feedback" style="display: block;">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-3">
-            {{ form.body(
-                class_='form-control',
-                style='display: none' if type == 'tui' else 'height: 15rem; border-radius: .5rem') }}
-            {% if type is none %}{{ form.body.label() }}{% endif %}
-        </div>
-        <div class="mb-3" id="tui_editor"></div>
-        {{ form.submit(class_='btn btn-success w-100') }}
-    </form>
-{% endmacro %}
 
 {% block mid_col %}
     <div class="mb-3">

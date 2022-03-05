@@ -2,7 +2,6 @@ Flask
 Flask-SQLAlchemy
 pg8000
 Flask-WTF
-Bootstrap-Flask
 Flask-Moment
 Flask-Login
 Flask-Mobility

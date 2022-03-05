@@ -1,7 +1,6 @@
 import stripe
 from authlib.integrations.flask_client import OAuth
 from flask import Flask
-from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
 from flask_mobility import Mobility
 from flask_moment import Moment
@@ -17,7 +16,6 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
-bootstrap = Bootstrap5()
 oauth = OAuth()
 moment = Moment()
 mobility = Mobility()
@@ -48,7 +46,6 @@ def create_app(config_name):
 
     db.init_app(app)
     login_manager.init_app(app)
-    bootstrap.init_app(app)
     oauth.init_app(app)
     moment.init_app(app)
     mobility.init_app(app)
