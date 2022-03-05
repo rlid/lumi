@@ -4,7 +4,7 @@ from authlib.integrations.base_client import MismatchingStateError
 from flask import render_template, redirect, request, url_for, flash, Markup, session
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import db, oauth, talisman
+from app import db, oauth
 from app.auth import auth
 from app.auth.forms import LogInForm, SignUpForm, ChangePasswordForm, PasswordResetRequestForm, PasswordResetForm
 from app.models.invite_code import InviteCode

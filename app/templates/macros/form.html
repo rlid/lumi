@@ -33,7 +33,7 @@
 {% endmacro %}
 
 
-{% macro render_signup_form(form) %}
+{% macro render_signup_form(form, has_invite_code=False) %}
     <a class="btn btn-outline-dark w-100 mb-2 {% if not has_invite_code %}disabled{% endif %}"
        href="{{ url_for("auth.apple") }}"><i class="bi bi-apple"></i> Sign up with Apple</a>
     <a class="btn btn-outline-danger w-100 my-2 {% if not has_invite_code %}disabled{% endif %}"

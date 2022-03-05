@@ -7,5 +7,5 @@
 
 {% block content %}
     {{ super() }}
-    {{ render_signup_form(form) }}
+    {{ render_signup_form(form, has_invite_code) }}
 {% endblock %}
