@@ -36,7 +36,10 @@ def csp_report():
 @main.route('/allow_cookie/<int:choice>')
 def allow_cookie(choice):
     session['allow_cookie'] = choice == 1
-    return redirect(request.referrer)
+    redirect_url = request.referrer
+    if redirect_url is None or not redirect_url.startswith(request.root_url):
+        redirect(url_for('main.index'))
+    return redirect(redirect_url)
 
 
 @main.route('/reset_cookie')

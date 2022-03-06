@@ -52,7 +52,7 @@ def edit_post(post_id):
     form.edit_mode = True
     if form.validate_on_submit():
         current_user.edit_post(post, title=form.title.data, body=form.body.data)
-        return redirect(url_for('main.browse'))
+        return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
     form.type.default = post.type
     form.type.choices = [form.type.choices[0 if post.type == Post.TYPE_BUY else 1]]
@@ -80,7 +80,7 @@ def toggle_editor():
     db.session.commit()
 
     redirect_url = request.referrer
-    if not redirect_url.startswith(request.root_url):
+    if redirect_url is None or not redirect_url.startswith(request.root_url):
         redirect_url = url_for('main.index')
     return redirect(redirect_url)
 

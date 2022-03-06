@@ -51,7 +51,6 @@ def top_up_success():
 @main.route('/top-up/cancel')
 @login_required
 def top_up_cancel():
-    print(request.referrer)
     flash('Top-up cancelled', category='warning')
     return redirect(url_for('main.account'))
 
