@@ -40,7 +40,7 @@
         {% endblock %}
     {% endblock %}
 </head>
-<body class="d-flex h-100 bg-light">
+<body class="d-flex h-100 {% block body_bg %}bg-light{% endblock %}">
 {% block body %}
     <div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
         <header>

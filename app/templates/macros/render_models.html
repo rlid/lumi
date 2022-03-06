@@ -1,5 +1,4 @@
-{% from "macros/form.html" import button_class %}
-{% from "macros/utils.html" import render_modal %}
+{% from "macros/utils.html" import render_modal, button_class %}
 
 {% macro render_user_plain(user, capitalize=True) %}
     {% if user == current_user %}

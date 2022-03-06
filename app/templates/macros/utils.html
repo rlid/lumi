@@ -200,3 +200,29 @@
         </div>
     </div>
 {% endmacro %}
+
+
+{% macro text_area_style(user, post) %}
+    {%- if (user == post.creator and post.type == "buy") or
+            (user != post.creator and post.type == "sell") -%}
+        background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;height: 10rem
+    {%- elif (user == post.creator and post.type == "sell") or
+            (user != post.creator and post.type == "buy") -%}
+        background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;height: 10rem
+    {%- else -%}
+        background-color: red
+    {%- endif -%}
+{% endmacro %}
+
+
+{% macro button_class(user, post) %}
+    {%- if (user == post.creator and post.type == "buy") or
+            (user != post.creator and post.type == "sell") -%}
+        info
+    {%- elif (user == post.creator and post.type == "sell") or
+            (user != post.creator and post.type == "buy") -%}
+        warning
+    {%- else -%}
+        danger
+    {%- endif -%}
+{% endmacro %}

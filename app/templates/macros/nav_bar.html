@@ -90,7 +90,7 @@
         {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}
         ">
         <a href="{% if link is not none %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
-           class="nav-link text-light"
+           class="nav-link text-white"
            {% if alt %}title="{{ alt }}" alt="{{ alt }}"{% endif %}
            {% if onclick %}onclick="{{ onclick }}"{% endif %}
         >{% if icon %}
