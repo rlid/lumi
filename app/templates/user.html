@@ -87,7 +87,9 @@
                         {% endif %}
                         {{ render_track_record(user, completed_engagements) }}
                     {% else %}
-                        The user has no completed engagements.
+                        <small class="text-muted">
+                            The user has no completed engagements.
+                        </small>
                     {% endif %}
                 </div>
             </div>
