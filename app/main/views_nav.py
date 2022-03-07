@@ -68,6 +68,11 @@ def cookie():
     return render_template('docs/cookie.html', title='Cookie Policy')
 
 
+@main.route('/terms')
+def terms():
+    return render_template('docs/terms.html', title='Terms & Conditions')
+
+
 @main.route('/engagements')
 @login_required
 def engagements():
