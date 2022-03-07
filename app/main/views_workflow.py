@@ -135,7 +135,7 @@ def share_node(node_id):
             return redirect(url_for('main.share_node', node_id=node_id))
         else:
             flash('You cannot adjust your referrer reward.', category='warning')
-    return render_template('node_share.html', node=user_node, form=form)
+    return render_template('node_share.html', node=user_node, form=form, Post=Post)
 
 
 @main.route('/node/<node_id>/request-engagement')

@@ -17,9 +17,9 @@
                 <th scope="row">{{ moment(engagement.last_updated).format('HH:mm:ss') }}</th>
                 <td>{{ '{0:.2f}'.format(0.01 * engagement.node.value_cent) }}</td>
                 <td>{% if user.id == engagement.asker_id %}
-                    Buyer
+                    Asker
                 {% elif user.id == engagement.answerer_id %}
-                    Seller
+                    Answerer
                 {% endif %}
                 </td>
                 <td>{{ is_success }}</td>
@@ -61,11 +61,11 @@
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
                     <li>
-                        the remaining amount goes to the seller
+                        the remaining amount goes to the answerer
                     </li>
                 </ul>
             {% else %}
-                Upon successful engagement, buyer pays :
+                Upon successful engagement, asker pays :
                 <ul class="mb-0">
                     <li>
                         {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} to you
@@ -98,11 +98,11 @@
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
                     <li>
-                        {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to the seller
+                        {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to the answerer
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - buyer pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
+                <b>Request for Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
@@ -110,7 +110,7 @@
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
                     <li>
-                        {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to you
+                        {{ '${0:.2f}'.format(0.01 * node.answerer_reward_cent) }} goes to you (the answerer)
                     </li>
                 </ul>
             {% endif %}
@@ -124,27 +124,27 @@
             for each successful engagement your referral leads to, or
             <p></p>
             {% if post.type == Post.TYPE_SELL %}
-                <b>Request for Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon successful
-                engagement, of which:
+                <b>Request for Engagement</b> - you (the asker) pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
+                successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
                     <li>
-                        {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to the seller
+                        {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to the answerer
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - buyer pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon successful
-                engagement, of which:
+                <b>Request for Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
+                successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
                     <li>
                         {{ '${0:.2f}'.format(0.01 * post.platform_fee_cent) }} is the platform fee
                     </li>
                     <li>
-                        {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to you
+                        {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} goes to you (the answerer)
                     </li>
                 </ul>
             {% endif %}
@@ -203,11 +203,11 @@
 
 
 {% macro text_area_style(user, post) %}
-    {%- if (user == post.creator and post.type == "buy") or
-            (user != post.creator and post.type == "sell") -%}
+    {%- if (user == post.creator and post.type == "asking") or
+            (user != post.creator and post.type == "answering") -%}
         background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;height: 10rem
-    {%- elif (user == post.creator and post.type == "sell") or
-            (user != post.creator and post.type == "buy") -%}
+    {%- elif (user == post.creator and post.type == "answering") or
+            (user != post.creator and post.type == "asking") -%}
         background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;height: 10rem
     {%- else -%}
         background-color: red
@@ -216,11 +216,11 @@
 
 
 {% macro button_class(user, post) %}
-    {%- if (user == post.creator and post.type == "buy") or
-            (user != post.creator and post.type == "sell") -%}
+    {%- if (user == post.creator and post.type == "asking") or
+            (user != post.creator and post.type == "answering") -%}
         info
-    {%- elif (user == post.creator and post.type == "sell") or
-            (user != post.creator and post.type == "buy") -%}
+    {%- elif (user == post.creator and post.type == "answering") or
+            (user != post.creator and post.type == "asking") -%}
         warning
     {%- else -%}
         danger

@@ -256,7 +256,7 @@ class User(UserMixin, db.Model):
             return post_tag
 
     def add_tag(self, post, name):
-        if name.lower() not in ('buying', 'selling'):
+        if name.lower() not in ('asking', 'answering'):
             post_tag = self._add_tag(post, name)
             if post_tag:
                 db.session.commit()
@@ -295,8 +295,8 @@ class User(UserMixin, db.Model):
                     body=('m' if self.use_markdown else 's') + body)
         db.session.add(post)
 
-        self._add_tag(post, 'Buying' if post_type == Post.TYPE_BUY else 'Selling')
-        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
+        self._add_tag(post, post_type.capitalize())
+        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('asking', 'answering')]
 
         if is_private:
             node = Node(
@@ -339,8 +339,8 @@ class User(UserMixin, db.Model):
 
         # reset all post tags
         [db.session.delete(post_tag) for post_tag in post.post_tags]
-        self._add_tag(post, 'Buying' if post.type == Post.TYPE_BUY else 'Selling')
-        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('buying', 'selling')]
+        self._add_tag(post, post.type.capitalize())
+        [self._add_tag(post, name) for name in tag_names if name.lower() not in ('asking', 'answering')]
 
         db.session.commit()
 
@@ -469,7 +469,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_SELL and self.balance_available_cent < node.value_cent:
-            raise InsufficientFundsError('Cannot create engagement as buyer due to insufficient funds')
+            raise InsufficientFundsError('Cannot create engagement as asker due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
             engagement = Engagement(node=node, sender=self, receiver=post.creator,
@@ -547,7 +547,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
         if post.type == Post.TYPE_BUY and self.balance_available_cent < node.value_cent:
-            raise InsufficientFundsError('Cannot accept engagement as buyer due to insufficient funds')
+            raise InsufficientFundsError('Cannot accept engagement as asker due to insufficient funds')
 
         if post.type == Post.TYPE_BUY:
             self.reserved_balance_cent += node.value_cent
@@ -800,7 +800,7 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=buyer,
         node=node,
-        message=f'You spent ${0.01 * value_cent:.2f} as buyer.'
+        message=f'You spent ${0.01 * value_cent:.2f} as asker.'
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
@@ -853,7 +853,7 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=seller,
         node=node,
-        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as seller.'
+        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as answerer.'
     )
 
     return value_cent

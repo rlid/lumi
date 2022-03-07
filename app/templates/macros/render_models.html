@@ -16,10 +16,10 @@
 {% endmacro %}
 
 {# tags_in_filter should contain all the ACTIVE tags on the current page #}
-{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['buying', 'selling']) %}
+{% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['asking', 'answering']) %}
     {% if tag.id not in ignore_ids %}
         <a class="badge rounded-pill border text-decoration-none
-        bg-{{- 'info' if tag.id == 'buying' else ('warning' if tag.id == 'selling' else 'light') }}
+        bg-{{- 'info' if tag.id == 'asking' else ('warning' if tag.id == 'answering' else 'light') }}
         text-dark {{ extra_class }}" href="
         {% if tag in tags_in_filter %}
             {# if the tag is already active, the link will remove the tag from the filter #}
@@ -35,8 +35,7 @@
 {% endmacro %}
 
 {% macro render_card(node, above_title=None, after_title=None, card_text=None, card_footer=None,
-    style_map={'buy':'info', 'sell':'warning'},
-    label_map={'buy':'Buying', 'sell':'Selling'}) %}
+    style_map={'asking':'info', 'answering':'warning'}) %}
     {% set post = node.post %}
     <div class="card mb-3 {{ style_map[post.type] }}">
         <div class="card-body pt-2 pb-{%- if card_text -%}2{% else %}0{% endif %}">
@@ -45,9 +44,9 @@
             {% endif %}
             <div class="card-title">
                 <div class="btn-group btn-group-sm buy-sell" role="group">
-                    <a href="{{ url_for("main.browse", tags=post.type+'ing' if post.type in ['buy', 'sell'] else '') }}"
-                       class="btn btn-{{- style_map[post.type] -}}">
-                        {{ label_map[post.type] }}
+                    <a href="{{ url_for("main.browse", tags=post.type) }}"
+                       class="btn btn-{{- style_map[post.type] }}">
+                        {{ post.type.capitalize() }}
                     </a>
                     <button type="button" class="btn btn-secondary" disabled>
                         {{ "$%.2f"|format(node.display_value(current_user)) }}
@@ -210,9 +209,9 @@
         {% if message.type >= Message.TYPE_REQUEST %}
               bg-light border-0
         {% elif message.creator == message.node.post.creator %}
-            {% if message.node.post.type == 'buy' %}info10{% else %}warning10{% endif %}
+            {% if message.node.post.type == 'asking' %}info10{% else %}warning10{% endif %}
         {% else %}
-            {% if message.node.post.type == 'sell' %}info10{% else %}warning10{% endif %}
+            {% if message.node.post.type == 'answering' %}info10{% else %}warning10{% endif %}
         {% endif %}
         "
                                              style="

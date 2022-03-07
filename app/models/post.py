@@ -16,8 +16,8 @@ from utils.markdown_ext import DelExtension
 class Post(db.Model):
     __tablename__ = 'posts'
 
-    TYPE_BUY = 'buy'
-    TYPE_SELL = 'sell'
+    TYPE_BUY = 'asking'
+    TYPE_SELL = 'answering'
     # TYPE_ANNOUNCEMENT = 'announcement'
     # TYPE_WARNING = 'warning'
     # TYPE_INFO = 'info'
