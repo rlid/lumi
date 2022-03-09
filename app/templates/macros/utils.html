@@ -80,6 +80,7 @@
         </div>
     {% elif current_user == node.creator %}
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
+            <p>If you...</p>
             <b>Share</b> - you
             {% if post.is_private %}
                 earn
@@ -119,6 +120,7 @@
     {% else %}
         {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent = node.rewards_for_next_node_cent() %}
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
+            <p>If you...</p>
             <b>Share</b> - you can earn up to
             {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }}
             for each successful engagement your referral leads to, or
