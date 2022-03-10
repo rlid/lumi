@@ -53,9 +53,9 @@ def whatsapp():
     return redirect('https://api.whatsapp.com/send?phone=+447774523701', code=302)
 
 
-@main.route('/how-it-works')
-def how_it_works():
-    return render_template('landing.html', title='How It Works')
+@main.route('/faq')
+def faq():
+    return render_template('docs/faq.html', title='How It Works')
 
 
 @main.route('/privacy')

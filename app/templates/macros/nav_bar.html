@@ -26,7 +26,7 @@
             <ul class="navbar-nav">
                 {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}
                 {{ render_nav_item("main.post_options", "Post", "bi-plus-square", visible_from="sm") }}
-                {{ render_nav_item("main.how_it_works", "How It Works", "bi-signpost-split", visible_from="md") }}
+                {{ render_nav_item("main.faq", "FAQ", "bi-signpost-split", visible_from="md") }}
                 {{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}
                 {{ render_nav_item("main.whatsapp", text="Help", icon="bi-question-circle", visible_from="sm") }}
             </ul>
@@ -154,7 +154,7 @@
                         How It Works
                     </a></p>
                     <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
+                          href="{{ url_for('main.faq') }}">
                         Help & FAQs
                     </a></p>
                     <p><a class="text-decoration-none text-muted"
