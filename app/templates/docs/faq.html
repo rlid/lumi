@@ -1,37 +1,59 @@
 {% extends "index.html" %}
 
+{% block style %}
+    <style>
+        h3:first-child {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h3:last-child {
+            margin-top: 3rem;
+        }
+    </style>
+{% endblock %}
+
 {% block mid_col %}
 
     <h3>What is LumiAsk?</h3>
     <p>LumiAsk started as a tool that helps you track and gain traction on the questions you ask in online communities.
-        If you are not having much luck with your post or comment on Reddit, your message on Discord, or other social
-        media platforms, you are welcome to try LumiAsk and see how much further some extra incentive will take you.</p>
+        If you are not having much luck with your message on a Discord server, or your post / comment on Reddit or other
+        social media platforms, you are welcome to give LumiAsk a go and see how much further some extra incentive will
+        take you.</p>
 
     <h3>How does it work?</h3>
-    <h6>If you are posting as an asker...</h6>
+    <h5>If you have a question to ask...</h5>
     <ol>
-        <li>Set a topic (e.g. something you are interested in) and set a reward
+        <li>Set a topic (e.g. something you are interested in) and set a reward to participants involved in getting
+            your question successfully answered
         </li>
         <li>Chat with anyone interested to help you and provide clarifications if needed</li>
-        <li><strong>Accept any request for engagement</strong> when you are ready, remember to check the answerer's
+        <li><strong>Accept a request for engagement</strong> when you are ready, remember to check the answerer's
             credentials if necessary
         </li>
-        <li>Ask your question and <strong>rate the engagement</strong> when an answer is provided</li>
+        <li>Ask your question and <strong>rate the engagement</strong> after an answer is provided</li>
     </ol>
 
-    <h6>If you want to help with an existing post...</h6>
+    <h5>If you want to help with an existing post...</h5>
     <ol>
-        <li>Chat with the OP for any clarifications needed</li>
+        <li>Chat with the OP (Original Poster) for any clarifications needed</li>
         <li><strong>Request for engagement</strong> when you are ready, or <strong>share</strong> the post with anyone
-            who might be able to help
+            who might be able to help. If you are sharing, <u>make sure to use your unique referrer link using the
+                "Share" button</u>
         </li>
         <li>After the request is accepted, help the OP and <strong>rate the engagement</strong> when you are done
         </li>
     </ol>
 
-    <h6>(New!) If you are posting as an answerer...</h6>
+    <h5>(New!) If you are posting as an answerer...</h5>
     <ol>
-        <li>Set a topic (something you are knowledgeable about) and set a reward
+        <li>Set a topic (something you are knowledgeable about) and set a reward that you want to receive after
+            successfully answering a question
         </li>
         <li>Chat with anyone interested in the topic and provide clarifications if needed</li>
         <li><strong>Accept any request for engagement</strong> when you are ready
@@ -42,8 +64,43 @@
     <p>If both parties rate the engagement as successful, a reward will be distributed from the asker to the answerer
         and all referrers leading to the successful engagement.</p>
 
-    <h3>What can I post?</h3>
-    <p></p>
+
+    <h3 id="questionPrivateMode">What is private mode?</h3>
+    <p>If you post in private mode, your post will not be listed publicly on the platform, and it can only be accessed
+        with a link from you or the referrers. <strong>This feature relies on you to send the link to your friends or
+            an online community to kick off the process.</strong></p>
+    <p>With private mode, we hope that we can offer extra incentives for referrers to spread the word without worrying
+        about not getting recognised when rewards are distributed.</p>
+    <p>You should use private mode if you want to rely on word of mouth to reach further than your immediate network of
+        friends and active members of online communities.</p>
+
+
+    <h3>What happens after my post is submitted?</h3>
+    <p>In public mode, you can just wait for other users to take interest in your post and contact you or refer your
+        post. We also use our own channels to connect you with someone to help you. You can also ask your friends to
+        spread the word.</p>
+    <p>In <a href="#questionPrivateMode">private mode</a>, nothing happens until you kick off the process by sending
+        it to a Discord server, post it on Reddit or other social media platforms.</p>
+
+
+    <h3>Why do my friends see a different reward from what I set for my post?</h3>
+    <p>The reward displayed is dependent on the viewer. When another user views your post, they will see how much they
+        would receive / pay on posts where you are the asker / answerer. If they are viewing your post through a
+        referrer's link, the referrer's reward will be taken into account.</p>
+    <p>For example, if you offer $5 on a question you are asking, other viewers will see $4.5 as the reward because that
+        is the amount they would receive by answering the question, after the platform fee. If a user sends the post to
+        a friend using a referral link, their friend would see $4 as the reward after the platform fee and the
+        referrer's reward.</p>
+    <p>If you are logged in, you should always see the rewards you set on your posts.</p>
+
+
+    <h3>What if I receive multiple requests for engagements on the same post?</h3>
+    <p>You can accept multiple active engagements at the same time, e.g. you want to hear from different perspectives /
+        a second opinion to cross-check the answers, but as an asker you should be prepared to pay the reward for each
+        successful engagement when you accept.</p>
+    <p>If you only need one person to help you, feel free to pick the most suitable one based on your criteria and
+        ignore the others.</p>
+
 
     <h3>When is payment taken?</h3>
     <p>Payment is not required at the time of posting.</p>
@@ -54,28 +111,6 @@
         the engagement is successful, the reserved amount will be distributed to the participants involved. Otherwise,
         the reserved amount will be released back to the asker's account.</p>
 
-    <h3>What if I receive multiple requests for engagements on the same post?</h3>
-    <p>You can accept multiple active engagements at the same time, e.g. you want to hear from different perspectives /
-        a second opinion to cross-check the answers, but as an asker you should be prepared to pay the reward for each
-        successful engagement when you accept.</p>
-    <p>If you only need 1 person to help you, feel free to pick the most suitable one based on your criteria and ignore
-        the others.</p>
-
-    <h3>What is private mode?</h3>
-    <p>If you post in private mode, your post will not be listed publicly on the platform, and it can only be accessed
-        with a link from you or the referrers. <strong>This feature relies on you to send the link to your friends or
-            share it on social media to kick off the chain reaction.</strong></p>
-    <p>With private mode, we hope that we can offer extra incentives for referrers to spread the word without worrying
-        about potential abuses of the system.</p>
-    <p>At the same time, you probably won't lose much by hiding the post on our platform, if that means more visibility
-        on high-traffic online communities / social media.</p>
-
-    <h3>How much can I earn from referrals?</h3>
-    <p>In public mode, you can earn up to 10% of the post reward set by the OP, if your referral leads to a successful
-        engagement directly. You can still earn a smaller reward if your participation is in a chain of referrals that
-        leads to a successful engagement.
-    </p>
-    <p>In private mode, it can be as much as 40% of the post reward set by the OP.</p>
 
     <h3>How are the rewards distributed?</h3>
     <p>Following a successful engagement, the reward is distributed to all participants in the chain leading to the
@@ -103,6 +138,19 @@
                 and ~50% of the post reward.</p>
         </li>
     </ul>
+
+
+    <h3>How much can I earn from referrals?</h3>
+    <p>In public mode, you can earn up to 10% of the post reward set by the OP, if your referral leads to a successful
+        engagement directly. You can still earn a smaller reward if your participation is in a chain of referrals that
+        leads to a successful engagement.
+    </p>
+    <p>In private mode, it can be as much as 40% of the post reward set by the OP.</p>
+
+    <h3>I did not get my referrer's reward I was expecting - why?</h3>
+    <p>Make sure you are sharing your own referrer's link by using the "Share" button. Simply sending a link to the post
+        will not properly record your contribution.</p>
+
 
     <h3>Does it really work?</h3>
     <p>You should probably always start with a simpler way, e.g. a Google search, asking friends or an online community,

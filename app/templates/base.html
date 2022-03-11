@@ -26,10 +26,10 @@
                 {{ conf.hotjar_js() }}
             {% endif %}
         {% endblock %}
-        <style>
-            {% block style %}
-            {% endblock %}
-        </style>
+        {% block style %}
+            <style>
+            </style>
+        {% endblock %}
         <title>
             {% block title %}
                 {{ config["APP_NAME"] }} - {% if title %}{{ title }}{% else %}Boosted Q&A{% endif %}
