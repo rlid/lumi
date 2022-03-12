@@ -55,7 +55,13 @@ def whatsapp():
 
 @main.route('/faq')
 def faq():
-    return render_template('docs/faq.html', title='How It Works')
+    return render_template('docs/faq.html', title='FAQs')
+
+
+@main.route('/faq/<anchor_id>')
+def faq_anchor(anchor_id):
+    print(anchor_id)
+    return render_template('docs/faq.html', title='FAQs', anchor_id=anchor_id)
 
 
 @main.route('/privacy')
