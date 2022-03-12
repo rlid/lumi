@@ -7,7 +7,7 @@ Apple iPhone SE
 
 @media (max-width: 340px) {
     .hide-340 {
-      display: none;
+        display: none;
     }
 }
 
@@ -33,7 +33,7 @@ Apple iPhone 13 Pro
 
 @media (max-width: 414px) {
     .hide-414 {
-      display: none;
+        display: none;
     }
 }
 
@@ -114,8 +114,6 @@ Apple iPhone 13 Pro Max
 }
 
 
-
-
 .card-text.truncated-sm {
     max-height: 5rem;
     overflow: hidden
@@ -182,4 +180,18 @@ Apple iPhone 13 Pro Max
     background-color: white;
     opacity: 1;
     font-size: 1rem;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+.accordion-button.collapsed {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.accordion-button:after {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23198754'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
 }
