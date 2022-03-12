@@ -15,7 +15,7 @@
         }
 
         h4 {
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
 
         h3 {
@@ -29,11 +29,12 @@
 {% endblock %}
 
 {% block left_col %}
-    <div class=" px-3 me-5">
+    <div class="mb-5">
         <h4>General</h4>
         <p><a href="#qWhat" class="text-decoration-none">What is LumiAsk?</a></p>
         <p><a href="#qHow" class="text-decoration-none">How does it work?</a></p>
         <p><a href="#qPayment" class="text-decoration-none">When is payment taken?</a></p>
+        <p><a href="#qAnswerQuality" class="text-decoration-none">How do you ensure the quality of answers?</a>
 
 
         <h4>Posting</h4>
@@ -65,26 +66,26 @@
 
         <h4>Rewards</h4>
         <p><a href="#qRewardDistribution" class="text-decoration-none">How are the rewards distributed?</a></p>
-        <p><a href="#qAnswererProtection" class="text-decoration-none">If an asker can always rate negatively to avoid
+        <p><a href="#qAnswererProtection" class="text-decoration-none">If the asker can always rate negatively to avoid
             paying, do I have any protection as the answerer?</a></p>
 
 
         <h4>Disputes</h4>
-        <p><a href="#qDispute" class="text-decoration-none">What is a dispute?</a></p>
-        <p><a href="#qDisputeResolution" class="text-decoration-none">What happens after a dispute?</a></p>
+        <p><a href="#qDisputeResolution" class="text-decoration-none">What if there is a dispute?</a></p>
         <p><a href="#qAnswererProtection" class="text-decoration-none">If the asker can always rate negatively to avoid
             paying out rewards, do I have any protection as the answerer?</a></p>
 
 
-        <h4>User reputation</h4>
+        <h4>User Reputation</h4>
         <p><a href="#qReputation" class="text-decoration-none">How do I protect my reputation?</a></p>
-        <p><a href="#qAnswerQuality" class="text-decoration-none">How do you ensure the quality of the answers
-            provided?</a></p>
+        </p>
 
 
-        <h4>Questions and feedback</h4>
+        <h4>Other</h4>
         <p><a href="#qDoesItWork" class="text-decoration-none">Does it really work?</a></p>
-        <p><a href="#qNewQuestion" class="text-decoration-none">How to ask a question that is not answered here?</a></p>
+        <p><a href="#qNewQuestion" class="text-decoration-none">How do I give feedback?</a></p>
+        <p><a href="#qNewQuestion" class="text-decoration-none">How do I ask a question that is not answered here?</a>
+        </p>
     </div>
 {% endblock %}
 
@@ -95,7 +96,6 @@
         If you are not having much luck with your message on a Discord server, or your post / comment on Reddit or other
         social media platforms, you are welcome to give LumiAsk a go and see how much further some extra incentive will
         take you.</p>
-
 
     <h3 id="qHow">How does it work?</h3>
     <h5>If you have a question to ask...</h5>
@@ -145,6 +145,39 @@
         If the engagement is rated as successful by both the asker and the answerer, the reserved amount will be
         distributed to the participants involved. Otherwise, the reserved amount will be released back to the asker's
         account.</p>
+
+
+    <h3 id="qAnswerQuality">How do you ensure the quality of answers?</h3>
+    <p>We are constantly exploring new ideas for the purpose of promoting responsible behavior, maintaining and
+        improving the quality user-generated contents, and helping users to assess the trustworthiness of others. Our
+        current recommendations are as follows:</p>
+    <ol>
+        <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the answer can be
+            verified by yourself once enough proof is presented by the answerer (e.g. you ask for a coupon code and the
+            one given by the answerer works), or because the answerer convinced you of their credentials through proof
+            (e.g. you want to know about a university and the answerer showed you his ID with sensitive information
+            redacted), or because you are prepared to enter into multiple engagements to cross-check the answers.
+        </li>
+        <li>Make sure to check out the other user's track record of past engagements before entering into an engagement.
+            While it does not prevent someone from giving poor answers, the need to maintain a good track record should
+            deter people from entering into engagements opportunistically.
+        </li>
+        <li>Each user has a reward limit and they cannot participate in any posts with a reward higher than their reward
+            limit. The limit is reduced aggressively for users on a bad run of engagements, and you will be warned if
+            their limit is reduced after they entered into engagement with you.
+        </li>
+        <li>In addition to rating the engagement, please report to us particularly poor interactions or deliberate
+            misinformation.
+        </li>
+    </ol>
+    <p>Please remember that like any platform powered by user‐generated contents, you are ultimately responsible for
+        verifying the information provided to you and deciding whether to rely on it. You should always exercise caution
+        when interacting with strangers on the internet and be wary of proof. You are encouraged to ask for more proof
+        if you find what is provided to you is insufficient.</p>
+    <p>Developing effective strategies to maintain and improve the quality of user-generated contents and holding the
+        sources accountable is one of the main motivations for us to create the platform, and it will always remain an
+        area of active research and development for us. We would like to work very closely with our users, so if you
+        have any ideas please <a href="#qFeedback">get in touch</a>!</p>
 
 
     <h1>Posting</h1>
@@ -290,12 +323,9 @@
 
     <h1>Disputes</h1>
 
-    <h3 id="qDispute">What is a dispute?</h3>
+    <h3 id="qDisputeResolution">What if there is a dispute?</h3>
     <p>A dispute arises if the asker rates the engagement as unsuccessful (&minus;) and the answerer rates it as
         successful (&plus;).</p>
-
-
-    <h3 id="qDisputeResolution">What happens after a dispute?</h3>
     <p>When a dispute arises, the user with a "worse" reputation will have its reputation negatively impacted, and their
         reward limit (the maximum reward of posts they can participate in) reduced.</p>
     <p>This process does not determine whether rewards should be paid out by the asker - it is determined by the asker
@@ -337,46 +367,40 @@
     </ul>
 
 
-    <h3 id="qAnswerQuality">How do you ensure the quality of the answers provided?</h3>
-    <p>We are constantly releasing new features for the purpose of promoting responsible behavior, maintaining and
-        improving the quality user-generated contents, and helping users to assess the trustworthiness of others.
-        Our current recommendations are as follows:</p>
-    <ol>
-        <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the answer can be
-            verified by yourself once enough proof is presented by the answerer (e.g. you ask for a coupon code and the
-            one given by the answerer works), or because the answerer convinced you of their credentials through proof
-            (e.g. you want to know about a university and the answerer showed you his ID with sensitive information
-            redacted), or because you are prepared to enter into multiple engagements to cross-check the answers.
-        </li>
-        <li>Make sure to check out the other user's track record of past engagements before entering into an engagement.
-            While it does not prevent someone from giving poor answers, the need to maintain a good track record
-            should deter people from entering into engagements opportunistically.
-        </li>
-        <li>There is a limit on the reward of posts a user can participate in, which is reduced aggressively for users
-            on a bad run of engagements. Such users cannot participate in high reward posts, and you will be warned if
-            their limit is reduced after they entered into engagement with you.
-        </li>
-        <li>In addition to rating the engagement, please report to us particularly poor interactions or deliberate
-            misinformation.
-        </li>
-    </ol>
-    <p>Please remember that like any platform powered by user‐generated contents, you are ultimately
-        responsible for verifying the information provided to you and deciding whether to rely on it.</p>
-    <p>Developing effective strategies to maintain and improve the quality of user-generated contents and holding the
-        sources accountable is one of the main motivations for us to create the platform, and it will always remain an
-        area of active research and development for us. We would like to work very closely with our users, so if you
-        have any ideas please get in touch!</p>
-
-
+    <h1>Other</h1>
 
     <h3 id="qDoesItWork">Does it really work?</h3>
-    <p>You should probably always start with a simpler way, e.g. a Google search, asking friends or an online community,
-        and there is no reason to use this platform if you can get the answer more easily. But there are times when your
-        question is so specific that no one else seems to care without extra incentive, and you want something that
-        reaches a little deeper than your own social circle, or go beyond the active users of a community.</p>
+    <p>You should probably always start with a more conventional way, e.g. a Google search, asking friends or an online
+        community, and there is no reason to use this platform if you can get the answer more easily. But there are
+        times when your question is so specific that no one seems to care without extra incentive, and you want
+        something that reaches a little deeper than your own social circle, and go beyond the active users of a
+        community.</p>
+    <p>In any case, we believe that LumiAsk has its place as a tool for finding specific knowledge, and it should
+        be an option for everyone to consider when the results from more conventional methods are less than
+        satisfactory.</p>
 
 
-    <h3 id="qNewQuestion">How to ask a question that is not answered here?</h3>
-    <p>You can contact us by <a href="mailto:support@lumiask.com">email</a> / <a href="{{ url_for('main.whatsapp') }}">WhatsApp</a>.
+    <h3 id="qFeedback">How do I give feedback?</h3>
+    <p>We value your feedback highly and you can contact us through any of the following communication channels -
+        <a href="mailto:info@lumiask.com">Email</a>,
+        <a href="http://192.168.0.8:8080/whatsapp">WhatsApp</a>,
+        <a href="https://discord.gg/PC7mPwXYsY">Discord</a>,
+        <a href="https://twitter.com/KnowbleApp">Twitter</a>,
+        <a href="https://fb.me/KnowbleApp">Facebook</a>,
+        <a href="https://www.linkedin.com/company/knowbleapp">LinkedIn</a>.
     </p>
+
+
+    <h3 id="qNewQuestion">How do I ask a question that is not answered here?</h3>
+    <p>You can contact us through any of the following communication channels -
+        <a href="mailto:info@lumiask.com">Email</a>,
+        <a href="http://192.168.0.8:8080/whatsapp">WhatsApp</a>,
+        <a href="https://discord.gg/PC7mPwXYsY">Discord</a>,
+        <a href="https://twitter.com/KnowbleApp">Twitter</a>,
+        <a href="https://fb.me/KnowbleApp">Facebook</a>,
+        <a href="https://www.linkedin.com/company/knowbleapp">LinkedIn</a>.
+    </p>
+    <a href="javascript:window.scrollTo(0, 0)">To Top</a>
+
+
 {% endblock %}
