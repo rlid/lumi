@@ -2,31 +2,101 @@
 
 {% block style %}
     <style>
-        h3:first-child {
+        h1:first-child {
             margin-top: 0;
-            margin-bottom: 1rem;
+        }
+
+        h1 {
+            margin-top: 10rem;
+        }
+
+        h4:first-child {
+            margin-top: 0;
+        }
+
+        h4 {
+            margin-top: 3rem;
         }
 
         h3 {
-            margin-top: 3rem;
+            padding-top: 4rem;
             margin-bottom: 1rem;
-        }
-
-        h3:last-child {
-            margin-top: 3rem;
         }
     </style>
 {% endblock %}
 
-{% block mid_col %}
+{% block left_col_position %}
+{% endblock %}
 
-    <h3>What is LumiAsk?</h3>
+{% block left_col %}
+    <div class=" px-3 me-5">
+        <h4>General</h4>
+        <p><a href="#qWhat" class="text-decoration-none">What is LumiAsk?</a></p>
+        <p><a href="#qHow" class="text-decoration-none">How does it work?</a></p>
+
+
+        <h4>Posting</h4>
+        <p><a href="#qPrivateMode" class="text-decoration-none">What is private mode?</a></p>
+        <p><a href="#qAfterSubmission" class="text-decoration-none">What happens after my post is submitted?</a></p>
+        <p><a href="#qRewardDisplay" class="text-decoration-none">Why do my friends see a different reward from what I
+            set for my post?</a></p>
+
+
+        <h4>Referrals</h4>
+        <p><a href="#qReferrerReward" class="text-decoration-none">How much can I earn from referrals?</a></p>
+        <p><a href="#qHowToRefer" class="text-decoration-none">How do I refer someone?</a></p>
+        <p><a href="#qReferralClaim" class="text-decoration-none">What portion of the total referral reward should I
+            claim in private mode?</a></p>
+
+
+        <h4>Engagements</h4>
+        <p><a href="#qMultipleEngagements" class="text-decoration-none">What if I receive multiple requests for
+            engagements on the same post?</a></p>
+        <p><a href="#qPayment" class="text-decoration-none">When is payment taken?</a></p>
+        <p><a href="#qCancel" class="text-decoration-none">Can I cancel an engagement?</a></p>
+        <p><a href="#qNegativeRating" class="text-decoration-none">The engagement is not going anywhere, what should I
+            do?</a>
+        </p>
+        <p><a href="#qAskTooMany" class="text-decoration-none">The asker is asking more questions than I
+            expected - what should I do?</a></p>
+        <p><a href="#qDispute" class="text-decoration-none">What happens if an engagement is rated differently by the
+            asker and the answerer?</a></p>
+
+
+        <h4>Rewards</h4>
+        <p><a href="#qRewardDistribution" class="text-decoration-none">How are the rewards distributed?</a></p>
+        <p><a href="#qAnswererProtection" class="text-decoration-none">If an asker can always rate negatively to avoid
+            paying, do I have any protection as the answerer?</a></p>
+
+
+        <h4>Disputes</h4>
+        <p><a href="#" class="text-decoration-none">What is a dispute?</a></p>
+        <p><a href="#" class="text-decoration-none">What are the consequences of a dispute?</a></p>
+        <p><a href="#" class="text-decoration-none">How are disputes resolved?</a></p>
+
+
+        <h4>User reputation</h4>
+        <p><a href="#qAnswerQuality" class="text-decoration-none">How do you ensure the quality of the answers
+            provided?</a></p>
+        <p><a href="#qAnswerQuality" class="text-decoration-none">How do I protect my reputation?</a></p>
+
+
+        <h4>Questions and feedback</h4>
+        <p><a href="#qDoesItWork" class="text-decoration-none">Does it really work?</a></p>
+        <p><a href="#qNewQuestion" class="text-decoration-none">How to ask a question that is not answered here?</a></p>
+    </div>
+{% endblock %}
+
+{% block mid_col %}
+    <h1>General</h1>
+    <h3 id="qWhat">What is LumiAsk?</h3>
     <p>LumiAsk started as a tool that helps you track and gain traction on the questions you ask in online communities.
         If you are not having much luck with your message on a Discord server, or your post / comment on Reddit or other
         social media platforms, you are welcome to give LumiAsk a go and see how much further some extra incentive will
         take you.</p>
 
-    <h3>How does it work?</h3>
+
+    <h3 id="qHow">How does it work?</h3>
     <h5>If you have a question to ask...</h5>
     <ol>
         <li>Set a topic (e.g. something you are interested in) and set a reward to participants involved in getting
@@ -65,7 +135,8 @@
         to the answerer and all referrers leading to the successful engagement.</p>
 
 
-    <h3 id="questionPrivateMode">What is private mode?</h3>
+    <h1>Posting</h1>
+    <h3 id="qPrivateMode">What is private mode?</h3>
     <p>If you post in private mode, your post will not be listed publicly on the platform, and it can only be accessed
         with a link from you or the referrers. <strong>This feature relies on you to send the link to your friends or
             an online community to kick off the process.</strong></p>
@@ -76,7 +147,7 @@
         active members of online communities.</p>
 
 
-    <h3>What happens after my post is submitted?</h3>
+    <h3 id="qAfterSubmission">What happens after my post is submitted?</h3>
     <p>In public mode, you can just wait for other users to take interest in your post and contact you or refer your
         post. We also use our own channels to connect you with someone to help you. You can also ask your friends to
         spread the word.</p>
@@ -84,7 +155,7 @@
         server, post it on Reddit or other social media platforms.</p>
 
 
-    <h3>Why do my friends see a different reward from what I set for my post?</h3>
+    <h3 id="qRewardDisplay">Why do my friends see a different reward from what I set for my post?</h3>
     <p>The reward displayed is dependent on the viewer. When another user views your post, they will see how much they
         would receive / pay on posts where you are the asker / answerer. If they are viewing your post through a
         referrer's link, the referrer's reward will be taken into account.</p>
@@ -95,15 +166,64 @@
     <p>If you are logged in, you should always see the rewards you set on your posts.</p>
 
 
-    <h3>What if I receive multiple requests for engagements on the same post?</h3>
+    <h1>Referrals</h1>
+    <h3 id="qReferrerReward">How much can I earn from referrals?</h3>
+    <p>In public mode, you can earn up to 10% of the post reward set by the OP, if your referral leads to a successful
+        engagement directly. You can still earn a smaller reward if your participation is in a chain of referrals that
+        leads to a successful engagement.
+    </p>
+    <p>In private mode, it can be as much as 40% of the post reward set by the OP.</p>
+
+    <h3 id="qHowToRefer">How do I refer someone?</h3>
+    <p>Make sure you use the "Share" button to generate your own referrer's link and share it. Simply sending a link to
+        the post will not properly register your involvement in the referral process.</p>
+
+
+    <h3 id="qReferralClaim">How much referrer's reward should I claim in private mode?</h3>
+    <p>Up to 40% of the reward set by the OP can be claimed by the referrers in private mode. The default is 20% (half
+        of the maximum) under the assumption that you want to earn a nice reward while leaving something on the table,
+        so it is still attractive for the next person to participate.</p>
+    <p>You can choose a different portion, e.g. 0% if you are a good friend and just want to help out of
+        kindness, or all of the 40% if you plan to put in a lot of effort to help the OP, or somewhere in-between.</p>
+    <p>Remember that the more you claim from the total reward, the less attractive it will be for other people to
+        participate from your point of referral, and the less likely it will lead to a successful engagement (unless you
+        are confident you can find the right person yourself).</p>
+
+
+
+    <h1>Engagements</h1>
+    <h3 id="qMultipleEngagements">What if I receive multiple requests for engagements on the same post?</h3>
     <p>You can accept multiple active engagements at the same time, e.g. you want to hear from different perspectives /
         a second opinion to cross-check the answers, but as an asker you should be prepared to pay the reward for each
         successful engagement when you accept.</p>
-    <p>If you only need one person to help you, feel free to pick the most suitable one based on your criteria and
+    <p>If you only need one person to help you, feel free to pick the most suitable one based on your own criteria and
         ignore the others.</p>
 
+    <h3 id="qCancel">Can I cancel an engagement?</h3>
+    <p>You can cancel your request for engagement before it is accepted by the OP by clicking the "Cancel" button.</p>
+    <p>If the engagement is accepted but an answer has not been provided, you should let the other user know as soon
+        as possible about your intention to cancel and rate the engagement as unsuccessful.</p>
 
-    <h3>What happens if an engagement is rated differently by the asker and the answerer?</h3>
+
+    <h3 id="qNegativeRating">The engagement is not going anywhere, what should I do?</h3>
+    <p>If you or the user at the other end of the engagement realised that the engagement is unlikely to be a success,
+        after entering into an engagement (e.g. due to a misunderstanding), you should politely let the other user know
+        (hopefully they have realised the same) and rate the engagement as unsuccessful.</p>
+    <p>It is perfectly OK to rate an engagement as unsuccessful as long as it is genuine - if both users agree that the
+        engagement is not successful, it will not have any negative impact on either user, as long as they act honestly
+        and courteously towards each other.</p>
+
+
+    <h3 id="qAskTooMany">The asker is asking more questions than I expected - what should I do?</h3>
+    <p>If you feel that the asker is asking more questions than what you understood before entering into the engagement,
+        you should politely explain that it is taking longer than expected, and ask them to clarify how many more
+        question they have in mind, and depending on their answer, either answer the remaining questions or agree to
+        rate the engagement based on the interactions so far and open a new engagement.</p>
+    <p>In any case, you should feel free to rate your engagement as successful, as long as you are acting honestly and
+        answered all the questions that was in scope originally.</p>
+
+
+    <h3 id="qDispute">What happens if an engagement is rated differently by the asker and the answerer?</h3>
     <p>An engagement can be rated as successful(&plus;) or unsuccessful(&minus;) by the asker and the answerer. No
         reward is distributed if there is any discrepancy in the asker and answerer's rating of the engagement.</p>
     <p>A <strong>dispute</strong> arises if the asker rates &minus; and the answerer rates &plus;, the party with a
@@ -112,7 +232,7 @@
         trustworthiness of neither party will be directly impacted</p>
 
 
-    <h3>If the askers can always decide not pay the reward by giving a negative rating, do I have any protection as the
+    <h3 id="qAnswererProtection">If an asker can always rate negatively to avoid paying, do I have any protection as the
         answerer?</h3>
     <p>If a buyer does not pay a reward by giving a negative rating untruthfully, their trustworthiness will be
         aggressively reduced very quickly, and they will lose the ability to make new post or enter into
@@ -122,7 +242,7 @@
         becomes restricted due to a low trustworthiness score.</p>
 
 
-    <h3>When is payment taken?</h3>
+    <h3 id="qPayment">When is payment taken?</h3>
     <p>Payment is not required at the time of posting.</p>
     <p>As the asker, before you can accept an engagement from a prospective answerer or request for engagement on an
         answerer's post, your balance will be checked and a top-up will be required if your balance is not enough for
@@ -133,7 +253,7 @@
         account.</p>
 
 
-    <h3>How do you ensure the quality of the answers provided?</h3>
+    <h3 id="qAnswerQuality">How do you ensure the quality of the answers provided?</h3>
     <p>We are constantly releasing new features for the purpose of promoting responsible behavior, maintaining and
         improving the quality user-generated contents, and helping users to assess the trustworthiness of others.
         Our current recommendations are as follows:</p>
@@ -164,8 +284,7 @@
         have any ideas please get in touch!</p>
 
 
-
-    <h3>How are the rewards distributed?</h3>
+    <h3 id="qRewardDistribution">How are the rewards distributed?</h3>
     <p>Following a successful engagement, the reward is distributed to all participants in the chain leading to the
         successful engagement.
     </p>
@@ -193,26 +312,14 @@
     </ul>
 
 
-    <h3>How much can I earn from referrals?</h3>
-    <p>In public mode, you can earn up to 10% of the post reward set by the OP, if your referral leads to a successful
-        engagement directly. You can still earn a smaller reward if your participation is in a chain of referrals that
-        leads to a successful engagement.
-    </p>
-    <p>In private mode, it can be as much as 40% of the post reward set by the OP.</p>
-
-    <h3>I did not get my referrer's reward I was expecting - why?</h3>
-    <p>Make sure you are sharing your own referrer's link by using the "Share" button. Simply sending a link to the post
-        will not properly record your contribution.</p>
-
-
-    <h3>Does it really work?</h3>
+    <h3 id="qDoesItWork">Does it really work?</h3>
     <p>You should probably always start with a simpler way, e.g. a Google search, asking friends or an online community,
         and there is no reason to use this platform if you can get the answer more easily. But there are times when your
         question is so specific that no one else seems to care without extra incentive, and you want something that
         reaches a little deeper than your own social circle, or go beyond the active users of a community.</p>
 
-    <h3>How to ask a question that is not answered here?</h3>
+
+    <h3 id="qNewQuestion">How to ask a question that is not answered here?</h3>
     <p>You can contact us by <a href="mailto:support@lumiask.com">email</a> / <a href="{{ url_for('main.whatsapp') }}">WhatsApp</a>.
     </p>
-
 {% endblock %}

@@ -6,7 +6,7 @@
 {% block main_container %}
     <div class="row">
         <div class="col">
-            <div class="position-sticky mb-3" style="top:5rem">
+            <div class="{% block left_col_position %}position-sticky{% endblock %} mb-3" style="top:5rem">
                 {% block left_col %}
                     {% if tags_in_filter or tags_not_in_filter_with_freq %}
                         <div class="card {% if tags_in_filter or tags_not_in_filter_with_freq %}mb-3{% endif %}">
