@@ -75,3 +75,12 @@ class ReportPostForm(FlaskForm):
         render_kw={"placeholder": "Spam / Phishing / Harassment / Other illegal activities"}
     )
     submit = SubmitField("Send")
+
+
+class FeedbackForm(FlaskForm):
+    text = TextAreaField(
+        "Text",
+        validators=[InputRequired()],
+        render_kw={"placeholder": "Write your feedback..."}
+    )
+    submit = SubmitField("Send")

@@ -74,21 +74,17 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guidelines for posting</h5>
             <ul class="small">
-                <li><b>Price</b> is the price you will pay or receive upon a successful transaction, regardless of
-                    whether referrers are involved
-                </li>
-                <li>Don't directly seek or offer <a
-                        href="https://www.gov.uk/government/publications/professions-regulated-by-law-in-the-uk-and-their-regulators/uk-regulated-professions-and-their-regulators">
-                    regulated professional services</a> (but it is totally fine to ask for recommendations / opinions
-                    of professional service companies). This is a place to ask friendly people on the Internet for
-                    informal help and tips, let's keep it casual and don't get too serious (yet)!
+                <li><b>Reward</b> is how much you would offer to someone for answering your question, or how much you
+                    want to receive by answering someone else's question, depending on the type of your post
                 </li>
                 <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the answer
                     can be verified by yourself once enough proof is presented by the answerer, or because the answerer
                     convinced you of their credential through proof, or because you are prepared to enter into multiple
                     engagements to cross-check the answers
                 </li>
-                <li>Be specific, give criteria on who you want to hear from if applicable</li>
+                <li>Be specific, try to give an idea how many follow-up questions you might ask, and give criteria on
+                    who you want to hear from if applicable
+                </li>
                 <li>Use <b>hashtags</b> so the relevant people can find your post quicker, e.g. if your question is
                     about Japanese Rice Cooker, put #Japan and #RiceCooker somewhere in the Details section for them to
                     be recognized as hashtags
@@ -96,10 +92,6 @@
                 <li>Spread the word and share your post on social media and other online communities, but <b>please
                     follow their rules and don't spam</b>. Generally, a good way is to ask the same question in the
                     community and offer to pay a reward using the link to your post here
-                </li>
-                <li>Don't share personal information in the post</li>
-                <li>(Experimental) Enable Private mode to offer even more incentive for people to spread the word
-                    by guaranteeing a reward for referral
                 </li>
             </ul>
         </div>
@@ -114,7 +106,10 @@
                     be required if the current balance is not enough for the reward
                 </li>
                 <li>If both parties rate the engagement as successful(+), the reward will be distributed according to
-                    the <a href="#">reward distribution rules</a></li>
+                    the
+                    <a href="{{ url_for('main.faq_anchor', anchor_id='qRewardDistribution', _anchor='qRewardDistribution') }}"
+                       target="_blank">
+                        reward distribution rules</a></li>
                 <li>As long as the asker rates the engagement as unsuccessful(&minus;), no reward will be distributed
                     and the
                     reserved amount will be released back to the asker's account

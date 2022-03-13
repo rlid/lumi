@@ -185,6 +185,7 @@ Apple iPhone 13 Pro Max
 .accordion-button:not(.collapsed) {
     background: rgba(108, 117, 125, 0.1);
     color: #212529;
+    font-weight: bold;
 }
 
 .accordion-button.collapsed {

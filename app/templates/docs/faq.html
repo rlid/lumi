@@ -149,7 +149,7 @@
                         and holding the sources accountable is one of the main motivations for us to create the
                         platform, and it will always remain an area of active research and development for us. We would
                         like to work very closely with our users, so if you have any ideas please
-                        <a href="#qFeedback">get in touch</a>!</p>
+                        <a href="mailto:support@lumiask.com">get in touch</a>!</p>
                 </div>
             </div>
         </div>
@@ -540,12 +540,14 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header" id="qFeedback">
-                <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse"
+                <button class="accordion-button {% if anchor_id != 'qFeedback' %}collapsed{% endif %} bg-light"
+                        type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseFeedback">
                     How do I give feedback?
                 </button>
             </h2>
-            <div id="collapseFeedback" class="accordion-collapse collapse">
+            <div id="collapseFeedback"
+                 class="accordion-collapse collapse {% if anchor_id == 'qFeedback' %}show{% endif %}">
                 <div class="accordion-body">
                     We value your feedback highly and you can contact us through any of the following channels -
                     <a href="mailto:info@lumiask.com">Email</a>,
