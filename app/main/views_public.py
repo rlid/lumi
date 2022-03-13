@@ -8,7 +8,7 @@ from sqlalchemy import func, desc, and_, or_
 from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
-from app.main.forms import MessageForm, ReportForm
+from app.main.forms import MessageForm, ReportForm, FeedbackForm
 from app.models.user import Message
 from app.models.user import Post, Node, Engagement
 from app.models.user import User, PostTag, Tag
@@ -43,7 +43,14 @@ def user(user_id):
     ).order_by(
         Node.timestamp.desc()
     ).all()
-    return render_template("user.html", user=u, nodes=nodes, completed_engagements=completed_engagements)
+    return render_template(
+        'user.html',
+        user=u,
+        nodes=nodes,
+        completed_engagements=completed_engagements,
+        title='User Profile',
+        feedback_form=FeedbackForm()
+    )
 
 
 @main.route('/browse')
@@ -103,17 +110,15 @@ def browse():
     # if not tag_ids_to_filter:
     #     sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
 
-    login_form = LogInForm()
-    signup_form = SignUpForm()
-
     return render_template(
         "index.html",
         # sticky_posts=sticky_posts,
         root_nodes=root_nodes,
         tags_in_filter=tags_in_filter,
         tags_not_in_filter_with_freq=tags_not_in_filter_query.all(),
-        login_form=login_form,
-        signup_form=signup_form
+        login_form=LogInForm(),
+        signup_form=SignUpForm(),
+        feedback_form=FeedbackForm()
     )
 
 
@@ -155,7 +160,8 @@ def view_node(node_id):
             nodes=nodes,
             Post=Post,
             Engagement=Engagement,
-            Message=Message)
+            Message=Message,
+            feedback_form=FeedbackForm())
 
     report_form = ReportForm()
     message_form = MessageForm()
@@ -184,11 +190,12 @@ def view_node(node_id):
             engagement=engagement,
             engagement_request=engagement_request,
             messages_asc=messages_asc,
-            form=message_form,
+            message_form=message_form,
             report_form=report_form,
             Post=Post,
             Engagement=Engagement,
-            Message=Message)
+            Message=Message,
+            feedback_form=FeedbackForm())
 
     if message_form.validate_on_submit():
         # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
@@ -201,6 +208,7 @@ def view_node(node_id):
     return render_template(
         "node_view_as_other.html",
         node=node,
-        form=message_form,
+        message_form=message_form,
         report_form=report_form,
-        Post=Post)
+        Post=Post,
+        feedback_form=FeedbackForm())

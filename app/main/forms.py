@@ -18,8 +18,8 @@ class PostForm(FlaskForm):
 
     type = RadioField("Choose a type:",
                       choices=[
-                          (Post.TYPE_BUY, "I am asking a question or making a request"),
-                          (Post.TYPE_SELL, "(Experimental) I am answering questions or offering my service"),
+                          (Post.TYPE_BUY, "I have a question to ask or a task to perform"),
+                          (Post.TYPE_SELL, "(New!) I want to answer questions or offering my service"),
                       ],
                       validators=[InputRequired()]
                       )

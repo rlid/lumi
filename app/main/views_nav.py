@@ -63,7 +63,6 @@ def faq():
 
 @main.route('/faq/<anchor_id>')
 def faq_anchor(anchor_id):
-    print(anchor_id)
     return render_template('docs/faq.html', title='FAQs', anchor_id=anchor_id)
 
 
@@ -82,18 +81,35 @@ def terms():
     return render_template('docs/terms.html', title='Terms & Conditions')
 
 
+@main.route('/feedback')
+def feedback():
+    form = FeedbackForm()
+    return render_template('contact.html', title="Questions & Feedback", form=form)
+
+
+@main.route('/whatsnew')
+def whatsnew():
+    return render_template('whatsnew.html', title="What's New")
+
+
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = FeedbackForm()
     if form.validate_on_submit():
-        feedback = Feedback(
+        fb = Feedback(
             type='feedback',
             text=form.text.data,
             email=form.email.data or (current_user.email if current_user.is_authenticated else None))
-        db.session.add(feedback)
+        db.session.add(fb)
         db.session.commit()
         flash('Thank you so much for your feedback!', category='success')
-    return render_template('contact.html', title="Questions & Feedback", form=form)
+        redirect_url = request.referrer
+        if redirect_url and redirect_url.startswith(request.root_url):
+            return redirect(redirect_url)
+        else:
+            return redirect('main.contact')
+
+    return render_template('contact.html', title="Contact Us", form=form)
 
 
 @main.route('/engagements')

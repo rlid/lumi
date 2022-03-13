@@ -8,19 +8,18 @@
 
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
-{#    {{ render_reward_info(node) }}#}
     <div class="mb-3">
         <form id="form" method="post">
-            {{ form.hidden_tag() }}
+            {{ message_form.hidden_tag() }}
             <div class="mb-3">
-                {{ form.text(
+                {{ message_form.text(
                        class_="form-control",
                        placeholder="Message",
                        style=text_area_style(current_user, node.post),
                        disabled=not current_user.is_authenticated) }}
             </div>
             <div class="d-flex justify-content-between">
-                {{ form.submit(
+                {{ message_form.submit(
                        class_="btn btn-" + button_class(current_user, node.post),
                        disabled=not current_user.is_authenticated) }}
                 <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"

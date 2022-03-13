@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, ShareForm, ReportForm
+from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
@@ -13,7 +13,7 @@ from utils.math import round_js
 @main.route('/post-options')
 @login_required
 def post_options():
-    return render_template("post_options.html")
+    return render_template("post_options.html", feedback_form=FeedbackForm())
 
 
 @main.route('/post/<int:is_private>', methods=['GET', 'POST'])
@@ -37,7 +37,7 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_create_edit.html", form=form, title="Create Post")
+    return render_template("post_create_edit.html", form=form, title="Create Post", feedback_form=FeedbackForm())
 
 
 @main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
@@ -69,7 +69,7 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('post_create_edit.html', form=form, title="Edit Post")
+    return render_template('post_create_edit.html', form=form, title="Edit Post", feedback_form=FeedbackForm())
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -139,7 +139,7 @@ def share_node(node_id):
             return redirect(url_for('main.share_node', node_id=node_id))
         else:
             flash('You cannot adjust your referrer reward.', category='warning')
-    return render_template('node_share.html', node=user_node, form=form, Post=Post)
+    return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
 
 
 @main.route('/node/<node_id>/request-engagement')
@@ -294,16 +294,17 @@ def account():
         "account.html",
         user=current_user,
         uncompleted_engagements=uncompleted_engagements,
-        # other_root_nodes=other_root_nodes,
-        # other_child_nodes=other_child_nodes,
         nodes=nodes,
         Post=Post,
         Node=Node,
-        Engagement=Engagement)
+        Engagement=Engagement,
+        title='Account',
+        feedback_form=FeedbackForm()
+    )
 
 
 @main.route('/alerts')
 @login_required
 def alerts():
     notifications = current_user.notifications.order_by(Notification.timestamp.desc())
-    return render_template('alerts.html', title='Alerts', notifications=notifications)
+    return render_template('alerts.html', notifications=notifications, title='Alerts', feedback_form=FeedbackForm())

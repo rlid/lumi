@@ -1,5 +1,5 @@
 {% from "macros/utils.html" import render_form_modal %}
-{% from "macros/form.html" import render_login_form, render_signup_form %}
+{% from "macros/form.html" import render_login_form, render_signup_form, render_feedback_form %}
 
 {% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
@@ -12,7 +12,6 @@
             {% if icon %}<i class="bi {{ icon }}"></i>{% endif %}
             {{ text }}
         </a>
-
     </li>
 {% endmacro %}
 
@@ -26,9 +25,23 @@
             <ul class="navbar-nav">
                 {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}
                 {{ render_nav_item("main.post_options", "Post", "bi-plus-square", visible_from="sm") }}
-                {{ render_nav_item("main.faq", "FAQ", "bi-question-circle", visible_from="md") }}
-{#                {{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}#}
-                {{ render_nav_item("main.contact", text="Feedback", icon="bi-pencil-square", visible_from="sm") }}
+                {{ render_nav_item("main.faq", "FAQ", "bi-question-circle", visible_from="sm") }}
+                {#{{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}#}
+                {#{{ render_nav_item("main.feedback", text="Feedback", icon="bi-pencil-square", visible_from="md") }}#}
+                <li class="nav-item">
+                    {% if feedback_form %}
+                        <button type="button" class="btn border-0 nav-link text-nowrap d-none d-md-block"
+                                data-bs-toggle="modal" data-bs-target="#modalFeedback">
+                            <i class="bi bi-pencil-square"></i> Feedback
+                        </button>
+                    {% else %}
+                        <a class="nav-link text-nowrap d-none d-md-block
+                        {% if request.endpoint and request.endpoint == 'main.feedback' %}active{% endif %}"
+                           href="{{ url_for('main.feedback') }}">
+                            <i class="bi bi-pencil-square"></i> Feedback
+                        </a>
+                    {% endif %}
+                </li>
             </ul>
             <ul class="navbar-nav ms-auto mb-2">
                 <li class="nav-item">
@@ -72,10 +85,22 @@
         </div>
     </nav>
     {% if login_form %}
-        {{ render_form_modal(modal_id='modalLogin', modal_title='Log in', modal_body=render_login_form(login_form)) }}
+        {{ render_form_modal(
+            modal_id='modalLogin',
+            modal_title='Log in',
+            modal_body=render_login_form(login_form)) }}
     {% endif %}
     {% if signup_form %}
-        {{ render_form_modal(modal_id='modalSignup', modal_title='Sign up', modal_body=render_signup_form(signup_form)) }}
+        {{ render_form_modal(
+            modal_id='modalSignup',
+            modal_title='Sign up',
+            modal_body=render_signup_form(signup_form)) }}
+    {% endif %}
+    {% if feedback_form %}
+        {{ render_form_modal(
+            modal_id='modalFeedback',
+            modal_title='Questions & Feedback',
+            modal_body=render_feedback_form(feedback_form)) }}
     {% endif %}
 {% endmacro %}
 
@@ -141,16 +166,16 @@
         <div class="card-body">
             <div class="row justify-content-evenly">
                 <div class="col-auto">
+                    {#                    <p><a class="text-decoration-none text-muted"#}
+                    {#                          href="{{ url_for('main.whatsnew') }}">#}
+                    {#                        What's New#}
+                    {#                    </a></p>#}
+                    {#                    <p><a class="text-decoration-none text-muted"#}
+                    {#                          href="{{ url_for('main.index') }}">#}
+                    {#                        Why {{ config["APP_NAME"] }}#}
+                    {#                    </a></p>#}
                     <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
-                        What's New
-                    </a></p>
-                    <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
-                        Why {{ config["APP_NAME"] }}
-                    </a></p>
-                    <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
+                          href="{{ url_for('main.faq_anchor', anchor_id='qHow') }}">
                         How It Works
                     </a></p>
                     <p><a class="text-decoration-none text-muted"
@@ -158,15 +183,15 @@
                         Help & FAQs
                     </a></p>
                     <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
-                        Feedback
+                          href="{{ url_for('main.contact') }}">
+                        Contact Us
                     </a></p>
                 </div>
                 <div class="col-auto">
-                    <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.index') }}">
-                        Community Guidelines
-                    </a></p>
+                    {#                    <p><a class="text-decoration-none text-muted"#}
+                    {#                          href="{{ url_for('main.index') }}">#}
+                    {#                        Community Guidelines#}
+                    {#                    </a></p>#}
                     <p><a class="text-decoration-none text-muted"
                           href="{{ url_for('main.terms') }}">
                         Terms
@@ -179,10 +204,10 @@
                           href="{{ url_for('main.cookie') }}">
                         Cookie Policy
                     </a></p>
-                    <p><a class="text-decoration-none text-muted"
-                          href="{{ url_for('main.about') }}">
-                        About Us
-                    </a></p>
+                    {#                    <p><a class="text-decoration-none text-muted"#}
+                    {#                          href="{{ url_for('main.feedback') }}">#}
+                    {#                        Feedback#}
+                    {#                    </a></p>#}
                 </div>
             </div>
         </div>

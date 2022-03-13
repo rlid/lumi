@@ -88,10 +88,10 @@
 {% if not node.post.is_archived or (engagement is not none and engagement.state == Engagement.STATE_ENGAGED) %}
     <form id="form">
         <div class="mb-3">
-            {{ form.text(class_="form-control", placeholder="Message", style=text_area_style(current_user, node.post)) }}
+            {{ message_form.text(class_="form-control", placeholder="Message", style=text_area_style(current_user, node.post)) }}
         </div>
         <div class="d-flex justify-content-between">
-            {{ form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
+            {{ message_form.submit(class_="btn btn-" + button_class(current_user, node.post)) }}
 
             {% if current_user == node.creator %}
                 {% if engagement is none and engagement_request is none %}

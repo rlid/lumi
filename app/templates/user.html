@@ -105,7 +105,9 @@
                 <div class="accordion-body">
                     {% set ns = namespace(empty=True) %}
                     {% for node in nodes if not node.post.is_archived %}
-                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        <small>
+                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        </small>
                         {% set ns.empty = False %}
                     {% endfor %}
                     {% if ns.empty %}
@@ -127,7 +129,9 @@
                 <div class="accordion-body">
                     {% set ns = namespace(empty=True) %}
                     {% for node in nodes if node.post.is_archived %}
-                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        <small>
+                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                        </small>
                         {% set ns.empty = False %}
                     {% endfor %}
                     {% if ns.empty %}

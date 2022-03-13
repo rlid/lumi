@@ -191,17 +191,17 @@
                     </div>
                 {% else %}
                     <div class="modal-header px-{%- if request.MOBILE %}4{%- else %}5{% endif %} pt-4 pb-2 border-bottom-0">
-                        <h2 class="fw-bold mb-0">
+                        <h3 class="fw-bold mb-0">
                             {% if request.MOBILE %}
                                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                     width="32" height="32"
-                                     class="d-inline-block align-text-bottom">
+                                     width="30" height="30"
+                                     class="d-inline-block align-text-top">
                             {% else %}
                                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                     width="40" height="40"
+                                     width="36" height="36"
                                      class="d-inline-block align-text-top">
                             {% endif %}
-                            {{ modal_title }}</h2>
+                            {{ modal_title }}</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body px-{%- if request.MOBILE %}4{%- else %}5{% endif %}">

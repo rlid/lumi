@@ -7,18 +7,18 @@
                  style="border-radius: 1rem; max-width: 30rem">
                 {% block content %}
                     <div class="pt-4 mb-4">
-                        <h2 class="fw-bold mb-0">
+                        <h3 class="fw-bold mb-0">
                             {% if request.MOBILE %}
                                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                     width="32" height="32"
-                                     class="d-inline-block align-text-bottom">
+                                     width="30" height="30"
+                                     class="d-inline-block align-text-top">
                             {% else %}
                                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                     width="40" height="40"
+                                     width="36" height="36"
                                      class="d-inline-block align-text-top">
                             {% endif %}
                             {% block title %}Title{% endblock %}
-                        </h2>
+                        </h3>
                     </div>
                 {% endblock %}
             </div>

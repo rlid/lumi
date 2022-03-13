@@ -21,6 +21,7 @@
             {{ conf.socketio_js() }}
             {{ flash.flash_toast_js() }}
             {{ moment.include_moment() }}
+            {{ conf.smalltalk_js() }}
             {% if session.get('allow_cookie') %}
                 {{ conf.google_analytics_js() }}
                 {{ conf.hotjar_js() }}
@@ -51,7 +52,7 @@
         </div>
         {% block main %}
             <main>
-                <div class="container my-5 py-3">
+                <div class="container-fluid my-5 py-3">
                     {% block main_container %}
                     {% endblock %}
                 </div>
@@ -59,7 +60,7 @@
         {% endblock %}
         {% if session.get('allow_cookie') is none %}
             <div class="toast-container fixed-bottom ms-auto"
-                 style="bottom:{{- 70 if current_user.is_authenticated else 60 -}}px;right:10px">
+                 style="bottom:{{- 70 if current_user.is_authenticated else 60 -}}px;right:1%">
                 <div class="toast" role="alert" data-bs-delay="10000"
                      data-bs-autohide="false"
                      style="background-color: #ffffff">
@@ -71,9 +72,9 @@
                         also like to use analytics cookies so we can measure and improve the performance of our site. Do
                         you want to allow analytics cookies?</p>
                         <div style="font-size:1.1rem">
-                            <a class="badge btn-primary text-decoration-none" href=/allow_cookie/1>Accept</a>
-                            <a class="badge btn-primary text-decoration-none" href=/allow_cookie/0>Reject</a>
-                            <a class="badge btn-primary text-decoration-none" href=/cookie>Learn More</a>
+                            <a class="badge btn-success text-decoration-none" href=/allow_cookie/1>Accept</a>
+                            <a class="badge btn-success text-decoration-none" href=/allow_cookie/0>Reject</a>
+                            <a class="badge btn-success text-decoration-none" href=/cookie>Learn More</a>
                         </div>
                     </div>
                 </div>
