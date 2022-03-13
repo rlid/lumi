@@ -11,3 +11,4 @@ from app.models.notification import Notification
 from app.models.node import Node
 from app.models.user import User
 from app.models.payment import PaymentIntent
+from app.models.feedback import Feedback

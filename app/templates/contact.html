@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "macros/form.html" import render_feedback_form %}
+
+{% block main %}
+    <main class="my-auto my-5">
+        <div class="my-5 py-3">
+            <div class="border shadow mx-auto px-4 pb-2"
+                 style="border-radius: 1rem; max-width: 30rem">
+                {% block content %}
+                    <div class="pt-4 mb-4">
+                        <h2 class="fw-bold mb-0">
+                            {% if request.MOBILE %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="32" height="32"
+                                     class="d-inline-block align-text-bottom">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="40" height="40"
+                                     class="d-inline-block align-text-top">
+                            {% endif %}
+                            {{ title }}
+                        </h2>
+                    </div>
+                    {{ render_feedback_form(form) }}
+                {% endblock %}
+            </div>
+        </div>
+    </main>
+{% endblock %}

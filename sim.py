@@ -7,7 +7,7 @@ from app import create_app, db
 from app.models import PlatformFee
 from app.models.user import User, Post, Node, Engagement
 
-app = create_app("AWS")
+app = create_app("DEV")
 N_DAYS = 10
 N_USERS = 20
 P_POST = 0.5

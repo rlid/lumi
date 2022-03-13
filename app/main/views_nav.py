@@ -1,8 +1,11 @@
 from flask import render_template, redirect, flash, Markup, url_for, session, request
 from flask_login import login_required, current_user
 
+from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
+from app.main.forms import FeedbackForm
+from app.models import Feedback
 
 
 @main.before_request
@@ -77,6 +80,20 @@ def cookie():
 @main.route('/terms')
 def terms():
     return render_template('docs/terms.html', title='Terms & Conditions')
+
+
+@main.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        feedback = Feedback(
+            type='feedback',
+            text=form.text.data,
+            email=form.email.data or (current_user.email if current_user.is_authenticated else None))
+        db.session.add(feedback)
+        db.session.commit()
+        flash('Thank you so much for your feedback!', category='success')
+    return render_template('contact.html', title="Questions & Feedback", form=form)
 
 
 @main.route('/engagements')

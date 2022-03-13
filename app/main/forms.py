@@ -1,6 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField, IntegerRangeField
+from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField, IntegerRangeField, EmailField
 from wtforms.validators import InputRequired, NumberRange, Length
 from wtforms.validators import ValidationError
 
@@ -68,11 +68,10 @@ class MessageForm(FlaskForm):
     submit = SubmitField("Send")
 
 
-class ReportPostForm(FlaskForm):
+class ReportForm(FlaskForm):
     text = TextAreaField(
         "Text",
-        validators=[InputRequired()],
-        render_kw={"placeholder": "Spam / Phishing / Harassment / Other illegal activities"}
+        validators=[InputRequired()]
     )
     submit = SubmitField("Send")
 
@@ -80,7 +79,7 @@ class ReportPostForm(FlaskForm):
 class FeedbackForm(FlaskForm):
     text = TextAreaField(
         "Text",
-        validators=[InputRequired()],
-        render_kw={"placeholder": "Write your feedback..."}
+        validators=[InputRequired()]
     )
+    email = EmailField('Email (Optional)', render_kw={"placeholder": "name@example.com"})
     submit = SubmitField("Send")

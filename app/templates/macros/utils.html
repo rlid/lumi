@@ -177,27 +177,37 @@
     </div>
 {% endmacro %}
 
-{% macro render_form_modal(modal_id, modal_title, modal_body) %}
+{% macro render_form_modal(modal_id, modal_title, modal_body, simple_format=False) %}
     <div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content shadow bg-light" style="border-radius: 1rem">
-                <div class="modal-header px-{%- if request.MOBILE %}4{%- else %}5{% endif %} pt-4 pb-2 border-bottom-0">
-                    <h2 class="fw-bold mb-0">
-                        {% if request.MOBILE %}
-                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                 width="32" height="32"
-                                 class="d-inline-block align-text-bottom">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
-                                 width="40" height="40"
-                                 class="d-inline-block align-text-top">
-                        {% endif %}
-                        {{ modal_title }}</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body px-{%- if request.MOBILE %}4{%- else %}5{% endif %}">
-                    {{ modal_body }}
-                </div>
+                {% if simple_format %}
+                    <div class="modal-header border-bottom-0 px-4 pb-0">
+                        {{ modal_title }}
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body px-4">
+                        {{ modal_body }}
+                    </div>
+                {% else %}
+                    <div class="modal-header px-{%- if request.MOBILE %}4{%- else %}5{% endif %} pt-4 pb-2 border-bottom-0">
+                        <h2 class="fw-bold mb-0">
+                            {% if request.MOBILE %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="32" height="32"
+                                     class="d-inline-block align-text-bottom">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="40" height="40"
+                                     class="d-inline-block align-text-top">
+                            {% endif %}
+                            {{ modal_title }}</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body px-{%- if request.MOBILE %}4{%- else %}5{% endif %}">
+                        {{ modal_body }}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -207,10 +217,10 @@
 {% macro text_area_style(user, post) %}
     {%- if (user == post.creator and post.type == "asking") or
             (user != post.creator and post.type == "answering") -%}
-        background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;height: 10rem
+        background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;height: 5rem
     {%- elif (user == post.creator and post.type == "answering") or
             (user != post.creator and post.type == "asking") -%}
-        background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;height: 10rem
+        background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;height: 5rem
     {%- else -%}
         background-color: red
     {%- endif -%}

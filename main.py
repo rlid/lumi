@@ -1,7 +1,7 @@
 import os
 
 from app import create_app, db, socketio
-from app.models import PlatformFee, User, Post, Node, Engagement, PostTag, Tag, Message
+from app.models import PlatformFee, User, Post, Node, Engagement, PostTag, Tag, Message, Feedback
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'DEFAULT')
 
@@ -17,7 +17,8 @@ def make_shell_context():
         PostTag=PostTag,
         Tag=Tag,
         Message=Message,
-        PlatformFee=PlatformFee
+        PlatformFee=PlatformFee,
+        Feedback=Feedback
     )
 
 

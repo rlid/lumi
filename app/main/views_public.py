@@ -8,7 +8,7 @@ from sqlalchemy import func, desc, and_, or_
 from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
-from app.main.forms import MessageForm
+from app.main.forms import MessageForm, ReportForm
 from app.models.user import Message
 from app.models.user import Post, Node, Engagement
 from app.models.user import User, PostTag, Tag
@@ -157,6 +157,8 @@ def view_node(node_id):
             Engagement=Engagement,
             Message=Message)
 
+    report_form = ReportForm()
+    message_form = MessageForm()
     if current_user == node.creator or current_user == post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
@@ -176,25 +178,29 @@ def view_node(node_id):
                   'dispute involving the user occurred after the current request for engagement was made / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
-        form = MessageForm()
         return render_template(
             "node_view.html",
             node=node,
             engagement=engagement,
             engagement_request=engagement_request,
             messages_asc=messages_asc,
-            form=form,
+            form=message_form,
+            report_form=report_form,
             Post=Post,
             Engagement=Engagement,
             Message=Message)
 
-    form = MessageForm()
-    if form.validate_on_submit():
+    if message_form.validate_on_submit():
         # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
         if not node.post.is_archived:
             user_node = current_user.create_node(node)
-            current_user.create_message(user_node, form.text.data)
+            current_user.create_message(user_node, message_form.text.data)
             return redirect(url_for('main.view_node', node_id=user_node.id))
         else:
             flash("Cannot send message because the post is now archived.", category='danger')
-    return render_template("node_view_as_other.html", node=node, form=form, Post=Post)
+    return render_template(
+        "node_view_as_other.html",
+        node=node,
+        form=message_form,
+        report_form=report_form,
+        Post=Post)

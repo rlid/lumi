@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, ShareForm
+from app.main.forms import PostForm, ShareForm, ReportForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
@@ -37,7 +37,7 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_create_edit.html", form=form, title="New Post")
+    return render_template("post_create_edit.html", form=form, title="Create Post")
 
 
 @main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
@@ -105,11 +105,15 @@ def toggle_archive_post(post_id):
 @main.route('/post/<post_id>/report', methods=['POST'])
 @login_required
 def report_post(post_id):
-    post = Post.query.filter_by(id=post_id).first_or_404()
-    reason = request.form.get('reason')
-    current_user.report(post, reason)
-    flash('The post has been reported for investigation and it will not be visible in the meantime.',
-          category='warning')
+    form = ReportForm()
+
+    if form.validate_on_submit():
+        post = Post.query.filter_by(id=post_id).first_or_404()
+        reason = request.form.get('reason')
+        current_user.report(post, reason)
+        flash(
+            'The post has been reported for investigation - it will not be visible until the investigation concludes.',
+            category='warning')
     return redirect(url_for('main.index'))
 
 

@@ -132,3 +132,59 @@
         {{ form.submit(class_='btn btn-success w-100') }}
     </form>
 {% endmacro %}
+
+
+{% macro render_report_form(form, post_id) %}
+    <form action="{{ url_for('main.report_post', post_id=post_id) }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.text(
+            class_='form-control',
+            rows=3,
+            placeholder="Spam / Harassment / Leaking personal information / Copyright infringement / Other illegal activities") }}
+        <div class="d-flex mt-3">
+            {{ form.submit(class_='btn btn-success me-auto', id='btnReport') }}
+            <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">
+                Cancel
+            </button>
+        </div>
+    </form>
+{% endmacro %}
+
+
+{% macro render_feedback_form(form) %}
+    <p>We'd love to hear from you! Contact us through any of the channels below, or leave a quick message using the
+        form. </p>
+    <div class="text-center">
+        <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">
+            <i class="bi bi-discord"></i> Discord
+        </a></p>
+        <p><a href="http://192.168.0.8:8080/whatsapp" class="text-decoration-none text-success">
+            <i class="bi bi-whatsapp"></i> WhatsApp
+        </a></p>
+        <p><a href="mailto:info@lumiask.com" class="text-decoration-none text-success">
+            <i class="bi bi-envelope-fill"></i> Email
+        </a></p>
+        <p><a href="https://twitter.com/KnowbleApp" class="text-decoration-none text-success">
+            <i class="bi bi-twitter"></i> Twitter
+        </a></p>
+        <p><a href="https://fb.me/KnowbleApp" class="text-decoration-none text-success">
+            <i class="bi bi-facebook"></i> Facebook
+        </a></p>
+        <p><a href="https://www.linkedin.com/company/knowbleapp" class="text-decoration-none text-success">
+            <i class="bi bi-linkedin"></i> LinkedIn
+        </a></p>
+    </div>
+    <hr class="my-4">
+    <form action="{{ url_for('main.contact') }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.text(
+            class_='form-control',
+            rows=5,
+            placeholder="Please leave your feedback here...") }}
+        <div class="form-floating my-3">
+            {{ form.email(class_='form-control') }}
+            {{ form.email.label() }}
+        </div>
+        {{ form.submit(class_='btn btn-success w-100 mb-3') }}
+    </form>
+{% endmacro %}
