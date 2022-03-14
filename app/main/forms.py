@@ -83,3 +83,8 @@ class FeedbackForm(FlaskForm):
     )
     email = EmailField('Email (Optional)', render_kw={"placeholder": "name@example.com"})
     submit = SubmitField("Send")
+
+
+class TippingForm(FlaskForm):
+    percentage = IntegerRangeField('Percentage')
+    submit = SubmitField('Confirm')

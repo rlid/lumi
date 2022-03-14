@@ -156,7 +156,7 @@
 {% endmacro %}
 
 {% macro render_modal(modal_id, modal_title, modal_body, confirm_url) %}
-    <div class="modal" tabindex="-1" role="dialog" id="{{ modal_id }}">
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}">
         <div class="modal-dialog modal-dialog-centered {% if request.MOBILE %}mx-5{% else %}modal-sm{% endif %}"
              role="document">
             <div class="modal-content rounded-4 shadow">

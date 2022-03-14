@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% from "macros/render_models.html" import render_message with context %}
+{% from "macros/render_models.html" import render_message, render_user with context %}
 {% from "macros/utils.html" import render_reward_info, render_modal, text_area_style, button_class with context %}
 
 {% macro engagement_style(engagement) %}
@@ -59,7 +59,8 @@
                 {# message belongs to the currently active engagement #}
                 <div class="card border-success mb-3">
                 <div class="card-header success text-success border-0 small">
-                    <b>Active Engagement</b>
+                    <b>Active Engagement</b> with
+                    {{ render_user(node.creator if current_user != node.creator else node.post.creator, capitalize=False) }}
                 </div>
                 {% set current.section_id = "section" + message.id|string %}
                 <div class="card-body pt-0 pb-3">
@@ -96,7 +97,8 @@
             {% if current_user == node.creator %}
                 {% if engagement is none and engagement_request is none %}
                     <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                            data-bs-toggle="modal" data-bs-target="#modalRequest">
+                            data-bs-toggle="modal" data-bs-target="#modalRequest"
+                            {% if current_user.value_limit_cent < node.value_cent %}disabled{% endif %}>
                         Request for Engagement
                     </button>
                     {{ render_modal(
