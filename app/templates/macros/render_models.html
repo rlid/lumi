@@ -1,20 +1,20 @@
 {% from "macros/utils.html" import render_modal, button_class, render_form_modal %}
 {% from "macros/form.html" import render_report_form %}
 
-{% macro render_user_plain(user, capitalize=True) %}
-    {% if user == current_user %}
-        {{ "You" if capitalize else "you" }}
-    {% else %}
-        {{ ("A " if capitalize else "a ") + (user.adjective + " user" if user.adjective else "user") }}
-    {% endif %}
-{% endmacro %}
+{%- macro render_user_plain(user, capitalize=True) -%}
+    {%- if user == current_user -%}
+        {{- "You" if capitalize else "you" -}}
+    {%- else -%}
+        {{- ("A " if capitalize else "a ") + (user.adjective + " user" if user.adjective else "user") -}}
+    {%- endif -%}
+{%- endmacro -%}
 
-{% macro render_user(user, capitalize=True) %}
+{%- macro render_user(user, capitalize=True) -%}
     <a class="text-decoration-none {% if user == current_user %}text-muted{% endif %}"
        href="{{ url_for("main.user", user_id=user.id) }}">
-        {{ render_user_plain(user, capitalize) }}
+        {{- render_user_plain(user, capitalize) -}}
     </a>
-{% endmacro %}
+{%- endmacro -%}
 
 {# tags_in_filter should contain all the ACTIVE tags on the current page #}
 {% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['asking', 'answering']) %}
@@ -72,11 +72,17 @@
     </div>
 {% endmacro %}
 
-{% macro post_above_title(post) %}
+{% macro post_above_title(node, render_last_updated) %}
+    {% set post = node.post %}
     <p class="small text-muted mb-1">
         {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
-        {{ render_user(post.creator) }}
-        posted {{ moment(post.timestamp).fromNow() }}
+        {% if render_last_updated %}
+            Posted by {{ render_user(post.creator, capitalize=False) }},
+            last interacted {{ moment(node.last_updated).fromNow() }}
+        {% else %}
+            {{ render_user(post.creator) }}
+            posted {{ moment(post.timestamp).fromNow() }}
+        {% endif %}
     </p>
 {% endmacro %}
 
@@ -104,95 +110,93 @@
 {% endmacro %}
 
 
-{% macro post_card_footer(node, buttons) %}
-    {% if buttons %}
-        {% set post = node.post %}
-        <div class="card-footer py-0">
-            {% if not post.is_archived %}
-                <a href="{{ url_for('main.share_node', node_id=node.id) }}"
+{% macro post_card_footer(node) %}
+    {% set post = node.post %}
+    <div class="card-footer py-0">
+        {% if not post.is_archived %}
+            <a href="{{ url_for('main.share_node', node_id=node.id) }}"
+               class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
+                <b>Share</b>
+            </a>
+            {% if current_user == post.creator %}
+                <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
                    class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                    <b>Share</b>
+                    <b>Edit</b>
                 </a>
-                {% if current_user == post.creator %}
-                    <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
-                       class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0">
-                        <b>Edit</b>
-                    </a>
 
-                    <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                            data-bs-toggle="modal" data-bs-target="#modalArchive">
-                        <b>Archive</b></button>
+                <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                        data-bs-toggle="modal" data-bs-target="#modalArchive">
+                    <b>Archive</b></button>
 
-                    {{ render_modal(
-                        modal_id='modalArchive',
-                        modal_title='Archive this post?',
-                        modal_body='Hide the post and stop accepting contributions from other users? Active engagements are not affected.',
-                        confirm_url=url_for('main.toggle_archive_post', post_id=post.id)) }}
+                {{ render_modal(
+                    modal_id='modalArchive',
+                    modal_title='Archive this post?',
+                    modal_body='Hide the post and stop accepting contributions from other users? Active engagements are not affected.',
+                    confirm_url=url_for('main.toggle_archive_post', post_id=post.id)) }}
 
-                {% endif %}
-                {% if current_user != post.creator %}
-                    <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                            data-bs-toggle="modal" data-bs-target="#modalReport">
-                        <b>Report</b></button>
-                    {{ render_form_modal(
-                        modal_id='modalReport',
-                        modal_title='Report Post',
-                        modal_body=render_report_form(form=report_form, post_id=node.post_id),
-                        simple_format=True) }}
-{#                    <div class="modal fade" id="modalReport" tabindex="-1">#}
-{#                        <div class="modal-dialog modal-fullscreen-sm-down">#}
-{#                            <div class="modal-content">#}
-{#                                <div class="modal-header">#}
-{#                                    <h6 class="modal-title">#}
-{#                                        What is the reason for reporting this post?#}
-{#                                    </h6>#}
-{#                                    <button type="button" class="btn-close" data-bs-dismiss="modal"#}
-{#                                            aria-label="Close"></button>#}
-{#                                </div>#}
-{#                                <div class="modal-body text-center">#}
-{#                                    <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">#}
-{#                                        {{ report_form.hidden_tag() }}#}
-{#                                        <div class="input-group input-group-sm mb-3">#}
-{#                                                <textarea name="reason" class="form-control" rows="4"#}
-{#                                                          placeholder="Spam / Harassment / Leaking personal information / Copyright infringement / Other illegal activities"#}
-{#                                                          required></textarea>#}
-{#                                        </div>#}
-{#                                        <input type="submit" id="btnReport"#}
-{#                                               class="btn btn-{{- button_class(current_user, post) -}}">#}
-{#                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">#}
-{#                                            Cancel#}
-{#                                        </button>#}
-{#                                    </form>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-
-                {% endif %}
-            {% else %}
-                {% if current_user == post.creator %}
-                    <a id="btnUnarchive" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
-                       href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
-                        <b>Unarchive</b>
-                    </a>
-                {% else %}
-                    <div class="text-muted small my-1">
-                        <b>This post is no longer accepting new contributions.</b>
-                    </div>
-                {% endif %}
             {% endif %}
-        </div>
-    {% endif %}
+            {% if current_user != post.creator %}
+                <button type="button" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                        data-bs-toggle="modal" data-bs-target="#modalReport">
+                    <b>Report</b></button>
+                {{ render_form_modal(
+                    modal_id='modalReport',
+                    modal_title='Report Post',
+                    modal_body=render_report_form(form=report_form, post_id=node.post_id),
+                    simple_format=True) }}
+                {#                    <div class="modal fade" id="modalReport" tabindex="-1">#}
+                {#                        <div class="modal-dialog modal-fullscreen-sm-down">#}
+                {#                            <div class="modal-content">#}
+                {#                                <div class="modal-header">#}
+                {#                                    <h6 class="modal-title">#}
+                {#                                        What is the reason for reporting this post?#}
+                {#                                    </h6>#}
+                {#                                    <button type="button" class="btn-close" data-bs-dismiss="modal"#}
+                {#                                            aria-label="Close"></button>#}
+                {#                                </div>#}
+                {#                                <div class="modal-body text-center">#}
+                {#                                    <form action="{{ url_for('main.report_post', post_id=post.id) }}" method="post">#}
+                {#                                        {{ report_form.hidden_tag() }}#}
+                {#                                        <div class="input-group input-group-sm mb-3">#}
+                {#                                                <textarea name="reason" class="form-control" rows="4"#}
+                {#                                                          placeholder="Spam / Harassment / Leaking personal information / Copyright infringement / Other illegal activities"#}
+                {#                                                          required></textarea>#}
+                {#                                        </div>#}
+                {#                                        <input type="submit" id="btnReport"#}
+                {#                                               class="btn btn-{{- button_class(current_user, post) -}}">#}
+                {#                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">#}
+                {#                                            Cancel#}
+                {#                                        </button>#}
+                {#                                    </form>#}
+                {#                                </div>#}
+                {#                            </div>#}
+                {#                        </div>#}
+                {#                    </div>#}
+
+            {% endif %}
+        {% else %}
+            {% if current_user == post.creator %}
+                <a id="btnUnarchive" class="btn btn-sm btn-outline-dark border-0 mx-0 my-0 rounded-0"
+                   href="{{ url_for('main.toggle_archive_post', post_id=post.id) }}">
+                    <b>Unarchive</b>
+                </a>
+            {% else %}
+                <div class="text-muted small my-1">
+                    <b>This post is no longer accepting new contributions.</b>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
 {% endmacro %}
 
 {# Note: buy/sell tags are ignored by render_tag, so if n tags should be rendered, tag_limit should be set to n+1 #}
-{% macro render_post_card(node, tag_limit=None, truncate_body=False, buttons=False) %}
+{% macro render_post_card(node, render_body=True, tag_limit=None, truncate_body=False, buttons=False, render_last_updated=False) %}
     {{ render_card(
            node,
-           above_title=post_above_title(node.post),
+           above_title=post_above_title(node, render_last_updated),
            after_title=post_after_title(node.post, tag_limit=tag_limit),
-           card_text=post_card_text(node, truncate_body=truncate_body),
-           card_footer=post_card_footer(node, buttons=buttons)) }}
+           card_text=post_card_text(node, truncate_body=truncate_body) if render_body else None,
+           card_footer=post_card_footer(node) if buttons else None) }}
 {% endmacro %}
 
 
@@ -251,12 +255,12 @@
     {% set post = engagement.node.post %}
     <p class="small text-muted mb-1">
         {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
-        {% if current_user == post.creator %}
-            {{ render_user(engagement.node.creator) }} responded
-            {{ moment(engagement.last_updated).fromNow() }}
-        {% else %}
-            {{ render_user(post.creator) }} posted {{ moment(post.timestamp).fromNow() }}
-        {% endif %}
+        Engaged with {% if current_user == post.creator %}
+        {{- render_user(engagement.node.creator, capitalize=False) -}},
+    {% else %}
+        {{- render_user(post.creator, capitalize=False) -}},
+    {% endif %}
+        last interacted {{ moment(engagement.last_updated).fromNow() }}
     </p>
 {% endmacro %}
 
@@ -297,15 +301,15 @@
 {% endmacro %}
 
 {% macro render_notification(notification) %}
-{#    <div class="px-3 py-2 border rounded mb-3 bg-{{- 'light' if notification.is_read else 'white' -}}">#}
-{#        {{ notification.read() }} on post#}
-{#        <a class="text-decoration-none"#}
-{#           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">#}
-{#             {{ notification.node.post.title }}#}
-{#        </a>#}
-{#        <p class="mb-0">#}
-{#            <small class="text-muted">{{ moment(notification.timestamp).calendar() }}</small>#}
-{#        </p>#}
-{#    </div>#}
-        {{ render_card(notification.node) }}
+    {#    <div class="px-3 py-2 border rounded mb-3 bg-{{- 'light' if notification.is_read else 'white' -}}">#}
+    {#        {{ notification.read() }} on post#}
+    {#        <a class="text-decoration-none"#}
+    {#           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">#}
+    {#             {{ notification.node.post.title }}#}
+    {#        </a>#}
+    {#        <p class="mb-0">#}
+    {#            <small class="text-muted">{{ moment(notification.timestamp).calendar() }}</small>#}
+    {#        </p>#}
+    {#    </div>#}
+    {{ render_card(notification.node) }}
 {% endmacro %}

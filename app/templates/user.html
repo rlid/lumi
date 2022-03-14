@@ -106,7 +106,7 @@
                     {% set ns = namespace(empty=True) %}
                     {% for node in nodes if not node.post.is_archived %}
                         <small>
-                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=0) }}
                         </small>
                         {% set ns.empty = False %}
                     {% endfor %}
@@ -130,7 +130,7 @@
                     {% set ns = namespace(empty=True) %}
                     {% for node in nodes if node.post.is_archived %}
                         <small>
-                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=0) }}
                         </small>
                         {% set ns.empty = False %}
                     {% endfor %}

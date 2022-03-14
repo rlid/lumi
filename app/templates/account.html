@@ -151,7 +151,7 @@
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in nodes if node.parent is none and not node.post.is_archived %}
                                         <small>
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
                                         </small>
                                         {% set ns.empty = False %}
                                     {% endfor %}
@@ -178,7 +178,7 @@
                                     {% set ns = namespace(empty=True) %}
                                     {% for node in nodes if node.parent is not none and not node.post.is_archived %}
                                         <small>
-                                            {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                            {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
                                         </small>
                                         {% set ns.empty = False %}
                                     {% endfor %}
@@ -220,7 +220,7 @@
                                 {% set ns = namespace(empty=True) %}
                                 {% for node in nodes if node.parent is none and node.post.is_archived %}
                                     <small>
-                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
                                     </small>
                                     {% set ns.empty = False %}
                                 {% endfor %}
@@ -248,7 +248,7 @@
                                 {% set ns = namespace(empty=True) %}
                                 {% for node in nodes if node.parent is not none and node.post.is_archived %}
                                     <small>
-                                        {{ render_post_card(node, truncate_body=True, buttons=False, tag_limit=4) }}
+                                        {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
                                     </small>
                                     {% set ns.empty = False %}
                                 {% endfor %}
