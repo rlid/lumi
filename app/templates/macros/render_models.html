@@ -270,7 +270,7 @@
     {% else %}
         {{- render_user(post.creator, capitalize=False) -}},
     {% endif %}
-        last interacted {{ moment(engagement.last_updated).fromNow() }}
+        last interaction was {{ moment(engagement.last_updated).fromNow() }}
     </p>
 {% endmacro %}
 
