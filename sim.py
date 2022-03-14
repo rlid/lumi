@@ -8,7 +8,7 @@ from app.models import PlatformFee
 from app.models.user import User, Post, Node, Engagement
 
 app = create_app("DEV")
-N_DAYS = 10
+N_DAYS = 50
 N_USERS = 20
 P_POST = 0.5
 P_NODE = 0.5
@@ -199,8 +199,8 @@ def sim_existing():
     db.session.commit()
 
 
-def sim_all(n_days=20,
-            n_users=10,
+def sim_all(n_days=50,
+            n_users=20,
             n_tags=50,
             a_competence=0.8, d_competence=0.1,
             a_credibility=0.85, d_credibility=0.1,
@@ -354,7 +354,11 @@ def sim_all(n_days=20,
                             is_success,
                             tip_cent=min(
                                 user.balance_available_cent,
-                                round(engagement.node.answerer_reward_cent * (1 if is_success else 0.4))))
+                                random.randint(
+                                    0,
+                                    round(engagement.node.answerer_reward_cent * (1 if is_success else 0.4)))
+                            )
+                        )
                     else:
                         user.rate_engagement(engagement, is_success)
                     print('Engagement rated')

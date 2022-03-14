@@ -57,11 +57,13 @@ def whatsapp():
 
 
 @main.route('/faq')
+@login_required
 def faq():
     return render_template('docs/faq.html', title='FAQs')
 
 
 @main.route('/faq/<anchor_id>')
+@login_required
 def faq_anchor(anchor_id):
     return render_template('docs/faq.html', title='FAQs', anchor_id=anchor_id)
 
@@ -77,6 +79,7 @@ def cookie():
 
 
 @main.route('/terms')
+@login_required
 def terms():
     return render_template('docs/terms.html', title='Terms & Conditions')
 
