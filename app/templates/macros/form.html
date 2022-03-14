@@ -211,7 +211,7 @@
         {{ form.hidden_tag() }}
         {% if tipping %}
             {{ form.tip_cent(
-                    class_="form-range",
+                    class_="form-range slider",
                     min=0,
                     max=tipping_cap,
                     value=0,

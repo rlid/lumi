@@ -138,7 +138,8 @@ def share_node(node_id):
             flash(f'Your referral reward claim is adjusted to ${0.01 * user_node.referrer_reward_cent:.2f}',
                   category='info')
         else:
-            flash('You cannot adjust your referral reward claim.', category='warning')
+            flash('You cannot adjust your referral reward claim once someone has joined using your referrer\'s link.',
+                  category='warning')
         return redirect(url_for('main.share_node', node_id=node_id))
     return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
 

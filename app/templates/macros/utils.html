@@ -177,9 +177,10 @@
     </div>
 {% endmacro %}
 
-{% macro render_form_modal(modal_id, modal_title, modal_body, simple_format=False) %}
+{% macro render_form_modal(modal_id, modal_title, modal_body, simple_format=False, extra_classes=None) %}
     <div class="modal fade" tabindex="-1" data-bs-backdrop="static" role="dialog" id="{{ modal_id }}">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down" role="document">
+        <div class="modal-dialog modal-dialog-centered {% if extra_classes %}{{ extra_classes }}{% endif %}"
+             role="document">
             <div class="modal-content shadow bg-light" style="border-radius: 1rem">
                 {% if simple_format %}
                     <div class="modal-header px-4 py-2">

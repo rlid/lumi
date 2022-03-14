@@ -42,14 +42,14 @@
                                 {% set percentage = (100 * node.referrer_reward_cent / node.parent.remaining_referral_budget_cent)|round|int %}
                                 (<span id="percentBox">
                                 {{- percentage -}}
-                            </span>% of the pot)
+                            </span>% of the remaining)
                             </p>
                             <form id="form" method="post">
                                 {{ form.hidden_tag() }}
                                 <div class="row">
                                     <div class="col">
                                         {{ form.percentage(
-                                            class_="form-range",
+                                            class_="form-range slider mt-1",
                                             min=0,
                                             max=100,
                                             value=percentage,
@@ -57,7 +57,7 @@
                                             oninput="showValue(this.value)") }}
                                     </div>
                                     <div class="col-auto">
-                                        {{ form.submit(class_="btn btn-primary btn-sm") }}
+                                        {{ form.submit(class_="btn btn-success btn") }}
                                     </div>
                                 </div>
                             </form>
