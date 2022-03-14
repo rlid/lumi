@@ -85,6 +85,6 @@ class FeedbackForm(FlaskForm):
     submit = SubmitField("Send")
 
 
-class TippingForm(FlaskForm):
-    percentage = IntegerRangeField('Percentage')
+class RatingForm(FlaskForm):
+    tip_cent = IntegerRangeField('Tip')
     submit = SubmitField('Confirm')

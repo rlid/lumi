@@ -575,7 +575,7 @@ class User(UserMixin, db.Model):
 
         db.session.commit()
 
-    def rate_engagement(self, engagement, is_success):
+    def rate_engagement(self, engagement, is_success, tip_cent=0):
         node = engagement.node
         asker = engagement.asker
         answerer = engagement.answerer
@@ -596,8 +596,18 @@ class User(UserMixin, db.Model):
                 (self == answerer and engagement.rating_by_answerer != 0):
             raise InvalidActionError('Cannot rate engagement because the user has already rated')
 
+        if self == answerer and tip_cent != 0:
+            raise InvalidActionError(
+                'Cannot rate engagement because the user is the answerer and a non-zero tip is set')
+
+        if self == asker and tip_cent > self.balance_available_cent:
+            raise InvalidActionError('Cannot rate engagement because the tip is greater than the balance available')
+
         if self == asker:
             engagement.rating_by_asker = 1 if is_success else -1
+            engagement.tip_cent = tip_cent
+            self.reserved_balance_cent += tip_cent
+            db.session.add(self)
         elif self == answerer:
             engagement.rating_by_answerer = 1 if is_success else -1
 
@@ -626,13 +636,22 @@ class User(UserMixin, db.Model):
             self._handle_success(engagement)
         elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
             self._handle_dispute(engagement)
-        elif engagement.rating_by_asker == 1 and engagement.rating_by_answerer == -1:
-            self._handle_success(engagement, fraction=0.5)  # Default fraction is 50% in this scenario
+        # elif engagement.rating_by_asker == 1 and engagement.rating_by_answerer == -1:
+        #     self._handle_success(engagement, fraction=0.5)  # Default fraction is 50% in this scenario
         else:
             node = engagement.node
             asker = engagement.asker
+            answerer = engagement.answerer
             asker.reserved_balance_cent -= node.value_cent
+
+            # any tip to be paid by the asker to the answer
+            if engagement.tip_cent > 0:
+                asker.reserved_balance_cent -= engagement.tip_cent
+                asker.total_balance_cent -= engagement.tip_cent
+                answerer.total_balance_cent += engagement.tip_cent
+
             db.session.add(asker)
+            db.session.add(answerer)
 
             message = Message(creator=self,
                               node=node,
@@ -652,6 +671,12 @@ class User(UserMixin, db.Model):
 
         asker.update_reputation(value_cent, success=True, dispute_lost=False)
         answerer.update_reputation(value_cent, success=True, dispute_lost=False)
+
+        # any tip to be paid by the asker to the answer
+        if engagement.tip_cent > 0:
+            asker.total_balance_cent -= engagement.tip_cent
+            asker.reserved_balance_cent -= engagement.tip_cent
+            answerer.total_balance_cent += engagement.tip_cent
 
         db.session.add(asker)
         db.session.add(answerer)

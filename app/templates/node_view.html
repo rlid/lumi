@@ -1,6 +1,7 @@
 {% extends "index.html" %}
+{% from "macros/form.html" import render_rating_form %}
 {% from "macros/render_models.html" import render_message, render_user with context %}
-{% from "macros/utils.html" import render_reward_info, render_modal, text_area_style, button_class with context %}
+{% from "macros/utils.html" import render_reward_info, render_modal, render_form_modal, text_area_style, button_class with context %}
 
 {% macro engagement_style(engagement) %}
     {% if engagement.state == Engagement.STATE_COMPLETED %}
@@ -150,22 +151,57 @@
                             &minus;
                         </button>
                     </div>
-                    {{ render_modal(
-                        modal_id='modalRatePlus',
-                        modal_title='Rate it as successful (&plus;)?',
-                        modal_body='The reward will be distributed if both users rate the engagement as successful.',
-                        confirm_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1)) }}
-
-                    {{ render_modal(
-                        modal_id='modalRateMinus',
-                        modal_title='Rate it as unsuccessful (&minus;)?',
-                        modal_body='No reward will be distributed if either user rates the engagement as unsuccessful.',
-                        confirm_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0)) }}
-                    {#  if current_user == engagement.asker else 'You will still receive half of the reward for a successful engagement if the other user rates it as successful.' #}
                 {% endif %}
             {% endif %}
         </div>
     </form>
+    {% if current_user == engagement.asker %}
+        {{ render_form_modal(
+            modal_id='modalRatePlus',
+            modal_title='Engagement successful (&plus;)',
+            modal_body=render_rating_form(
+                rating_form,
+                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1),
+                success=True,
+                tipping=True,
+                tipping_cap=[node.answerer_reward_cent, current_user.balance_available_cent]|min,
+                answerer_reward_cent=node.answerer_reward_cent),
+            simple_format=True
+        ) }}
+        {{ render_form_modal(
+            modal_id='modalRateMinus',
+            modal_title='Engagement unsuccessful (&minus;)',
+            modal_body=render_rating_form(
+                rating_form,
+                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0),
+                success=False,
+                tipping=True,
+                tipping_cap=[(0.4 * node.answerer_reward_cent)|round, current_user.balance_available_cent]|min,
+                answerer_reward_cent=node.answerer_reward_cent),
+            simple_format=True
+            ) }}
+    {% elif current_user == engagement.answerer %}
+        {{ render_form_modal(
+            modal_id='modalRatePlus',
+            modal_title='Engagement successful (&plus;)',
+            modal_body=render_rating_form(
+                rating_form,
+                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1),
+                success=True,
+                tipping=False),
+            simple_format=True
+        ) }}
+        {{ render_form_modal(
+            modal_id='modalRateMinus',
+            modal_title='Engagement unsuccessful (&minus;)',
+            modal_body=render_rating_form(
+                rating_form,
+                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0),
+                success=False,
+                tipping=False),
+            simple_format=True
+            ) }}
+    {% endif %}
 {% endif %}
 {% if engagement.state == Engagement.STATE_ENGAGED %}
     {# Active engagement uses card and card-body which means 2 divs, close the div tag for card-body #}

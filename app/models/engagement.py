@@ -17,6 +17,8 @@ class Engagement(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
+    tip_cent = db.Column(db.Integer, default=0, nullable=False)
+
     node_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'), nullable=False)
 
     asker_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)

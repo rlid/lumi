@@ -4,7 +4,7 @@ from random import Random
 
 from app import create_app, db
 from app.models import User, Post, Node, PlatformFee
-from app.models.user import REP_DECAY
+from app.models.user import REP_DECAY, REP_I_DECAY
 
 
 class BasicsTestCase(unittest.TestCase):
@@ -142,23 +142,23 @@ class BasicsTestCase(unittest.TestCase):
         u1.accept_engagement(e)
         u1.rate_engagement(e, True)
         u3.rate_engagement(e, False)
-        self.assertAlmostEqual(u1.sum_x, 200 + math.exp(-200 * REP_DECAY) * 400)
-        self.assertAlmostEqual(u3.sum_x, 200)
+        self.assertAlmostEqual(u1.sum_x, 400)
+        self.assertAlmostEqual(u3.sum_x, 0)
         self.assertAlmostEqual(u1.reputation, 1.0)
         self.assertAlmostEqual(u3.reputation, 1.0)
-        self.assertEqual(u1.value_limit_cent, 800)
-        self.assertEqual(u3.value_limit_cent, 600)
+        self.assertEqual(u1.value_limit_cent, 700)
+        self.assertEqual(u3.value_limit_cent, 500)
 
         n14 = u4.create_node(n13)
         e = u4.create_engagement(n14)
         u1.accept_engagement(e)
         u1.rate_engagement(e, False)
         u4.rate_engagement(e, True)
-        self.assertAlmostEqual(u1.sum_x, math.exp(-400 * REP_DECAY) * 200 + math.exp(-600 * REP_DECAY) * 400)
+        self.assertAlmostEqual(u1.sum_x, math.exp(-400 * REP_DECAY) * 400)
         self.assertAlmostEqual(u4.sum_x, -400)
         self.assertAlmostEqual(u1.reputation, 1.0)
         self.assertAlmostEqual(u4.reputation, -1.0)
-        self.assertEqual(u1.value_limit_cent, 800)
+        self.assertEqual(u1.value_limit_cent, 700)
         self.assertEqual(u4.value_limit_cent, 200)
 
         p2 = u2.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
@@ -167,14 +167,12 @@ class BasicsTestCase(unittest.TestCase):
         u2.accept_engagement(e)
         u2.rate_engagement(e, False)
         u3.rate_engagement(e, True)
-        a = -300 + math.exp(-300 * REP_DECAY) * 200
-        b = 300 + math.exp(-300 * REP_DECAY) * 200
         self.assertAlmostEqual(u2.sum_x, math.exp(-300 * REP_DECAY) * 400)
-        self.assertAlmostEqual(u3.sum_x, -300 + math.exp(-300 * REP_DECAY) * 200)
+        self.assertAlmostEqual(u3.sum_x, -300)
         self.assertAlmostEqual(u2.reputation, 1.0)
-        self.assertAlmostEqual(u3.reputation, a / b)
+        self.assertAlmostEqual(u3.reputation, -1.0)
         self.assertEqual(u2.value_limit_cent, 700)
-        self.assertEqual(u3.value_limit_cent, 225)
+        self.assertEqual(u3.value_limit_cent, 150)
 
     def test_reputation_public_tie(self):
         u1 = User(email='1', total_balance_cent=10000)
@@ -264,24 +262,23 @@ class BasicsTestCase(unittest.TestCase):
 
         u1.rate_engagement(e4, False)
         u4.rate_engagement(e4, True)
-        a = round(0.5 * (300 + 60 + 30 + 30)) - math.exp(-210 * REP_DECAY) * 390
-        b = round(0.5 * (300 + 60 + 30 + 30)) + math.exp(-210 * REP_DECAY) * 390
-        self.assertAlmostEqual(u1.sum_x, a)
-        self.assertAlmostEqual(u4.sum_x, 210)
-        self.assertAlmostEqual(u1.reputation, a / b)
+        self.assertAlmostEqual(u1.sum_x, -(300 + 60 + 30))
+        self.assertAlmostEqual(u4.sum_x, 0)
+        self.assertAlmostEqual(u1.reputation, -1)
         self.assertAlmostEqual(u4.reputation, 1.0)
-        self.assertEqual(u1.value_limit_cent, 195 + round(210 * 0.05))
-        self.assertEqual(u4.value_limit_cent, 500 + round(210 * 0.5))
+        self.assertEqual(u1.value_limit_cent, 195)
+        self.assertEqual(u4.value_limit_cent, 500)
 
         u1.rate_engagement(e5, True)
         u5.rate_engagement(e5, True)
-        a = (300 + 60 + 30 + 30 + 15) + math.exp(-435 * REP_DECAY) * 210 - math.exp(-645 * REP_DECAY) * 390
-        b = (300 + 60 + 30 + 30 + 15) + math.exp(-435 * REP_DECAY) * 210 + math.exp(-645 * REP_DECAY) * 390
+        a = (300 + 60 + 30 + 30 + 15) - math.exp(-435 * REP_DECAY) * 390
         self.assertAlmostEqual(u1.sum_x, a)
         self.assertAlmostEqual(u5.sum_x, 435)
+        a = 1 - math.exp(-1 * REP_I_DECAY) * 1
+        b = 1 + math.exp(-1 * REP_I_DECAY) * 1
         self.assertAlmostEqual(u1.reputation, a / b)
         self.assertAlmostEqual(u5.reputation, 1.0)
-        self.assertEqual(u1.value_limit_cent, 195 + round(210 * 0.05) + round(435 * 0.2))
+        self.assertEqual(u1.value_limit_cent, 195 + round(435 * 0.1))
         self.assertEqual(u5.value_limit_cent, 500 + round(435 * 0.5))
 
     def test_leakage(self):

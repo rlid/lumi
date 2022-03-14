@@ -8,7 +8,7 @@ from sqlalchemy import func, desc, and_, or_
 from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
-from app.main.forms import MessageForm, ReportForm, FeedbackForm
+from app.main.forms import MessageForm, ReportForm, FeedbackForm, RatingForm
 from app.models.user import Message
 from app.models.user import Post, Node, Engagement
 from app.models.user import User, PostTag, Tag
@@ -184,6 +184,8 @@ def view_node(node_id):
                   'dispute involving the user occurred after the current request for engagement was made / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
+
+        rating_form = RatingForm()
         return render_template(
             "node_view.html",
             node=node,
@@ -192,6 +194,7 @@ def view_node(node_id):
             messages_asc=messages_asc,
             message_form=message_form,
             report_form=report_form,
+            rating_form=rating_form,
             Post=Post,
             Engagement=Engagement,
             Message=Message,

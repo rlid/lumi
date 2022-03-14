@@ -135,6 +135,7 @@
 
 
 {% macro render_report_form(form, post_id) %}
+    <p>What is the reason for reporting this post?</p>
     <form action="{{ url_for('main.report_post', post_id=post_id) }}" method="post">
         {{ form.hidden_tag() }}
         {{ form.text(
@@ -187,4 +188,49 @@
         </div>
         {{ form.submit(class_='btn btn-success w-100 mb-3') }}
     </form>
+{% endmacro %}
+
+
+{% macro render_rating_form(form, action_url, success, tipping=False, tipping_cap=0, answerer_reward_cent=0) %}
+    {% set id_suffix = 'Plus' if success else 'Minus' %}
+    <div class="mb-4">
+        {% if success %}
+            <p>The reward will be distributed if both users rate the engagement as successful.</p>
+        {% else %}
+            <p>No reward will be distributed if either user rates the engagement as unsuccessful.</p>
+        {% endif %}
+        {% if tipping %}
+            <p>If you would like to tip the answerer, please choose one of the options below now.</p>
+            <p>I would like to tip
+                $<span id="valueBox{{- id_suffix -}}">0</span> (<span id="percentBox{{- id_suffix -}}">0</span>%
+                of the answerer's reward).
+            </p>
+        {% endif %}
+    </div>
+    <form id="form{{- id_suffix -}}" action="{{ action_url }}" method="post">
+        {{ form.hidden_tag() }}
+        {% if tipping %}
+            {{ form.tip_cent(
+                    class_="form-range",
+                    min=0,
+                    max=tipping_cap,
+                    value=0,
+                    step=10 if tipping_cap % 10 == 0 else (5 if tipping_cap % 5 == 0 else (2 if tipping_cap % 2 == 0 else 1)),
+                    oninput="showValue" + id_suffix + "(this.value)") }}
+        {% endif %}
+        <div class="d-flex mt-3">
+            {{ form.submit(class_='btn btn-success me-auto', id='btnConfirm' + id_suffix) }}
+            <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">
+                Cancel
+            </button>
+        </div>
+    </form>
+    {% if tipping %}
+        <script>
+            function showValue{{- id_suffix -}}(newValue) {
+                document.getElementById("valueBox{{- id_suffix -}}").innerHTML = (0.01 * newValue).toFixed(2);
+                document.getElementById("percentBox{{- id_suffix -}}").innerHTML = (100 * newValue / {{ answerer_reward_cent }}).toFixed();
+            }
+        </script>
+    {% endif %}
 {% endmacro %}

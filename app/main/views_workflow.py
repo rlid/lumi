@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm
+from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm, RatingForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
@@ -135,10 +135,11 @@ def share_node(node_id):
                 0.01 * form.percentage.data * user_node.parent.remaining_referral_budget_cent)
             db.session.add(user_node)
             db.session.commit()
-            flash(f'Your referrer reward is adjusted to ${0.01 * user_node.referrer_reward_cent:.2f}', category='info')
-            return redirect(url_for('main.share_node', node_id=node_id))
+            flash(f'Your referral reward claim is adjusted to ${0.01 * user_node.referrer_reward_cent:.2f}',
+                  category='info')
         else:
-            flash('You cannot adjust your referrer reward.', category='warning')
+            flash('You cannot adjust your referral reward claim.', category='warning')
+        return redirect(url_for('main.share_node', node_id=node_id))
     return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
 
 
@@ -232,19 +233,26 @@ def accept_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
 
-@main.route('/engagement/<engagement_id>/<int:is_success>')
+@main.route('/engagement/<engagement_id>/<int:is_success>', methods=['POST'])
 @login_required
 def rate_engagement(engagement_id, is_success):
-    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+    form = RatingForm()
+    if form.validate_on_submit():
+        engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+        # if engagement.node.value_cent > current_user.value_limit_cent:
+        #     flash('You currently cannot rate engagement on posts worth more than $' +
+        #           f'{current_user.reward_limit:.2f}.', category='warning')
 
-    # if engagement.node.value_cent > current_user.value_limit_cent:
-    #     flash('You currently cannot rate engagement on posts worth more than $' +
-    #           f'{current_user.reward_limit:.2f}.', category='warning')
-
-    if current_user == engagement.node.creator or current_user == engagement.node.post.creator:
-        current_user.rate_engagement(engagement, is_success)
-    else:
-        flash('Only the original poster can accept the engagement.', category='danger')
+        if current_user == engagement.asker:
+            tip_cent = form.tip_cent.data
+            if tip_cent > current_user.balance_available_cent:
+                flash('The tip amount is greater than your available account balance.', category='danger')
+                return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+            current_user.rate_engagement(engagement, is_success, tip_cent=form.tip_cent.data)
+        elif current_user == engagement.answerer:
+            current_user.rate_engagement(engagement, is_success)
+        else:
+            flash('You cannot rate this engagement.', category='danger')
 
     return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
@@ -257,7 +265,8 @@ def account():
         or_(
             Engagement.state == Engagement.STATE_ENGAGED,
             and_(Engagement.state == Engagement.STATE_REQUESTED, Post.is_archived.is_not(True))
-        )
+        ),
+        Post.is_reported.is_not(True)
     ).join(
         Node, Node.id == Engagement.node_id
     ).join(
