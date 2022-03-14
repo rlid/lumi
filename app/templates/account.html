@@ -132,7 +132,7 @@
                 <button class="accordion-button py-2 {% if not nodes %}collapsed{% endif %}"
                         type="button" data-bs-toggle="collapse"
                         data-bs-target="#accordionActiveInteractions">
-                    Other Interactions - Active
+                    All Active Interactions
                 </button>
             </h2>
             <div id="accordionActiveInteractions" class="accordion-collapse collapse {% if nodes %}show{% endif %}">
@@ -188,81 +188,81 @@
                                             contributions.
                                         </small>
                                     {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="accordion-item bg-light">
-        <h2 class="accordion-header">
-            <button class="accordion-button py-2 collapsed"
-                    type="button" data-bs-toggle="collapse"
-                    data-bs-target="#accordionInactiveInteractions">
-                Other Interactions - Archived
-            </button>
-        </h2>
-        <div id="accordionInactiveInteractions" class="accordion-collapse collapse">
-            <div class="accordion-body pe-0 pt-0">
-                <div class="accordion accordion-flush">
-                    <div class="accordion-item bg-light">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button py-1"
-                                    type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#accordionInactiveInteractionsMyPosts">
-                                <small>Posts by you</small>
-                            </button>
-                        </h2>
-                        <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show">
-                            <div class="accordion-body">
-                                {% set ns = namespace(empty=True) %}
-                                {% for node in nodes if node.parent is none and node.post.is_archived %}
-                                    <small>
-                                        {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
-                                    </small>
-                                    {% set ns.empty = False %}
-                                {% endfor %}
-                                {% if ns.empty %}
-                                    <small class="text-muted">
-                                        There are no posts you have created that are archived.
-                                    </small>
-                                {% endif %}
+        <div class="accordion-item bg-light">
+            <h2 class="accordion-header">
+                <button class="accordion-button py-2 collapsed"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordionInactiveInteractions">
+                    Archived Interactions
+                </button>
+            </h2>
+            <div id="accordionInactiveInteractions" class="accordion-collapse collapse">
+                <div class="accordion-body pe-0 pt-0">
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item bg-light">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-1"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionInactiveInteractionsMyPosts">
+                                    <small>Posts by you</small>
+                                </button>
+                            </h2>
+                            <div id="accordionInactiveInteractionsMyPosts" class="accordion-collapse collapse show">
+                                <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
+                                    {% for node in nodes if node.parent is none and node.post.is_archived %}
+                                        <small>
+                                            {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
+                                        </small>
+                                        {% set ns.empty = False %}
+                                    {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no posts you have created that are archived.
+                                        </small>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="accordion accordion-flush">
-                    <div class="accordion-item bg-light">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button py-1"
-                                    type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#accordionInactiveInteractionsOtherPosts">
-                                <small>Posts by others</small>
-                            </button>
-                        </h2>
-                        <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show">
-                            <div class="accordion-body">
-                                {% set ns = namespace(empty=True) %}
-                                {% for node in nodes if node.parent is not none and node.post.is_archived %}
-                                    <small>
-                                        {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
-                                    </small>
-                                    {% set ns.empty = False %}
-                                {% endfor %}
-                                {% if ns.empty %}
-                                    <small class="text-muted">
-                                        There are no posts you have interacted with that are archived.
-                                    </small>
-                                {% endif %}
+                    <div class="accordion accordion-flush">
+                        <div class="accordion-item bg-light">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button py-1"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#accordionInactiveInteractionsOtherPosts">
+                                    <small>Posts by others</small>
+                                </button>
+                            </h2>
+                            <div id="accordionInactiveInteractionsOtherPosts" class="accordion-collapse collapse show">
+                                <div class="accordion-body">
+                                    {% set ns = namespace(empty=True) %}
+                                    {% for node in nodes if node.parent is not none and node.post.is_archived %}
+                                        <small>
+                                            {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=0) }}
+                                        </small>
+                                        {% set ns.empty = False %}
+                                    {% endfor %}
+                                    {% if ns.empty %}
+                                        <small class="text-muted">
+                                            There are no posts you have interacted with that are archived.
+                                        </small>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 {% endblock %}
