@@ -130,7 +130,7 @@ def share_node(node_id):
 
     form = ShareForm()
     if form.validate_on_submit():
-        if user_node.post.is_private and user_node.nodes_after__inc().count() == 1:
+        if user_node.post.is_private and user_node.nodes_after_inc().count() == 1:
             user_node.referrer_reward_cent = round_js(
                 0.01 * form.percentage.data * user_node.parent.remaining_referral_budget_cent)
             db.session.add(user_node)

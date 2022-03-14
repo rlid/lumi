@@ -14,7 +14,8 @@
                 <p class="text-muted">
                     You can now share this link with your friends. Upon each successful engagement, a referral reward
                     will be shared among all referrers linking the asker and the answerer, distributed according to the
-                    <a href="#">reward distribution rules</a>.
+                    <a href="{{ url_for('main.faq_anchor', anchor_id='qRewardDistribution', _anchor='qRewardDistribution') }}"
+                       target="_blank">reward distribution rules</a>.
                 </p>
                 {{ render_post_card(node, buttons=False) }}
 
