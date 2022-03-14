@@ -77,11 +77,21 @@
     <p class="small text-muted mb-1">
         {% if post.is_private %}<span class="badge bg-dark">Private</span>{% endif %}
         {% if render_last_updated %}
-            Posted by {{ render_user(post.creator, capitalize=False) }},
-            last interacted {{ moment(node.last_updated).fromNow() }}
+            {% if current_user == post.creator and current_user == node.creator %}
+                {% set n = post.nodes.count() - 1 %}
+                {{ n }} {% if n > 1 %}users have{% else %}user has{% endif %} shared or contributed,
+                last activity was
+            {% else %}
+                {% if current_user == post.creator %}
+                    Interacting with {{ render_user(node.creator, capitalize=False) }},
+                {% else %}
+                    Posted by {{ render_user(post.creator, capitalize=False) }},
+                {% endif %}
+                last interaction was
+            {% endif %}
+            {{ moment(node.last_updated).fromNow() }}
         {% else %}
-            {{ render_user(post.creator) }}
-            posted {{ moment(post.timestamp).fromNow() }}
+            {{ render_user(post.creator) }} posted {{ moment(post.timestamp).fromNow() }}
         {% endif %}
     </p>
 {% endmacro %}
