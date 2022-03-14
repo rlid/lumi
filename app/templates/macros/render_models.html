@@ -240,7 +240,7 @@
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
             {% if message.type in (Message.TYPE_REQUEST, Message.TYPE_CANCEL, Message.TYPE_ACCEPT, Message.TYPE_RATE) %}
-                by {{ render_user_plain(message.creator, capitalize=False) }}
+                by {{ render_user(message.creator, capitalize=False) }}
             {% endif %}
         </div>
     </div>

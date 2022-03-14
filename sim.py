@@ -348,8 +348,15 @@ def sim_all(n_days=20,
                         is_success = False
                     if (not is_success) and user == engagement.answerer and random.uniform(0, 1) > credibility[user]:
                         is_success = True
-
-                    user.rate_engagement(engagement, is_success)
+                    if user == engagement.asker:
+                        user.rate_engagement(
+                            engagement,
+                            is_success,
+                            tip_cent=min(
+                                user.balance_available_cent,
+                                round(engagement.node.answerer_reward_cent * (1 if is_success else 0.4))))
+                    else:
+                        user.rate_engagement(engagement, is_success)
                     print('Engagement rated')
 
             posts = Post.query.join(

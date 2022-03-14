@@ -247,8 +247,10 @@ def rate_engagement(engagement_id, is_success):
         if current_user == engagement.asker:
             tip_cent = form.tip_cent.data
             if tip_cent > current_user.balance_available_cent:
-                flash('The tip amount is greater than your available account balance.', category='danger')
+                flash('The tip value exceeds your available account balance.', category='danger')
                 return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+            if tip_cent > round(engagement.node.answerer_reward_cent * (1 if is_success else 0.4)):
+                flash('The tip value exceeds the maximum allowed', category='danger')
             current_user.rate_engagement(engagement, is_success, tip_cent=form.tip_cent.data)
         elif current_user == engagement.answerer:
             current_user.rate_engagement(engagement, is_success)

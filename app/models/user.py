@@ -10,7 +10,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee, Notification
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee, Notification, \
+    Feedback
 from app.models.errors import InvalidActionError, RewardDistributionError, InsufficientFundsError
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
@@ -357,10 +358,18 @@ class User(UserMixin, db.Model):
 
     def report(self, post, reason):
         post.is_reported = True
+        # port might have been reported by multiple users, so add this report instead of overwriting it:
         post.report_reason = f'{self}: {reason}\n' + post.report_reason
         post.is_archived = True
         post.ping(datetime.utcnow())
         db.session.add(post)
+
+        fb = Feedback(
+            type='report',
+            text=f'Post {post.id} is reported by User {self.id} for Reason "{reason}".',
+            email=self.email)
+        db.session.add(fb)
+
         db.session.commit()
 
     def create_node(self, parent_node, referrer_reward_cent=None):
@@ -600,8 +609,11 @@ class User(UserMixin, db.Model):
             raise InvalidActionError(
                 'Cannot rate engagement because the user is the answerer and a non-zero tip is set')
 
-        if self == asker and tip_cent > self.balance_available_cent:
-            raise InvalidActionError('Cannot rate engagement because the tip is greater than the balance available')
+        if self == asker:
+            if tip_cent > self.balance_available_cent:
+                raise InvalidActionError('Cannot rate engagement because the tip value exceeds the balance available')
+            if tip_cent > round(node.answerer_reward_cent * (1 if is_success else 0.4)):
+                raise InvalidActionError('Cannot rate engagement because the tip value exceeds the maximum allowed')
 
         if self == asker:
             engagement.rating_by_asker = 1 if is_success else -1
@@ -628,116 +640,8 @@ class User(UserMixin, db.Model):
         db.session.add(message)
 
         if engagement.rating_by_asker != 0 and engagement.rating_by_answerer != 0:
-            self._finalise_engagement(engagement)
+            _finalise_engagement(engagement)
         db.session.commit()
-
-    def _finalise_engagement(self, engagement):
-        if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
-            self._handle_success(engagement)
-        elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
-            self._handle_dispute(engagement)
-        # elif engagement.rating_by_asker == 1 and engagement.rating_by_answerer == -1:
-        #     self._handle_success(engagement, fraction=0.5)  # Default fraction is 50% in this scenario
-        else:
-            node = engagement.node
-            asker = engagement.asker
-            answerer = engagement.answerer
-            asker.reserved_balance_cent -= node.value_cent
-
-            # any tip to be paid by the asker to the answer
-            if engagement.tip_cent > 0:
-                asker.reserved_balance_cent -= engagement.tip_cent
-                asker.total_balance_cent -= engagement.tip_cent
-                answerer.total_balance_cent += engagement.tip_cent
-
-            db.session.add(asker)
-            db.session.add(answerer)
-
-            message = Message(creator=self,
-                              node=node,
-                              type=Message.TYPE_COMPLETE,
-                              text=f'Engagement unsuccessful - no reward will be distributed')
-            db.session.add(message)
-
-        engagement.state = Engagement.STATE_COMPLETED
-        engagement.node.state = Node.STATE_CHAT
-
-    def _handle_success(self, engagement, fraction=1.0):
-        node = engagement.node
-        asker = engagement.asker
-        answerer = engagement.answerer
-
-        value_cent = _distribute_reward_cent(node=node, fraction=fraction)
-
-        asker.update_reputation(value_cent, success=True, dispute_lost=False)
-        answerer.update_reputation(value_cent, success=True, dispute_lost=False)
-
-        # any tip to be paid by the asker to the answer
-        if engagement.tip_cent > 0:
-            asker.total_balance_cent -= engagement.tip_cent
-            asker.reserved_balance_cent -= engagement.tip_cent
-            answerer.total_balance_cent += engagement.tip_cent
-
-        db.session.add(asker)
-        db.session.add(answerer)
-
-        message = Message(creator=self,
-                          node=node,
-                          type=Message.TYPE_COMPLETE,
-                          text=f'Engagement successful - reward has been distributed')
-        db.session.add(message)
-
-    def _handle_dispute(self, engagement):
-        node = engagement.node
-        asker = engagement.asker
-        answerer = engagement.answerer
-
-        value_cent = node.value_cent
-        asker.reserved_balance_cent -= value_cent
-
-        rx_asker, ri_asker = asker.reputation_if_dispute_lost(value_cent)
-        rx_answerer, ri_answerer = answerer.reputation_if_dispute_lost(value_cent)
-
-        # 3-D lexical ordering by (min(rx, ri), rx, ri)
-        if min(rx_asker, ri_asker) < min(rx_answerer, ri_answerer) or \
-                (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
-                        rx_asker < rx_answerer
-                ) or \
-                (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
-                        rx_asker == rx_answerer and
-                        ri_asker < ri_answerer
-                ):
-            # asker lost:
-            asker.update_reputation(value_cent, success=False, dispute_lost=True)
-            answerer.update_reputation(value_cent, success=False, dispute_lost=False)
-        elif min(rx_asker, ri_asker) > min(rx_answerer, ri_answerer) or \
-                (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
-                        rx_asker > rx_answerer
-                ) or \
-                (
-                        min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
-                        rx_asker == rx_answerer and
-                        ri_asker > ri_answerer
-                ):  # answerer lost:
-            asker.update_reputation(value_cent, success=False, dispute_lost=False)
-            answerer.update_reputation(value_cent, success=False, dispute_lost=True)
-        else:  # it is a draw, punishment both
-            # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
-            # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
-            asker.update_reputation(value_cent, success=False, dispute_lost=True)
-            answerer.update_reputation(value_cent, success=False, dispute_lost=True)
-
-        db.session.add(asker)
-        db.session.add(answerer)
-
-        message = Message(creator=self,
-                          node=node,
-                          type=Message.TYPE_COMPLETE,
-                          text=f'Engagement outcome disputed - no reward will be distributed')
-        db.session.add(message)
 
     def reputation_if_dispute_lost(self, value_cent):
         m_x = math.exp(-abs(value_cent) * REP_DECAY)
@@ -806,6 +710,141 @@ class User(UserMixin, db.Model):
         self.update_reward_limit(value_cent, success, dispute_lost)
 
 
+def _handle_success(engagement, fraction=1.0):
+    node = engagement.node
+    asker = engagement.asker
+    answerer = engagement.answerer
+
+    value_cent = _distribute_reward_cent(node=node, fraction=fraction)
+
+    asker.update_reputation(value_cent, success=True, dispute_lost=False)
+    answerer.update_reputation(value_cent, success=True, dispute_lost=False)
+
+    # any tip to be paid by the asker to the answer
+    _pay_tip(engagement)
+
+    db.session.add(asker)
+    db.session.add(answerer)
+
+    message = Message(creator=node.creator,
+                      node=node,
+                      type=Message.TYPE_COMPLETE,
+                      text=f'Engagement successful - reward has been distributed')
+    db.session.add(message)
+
+
+def _finalise_engagement(engagement):
+    if engagement.rating_by_asker == engagement.rating_by_answerer == 1:
+        _handle_success(engagement)
+    elif engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1:
+        _handle_dispute(engagement)
+    # elif engagement.rating_by_asker == 1 and engagement.rating_by_answerer == -1:
+    #     self._handle_success(engagement, fraction=0.5)  # Default fraction is 50% in this scenario
+    else:
+        _handle_non_success(engagement)
+
+    engagement.state = Engagement.STATE_COMPLETED
+    engagement.node.state = Node.STATE_CHAT
+
+
+def _handle_non_success(engagement):
+    node = engagement.node
+    asker = engagement.asker
+    answerer = engagement.answerer
+
+    asker.reserved_balance_cent -= node.value_cent
+
+    # any tip to be paid by the asker to the answer
+    _pay_tip(engagement)
+
+    db.session.add(asker)
+    db.session.add(answerer)
+
+    message = Message(creator=node.creator,
+                      node=node,
+                      type=Message.TYPE_COMPLETE,
+                      text=f'Engagement unsuccessful - no reward will be distributed')
+    db.session.add(message)
+
+
+def _handle_dispute(engagement):
+    node = engagement.node
+    asker = engagement.asker
+    answerer = engagement.answerer
+
+    value_cent = node.value_cent
+    asker.reserved_balance_cent -= value_cent
+
+    rx_asker, ri_asker = asker.reputation_if_dispute_lost(value_cent)
+    rx_answerer, ri_answerer = answerer.reputation_if_dispute_lost(value_cent)
+
+    # 3-D lexical ordering by (min(rx, ri), rx, ri)
+    if min(rx_asker, ri_asker) < min(rx_answerer, ri_answerer) or \
+            (
+                    min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                    rx_asker < rx_answerer
+            ) or \
+            (
+                    min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                    rx_asker == rx_answerer and
+                    ri_asker < ri_answerer
+            ):
+        # asker lost:
+        asker.update_reputation(value_cent, success=False, dispute_lost=True)
+        answerer.update_reputation(value_cent, success=False, dispute_lost=False)
+    elif min(rx_asker, ri_asker) > min(rx_answerer, ri_answerer) or \
+            (
+                    min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                    rx_asker > rx_answerer
+            ) or \
+            (
+                    min(rx_asker, ri_asker) == min(rx_answerer, ri_answerer) and
+                    rx_asker == rx_answerer and
+                    ri_asker > ri_answerer
+            ):  # answerer lost:
+        asker.update_reputation(value_cent, success=False, dispute_lost=False)
+        answerer.update_reputation(value_cent, success=False, dispute_lost=True)
+    else:  # it is a draw, punishment both
+        # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
+        # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
+        asker.update_reputation(value_cent, success=False, dispute_lost=True)
+        answerer.update_reputation(value_cent, success=False, dispute_lost=True)
+
+    db.session.add(asker)
+    db.session.add(answerer)
+
+    message = Message(creator=node.creator,
+                      node=node,
+                      type=Message.TYPE_COMPLETE,
+                      text=f'Engagement outcome disputed - no reward will be distributed')
+    db.session.add(message)
+
+
+def _pay_tip(engagement):
+    tip_cent = engagement.tip_cent
+    asker = engagement.asker
+    answerer = engagement.answerer
+    if tip_cent > 0:
+        asker.total_balance_cent -= tip_cent
+        asker.reserved_balance_cent -= tip_cent
+        answerer.total_balance_cent += tip_cent
+
+        db.session.add(asker)
+        db.session.add(answerer)
+
+        Notification.push(
+            target=asker,
+            node=engagement.node,
+            message=f'You paid ${0.01 * tip_cent:.2f} as tip.'
+        )
+
+        Notification.push(
+            target=answerer,
+            node=engagement.node,
+            message=f'You earned ${0.01 * tip_cent:.2f} as tip.'
+        )
+
+
 def _distribute_reward_cent(node, fraction):
     post = node.post
     if post.type == Post.TYPE_BUY:
@@ -825,7 +864,7 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=buyer,
         node=node,
-        message=f'You spent ${0.01 * value_cent:.2f} as asker.'
+        message=f'You paid ${0.01 * value_cent:.2f} as asker.'
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
