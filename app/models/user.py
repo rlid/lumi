@@ -402,7 +402,7 @@ class User(UserMixin, db.Model):
 
     def _create_node(self, parent_node, referrer_reward_cent=None):
         post = parent_node.post
-        answerer_reward_cent, sum_referrer_reward_cent, value_cent = parent_node.rewards_for_next_node_cent()
+        answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = parent_node.rewards_for_next_node_cent()
 
         if post.is_private:
             if referrer_reward_cent is None:

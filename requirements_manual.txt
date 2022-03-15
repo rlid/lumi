@@ -18,3 +18,4 @@ stripe
 boto3
 sendgrid
 flask-talisman
+Flask-QRcode

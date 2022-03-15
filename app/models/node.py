@@ -79,7 +79,7 @@ class Node(db.Model):
             else:
                 return 0.01 * self.value_cent
 
-        answerer_reward_cent, sum_referrer_reward_cent, value_cent = self.rewards_for_next_node_cent()
+        answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = self.rewards_for_next_node_cent()
         if post.type == Post.TYPE_BUY:
             return 0.01 * answerer_reward_cent
         else:
@@ -94,7 +94,6 @@ class Node(db.Model):
             if user == self.creator:
                 return 0.01 * self.referrer_reward_cent
             else:
-                # TODO: make this (up to) 100% of remaining in power user mode
                 return 0.01 * self.remaining_referral_budget_cent
         else:
             return 0.01 * round(0.5 * post.referral_budget_cent)
@@ -118,7 +117,7 @@ class Node(db.Model):
         post = self.post
         value_cent = self.value_cent
         answerer_reward_cent = self.answerer_reward_cent
-        sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()
+        sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()  # for existing referrers
         if post.type == Post.TYPE_BUY:
             if post.is_private:
                 answerer_reward_cent -= self.referrer_reward_cent
@@ -129,7 +128,10 @@ class Node(db.Model):
                 value_cent += self.referrer_reward_cent
             else:
                 value_cent = answerer_reward_cent + post.platform_fee_cent + sum_referrer_reward_cent
-        return answerer_reward_cent, sum_referrer_reward_cent, value_cent
+
+        max_referrer_reward_cent = self.remaining_referral_budget_cent if post.is_private else \
+            round(0.5 * post.referral_budget_cent)  # for next node
+        return answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent
 
     @property
     def value(self):

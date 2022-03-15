@@ -3,11 +3,32 @@
 {% from "macros/utils.html" import render_reward_info, text_area_style, button_class with context %}
 {% from "macros/form.html" import render_confirm_form_modal %}
 
+{% block meta %}
+    {{ super() }}
+    <meta property="og:title" content="{{ node.post.title }}"/>
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lumiask.com"/>
+    {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
+    {% if node.post.type == Post.TYPE_BUY %}
+        <meta property="og:description"
+              content="Help me with my questions on this topic and earn {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }} as reward! Know someone who can help? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every answer I receive through you (directly or indirectly). Follow this link for more details. Thanks so much!"/>
+    {% else %}
+        <meta property="og:description"
+              content="Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}! Know someone who might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for more details. Thanks for your time!"/>
+    {% endif %}
+    <meta property="og:site_name" content="LumiAsk"/>
+    <meta property="og:image"
+          content="{{ qrcode(url_for('main.view_node', node_id=node.id, _external=True), error_correction='H', icon_img='android-chrome-192x192-sq.png') }}"/>
+    <meta property="og:image:width" content="256"/>
+    <meta property="og:image:height" content="256"/>
+{% endblock %}
+
 {% block left_col %}
     {{ render_reward_info(node) }}
 {% endblock %}
 
 {% block mid_col %}
+    {#    <img src="{{ qrcode(url_for('main.view_node', node_id=node.id, _external=True), error_correction='H', icon_img='android-chrome-192x192-sq.png') }}" width="128" height="128">#}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
     <div class="mb-3">
         <form id="form" method="post">
