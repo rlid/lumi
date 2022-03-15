@@ -3,27 +3,24 @@
 
 
 {% block mid_col %}
-    <ul class="list-group list-group-flush">
-        {% set ns = namespace(node_id=None) %}
-        {% for notification in notifications %}
-            {% set is_read = notification.is_read %}
-            {% if ns.node_id is not none and ns.node_id != notification.node_id %}
-                <hr>
-            {% endif %}
-            <li class="list-group-item bg-light border-0">
-
-                <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
-                   class="small text-decoration-none text-{%- if is_read %}muted{%- else %}dark{% endif %}">
+    {% set ns = namespace(node_id=None) %}
+    {% for notification in notifications %}
+        {% set is_read = notification.is_read %}
+        {% if ns.node_id is not none and ns.node_id != notification.node_id %}
+            <hr>
+        {% endif %}
+        <p class="bg-light">
+            <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
+               class="small text-decoration-none text-{%- if is_read %}muted{%- else %}dark{% endif %}">
                     <span class="text-{%- if is_read %}muted{%- else %}danger{% endif %}">
                         {{ moment(notification.timestamp).calendar() }}</span> - {{ notification.read() }}
-                </a>
-            </li>
-            {% if ns.node_id != notification.node_id %}
-                <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} small ms-5 mt-2">
-                    {{ render_notification(notification) }}
-                </div>
-                {% set ns.node_id = notification.node_id %}
-            {% endif %}
-        {% endfor %}
-    </ul>
+            </a>
+        </p>
+        {% if ns.node_id != notification.node_id %}
+            <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} small ms-5 mt-2">
+                {{ render_notification(notification) }}
+            </div>
+            {% set ns.node_id = notification.node_id %}
+        {% endif %}
+    {% endfor %}
 {% endblock %}
