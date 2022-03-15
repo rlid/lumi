@@ -8,7 +8,7 @@ from sqlalchemy import func, desc, and_, or_
 from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
-from app.main.forms import MessageForm, ReportForm, FeedbackForm, RatingForm
+from app.main.forms import MessageForm, ReportForm, FeedbackForm, RatingForm, ConfirmForm
 from app.models.user import Message
 from app.models.user import Post, Node, Engagement
 from app.models.user import User, PostTag, Tag
@@ -195,6 +195,9 @@ def view_node(node_id):
             message_form=message_form,
             report_form=report_form,
             rating_form=rating_form,
+            confirm_request_form=ConfirmForm(),
+            confirm_cancel_form=ConfirmForm(),
+            confirm_accept_form=ConfirmForm(),
             Post=Post,
             Engagement=Engagement,
             Message=Message,
@@ -212,6 +215,7 @@ def view_node(node_id):
         "node_view_as_other.html",
         node=node,
         message_form=message_form,
+        confirm_request_form=ConfirmForm(),
         report_form=report_form,
         Post=Post,
         feedback_form=FeedbackForm())

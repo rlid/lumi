@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 
 from app import db
 from app.main import main
-from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm, RatingForm
+from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm, RatingForm, ConfirmForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
 from utils.math import round_js
@@ -144,94 +144,99 @@ def share_node(node_id):
     return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
 
 
-@main.route('/node/<node_id>/request-engagement')
+@main.route('/node/<node_id>/request-engagement', methods=['POST'])
 @login_required
 def request_engagement(node_id):
-    node = Node.query.filter_by(id=node_id).first_or_404()
-    post = node.post
+    form = ConfirmForm()
+    if form.validate_on_submit():
+        node = Node.query.filter_by(id=node_id).first_or_404()
+        post = node.post
 
-    if post.is_archived:
-        flash('Cannot request for engagement because the post is archived.', category='danger')
-        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if current_user == post.creator:
-        flash('Cannot request for engagement on your own post.', category='danger')
-        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if current_user.value_limit_cent < (
-            # value limit checks
-            # post.price_cent
-            node.value_cent
-    ):
-        flash('You currently cannot request for engagement on posts worth more than $' +
-              f'{current_user.reward_limit:.2f}.', category='warning')
-        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
-    if post.type == Post.TYPE_SELL and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
-        flash('Insufficient funds, please ' +
-              Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
-        return redirect(url_for('main.view_node', node_id=node_id, _anchor='form'))
+        if post.is_archived:
+            flash('Cannot request for engagement because the post is archived.', category='danger')
+            return redirect(url_for('main.view_node', node_id=node_id))
+        if current_user == post.creator:
+            flash('Cannot request for engagement on your own post.', category='danger')
+            return redirect(url_for('main.view_node', node_id=node_id))
+        if current_user.value_limit_cent < (
+                # value limit checks
+                # post.price_cent
+                node.value_cent
+        ):
+            flash('You currently cannot request for engagement on posts worth more than $' +
+                  f'{current_user.reward_limit:.2f}.', category='warning')
+            return redirect(url_for('main.view_node', node_id=node_id))
+        if post.type == Post.TYPE_SELL and \
+                current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
+            flash('Insufficient funds, please ' +
+                  Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
+            return redirect(url_for('main.view_node', node_id=node_id))
 
-    # the user must have his own node, and the request must be made on that node:
-    user_node = node
-    if current_user != node.creator:
-        user_node = post.nodes.filter(Node.creator == current_user).first()
-        if user_node is None:
-            user_node = current_user.create_node(node)
+        # the user must have his own node, and the request must be made on that node:
+        user_node = node
+        if current_user != node.creator:
+            user_node = post.nodes.filter(Node.creator == current_user).first()
+            if user_node is None:
+                user_node = current_user.create_node(node)
 
-    engagement = user_node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
-    if engagement is None:
-        engagement = current_user.create_engagement(user_node)
-    else:
-        flash('You have already requested for engagement, please let the other user know.', category='warning')
-    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+        engagement = user_node.engagements.filter(Engagement.state < Engagement.STATE_COMPLETED).first()
+        if engagement is None:
+            engagement = current_user.create_engagement(user_node)
+        else:
+            flash('You have already requested for engagement, please let the other user know.', category='warning')
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
-@main.route('/engagement/<engagement_id>/cancel')
+@main.route('/engagement/<engagement_id>/cancel', methods=['POST'])
 @login_required
 def cancel_engagement(engagement_id):
-    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-    node = engagement.node
-    post = node.post
-    if post.is_archived:
-        flash('Cannot cancel engagement because the post is archived.', category='danger')
-    elif current_user != node.creator:
-        flash('Cannot cancel engagement requested by someone else.', category='danger')
-    elif engagement.state != Engagement.STATE_REQUESTED:
-        flash('Cannot cancel engagement because it has been accepted.', category='warning')
-    else:
-        current_user.cancel_engagement(engagement)
+    form = ConfirmForm()
+    if form.validate_on_submit():
+        engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+        node = engagement.node
+        post = node.post
+        if post.is_archived:
+            flash('Cannot cancel engagement because the post is archived.', category='danger')
+        elif current_user != node.creator:
+            flash('Cannot cancel engagement requested by someone else.', category='danger')
+        elif engagement.state != Engagement.STATE_REQUESTED:
+            flash('Cannot cancel engagement because it has been accepted.', category='warning')
+        else:
+            current_user.cancel_engagement(engagement)
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
-    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
 
-
-@main.route('/engagement/<engagement_id>/accept')
+@main.route('/engagement/<engagement_id>/accept', methods=['POST'])
 @login_required
 def accept_engagement(engagement_id):
-    engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
-    node = engagement.node
-    post = engagement.node.post
+    form = ConfirmForm()
+    if form.validate_on_submit():
+        engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
+        node = engagement.node
+        post = engagement.node.post
 
-    if post.is_archived:
-        flash('Cannot accept engagement because the post is archived.', category='danger')
-    elif engagement.state != Engagement.STATE_REQUESTED:
-        flash('The request for engagement can no longer be accepted.', category='danger')
-    elif current_user != post.creator:
-        flash('Only the original poster can accept the engagement.', category='danger')
-    elif current_user.value_limit_cent < (
-            # value limit checks
-            # post.price_cent
-            node.value_cent
-    ):
-        flash('You currently cannot accept engagement on posts worth more than $' +
-              f'{current_user.reward_limit:.2f}.',
-              category='danger')
-    elif post.type == Post.TYPE_BUY and \
-            current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
-        flash('Insufficient funds, please ' +
-              Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
-        return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
-    else:
-        current_user.accept_engagement(engagement)
-    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+        if post.is_archived:
+            flash('Cannot accept engagement because the post is archived.', category='danger')
+        elif engagement.state != Engagement.STATE_REQUESTED:
+            flash('The request for engagement can no longer be accepted.', category='danger')
+        elif current_user != post.creator:
+            flash('Only the original poster can accept the engagement.', category='danger')
+        elif current_user.value_limit_cent < (
+                # value limit checks
+                # post.price_cent
+                node.value_cent
+        ):
+            flash('You currently cannot accept engagement on posts worth more than $' +
+                  f'{current_user.reward_limit:.2f}.',
+                  category='danger')
+        elif post.type == Post.TYPE_BUY and \
+                current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
+            flash('Insufficient funds, please ' +
+                  Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
+            return redirect(url_for('main.view_node', node_id=engagement.node_id))
+        else:
+            current_user.accept_engagement(engagement)
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
 @main.route('/engagement/<engagement_id>/<int:is_success>', methods=['POST'])
@@ -248,7 +253,7 @@ def rate_engagement(engagement_id, is_success):
             tip_cent = form.tip_cent.data
             if tip_cent > current_user.balance_available_cent:
                 flash('The tip value exceeds your available account balance.', category='danger')
-                return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+                return redirect(url_for('main.view_node', node_id=engagement.node_id))
             if tip_cent > round(engagement.node.answerer_reward_cent * (1 if is_success else 0.4)):
                 flash('The tip value exceeds the maximum allowed', category='danger')
             current_user.rate_engagement(engagement, is_success, tip_cent=form.tip_cent.data)
@@ -257,7 +262,7 @@ def rate_engagement(engagement_id, is_success):
         else:
             flash('You cannot rate this engagement.', category='danger')
 
-    return redirect(url_for('main.view_node', node_id=engagement.node_id, _anchor='form'))
+    return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
 @main.route('/account')

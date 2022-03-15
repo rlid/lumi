@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% from "macros/form.html" import render_rating_form %}
+{% from "macros/form.html" import render_rating_form, render_confirm_form_modal %}
 {% from "macros/render_models.html" import render_message, render_user with context %}
 {% from "macros/utils.html" import render_reward_info, render_modal, render_form_modal, text_area_style, button_class with context %}
 
@@ -88,7 +88,7 @@
 {# before rendering the form, close the div tag for messages to display #}
 </div>
 {% if not node.post.is_archived or (engagement is not none and engagement.state == Engagement.STATE_ENGAGED) %}
-    <form id="form">
+    <form id="formMessage">
         <div class="mb-3">
             {{ message_form.text(class_="form-control", placeholder="Message", style=text_area_style(current_user, node.post)) }}
         </div>
@@ -102,34 +102,19 @@
                             {% if current_user.value_limit_cent < node.value_cent %}disabled{% endif %}>
                         Request for Engagement
                     </button>
-                    {{ render_modal(
-                        modal_id='modalRequest',
-                        modal_title='Request for engagement?',
-                        modal_body='You will send a request for the user user to accept.',
-                        confirm_url=url_for('main.request_engagement', node_id=node.id)) }}
-
                 {% elif engagement_request is not none %}
-                    <a id="btnCancel" class="btn btn-{{- button_class(current_user, node.post) -}}"
-                       href="{{ url_for('main.cancel_engagement', engagement_id=engagement_request.id) }}">
+                    <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
+                            data-bs-toggle="modal" data-bs-target="#modalCancel">
                         Cancel Request
-                    </a>
+                    </button>
                 {% endif %}
             {% endif %}
             {% if engagement_request is not none %}
                 {% if current_user == node.post.creator %}
-                    {#                    <a id="btnAccept" class="btn btn-{{- button_class(current_user, node.post) -}}"#}
-                    {#                       href="{{ url_for('main.accept_engagement', engagement_id=engagement_request.id) }}">#}
-                    {#                        Accept Engagement</a>#}
-                    <button type="button"
-                            class="btn btn-{{- button_class(current_user, node.post) -}}"
+                    <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
                             data-bs-toggle="modal" data-bs-target="#modalAccept">
                         Accept Engagement
                     </button>
-                    {{ render_modal(
-                        modal_id='modalAccept',
-                        modal_title='Accept the engagement?',
-                        modal_body='You will enter into the engagement and rate the engagement when you finish.',
-                        confirm_url=url_for('main.accept_engagement', engagement_id=engagement_request.id)) }}
                 {% endif %}
             {% endif %}
             {% if engagement is not none %}
@@ -155,6 +140,25 @@
             {% endif %}
         </div>
     </form>
+    {{ render_confirm_form_modal(
+        modal_id='modalRequest',
+        modal_title='Request for engagement?',
+        modal_body='You will send a request for the user user to accept.',
+        form=confirm_request_form,
+        action_url=url_for('main.request_engagement', node_id=node.id)) }}
+    {{ render_confirm_form_modal(
+        modal_id='modalCancel',
+        modal_title='Cancel your request?',
+        modal_body='You can cancel your request for engagement if the other user has not accepted it.',
+        form=confirm_cancel_form,
+        action_url=url_for('main.cancel_engagement', engagement_id=engagement_request.id)) }}
+    {{ render_confirm_form_modal(
+        modal_id='modalAccept',
+        modal_title='Accept the engagement?',
+        modal_body='Please rate the engagement when you finish.',
+        form=confirm_accept_form,
+        action_url=url_for('main.accept_engagement', engagement_id=engagement_request.id)) }}
+
     {% if current_user == engagement.asker %}
         {{ render_form_modal(
             modal_id='modalRatePlus',
@@ -181,26 +185,40 @@
             simple_format=True
             ) }}
     {% elif current_user == engagement.answerer %}
-        {{ render_form_modal(
+        {{ render_confirm_form_modal(
             modal_id='modalRatePlus',
-            modal_title='Engagement successful (&plus;)',
-            modal_body=render_rating_form(
-                rating_form,
-                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1),
-                success=True,
-                tipping=False),
-            simple_format=True
+            modal_title='Engagement successful',
+            modal_body='The reward will be distributed if both users rate the engagement as successful.',
+            form=rating_form,
+            action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1)
         ) }}
-        {{ render_form_modal(
+{#        {{ render_form_modal(#}
+{#            modal_id='modalRatePlus',#}
+{#            modal_title='Engagement successful (&plus;)',#}
+{#            modal_body=render_rating_form(#}
+{#                rating_form,#}
+{#                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1),#}
+{#                success=True,#}
+{#                tipping=False),#}
+{#            simple_format=True#}
+{#        ) }}#}
+        {{ render_confirm_form_modal(
             modal_id='modalRateMinus',
-            modal_title='Engagement unsuccessful (&minus;)',
-            modal_body=render_rating_form(
-                rating_form,
-                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0),
-                success=False,
-                tipping=False),
-            simple_format=True
-            ) }}
+            modal_title='Engagement unsuccessful',
+            modal_body='No reward will be distributed if either user rates the engagement as unsuccessful.',
+            form=rating_form,
+            action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0)
+        ) }}
+{#        {{ render_form_modal(#}
+{#            modal_id='modalRateMinus',#}
+{#            modal_title='Engagement unsuccessful (&minus;)',#}
+{#            modal_body=render_rating_form(#}
+{#                rating_form,#}
+{#                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0),#}
+{#                success=False,#}
+{#                tipping=False),#}
+{#            simple_format=True#}
+{#            ) }}#}
     {% endif %}
 {% endif %}
 {% if engagement.state == Engagement.STATE_ENGAGED %}
@@ -290,7 +308,7 @@
                 });
         });
 
-        document.getElementById('form').onsubmit = event => {
+        document.getElementById('formMessage').onsubmit = event => {
             event.preventDefault();
             const textField = document.getElementById('text');
             socket.emit(
@@ -313,7 +331,7 @@
             flask_moment_render_all();
             {#document.getElementById('message'+message.id).scrollIntoView(false);#}
             {#document.getElementById('message'+message.id).scrollIntoViewIfNeeded(true);#}
-            {#let message_form = document.getElementById('form')#}
+            {#let message_form = document.getElementById('formMessage')#}
             {#message_form.scrollTop = message_form.scrollHeight;#}
         });
 
@@ -324,12 +342,12 @@
                     node_id: "{{ node.id }}",
                 });
         };
-        let btnRatePlus = document.getElementById('btn_modalRatePlus')
+        let btnRatePlus = document.getElementById('btnConfirm_modalAccept')
         if (btnRatePlus) {
             btnRatePlus.onclick = rate_event_handler;
         }
         ;
-        let btnRateMinus = document.getElementById('btn_modalRateMinus')
+        let btnRateMinus = document.getElementById('btnConfirm_modalRatePlus')
         if (btnRateMinus) {
             btnRateMinus.onclick = rate_event_handler;
         }
@@ -361,9 +379,9 @@
                 document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
             }
             flask_moment_render_all();
-            {#document.getElementById('form').scrollIntoView(false);#}
+            {#document.getElementById('formMessage').scrollIntoView(false);#}
         });
-        document.getElementById('form').onsubmit = event => {
+        document.getElementById('formMessage').onsubmit = event => {
             event.preventDefault();
             const textField = document.getElementById('text');
             sock.send(textField.value);

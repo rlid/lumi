@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% from "macros/render_models.html" import render_post_card with context %}
-{% from "macros/utils.html" import render_reward_info, render_modal, text_area_style, button_class with context %}
+{% from "macros/utils.html" import render_reward_info, text_area_style, button_class with context %}
+{% from "macros/form.html" import render_confirm_form_modal %}
 
 {% block left_col %}
     {{ render_reward_info(node) }}
@@ -27,14 +28,15 @@
                         {% if not current_user.is_authenticated %}disabled{% endif %}>
                     Request for Engagement
                 </button>
-                {{ render_modal(
-                    modal_id='modalRequest',
-                    modal_title='Request for engagement?',
-                    modal_body='You will send a request for the user user to accept.',
-                    confirm_url=url_for('main.request_engagement', node_id=node.id)) }}
             </div>
         </form>
     </div>
+    {{ render_confirm_form_modal(
+        modal_id='modalRequest',
+        modal_title='Request for engagement?',
+        modal_body='You will send a request for the user user to accept.',
+        form=confirm_request_form,
+        action_url=url_for('main.request_engagement', node_id=node.id)) }}
 {% endblock %}
 
 

@@ -74,7 +74,7 @@ def handle_engagement_rated(message):
     emit('notify_node', {
         'html': 'The other user has rated this engagement - please '
                 '<a href="{node_url}" onclick="location.reload()">refresh</a> to see the updates.'.format(
-            node_url=url_for('main.view_node', node_id=message['node_id'], _anchor='form')
+            node_url=url_for('main.view_node', node_id=message['node_id'])
         )},
          to=message['node_id'])
 

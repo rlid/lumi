@@ -835,13 +835,13 @@ def _pay_tip(engagement):
         Notification.push(
             target=asker,
             node=engagement.node,
-            message=f'You paid ${0.01 * tip_cent:.2f} as tip.'
+            message=f'You paid ${0.01 * tip_cent:.2f} tip.'
         )
 
         Notification.push(
             target=answerer,
             node=engagement.node,
-            message=f'You earned ${0.01 * tip_cent:.2f} as tip.'
+            message=f'You earned ${0.01 * tip_cent:.2f} tip.'
         )
 
 
