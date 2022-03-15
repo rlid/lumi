@@ -5,7 +5,7 @@ Flask-WTF
 Flask-Moment
 Flask-Login
 Flask-Mobility
-Authlib==1.0.0rc1
+Authlib
 requests
 markdown
 bleach
