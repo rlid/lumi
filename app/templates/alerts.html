@@ -10,10 +10,16 @@
             <hr>
         {% endif %}
         <p class="bg-light">
+            {% if is_read %}
+                <span class="badge rounded-pill text-muted" style="font-weight: normal;background-color: #e9ecef">
+            {% else %}
+                {# red eecfd3 #} {# teal caebe1 #} {# green c9dfd6 #} {# pink eecede #}
+                <span class="badge rounded-pill text-dark" style="font-weight: normal;background-color: #caebe1">
+            {% endif %}
+            {{ moment(notification.timestamp).calendar() }}</span>
             <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
-               class="small text-decoration-none text-{%- if is_read %}muted{%- else %}dark{% endif %}">
-                    <span class="text-{%- if is_read %}muted{%- else %}danger{% endif %}">
-                        {{ moment(notification.timestamp).calendar() }}</span> - {{ notification.read() }}
+               class="small text-decoration-none {% if is_read %}text-muted{% else %}text-dark{% endif %}">
+                {{ notification.read() }}
             </a>
         </p>
         {% if ns.node_id != notification.node_id %}
