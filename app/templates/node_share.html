@@ -48,9 +48,9 @@
                             {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
                             <p class="card-text">
                                 {% if node.post.type == Post.TYPE_BUY %}
-                                    Help me on this topic and earn {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }}! Think someone can help? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every answer I accept through you (directly or indirectly). Follow this link for details.
+                                    Help me on this topic and earn {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }}. Think someone can help? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every answer I accept through you (directly or indirectly). Follow this link for details.
                                 {% else %}
-                                    Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}! Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details.
+                                    Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}. Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details.
                                 {% endif %}
                             </p>
                         </div>
