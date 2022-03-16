@@ -104,8 +104,11 @@
                         </form>
                         <script>
                             function showValue(newValue) {
-                                document.getElementById("valueBox").innerHTML = (0.0001 * newValue * {{ node.parent.remaining_referral_budget_cent }}).toFixed(2);
-                                document.getElementById("percentBox").innerHTML = newValue;
+                                let s = {{ node.parent.remaining_referral_budget_cent }};
+                                let x = Math.round(0.01 * newValue * s);
+                                document.getElementById("valueBox").innerHTML = (0.01 * x).toFixed(2);
+                                {# due to rounding of price(value), the rounded percentage might not match the slider #}
+                                document.getElementById("percentBox").innerHTML = (100 * x / s).toFixed();
                             }
                         </script>
                     </div>
