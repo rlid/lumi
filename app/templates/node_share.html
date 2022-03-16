@@ -1,94 +1,116 @@
 {% extends "node_view.html" %}
 
+
 {% block mid_col %}
-    <div class="card mb-3">
-        <div class="card-body pb-0">
-            <h5 class="card-title">Here is your unique referral link for this post:</h5>
-            {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
-            <div class="text-center my-3">
-                <p>
-                    <a href="{{ node_url }}">
-                        <img src="{{ qrcode(node_url, error_correction='H', icon_img='android-chrome-192x192-sq.png') }}"
-                             width="256" height="256">
-                    </a>
-                </p>
-                <p>
-                    <a id="referrerLink" href="{{ node_url }}">{{ node_url }}</a>
-                </p>
-                <button type="button" class="btn btn-success" onclick="copyLink()">Copy Link</button>
-                <script>
-                    function copyLink() {
-                        navigator.clipboard.writeText(document.getElementById("referrerLink").href);
-                        let toast = document.getElementById('nodeToast');
-                        let toastText = document.getElementById('nodeToastText');
-                        toastText.innerHTML = "Link copied";
-                        bootstrap.Toast.getOrCreateInstance(toast).show()
-                        toast.hidden = false;
-                    }
-                </script>
-            </div>
-            <hr>
-            <div class="card-text small">
-                <p class="text-muted">
-                    You can now share this link with your friends. Upon each successful engagement, a referral reward
-                    will be shared among all referrers linking the asker and the answerer, distributed according to the
-                    <a href="{{ url_for('main.faq_anchor', anchor_id='qRewardDistribution', _anchor='qRewardDistribution') }}"
-                       target="_blank">reward distribution rules</a>.
-                </p>
-                {{ render_post_card(node, buttons=False) }}
-
-                {% if node.post.is_private and current_user != node.post.creator and node.parent.remaining_referral_budget_cent > 0 %}
-                    <div class="mt-4">
-                        <h6>How much referral reward to claim?</h6>
-                        <p class="text-muted mb-1">
-                            The default is to claim half of the remaining referral budget (the total budget of
-                            {{ '${0:.2f}'.format(0.01 * node.parent.remaining_referral_budget_cent) }}
-                            is set by the OP) but you can choose a different amount, between:
-                        </p>
-                        <ul class="text-muted">
-                            <li>0% - you are a good friend and just want to help</li>
-                            <li>100% - you will put in lots of effort helping OP to connect, and don't need others to
-                                spread the word further (or you are just cheeky!)
-                            </li>
-                        </ul>
-
-                        <div class="mt-0 mb-3 p-2 border rounded">
-                            <p>Adjust your claim to:
-                                $<span id="valueBox">
-                                {{- '{0:.2f}'.format(0.01 * node.referrer_reward_cent) -}}
-                            </span>
-                                {% set percentage = (100 * node.referrer_reward_cent / node.parent.remaining_referral_budget_cent)|round|int %}
-                                (<span id="percentBox">
-                                {{- percentage -}}
-                            </span>% of the remaining)
+    <div class="bg-white border rounded p-4 mb-3">
+        <h5 class="card-title">Share this post using your unique link below:</h5>
+        {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
+        <div class="text-center my-3">
+            <p>
+                <a href="{{ node_url }}">
+                    <img src="{{ qrcode(node_url, error_correction='H', icon_img='android-chrome-192x192-sq.png') }}"
+                         width="256" height="256">
+                </a>
+            </p>
+            <p>
+                <a id="referrerLink" href="{{ node_url }}">{{ node_url }}</a>
+            </p>
+            <button type="button" class="btn btn-success" onclick="copyLink()">Copy Link</button>
+            <script>
+                function copyLink() {
+                    navigator.clipboard.writeText(document.getElementById("referrerLink").href);
+                    let toast = document.getElementById('nodeToast');
+                    let toastText = document.getElementById('nodeToastText');
+                    toastText.innerHTML = "Link copied";
+                    bootstrap.Toast.getOrCreateInstance(toast).show()
+                    toast.hidden = false;
+                }
+            </script>
+        </div>
+        <hr class="my-4">
+        <div class="small">
+            <p class="text-muted">
+                You can now share this link with your friends. For each successful engagement, a referral reward
+                will be shared among all referrers linking the asker and the answerer, distributed according to the
+                <a href="{{ url_for('main.faq_anchor', anchor_id='qRewardDistribution', _anchor='qRewardDistribution') }}"
+                   target="_blank">reward distribution rules</a>.
+            </p>
+            <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none text-dark">
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-sm-4">
+                        <img src="{{ url_for('static', filename='logo.svg', _external=True) }}"
+                             class="img-fluid w-100 h-100">
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="card-body" style="max-height: 11rem; overflow: hidden;">
+                            <h5 class="card-title">{{ node.post.title }}</h5>
+                            {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
+                            <p class="card-text">
+                                {% if node.post.type == Post.TYPE_BUY %}
+                                    Help me on this topic and earn {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }}! Think someone can help? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every answer I accept through you (directly or indirectly). Follow this link for details.
+                                {% else %}
+                                    Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}! Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details.
+                                {% endif %}
                             </p>
-                            <form id="form" method="post">
-                                {{ form.hidden_tag() }}
-                                <div class="row">
-                                    <div class="col">
-                                        {{ form.percentage(
-                                            class_="form-range slider mt-1",
-                                            min=0,
-                                            max=100,
-                                            value=percentage,
-                                            step=25,
-                                            oninput="showValue(this.value)") }}
-                                    </div>
-                                    <div class="col-auto">
-                                        {{ form.submit(class_="btn btn-success btn") }}
-                                    </div>
-                                </div>
-                            </form>
-                            <script>
-                                function showValue(newValue) {
-                                    document.getElementById("valueBox").innerHTML = (0.0001 * newValue * {{ node.parent.remaining_referral_budget_cent }}).toFixed(2);
-                                    document.getElementById("percentBox").innerHTML = newValue;
-                                }
-                            </script>
                         </div>
                     </div>
-                {% endif %}
+                </div>
             </div>
+            </a>
+
+            {% if node.post.is_private and current_user != node.post.creator and node.parent.remaining_referral_budget_cent > 0 %}
+                <hr class="my-4">
+                <div class="mt-3">
+                    <h6>How much referral reward to claim?</h6>
+                    <p class="text-muted mb-1">
+                        The default is to claim half of the remaining referral budget (the total budget of
+                        {{ '${0:.2f}'.format(0.01 * node.parent.remaining_referral_budget_cent) }}
+                        is set by the OP) but you can choose a different amount, between:
+                    </p>
+                    <ul class="text-muted">
+                        <li>0% - you are a good friend and just want to help</li>
+                        <li>100% - you will put in lots of effort helping OP to connect, and don't need others to
+                            spread the word further (or you are just cheeky!)
+                        </li>
+                    </ul>
+
+                    <div class="mt-0 p-2 border rounded">
+                        <p>Adjust your claim to:
+                            $<span id="valueBox">
+                            {{- '{0:.2f}'.format(0.01 * node.referrer_reward_cent) -}}
+                        </span>
+                            {% set percentage = (100 * node.referrer_reward_cent / node.parent.remaining_referral_budget_cent)|round|int %}
+                            (<span id="percentBox">
+                            {{- percentage -}}
+                        </span>% of the remaining)
+                        </p>
+                        <form id="form" method="post">
+                            {{ form.hidden_tag() }}
+                            <div class="row">
+                                <div class="col">
+                                    {{ form.percentage(
+                                        class_="form-range slider mt-1",
+                                        min=0,
+                                        max=100,
+                                        value=percentage,
+                                        step=25,
+                                        oninput="showValue(this.value)") }}
+                                </div>
+                                <div class="col-auto">
+                                    {{ form.submit(class_="btn btn-success btn") }}
+                                </div>
+                            </div>
+                        </form>
+                        <script>
+                            function showValue(newValue) {
+                                document.getElementById("valueBox").innerHTML = (0.0001 * newValue * {{ node.parent.remaining_referral_budget_cent }}).toFixed(2);
+                                document.getElementById("percentBox").innerHTML = newValue;
+                            }
+                        </script>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 

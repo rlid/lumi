@@ -40,13 +40,17 @@
                 {{ n_nodes }} {% if n_nodes > 1 %}users have{% else %}user has{% endif %} shared or contributed to this
                 post.
             {% elif post.is_private %}
-                Share your post and let others join the search! Send it to your friends or share it on Twitter,
-                Facebook, Twitter, Reddit... whatever your favorite online community is. Your post is in
-                <b>Private Mode</b>, which means it solely relies on the power of your social networks to reach
-                the people you are looking for.
+                <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none"><b>Share</b>
+                </a>
+                your post and let others join the search! Send it to your friends or share it on Twitter, Facebook,
+                Twitter, Reddit... whatever your favorite online community is. Your post is in <b>Private Mode</b>,
+                which means it solely relies on the power of your social networks to reach the people you are looking
+                for.
             {% else %}
-                Share your post and let others join the search! Send it to your friends or share it on Twitter,
-                Facebook, Twitter, Reddit... whatever your favorite online community is.
+                <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none"><b>Share</b>
+                </a>
+                your post and let others join the search! Send it to your friends or share it on Twitter, Facebook,
+                Twitter, Reddit... whatever your favorite online community is.
             {% endif %}
             <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
         </div>
@@ -79,7 +83,8 @@
     {% elif current_user == node.creator %}
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             <p>If you...</p>
-            <b>Share</b> - you
+            <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none"><b>Share</b></a>
+            - you
             {% if post.is_private %}
                 earn
             {% else %}
@@ -119,7 +124,8 @@
         {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
             <p>If you...</p>
-            <b>Share</b> - you can earn up to
+            <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none"><b>Share</b></a>
+            - you can earn up to
             {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }}
             for each successful engagement your referral leads to, or
             <p></p>

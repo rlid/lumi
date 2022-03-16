@@ -19,7 +19,7 @@ class PostForm(FlaskForm):
     type = RadioField("Choose a type:",
                       choices=[
                           (Post.TYPE_BUY, "I have a question to ask or a task to perform"),
-                          (Post.TYPE_SELL, "(New!) I want to answer questions or offering my service"),
+                          (Post.TYPE_SELL, "(New) I want to answer questions or offering my service"),
                       ],
                       validators=[InputRequired()]
                       )
@@ -46,7 +46,7 @@ class PostForm(FlaskForm):
             price_cent = round(100 * field.data)
             if self.type.data == Post.TYPE_BUY:
                 if current_user.value_limit_cent < price_cent:
-                    raise ValidationError(f'Your current limit on buying price is {current_user.reward_limit:.2f}.')
+                    raise ValidationError(f'Your current limit on buying price is ${current_user.reward_limit:.2f}.')
             if self.type.data == Post.TYPE_SELL:
                 value_cent = price_cent
                 value_cent += round(self.platform_fee * price_cent)

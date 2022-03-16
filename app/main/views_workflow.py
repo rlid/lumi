@@ -118,8 +118,10 @@ def report_post(post_id):
 
 
 @main.route('/node/<node_id>/share', methods=['GET', 'POST'])
-@login_required
 def share_node(node_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('main.view_node', node_id=node_id))
+
     node = Node.query.filter_by(id=node_id).first_or_404()
     if current_user != node.creator:
         user_node = node.post.nodes.filter(Node.creator == current_user).first()
