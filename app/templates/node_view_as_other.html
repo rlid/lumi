@@ -17,11 +17,18 @@
               content="Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}. Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details."/>
     {% endif %}
     <meta property="og:site_name" content="LumiAsk"/>
-    <meta property="og:image"
-          content="{{ url_for('static', filename='logo-258x258.png', _external=True) }}"/>
+    <meta property="og:image" content="{{ url_for('static', filename='logo-258x258.png', _external=True) }}"/>
     <meta property="og:image:type" content="image/png"/>
     <meta property="og:image:width" content="258"/>
     <meta property="og:image:height" content="258"/>
+    <meta property="og:image" content="{{ url_for('static', filename='logo-501x501.png', _external=True) }}"/>
+    <meta property="og:image:type" content="image/png"/>
+    <meta property="og:image:width" content="501"/>
+    <meta property="og:image:height" content="501"/>
+    <meta property="og:image" content="{{ url_for('static', filename='logo-750x750.png', _external=True) }}"/>
+    <meta property="og:image:type" content="image/png"/>
+    <meta property="og:image:width" content="750"/>
+    <meta property="og:image:height" content="750"/>
 {% endblock %}
 
 {% block left_col %}
