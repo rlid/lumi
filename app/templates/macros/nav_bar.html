@@ -25,9 +25,15 @@
             <ul class="navbar-nav">
                 {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}
                 {{ render_nav_item("main.post_options", "Post", "bi-plus-square", visible_from="sm") }}
-                {{ render_nav_item("main.faq", "FAQ", "bi-question-circle", visible_from="sm") }}
+                {{ render_nav_item("main.faq", "FAQ", "bi-signpost-split", visible_from="sm") }}
                 {#{{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}#}
                 {#{{ render_nav_item("main.feedback", text="Feedback", icon="bi-pencil-square", visible_from="md") }}#}
+                <li class="nav-item">
+                    <button type="button" class="btn border-0 nav-link text-nowrap d-none d-md-block"
+                            data-bs-toggle="modal" data-bs-target="#modalWhatsNew">
+                        <i class="bi bi-lightbulb"></i> What's New
+                    </button>
+                </li>
                 <li class="nav-item">
                     {% if feedback_form %}
                         <button type="button" class="btn border-0 nav-link text-nowrap d-none d-md-block"
@@ -102,6 +108,44 @@
             modal_title='Questions & Feedback',
             modal_body=render_feedback_form(feedback_form)) }}
     {% endif %}
+    <div class="modal py-5" tabindex="-1" id="modalWhatsNew">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow p-4" style="border-radius: 1rem">
+                <div class="modal-header border-0">
+                    <h2 class="fw-bold mb-0">What's New</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="d-grid gap-4 my-5 list-unstyled">
+                        <li class="d-flex gap-4">
+                            <i class="bi bi-megaphone text-warning" style="font-size: 48px"></i>
+                            <div>
+                                <h5 class="mb-0">Posting as Answerer</h5>
+                                Tell others what you know, answer questions and earn rewards.
+                            </div>
+                        </li>
+                        <li class="d-flex gap-4">
+                            <i class="bi bi-people-fill text-secondary" style="font-size: 48px"></i>
+                            <div>
+                                <h5 class="mb-0">Private Mode</h5>
+                                Extra incentive for people to tap into their networks to help you.
+                            </div>
+                        </li>
+                        <li class="d-flex gap-4">
+                            <i class="bi bi-hand-thumbs-up text-primary" style="font-size: 48px"></i>
+                            <div>
+                                <h5 class="mb-0">Tipping</h5>
+                                Tip particularly helpful answerers to show your appreciation.
+                            </div>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn btn-success mt-5 w-100" data-bs-dismiss="modal">
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endmacro %}
 
 

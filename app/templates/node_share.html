@@ -3,7 +3,7 @@
 
 {% block mid_col %}
     <div class="bg-white border rounded p-4 mb-3">
-        <h5 class="card-title">Share this post using your unique link below:</h5>
+        <h5 class="card-title mb-4">Share this post using your unique link below:</h5>
         {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
         <div class="text-center my-3">
             <p>
@@ -35,7 +35,7 @@
                 <a href="{{ url_for('main.faq_anchor', anchor_id='qRewardDistribution', _anchor='qRewardDistribution') }}"
                    target="_blank">reward distribution rules</a>.
             </p>
-            <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none text-dark">
+        <h6>Preview:</h6>
             <div class="card">
                 <div class="row g-0">
                     <div class="col-sm-4">
@@ -44,7 +44,9 @@
                     </div>
                     <div class="col-sm-8">
                         <div class="card-body" style="max-height: 11rem; overflow: hidden;">
-                            <h5 class="card-title">{{ node.post.title }}</h5>
+                            <h5 class="card-title">
+                                <a href="{{ url_for('main.view_node', node_id=node.id) }}" class="text-decoration-none text-dark">{{ node.post.title }}</a>
+                            </h5>
                             {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
                             <p class="card-text">
                                 {% if node.post.type == Post.TYPE_BUY %}
@@ -57,7 +59,6 @@
                     </div>
                 </div>
             </div>
-            </a>
 
             {% if node.post.is_private and current_user != node.post.creator and node.parent.remaining_referral_budget_cent > 0 %}
                 <hr class="my-4">
