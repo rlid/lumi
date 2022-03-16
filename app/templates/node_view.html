@@ -192,16 +192,6 @@
             form=rating_form,
             action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1)
         ) }}
-{#        {{ render_form_modal(#}
-{#            modal_id='modalRatePlus',#}
-{#            modal_title='Engagement successful (&plus;)',#}
-{#            modal_body=render_rating_form(#}
-{#                rating_form,#}
-{#                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1),#}
-{#                success=True,#}
-{#                tipping=False),#}
-{#            simple_format=True#}
-{#        ) }}#}
         {{ render_confirm_form_modal(
             modal_id='modalRateMinus',
             modal_title='Engagement unsuccessful',
@@ -209,16 +199,6 @@
             form=rating_form,
             action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0)
         ) }}
-{#        {{ render_form_modal(#}
-{#            modal_id='modalRateMinus',#}
-{#            modal_title='Engagement unsuccessful (&minus;)',#}
-{#            modal_body=render_rating_form(#}
-{#                rating_form,#}
-{#                action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=0),#}
-{#                success=False,#}
-{#                tipping=False),#}
-{#            simple_format=True#}
-{#            ) }}#}
     {% endif %}
 {% endif %}
 {% if engagement.state == Engagement.STATE_ENGAGED %}
@@ -226,7 +206,7 @@
     </div>
 {% endif %}
 </div>
-    <div class="toast-container fixed-top ms-auto p-3">
+    <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
         <div class="toast"
              id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
             <div class="d-flex">

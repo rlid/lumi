@@ -30,5 +30,5 @@ def test():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='192.168.0.8', port=8080, debug=True)
+    socketio.run(app, port=8080, debug=True)
     # app.run(host="0.0.0.0", port=8080, debug=True)

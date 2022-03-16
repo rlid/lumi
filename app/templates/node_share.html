@@ -1,16 +1,34 @@
 {% extends "node_view.html" %}
 
 {% block mid_col %}
-    <div class="card">
+    <div class="card mb-3">
         <div class="card-body pb-0">
             <h5 class="card-title">Here is your unique referral link for this post:</h5>
-            <div class="card-text small">
-                <p class="my-3">
-                    {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
+            {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
+            <div class="text-center my-3">
+                <p>
                     <a href="{{ node_url }}">
-                        {{ node_url }}
+                        <img src="{{ qrcode(node_url, error_correction='H', icon_img='android-chrome-192x192-sq.png') }}"
+                             width="256" height="256">
                     </a>
                 </p>
+                <p>
+                    <a id="referrerLink" href="{{ node_url }}">{{ node_url }}</a>
+                </p>
+                <button type="button" class="btn btn-success" onclick="copyLink()">Copy Link</button>
+                <script>
+                    function copyLink() {
+                        navigator.clipboard.writeText(document.getElementById("referrerLink").href);
+                        let toast = document.getElementById('nodeToast');
+                        let toastText = document.getElementById('nodeToastText');
+                        toastText.innerHTML = "Link copied";
+                        bootstrap.Toast.getOrCreateInstance(toast).show()
+                        toast.hidden = false;
+                    }
+                </script>
+            </div>
+            <hr>
+            <div class="card-text small">
                 <p class="text-muted">
                     You can now share this link with your friends. Upon each successful engagement, a referral reward
                     will be shared among all referrers linking the asker and the answerer, distributed according to the
@@ -74,6 +92,15 @@
         </div>
     </div>
 
-
-
+    <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
+        <div class="toast"
+             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
+            <div class="d-flex">
+                <div class="toast-body">
+                    <small id="nodeToastText">{{ msg }}</small>
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 {% endblock %}
