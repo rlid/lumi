@@ -17,6 +17,7 @@
               content="Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}. Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details."/>
     {% endif %}
     <meta property="og:site_name" content="LumiAsk"/>
+    <meta name="twitter:card" content="summary"/>
     <meta property="twitter:image" content="{{ url_for('static', filename='logo-252x252.png', _external=True) }}"/>
     <meta property="og:image" content="{{ url_for('static', filename='logo-1251x1251.png', _external=True) }}"/>
     <meta property="og:image:type" content="image/png"/>
