@@ -155,27 +155,31 @@
 {% macro render_feedback_form(form) %}
     <p>We'd love to hear from you! Contact us through any of the channels below, or leave a quick message using the
         feedback form. </p>
-    <div class="text-center">
-        <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">
-            <i class="bi bi-discord"></i> Discord
-        </a></p>
-        <p><a href="http://192.168.0.8:8080/whatsapp" class="text-decoration-none text-success">
-            <i class="bi bi-whatsapp"></i> WhatsApp
-        </a></p>
-        <p><a href="mailto:info@lumiask.com" class="text-decoration-none text-success">
-            <i class="bi bi-envelope-fill"></i> Email
-        </a></p>
-        <p><a href="https://twitter.com/LumiQnA" class="text-decoration-none text-success">
-            <i class="bi bi-twitter"></i> Twitter
-        </a></p>
-        <p><a href="https://fb.me/LumiQA" class="text-decoration-none text-success">
-            <i class="bi bi-facebook"></i> Facebook
-        </a></p>
-        <p><a href="https://www.linkedin.com/company/knowbleltd" class="text-decoration-none text-success">
-            <i class="bi bi-linkedin"></i> LinkedIn
-        </a></p>
+    <div class="row justify-content-evenly">
+        <div class="col-auto">
+            <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">
+                <i class="bi bi-discord"></i> Discord
+            </a></p>
+            <p><a href="http://192.168.0.8:8080/whatsapp" class="text-decoration-none text-success">
+                <i class="bi bi-whatsapp"></i> WhatsApp
+            </a></p>
+            <p><a href="mailto:info@lumiask.com" class="text-decoration-none text-success">
+                <i class="bi bi-envelope-fill"></i> Email
+            </a></p>
+        </div>
+        <div class="col-auto">
+            <p><a href="https://twitter.com/LumiQnA" class="text-decoration-none text-success">
+                <i class="bi bi-twitter"></i> Twitter
+            </a></p>
+            <p><a href="https://fb.me/LumiQA" class="text-decoration-none text-success">
+                <i class="bi bi-facebook"></i> Facebook
+            </a></p>
+            <p><a href="https://www.linkedin.com/company/knowbleltd" class="text-decoration-none text-success">
+                <i class="bi bi-linkedin"></i> LinkedIn
+            </a></p>
+        </div>
     </div>
-    <hr class="my-4">
+    <hr class="mt-2 mb-4">
     <form action="{{ url_for('main.contact') }}" method="post">
         {{ form.hidden_tag() }}
         {{ form.text(

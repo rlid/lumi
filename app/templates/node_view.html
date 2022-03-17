@@ -290,7 +290,7 @@
 
         document.getElementById('formMessage').onsubmit = event => {
             event.preventDefault();
-            const textField = document.getElementById('text');
+            const textField = document.getElementById('textareaMessage');
             socket.emit(
                 'message_sent',
                 {
@@ -322,12 +322,12 @@
                     node_id: "{{ node.id }}",
                 });
         };
-        let btnRatePlus = document.getElementById('btnConfirm_modalAccept')
+        let btnRatePlus = document.getElementById('btnConfirm_modalRatePlus')
         if (btnRatePlus) {
             btnRatePlus.onclick = rate_event_handler;
         }
         ;
-        let btnRateMinus = document.getElementById('btnConfirm_modalRatePlus')
+        let btnRateMinus = document.getElementById('btnConfirm_modalRateMinus')
         if (btnRateMinus) {
             btnRateMinus.onclick = rate_event_handler;
         }
@@ -363,7 +363,7 @@
         });
         document.getElementById('formMessage').onsubmit = event => {
             event.preventDefault();
-            const textField = document.getElementById('text');
+            const textField = document.getElementById('textareaMessage');
             sock.send(textField.value);
             textField.value = '';
         };

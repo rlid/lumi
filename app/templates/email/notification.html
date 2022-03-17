@@ -44,12 +44,14 @@
         {% else %}
             <p>This notification is regarding your account.
                 Please tap the button below to view your latest account activity.</p>
-            <a href="{{ url_for("main.account", _external=True) }}"
-               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                View Activity
-            </a>
+            <div style="text-align: center; margin: 2rem">
+                <a href="{{ url_for("main.account", _external=True) }}"
+                   style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                    View Activity
+                </a>
+            </div>
             <p>If that doesn't work, copy and paste the following link in your browser's address bar:
-                {{ url_for("main.account", _external=True) }}</p>
+                {{ url_for("main.alerts", _external=True) }}</p>
         {% endif %}
         <p style="margin-top: 3rem">
             Cheers,

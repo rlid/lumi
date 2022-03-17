@@ -64,23 +64,17 @@ class ShareForm(FlaskForm):
 
 
 class MessageForm(FlaskForm):
-    text = TextAreaField("Text", validators=[InputRequired()])
+    text = TextAreaField("Text", id='textareaMessage', validators=[InputRequired()])
     submit = SubmitField("Send")
 
 
 class ReportForm(FlaskForm):
-    text = TextAreaField(
-        "Text",
-        validators=[InputRequired()]
-    )
+    text = TextAreaField("Text", id='textareaReport', validators=[InputRequired()])
     submit = SubmitField("Send")
 
 
 class FeedbackForm(FlaskForm):
-    text = TextAreaField(
-        "Text",
-        validators=[InputRequired()]
-    )
+    text = TextAreaField('Text', id='textareaFeedback', validators=[InputRequired()])
     email = EmailField('Email (Optional)', render_kw={"placeholder": "name@example.com"})
     submit = SubmitField("Send")
 
