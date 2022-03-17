@@ -21,9 +21,9 @@ class Node(db.Model):
         'batch': False  # allows extension to fire for each instance before going to the next.
     }
 
-    STATE_CHAT = 2 ** 10
-    STATE_REQUESTED = 2 * STATE_CHAT
-    STATE_ENGAGED = 2 * STATE_REQUESTED
+    STATE_CHAT = 100
+    STATE_REQUESTED = 200
+    STATE_ENGAGED = 300
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)

@@ -7,6 +7,7 @@ from app.main import main
 from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm, RatingForm, ConfirmForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
+from utils.email import send_email
 from utils.math import round_js
 
 
@@ -109,8 +110,13 @@ def report_post(post_id):
 
     if form.validate_on_submit():
         post = Post.query.filter_by(id=post_id).first_or_404()
-        reason = request.form.get('reason')
-        current_user.report(post, reason)
+        current_user.report(post, form.text.data)
+        send_email(
+            sender='report@lumiask.com',
+            recipient='support@lumiask.com',
+            subject='Report received',
+            body_text=f'{current_user}\n{post}\n{form.text.data}'
+        )
         flash(
             'The post has been reported for investigation - it will not be visible until the investigation concludes.',
             category='warning')

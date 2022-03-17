@@ -19,6 +19,7 @@ from utils import security_utils, authlib_ext
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
 REP_I_DECAY = 0.1
+# normalise to $10 (1000c), i.e. counter metric and value metric would be equivalent if every engagement is $10
 REP_DECAY = REP_I_DECAY / 1000
 
 
@@ -790,6 +791,7 @@ def _handle_dispute(engagement):
                     ri_asker < ri_answerer
             ):
         # asker lost:
+        engagement.dispute_status = Engagement.DISPUTE_STATUS_ASKER_LOST
         asker.update_reputation(value_cent, success=False, dispute_lost=True)
         answerer.update_reputation(value_cent, success=False, dispute_lost=False)
     elif min(rx_asker, ri_asker) > min(rx_answerer, ri_answerer) or \
@@ -802,11 +804,13 @@ def _handle_dispute(engagement):
                     rx_asker == rx_answerer and
                     ri_asker > ri_answerer
             ):  # answerer lost:
+        engagement.dispute_status = Engagement.DISPUTE_STATUS_ANSWERER_LOST
         asker.update_reputation(value_cent, success=False, dispute_lost=False)
         answerer.update_reputation(value_cent, success=False, dispute_lost=True)
     else:  # it is a draw, punishment both
-        # TODO: consider reducing the reputation of both to prevent users intentionally decaying bad history
+        # TODO: consider punishing no one or a different logic
         # currently this is deemed unnecessary as it should be very rare to have exactly the same reputation
+        engagement.dispute_status = Engagement.DISPUTE_STATUS_BOTH_LOST
         asker.update_reputation(value_cent, success=False, dispute_lost=True)
         answerer.update_reputation(value_cent, success=False, dispute_lost=True)
 

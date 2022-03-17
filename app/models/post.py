@@ -18,9 +18,6 @@ class Post(db.Model):
 
     TYPE_BUY = 'asking'
     TYPE_SELL = 'answering'
-    # TYPE_ANNOUNCEMENT = 'announcement'
-    # TYPE_WARNING = 'warning'
-    # TYPE_INFO = 'info'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)

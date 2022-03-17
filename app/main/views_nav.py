@@ -6,6 +6,7 @@ from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
 from app.main.forms import FeedbackForm
 from app.models import Feedback
+from utils.email import send_email
 
 
 @main.before_request
@@ -105,6 +106,12 @@ def contact():
             email=form.email.data or (current_user.email if current_user.is_authenticated else None))
         db.session.add(fb)
         db.session.commit()
+        send_email(
+            sender='feedback@lumiask.com',
+            recipient='support@lumiask.com',
+            subject='Feedback received',
+            body_text=f'{fb.email}\n{fb.text}'
+        )
         flash('Thank you so much for your feedback!', category='success')
         redirect_url = request.referrer
         if redirect_url and redirect_url.startswith(request.root_url):

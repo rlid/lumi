@@ -282,11 +282,11 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u5.value_limit_cent, 500 + round(435 * 0.5))
 
     def test_leakage(self):
-        u1 = User(email='1', total_balance_cent=10000)
-        u2 = User(email='2', total_balance_cent=10000)
-        u3 = User(email='3', total_balance_cent=10000)
-        u4 = User(email='4', total_balance_cent=10000)
-        u5 = User(email='5', total_balance_cent=10000)
+        u1 = User(email='1', total_balance_cent=1000)
+        u2 = User(email='2', total_balance_cent=1000)
+        u3 = User(email='3', total_balance_cent=1000)
+        u4 = User(email='4', total_balance_cent=1000)
+        u5 = User(email='5', total_balance_cent=1000)
         users = [u1, u2, u3, u4, u5]
         db.session.add_all(users)
         p1b = u1.create_post(post_type=Post.TYPE_BUY, price_cent=100, title='')
@@ -294,11 +294,11 @@ class BasicsTestCase(unittest.TestCase):
         p2b = u2.create_post(post_type=Post.TYPE_BUY, price_cent=200, title='')
         p2s = u2.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
         p3b = u3.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
-        p3s = u3.create_post(post_type=Post.TYPE_SELL, price_cent=300, title='')
-        p4b = u4.create_post(post_type=Post.TYPE_BUY, price_cent=400, title='')
-        p4s = u4.create_post(post_type=Post.TYPE_SELL, price_cent=200, title='')
-        p5b = u5.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
-        p5s = u5.create_post(post_type=Post.TYPE_SELL, price_cent=100, title='')
+        p3s = u3.create_post(post_type=Post.TYPE_SELL, price_cent=300, is_private=True, title='')
+        p4b = u4.create_post(post_type=Post.TYPE_BUY, price_cent=400, is_private=True, title='')
+        p4s = u4.create_post(post_type=Post.TYPE_SELL, price_cent=200, is_private=True, title='')
+        p5b = u5.create_post(post_type=Post.TYPE_BUY, price_cent=500, is_private=True, title='')
+        p5s = u5.create_post(post_type=Post.TYPE_SELL, price_cent=100, is_private=True, title='')
         posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
         random = Random(1)
@@ -306,15 +306,20 @@ class BasicsTestCase(unittest.TestCase):
             for user in users:
                 post = random.choice(posts)
                 if user != post.creator:
-                    parent_node = random.choice(post.nodes.all())
-                    if user.value_limit_cent >= parent_node.value_cent and post.creator.value_limit_cent >= parent_node.value_cent:
+                    node = post.nodes.filter_by(creator=user).first()
+                    if node is None:
+                        parent_node = random.choice(post.nodes.all())
                         node = user.create_node(parent_node)
+                    if user.value_limit_cent >= node.value_cent and \
+                            post.creator.value_limit_cent >= node.value_cent and (
+                            (post.type == Post.TYPE_BUY and post.creator.balance_available_cent > node.value_cent) or
+                            (post.type == Post.TYPE_SELL and node.creator.balance_available_cent > node.value_cent)):
                         engagement = user.create_engagement(node)
                         post.creator.accept_engagement(engagement)
                         user.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)
                         post.creator.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)
 
-        initial_balance = 5 * 100.0
+        initial_balance = 5 * 10.0
         final_balance = sum([u.total_balance for u in users])
         platform_fees = sum([fee.amount for fee in PlatformFee.query.all()])
         self.assertAlmostEqual(initial_balance - final_balance, platform_fees)

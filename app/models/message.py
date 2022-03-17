@@ -9,12 +9,12 @@ from app import db
 class Message(db.Model):
     message_listeners = []
 
-    TYPE_CHAT = 2 ** 10
-    TYPE_REQUEST = 2 * TYPE_CHAT
-    TYPE_ACCEPT = 2 * TYPE_REQUEST
-    TYPE_RATE = 2 * TYPE_ACCEPT
-    TYPE_COMPLETE = 2 * TYPE_RATE
-    TYPE_CANCEL = 2 * TYPE_COMPLETE
+    TYPE_CHAT = 100
+    TYPE_REQUEST = 200
+    TYPE_ACCEPT = 300
+    TYPE_RATE = 400
+    TYPE_COMPLETE = 500
+    TYPE_CANCEL = 600
 
     __tablename__ = 'messages'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

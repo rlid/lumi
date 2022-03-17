@@ -7,10 +7,15 @@ from app import db
 
 
 class Engagement(db.Model):
-    STATE_REQUESTED = 2 ** 10
-    STATE_ENGAGED = 2 * STATE_REQUESTED
-    STATE_COMPLETED = 2 * STATE_ENGAGED
-    STATE_CANCELLED = 2 * STATE_COMPLETED
+    STATE_REQUESTED = 100
+    STATE_ENGAGED = 200
+    STATE_COMPLETED = 300
+    STATE_CANCELLED = 400
+
+    DISPUTE_STATUS_NONE = 100
+    DISPUTE_STATUS_ASKER_LOST = 200
+    DISPUTE_STATUS_ANSWERER_LOST = 300
+    DISPUTE_STATUS_BOTH_LOST = 400
 
     __tablename__ = 'engagements'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -28,6 +33,7 @@ class Engagement(db.Model):
     receiver_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     state = db.Column(db.Integer, default=STATE_REQUESTED, nullable=False)
+    dispute_status = db.Column(db.Integer, default=DISPUTE_STATUS_NONE, nullable=False)
 
     rating_by_asker = db.Column(db.Integer, default=0, nullable=False)
     rating_by_answerer = db.Column(db.Integer, default=0, nullable=False)

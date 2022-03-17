@@ -7,19 +7,6 @@ from app import create_app, db
 from app.models import PlatformFee
 from app.models.user import User, Post, Node, Engagement
 
-app = create_app("DEV")
-N_DAYS = 50
-N_USERS = 20
-P_POST = 0.5
-P_NODE = 0.5
-P_MESSAGE = 1.0
-P_REQUEST_ENGAGE = 0.2
-P_CANCEL_ENGAGE = 0.1
-P_ACCEPT_ENGAGE = 0.5
-P_RATE_ENGAGE = 0.5
-P_ARCHIVE = 0.75
-N_TAGS = 50
-
 faker = Faker()
 adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachable', 'adaptable', 'adventurous',
               'affectionate', 'ambitious', 'amiable', 'compassionate', 'considerate', 'courageous', 'courteous',
@@ -231,7 +218,7 @@ def sim_all(n_days=50,
         credibility[user] = random.uniform(a_credibility - d_credibility, a_credibility + d_credibility)
 
     actual_success = {}
-
+    sum_top_up_cent = 0
     for day in range(n_days):
         for user in users:
             if random.uniform(0, 1) < p_post:
@@ -299,9 +286,10 @@ def sim_all(n_days=50,
                 if len(nodes) > 0:
                     node = random.choice(nodes)
                     if node.post.type == Post.TYPE_SELL and user.balance_available_cent < node.value_cent:
-                        user.total_balance_cent += 1000 * int(
-                            1 + (node.value_cent - user.balance_available_cent) / 1000)
-                        print('Account topped up')
+                        top_up_cent = 1000 * int(1 + (node.value_cent - user.balance_available_cent) / 1000)
+                        user.total_balance_cent += top_up_cent
+                        sum_top_up_cent += top_up_cent
+                        print(f'Account topped up by {0.01 * top_up_cent:g}')
                     engagement = user.create_engagement(node)
                     print('Engagement requested')
                     if random.uniform(0, 1) < p_cancel_given_request:
@@ -322,9 +310,10 @@ def sim_all(n_days=50,
                 post = node.post
                 if random.uniform(0, 1) < p_accept_given_request:
                     if post.type == Post.TYPE_BUY and user.balance_available_cent < node.value_cent:
-                        user.total_balance_cent += 1000 * int(
-                            1 + (node.value_cent - user.balance_available_cent) / 1000)
-                        print('Account topped up')
+                        top_up_cent = 1000 * int(1 + (node.value_cent - user.balance_available_cent) / 1000)
+                        user.total_balance_cent += top_up_cent
+                        sum_top_up_cent += top_up_cent
+                        print(f'Account topped up by {0.01 * top_up_cent:g}')
                     user.accept_engagement(engagement_request)
                     print('Engagement accepted')
                     [user.create_message(node, text=faker.text(100)) for i in range(random.randint(1, 2))]
@@ -377,21 +366,35 @@ def sim_all(n_days=50,
             for post in posts:
                 if random.uniform(0, 1) < p_archive_given_complete:
                     user.toggle_archive(post)
-
     db.session.commit()
+    return sum_top_up_cent
 
 
+P_POST = 0.5
+P_NODE = 0.5
+P_MESSAGE = 1.0
+P_REQUEST_ENGAGE = 0.2
+P_CANCEL_ENGAGE = 0.1
+P_ACCEPT_ENGAGE = 0.5
+P_RATE_ENGAGE = 0.5
+P_ARCHIVE = 0.75
+N_TAGS = 50
+
+N_DAYS = 50
+N_USERS = 20
+N_BAL = 1000
+P_PRIVATE = 0.5
+
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
-# db.drop_all()
-# db.create_all()
 
-sim_all()
+db.drop_all()
+db.create_all()
+sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL, p_private=P_PRIVATE)
 # sim_random()
 # sim_reset()
 # sim_existing()
-
-users = User.query.all()
 
 print(f'Number of posts = {len(Post.query.all())}')
 print(f'Number of nodes (including root) = {len(Node.query.all())}')
@@ -405,10 +408,17 @@ print('Number of completed engagements = ' + str(Engagement.query.filter(
     Engagement.state == Engagement.STATE_COMPLETED
 ).count()))
 
-print('Total user balance = ' + str(sum([u.total_balance for u in users])))
-print('Total platform fee = ' + str(sum([fee.amount for fee in PlatformFee.query.all()])))
+print(f'Initial sum balance = {0.01 * N_USERS * N_BAL:g}')
+print(f'Sum top up = {0.01 * sum_top_up_cent:g}')
+users = User.query.all()
+sum_final_balance = sum([u.total_balance for u in users])
+sum_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
+print(f'Sum final balance = {sum_final_balance:g}')
+print(f'Sum platform fee = {sum_platform_fee:g}')
 
-# db.session.commit()
+print(f'Initial balance + Total top up = {0.01 * (N_USERS * N_BAL + sum_top_up_cent):g}')
+print(f'Sum final balance + Sum platform fee = {(sum_final_balance + sum_platform_fee):g}')
+
 # db.session.remove()
 # db.drop_all()
 app_context.pop()

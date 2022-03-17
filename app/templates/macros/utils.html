@@ -13,7 +13,8 @@
         {% for engagement in engagements %}
             {% set is_success = engagement.rating_by_asker == engagement.rating_by_answerer == 1 %}
             {% set is_dispute = engagement.rating_by_asker == -1 and engagement.rating_by_answerer == 1 %}
-            <tr class="table-{%- if is_success -%}success{%- elif is_dispute -%}danger{%- else -%}secondary{%- endif -%}">
+            {% set is_dispute_lost = engagement.dispute_status == Engagement.DISPUTE_STATUS_BOTH_LOST or (user == engagement.asker and engagement.dispute_status == Engagement.DISPUTE_STATUS_ASKER_LOST) or (user == engagement.answerer and engagement.dispute_status == Engagement.DISPUTE_STATUS_ANSWERER_LOST) %}
+            <tr class="table-{%- if is_success -%}success{%- elif is_dispute_lost -%}danger{%- else -%}secondary{%- endif -%}">
                 <th scope="row">{{ moment(engagement.last_updated).format('HH:mm:ss') }}</th>
                 <td>{{ '{0:.2f}'.format(0.01 * engagement.node.value_cent) }}</td>
                 <td>{% if user.id == engagement.asker_id %}

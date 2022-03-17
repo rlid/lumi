@@ -49,7 +49,9 @@ def user(user_id):
         nodes=nodes,
         completed_engagements=completed_engagements,
         title='User Profile',
-        feedback_form=FeedbackForm()
+        feedback_form=FeedbackForm(),
+        Post=Post,
+        Engagement=Engagement
     )
 
 
