@@ -1,10 +1,11 @@
+import logging
 import os
 
 from app import create_app, db, socketio
 from app.models import PlatformFee, User, Post, Node, Engagement, PostTag, Tag, Message, Feedback
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'DEFAULT')
-
+app.logger.setLevel(logging.INFO)
 
 @app.shell_context_processor
 def make_shell_context():

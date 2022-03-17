@@ -382,14 +382,14 @@ N_TAGS = 50
 N_DAYS = 20
 N_USERS = 10
 N_BAL = 1000
-P_PRIVATE = 0.5
+P_PRIVATE = 1.0
 
-app = create_app("DEV")
+app = create_app("AWS")
 app_context = app.app_context()
 app_context.push()
 
-# db.drop_all()
-# db.create_all()
+db.drop_all()
+db.create_all()
 
 sum_initial_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
 sum_initial_balance, sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL, p_private=P_PRIVATE)
