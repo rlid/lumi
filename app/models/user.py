@@ -437,10 +437,14 @@ class User(UserMixin, db.Model):
         message = Message(creator=self, node=node, engagement=engagement, text=text)
         db.session.add(message)
 
+        self.ping()
+        db.session.add(self)
+
         Notification.push(
             target=node.creator if self != node.creator else post.creator,
             node=node,
-            message='A user sent you a message.'
+            message='A user sent you a message.',
+            email=engagement is not None
         )
 
         if engagement is not None:
@@ -494,7 +498,8 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=post.creator,
             node=node,
-            message='A user sent you a request for engagement.'
+            message='A user sent you a request for engagement.',
+            email=True
         )
 
         message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
@@ -570,7 +575,8 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=node.creator,
             node=node,
-            message='A user accepted your request for engagement.'
+            message='A user accepted your request for engagement.',
+            email=True
         )
 
         message = Message(creator=self,
@@ -630,7 +636,8 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=asker if self != asker else answerer,
             node=node,
-            message='A user rated an engagement with you.'
+            message='A user rated an engagement with you.',
+            email=True
         )
 
         message = Message(creator=self,
@@ -839,13 +846,15 @@ def _pay_tip(engagement):
         Notification.push(
             target=asker,
             node=engagement.node,
-            message=f'You paid ${0.01 * tip_cent:.2f} tip.'
+            message=f'You paid ${0.01 * tip_cent:.2f} tip.',
+            email=True
         )
 
         Notification.push(
             target=answerer,
             node=engagement.node,
-            message=f'You earned ${0.01 * tip_cent:.2f} tip.'
+            message=f'You earned ${0.01 * tip_cent:.2f} tip.',
+            email=True
         )
 
 
@@ -868,7 +877,8 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=buyer,
         node=node,
-        message=f'You paid ${0.01 * value_cent:.2f} as asker.'
+        message=f'You paid ${0.01 * value_cent:.2f} as asker.',
+        email=True
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
@@ -889,7 +899,8 @@ def _distribute_reward_cent(node, fraction):
             Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.',
+                email=True
             )
     else:
         if len(nodes) == 1:  # there is only OP's node - should never reach here
@@ -910,7 +921,8 @@ def _distribute_reward_cent(node, fraction):
             Notification.push(
                 target=referrer,
                 node=node,
-                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.'
+                message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.',
+                email=True
             )
 
     # the seller gets everything left
@@ -921,7 +933,8 @@ def _distribute_reward_cent(node, fraction):
     Notification.push(
         target=seller,
         node=node,
-        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as answerer.'
+        message=f'You earned ${0.01 * answerer_reward_cent:.2f} as answerer.',
+        email=True
     )
 
     return value_cent

@@ -26,8 +26,6 @@ adjectives = ['friendly', 'wholesome', 'random', 'special', 'funny', 'approachab
 
 
 def sim_random():
-    db.drop_all()
-    db.create_all()
     users = [User(email=faker.email(), total_balance_cent=100000, adjective=random.choice(adjectives)) for i in
              range(N_USERS)]
     db.session.add_all(users)
@@ -201,13 +199,14 @@ def sim_all(n_days=50,
             p_rate_given_accept=0.8,
             p_archive_given_complete=0.5,
             initial_balance_cent=10000):
-    db.drop_all()
-    db.create_all()
     users = [User(email=faker.email(), total_balance_cent=initial_balance_cent, adjective=random.choice(adjectives)) for
              i in
              range(n_users)]
     db.session.add_all(users)
     db.session.commit()
+
+    users = User.query.all()
+    sum_initial_balance = sum([u.total_balance for u in users])
 
     tag_names = [word.capitalize() for word in faker.words(n_tags)]
 
@@ -367,7 +366,7 @@ def sim_all(n_days=50,
                 if random.uniform(0, 1) < p_archive_given_complete:
                     user.toggle_archive(post)
     db.session.commit()
-    return sum_top_up_cent
+    return sum_initial_balance, sum_top_up_cent
 
 
 P_POST = 0.5
@@ -380,8 +379,8 @@ P_RATE_ENGAGE = 0.5
 P_ARCHIVE = 0.75
 N_TAGS = 50
 
-N_DAYS = 50
-N_USERS = 20
+N_DAYS = 20
+N_USERS = 10
 N_BAL = 1000
 P_PRIVATE = 0.5
 
@@ -389,9 +388,11 @@ app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 
-db.drop_all()
-db.create_all()
-sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL, p_private=P_PRIVATE)
+# db.drop_all()
+# db.create_all()
+
+sum_initial_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
+sum_initial_balance, sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL, p_private=P_PRIVATE)
 # sim_random()
 # sim_reset()
 # sim_existing()
@@ -408,16 +409,17 @@ print('Number of completed engagements = ' + str(Engagement.query.filter(
     Engagement.state == Engagement.STATE_COMPLETED
 ).count()))
 
-print(f'Initial sum balance = {0.01 * N_USERS * N_BAL:g}')
+print(f'Sum initial balance = {sum_initial_balance:g}')
+print(f'Sum initial platform fee = {sum_initial_platform_fee:g}')
 print(f'Sum top up = {0.01 * sum_top_up_cent:g}')
 users = User.query.all()
 sum_final_balance = sum([u.total_balance for u in users])
-sum_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
+sum_final_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
 print(f'Sum final balance = {sum_final_balance:g}')
-print(f'Sum platform fee = {sum_platform_fee:g}')
+print(f'Sum final platform fee = {sum_final_platform_fee:g}')
 
-print(f'Initial balance + Total top up = {0.01 * (N_USERS * N_BAL + sum_top_up_cent):g}')
-print(f'Sum final balance + Sum platform fee = {(sum_final_balance + sum_platform_fee):g}')
+print(f'Initial balance + Total top up = {sum_initial_balance + sum_initial_platform_fee + 0.01 * sum_top_up_cent:g}')
+print(f'Sum final balance + Sum platform fee = {sum_final_balance + sum_final_platform_fee:g}')
 
 # db.session.remove()
 # db.drop_all()

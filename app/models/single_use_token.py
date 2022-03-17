@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from flask import current_app
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
@@ -22,7 +23,7 @@ class SingleUseToken(db.Model):
         token = SingleUseToken(expiry_timedelta=timedelta_to_expiry)
         db.session.add(token)
         db.session.commit()
-        print(f'Created {token}.')
+        current_app.logger.info(f'Created {token}.')
         return token
 
     @staticmethod
@@ -35,10 +36,10 @@ class SingleUseToken(db.Model):
         elif datetime.utcnow() > token.expiry:
             db.session.delete(token)
             db.session.commit()
-            print(f'Deleted {token}.')
+            current_app.logger.info(f'Deleted {token}.')
             return False
         else:
             db.session.delete(token)
             db.session.commit()
-            print(f'Deleted {token}.')
+            current_app.logger.info(f'Deleted {token}.')
             return True

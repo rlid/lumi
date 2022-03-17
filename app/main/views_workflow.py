@@ -1,4 +1,4 @@
-from flask import render_template, redirect, flash, url_for, Markup, request, abort
+from flask import render_template, redirect, flash, url_for, Markup, request, abort, current_app
 from flask_login import login_required, current_user
 from sqlalchemy import and_, or_
 
@@ -7,7 +7,6 @@ from app.main import main
 from app.main.forms import PostForm, ShareForm, ReportForm, FeedbackForm, RatingForm, ConfirmForm
 from app.models import Notification
 from app.models.user import Post, Node, Engagement
-from utils.email import send_email
 from utils.math import round_js
 
 
@@ -111,6 +110,7 @@ def report_post(post_id):
     if form.validate_on_submit():
         post = Post.query.filter_by(id=post_id).first_or_404()
         current_user.report(post, form.text.data)
+        send_email = current_app.config["EMAIL_SENDER"]
         send_email(
             sender='report@lumiask.com',
             recipient='support@lumiask.com',

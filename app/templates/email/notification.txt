@@ -1,0 +1,15 @@
+Hi there,
+
+{{ notification.message }}
+{% if notification.node %}
+This notification is regarding the post titled "{{ notification.node.post.title }}". Please visit the link below to view the latest activity on the post.
+
+{{ url_for("main.view_node", node_id=notification.node.id, _external=True) }}
+{% else %}
+This notification is regarding your account. Please visit the link below to view your latest account activity.
+
+{{ url_for("main.account", _external=True) }}
+{% endif %}
+
+Cheers,
+Team LumiAsk

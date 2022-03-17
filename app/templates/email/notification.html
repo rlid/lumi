@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{{ config["APP_NAME"] }} - User Notification</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #eeeeee;
+            max-width: 600px;
+            -moz-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+<div class="preheader" style="display: none">
+    {% if notification.node %}
+        Update on "{{ notification.node.post.title }}"
+    {% else %}
+        Account activity
+    {% endif %}
+</div>
+<main style="width: 100%">
+    <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
+        <h2 style="font-weight: normal">{{ notification.message }}</h2>
+        {% if notification.node %}
+            <p>This notification is regarding the post titled "{{ notification.node.post.title }}".
+                Please tap the button below to view the latest updates on the post.</p>
+            <div style="text-align: center; margin: 2rem">
+                <a href="{{ url_for("main.view_node", node_id=notification.node.id, _external=True) }}"
+                   style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                    View Updates
+                </a>
+            </div>
+            <p>If that doesn't work, copy and paste the following link in your browser's address bar:
+                {{ url_for("main.view_node", node_id=notification.node.id, _external=True) }}</p>
+        {% else %}
+            <p>This notification is regarding your account.
+                Please tap the button below to view your latest account activity.</p>
+            <a href="{{ url_for("main.account", _external=True) }}"
+               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                View Activity
+            </a>
+            <p>If that doesn't work, copy and paste the following link in your browser's address bar:
+                {{ url_for("main.account", _external=True) }}</p>
+        {% endif %}
+        <p style="margin-top: 3rem">
+            Cheers,
+            <br>
+            Team LumiAsk
+        </p>
+    </div>
+</main>
+</body>
+</html>

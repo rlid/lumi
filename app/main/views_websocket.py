@@ -1,4 +1,4 @@
-from flask import render_template, url_for
+from flask import render_template, url_for, current_app
 from flask_login import login_required, current_user
 from flask_socketio import emit, join_room, disconnect
 from simple_websocket import ConnectionClosed
@@ -20,7 +20,7 @@ def on_join(data):
     node = Node.query.get(node_id)
     if current_user == node.creator or current_user == node.post.creator:
         join_room(node_id)
-        print(f'{current_user} has joined the chat.')
+        current_app.logger.info(f'{current_user} has joined the chat.')
         # emit('notify_node', {'html': f'{current_user} has joined the chat.'}, to=node_id)
     else:
         disconnect()
@@ -74,8 +74,7 @@ def handle_engagement_rated(message):
     emit('notify_node', {
         'html': 'The other user has rated this engagement - please '
                 '<a href="{node_url}" onclick="location.reload()">refresh</a> to see the updates.'.format(
-            node_url=url_for('main.view_node', node_id=message['node_id'])
-        )},
+                    node_url=url_for('main.view_node', node_id=message['node_id']))},
          to=message['node_id'])
 
 
@@ -104,7 +103,7 @@ def sock_to_node(ws, node_id):
     node = Node.query.get(node_id)
     if current_user == node.creator or current_user == node.post.creator:
         Message.message_listeners.append((current_user.id, ws))
-        print(f'{current_user} connected to node {node_id}')
+        current_app.logger.info(f'{current_user} connected to node {node_id}')
         while True:
             text = ws.receive()
             current_user.create_message(node, text)
@@ -134,16 +133,16 @@ def emit_after_insert(mapper, connection, message):
                                    # this is from the last message SENT, not rendered, as that info is not
                                    # available here. TODO: try to match the logic for existing messages
                                    Message=Message)
-            print(f'Pushing message to user {user_id}')
+            current_app.logger.info(f'Pushing message to user {user_id}')
             try:
                 user_sock.send(html)
             except ConnectionClosed as e:
-                print(f'A Connection for user {user_id} is closed')
+                current_app.logger.info(f'A Connection for user {user_id} is closed')
                 closed_connections.append((user_id, user_sock))
 
     for c in closed_connections:
         try:
             Message.message_listeners.remove(c)
-            print(f'A listener for user {c[0]} is removed')
+            current_app.logger.info(f'A listener for user {c[0]} is removed')
         except ValueError as e:
-            print(e)
+            current_app.logger.exception(e)

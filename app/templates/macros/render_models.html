@@ -235,20 +235,20 @@
             {% if message.node.post.type == 'answering' %}info10{% else %}warning10{% endif %}
         {% endif %}
         "
-         style="max-width:
-         {% if message.type >= Message.TYPE_REQUEST %}
-             80%
-         {% else %}
-             90%
-         {% endif %};
-         {% if message.type < Message.TYPE_REQUEST %}
-             border-radius: 1rem;
-             {% if message.creator == message.node.creator %}
-                 border-bottom-right-radius: 0;
-             {% elif message.creator == message.node.post.creator %}
-                 border-bottom-left-radius: 0;
-             {% endif %}
-         {% endif %}">
+                                             style="max-width:
+                                                     {% if message.type >= Message.TYPE_REQUEST %}
+                                                         80%
+                                                     {% else %}
+                                                         90%
+                                                     {% endif %};
+                                                     {% if message.type < Message.TYPE_REQUEST %}
+                                                         border-radius: 1rem;
+                                                         {% if message.creator == message.node.creator %}
+                                                             border-bottom-right-radius: 0;
+                                                         {% elif message.creator == message.node.post.creator %}
+                                                             border-bottom-left-radius: 0;
+                                                         {% endif %}
+                                                     {% endif %}">
         <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
             {% if message.type in (Message.TYPE_REQUEST, Message.TYPE_CANCEL, Message.TYPE_ACCEPT, Message.TYPE_RATE) %}
@@ -298,26 +298,8 @@
            card_text=engagement_card_text(engagement)) }}
 {% endmacro %}
 
-{% macro notification_above_title(notification) %}
-    <p class="small mb-1">
-        <a class="text-decoration-none text-dark"
-           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">
-            {{ notification.read() }}
-            {{ moment(notification.timestamp).fromNow() }}
-        </a>
-    </p>
-{% endmacro %}
-
 {% macro render_notification(notification) %}
-    {#    <div class="px-3 py-2 border rounded mb-3 bg-{{- 'light' if notification.is_read else 'white' -}}">#}
-    {#        {{ notification.read() }} on post#}
-    {#        <a class="text-decoration-none"#}
-    {#           href="{{ url_for('main.view_node', node_id=notification.node_id) }}">#}
-    {#             {{ notification.node.post.title }}#}
-    {#        </a>#}
-    {#        <p class="mb-0">#}
-    {#            <small class="text-muted">{{ moment(notification.timestamp).calendar() }}</small>#}
-    {#        </p>#}
-    {#    </div>#}
-    {{ render_card(notification.node) }}
+    {% if notification.node %}
+        {{ render_card(notification.node) }}
+    {% endif %}
 {% endmacro %}

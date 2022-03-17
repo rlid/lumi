@@ -31,7 +31,8 @@
         <div style="text-align: center; margin: 2rem">
             <a href="{{ url_for("auth.password_reset", token=token, _external=True) }}"
                style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                Reset My Password</a>
+                Reset My Password
+            </a>
         </div>
         <p>If that doesn't work, copy and paste the following link in your browser's address bar:
             {{ url_for("auth.password_reset", token=token, _external=True) }}</p>

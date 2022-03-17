@@ -20,27 +20,28 @@
     </style>
 </head>
 <body>
-    <div class="preheader" style="display: none">
-        Welcome to LumiAsk! You are just one step away from activating your account.
-    </div>
-    <main style="width: 100%">
-        <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
-            <h2 style="font-weight: normal">Thanks for signing up!</h2>
-            <p>Please tap the button below to verify your email address. If you didn't create an account with
-                <a href="https://lumiask.com">LumiAsk</a>, you can safely delete this email.</p>
-            <div style="text-align: center; margin: 2rem">
-                <a href="{{ url_for("auth.confirm", token=token, _external=True) }}"
-                   style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                    Verify Email Now</a>
-            </div>
-            <p>If that doesn't work, copy and paste the following link in your browser's address bar:
-                {{ url_for("auth.confirm", token=token, _external=True) }}</p>
-            <p style="margin-top: 3rem">
-                Cheers,
-                <br>
-                Team LumiAsk
-            </p>
+<div class="preheader" style="display: none">
+    Welcome to LumiAsk! You are just one step away from activating your account.
+</div>
+<main style="width: 100%">
+    <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
+        <h2 style="font-weight: normal">Thanks for signing up!</h2>
+        <p>Please tap the button below to verify your email address. If you didn't create an account with
+            <a href="https://lumiask.com">LumiAsk</a>, you can safely delete this email.</p>
+        <div style="text-align: center; margin: 2rem">
+            <a href="{{ url_for("auth.confirm", token=token, _external=True) }}"
+               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                Verify Email Now
+            </a>
         </div>
-    </main>
+        <p>If that doesn't work, copy and paste the following link in your browser's address bar:
+            {{ url_for("auth.confirm", token=token, _external=True) }}</p>
+        <p style="margin-top: 3rem">
+            Cheers,
+            <br>
+            Team LumiAsk
+        </p>
+    </div>
+</main>
 </body>
 </html>

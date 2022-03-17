@@ -1,4 +1,4 @@
-from flask import render_template, redirect, flash, Markup, url_for, session, request
+from flask import render_template, redirect, flash, Markup, url_for, session, request, current_app
 from flask_login import login_required, current_user
 
 from app import db
@@ -6,7 +6,6 @@ from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
 from app.main.forms import FeedbackForm
 from app.models import Feedback
-from utils.email import send_email
 
 
 @main.before_request
@@ -91,11 +90,6 @@ def feedback():
     return render_template('contact.html', title="Questions & Feedback", form=form)
 
 
-@main.route('/whatsnew')
-def whatsnew():
-    return render_template('whatsnew.html', title="What's New")
-
-
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = FeedbackForm()
@@ -106,6 +100,7 @@ def contact():
             email=form.email.data or (current_user.email if current_user.is_authenticated else None))
         db.session.add(fb)
         db.session.commit()
+        send_email = current_app.config['EMAIL_SENDER']
         send_email(
             sender='feedback@lumiask.com',
             recipient='support@lumiask.com',

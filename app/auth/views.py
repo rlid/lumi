@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from authlib.integrations.base_client import MismatchingStateError
-from flask import render_template, redirect, request, url_for, flash, Markup, session
+from flask import render_template, redirect, request, url_for, flash, Markup, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app import db, oauth
@@ -11,7 +11,6 @@ from app.models.invite_code import InviteCode
 from app.models.user import User
 from config import Config
 from utils import security_utils
-from utils.email import send_email
 
 
 # intended user: is_authenticated no | signup_method email | email_verified all
@@ -106,6 +105,7 @@ def signup():
         db.session.commit()
         session.pop("invite_code")
         token = user.generate_token(action="confirm")
+        send_email = current_app.config["EMAIL_SENDER"]
         send_email(
             sender='LumiAsk <welcome@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
             body_text=render_template('email/confirm.txt', token=token),
@@ -160,6 +160,7 @@ def resend_confirmation():
         return redirect(url_for("main.index"))
 
     token = current_user.generate_token(action="confirm")
+    send_email = current_app.config["EMAIL_SENDER"]
     send_email(
         sender='LumiAsk <welcome@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
         body_text=render_template('email/confirm.txt', token=token),
@@ -213,13 +214,14 @@ def password_reset_request():
             # as the cookie does not exist, and only the hashed id is included in the token for security reasons:
             site_rid = security_utils.random_urlsafe(nbytes=Config.SITE_RID_NBYTES)
             session['auth_reset'] = site_rid
-            print(f"site_rid is set to [{site_rid}].")
+            current_app.logger.info(f"site_rid is set to [{site_rid}].")
             token = user.generate_token(
                 action="reset",
                 site_rid_hash=security_utils.hash_string(
                     site_rid,
                     digest_size=Config.SITE_RID_HASH_DIGEST_SIZE
                 ))
+            send_email = current_app.config["EMAIL_SENDER"]
             send_email(
                 sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Reset your password',
                 body_text=render_template('email/reset.txt', token=token),
@@ -255,7 +257,7 @@ def password_reset(token):
             db.session.add(user)
             db.session.commit()
             flash('Your password has been updated.', category='success')
-            print(f"site_rid [{session.get('auth_reset')}] is deleted.")
+            current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
             session.pop('auth_reset')
             return redirect(url_for('main.index'))
         else:
@@ -264,7 +266,9 @@ def password_reset(token):
     return render_template('auth/change_password.html', form=form)
 
 
-def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
+def make_oauth_routes(oauth_provider, callback_methods=None):
+    if callback_methods is None:
+        callback_methods = ["GET"]
     name_capitalized = oauth_provider.name.capitalize()
     callback_endpoint = f"{oauth_provider.name}_callback"
 
@@ -276,26 +280,27 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
 
         redirect_uri = url_for(f"auth.{callback_endpoint}", _external=True)
         response = oauth_provider.authorize_redirect(redirect_uri)
-        # print(f"response.response = {response.response}")
+        # current_app.logger.info(f"response.response = {response.response}")
         return response
 
     # intended user: is_authenticated no | signup_method email | email_verified n/a
     def callback():
-        # print('=====DEBUG BEGIN=====')
+        # current_app.logger.debug('=====DEBUG BEGIN=====')
         # state = request.form.get('state') or request.args.get('state')
-        # print(state, session.get(f'_state_{oauth_provider.name}_{state}'))
-        # print(type(session))
-        # print(session)
-        # print(session.keys())
-        # print('=====DEBUG END=====')
+        # current_app.logger.debug(state, session.get(f'_state_{oauth_provider.name}_{state}'))
+        # current_app.logger.debug(type(session))
+        # current_app.logger.debug(session)
+        # current_app.logger.debug(session.keys())
+        # current_app.logger.debug('=====DEBUG END=====')
         try:
             token = oauth_provider.authorize_access_token()
         except MismatchingStateError as e:
-            flash('Error', category='danger')
+            current_app.logger.exception(e)
+            flash('Internal error - please contact support.', category='danger')
             return redirect(url_for("auth.signup"))
-        # print(f"token = {token}")
+        # current_app.logger.debug(f"token = {token}")
         userinfo = token.get("userinfo")
-        # print(f"userinfo = {userinfo}")
+        # current_app.logger.debug(f"userinfo = {userinfo}")
 
         if userinfo and userinfo.get("email_verified"):
             email = userinfo["email"].lower()
@@ -330,8 +335,8 @@ def make_oauth_routes(oauth_provider, callback_methods=["GET"]):
                           category="success")
                 else:
                     flash(
-                        f'The account associated with {userinfo["email"]} does not support Sign in with {name_capitalized}. '
-                        'Please use an alternative login method.',
+                        f'The account associated with {userinfo["email"]} does not support'
+                        f'Sign in with {name_capitalized}. Please use an alternative login method.',
                         category="danger")
                     return redirect(url_for("auth.login"))
         else:

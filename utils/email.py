@@ -2,6 +2,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from flask import current_app
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -46,10 +47,10 @@ def send_email_aws(sender, recipient, subject, body_text, body_html=None,
         )
     # Display an error if something goes wrong.
     except ClientError as e:
-        print(e.response['Error']['Message'])
+        current_app.logger.exception(e)
     else:
-        print("Email sent! Message ID:"),
-        print(response['MessageId'])
+        current_app.logger.info("Email sent! Message ID:"),
+        current_app.logger.info(response['MessageId'])
 
 
 def send_email_sg(sender, recipient, subject, body_text, body_html=None):
@@ -62,11 +63,18 @@ def send_email_sg(sender, recipient, subject, body_text, body_html=None):
     try:
         sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
         response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        current_app.logger.info(response.status_code)
+        current_app.logger.info(response.body)
+        current_app.logger.info(response.headers)
     except Exception as e:
-        print(e.message)
+        current_app.logger.exception(e)
 
 
-send_email = send_email_sg
+def send_email_dummy(sender, recipient, subject, body_text, body_html=None):
+    current_app.logger.info('--------------------------------- BEGIN EMAIL ----------------------------------')
+    current_app.logger.info(f'From: {sender}')
+    current_app.logger.info(f'To: {recipient}')
+    current_app.logger.info(f'Subject: {subject}')
+    current_app.logger.info(f'Content (Plain Text):\n{body_text}')
+    current_app.logger.info(f'Content (HTML):\n{body_html}')
+    current_app.logger.info('---------------------------------- END EMAIL -----------------------------------')

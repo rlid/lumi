@@ -3,10 +3,10 @@
 
 
 {% block mid_col %}
-    {% set ns = namespace(node_id=None) %}
+    {% set ns = namespace(node_id=-1) %}
     {% for notification in notifications %}
         {% set is_read = notification.is_read %}
-        {% if ns.node_id is not none and ns.node_id != notification.node_id %}
+        {% if ns.node_id != -1 and ns.node_id != notification.node_id %}
             <hr>
         {% endif %}
         <p class="bg-light">
@@ -14,15 +14,21 @@
             <span class="badge rounded-pill text-dark"
                   style="font-weight: normal;background-color: {% if is_read %}#e9ecef{% else %}#caebe1{% endif %}">
             {{ moment(notification.timestamp).calendar() }}</span>
-            <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
-               class="small text-decoration-none text-dark">
-                {{ notification.read() }}
-            </a>
+            {% if notification.node_id %}
+                <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
+                   class="small text-decoration-none text-dark">
+                    {{ notification.read() }}
+                </a>
+            {% else %}
+                <span class="small text-dark">{{ notification.read() }}</span>
+            {% endif %}
         </p>
         {% if ns.node_id != notification.node_id %}
-            <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} small ms-5 mt-2">
-                {{ render_notification(notification) }}
-            </div>
+            {% if notification.node_id %}
+                <div class="opacity-{%- if is_read %}50{%- else %}75{% endif %} small ms-5 mt-2">
+                    {{ render_notification(notification) }}
+                </div>
+            {% endif %}
             {% set ns.node_id = notification.node_id %}
         {% endif %}
     {% endfor %}

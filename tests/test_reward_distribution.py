@@ -1,3 +1,4 @@
+import logging
 import math
 import unittest
 from random import Random
@@ -10,6 +11,7 @@ from app.models.user import REP_DECAY, REP_I_DECAY
 class BasicsTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app("TEST")
+        self.app.logger.setLevel(logging.ERROR)
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()

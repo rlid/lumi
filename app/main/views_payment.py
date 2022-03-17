@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.main import main
+from app.models import Notification
 from app.models.payment import PaymentIntent
 
 
@@ -28,9 +29,11 @@ def top_up(price_id):
         current_user.create_payment_intent(
             stripe_session_id=checkout_session.id,
             stripe_payment_intent_id=checkout_session.payment_intent)
+        return redirect(checkout_session.url, code=303)
     except Exception as e:
-        return str(e)
-    return redirect(checkout_session.url, code=303)
+        current_app.logger.exception(e)
+        flash('Internal error - please contact support.', category='danger')
+    return redirect(url_for('main.account'))
 
 
 @main.route('/top-up/success')
@@ -57,14 +60,15 @@ def top_up_cancel():
 
 @main.route('/top-up/webhook', methods=['POST'])
 def webhook():
-    event = None
     payload = request.data
     sig_header = request.headers['STRIPE_SIGNATURE']
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, current_app.config['STRIPE_WEBHOOK_SECRET'])
     except ValueError as e:
+        current_app.logger.exception(e)
         return 'Invalid payload', 400
     except stripe.error.SignatureVerificationError as e:
+        current_app.logger.exception(e)
         return 'Invalid signature', 400
 
     # Handle the event
@@ -76,8 +80,14 @@ def webhook():
             payment_intent.creator.total_balance_cent += stripe_payment_intent.amount
             db.session.add(payment_intent)
             db.session.commit()
-            print(f'Processed {event.type} - top-up successful')
+
+            Notification.push(
+                target=payment_intent.creator,
+                message=f'You topped up your account by ${0.01 * stripe_payment_intent.amount:.2f}.',
+                email=True
+            )
+            current_app.logger.info(f'Processed {event.type} - top-up successful')
     else:
-        print(f'Unhandled event type {event.type}')
+        current_app.logger.info(f'Unhandled event type {event.type}')
 
     return jsonify(success=True)

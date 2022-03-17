@@ -2,6 +2,8 @@ import os
 
 from sqlalchemy.engine.url import URL
 
+import utils.email
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -36,6 +38,10 @@ class Config:
     STRIPE_PRICE_5 = 'price_1KWgD0GoAMQGbjHHUBRINR2I'
     STRIPE_PRICE_10 = 'price_1KWkE2GoAMQGbjHHKOP6j5Be'
     STRIPE_PRICE_20 = 'price_1KWkEhGoAMQGbjHHdwIdNHvO'
+
+    EMAIL_SENDER = utils.email.send_email_aws if os.environ.get('EMAIL_SENDER') == 'AWS' else \
+        utils.email.send_email_sg if os.environ.get('EMAIL_SENDER') == "SendGrid" else \
+        utils.email.send_email_dummy
 
     @staticmethod
     def init_app(app):
