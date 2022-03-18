@@ -1,47 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <title>Confirm your LumiAsk account</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #eeeeee;
-            max-width: 600px;
-            -moz-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            -webkit-text-size-adjust: 100%;
-            -webkit-font-smoothing: antialiased;
-        }
+{% extends "email/base.html" %}
 
-        p {
-            font-size: 14px;
-            line-height: 1.5;
-        }
-    </style>
-</head>
-<body>
-<div class="preheader" style="display: none">
+{% block title %}
+    Confirm your LumiAsk account
+{% endblock %}
+
+{% block preheader %}
     Welcome to LumiAsk! You are just one step away from activating your account.
-</div>
-<main style="width: 100%">
-    <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
-        <h2 style="font-weight: normal">Thanks for signing up!</h2>
-        <p>Please tap the button below to verify your email address. If you didn't create an account with
-            <a href="https://lumiask.com">LumiAsk</a>, you can safely delete this email.</p>
-        <div style="text-align: center; margin: 2rem">
-            <a href="{{ url_for("auth.confirm", token=token, _external=True) }}"
-               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                Verify Email Now
-            </a>
-        </div>
-        <p>If that doesn't work, copy and paste the following link in your browser's address bar:
-            {{ url_for("auth.confirm", token=token, _external=True) }}</p>
-        <p style="margin-top: 3rem">
-            Cheers,
-            <br>
-            Team LumiAsk
-        </p>
-    </div>
-</main>
-</body>
-</html>
+{% endblock %}
+
+{% block heading %}
+    Thanks for signing up!
+{% endblock %}
+
+{% block content %}
+    Please tap the button below to verify your email address.
+    If you did not create an account with <a href="https://lumiask.com">LumiAsk</a>, please discard this email.
+{% endblock %}
+
+{% block button_url %}
+    {{ url_for("auth.confirm", token=token, _external=True) }}
+{% endblock %}
+
+{% block button_label %}
+    Verify Email Now
+{% endblock %}

@@ -31,6 +31,11 @@ def index():
     return render_template('landing.html', login_form=login_form, signup_form=signup_form)
 
 
+# @main.route('/email')
+# def email():
+#     return render_template('email/notification.html', notification=Notification(message="Hello", node=Node(id='1')))
+
+
 @main.route('/csp-report', methods=['POST'])
 def csp_report():
     return '', 200

@@ -1,0 +1,56 @@
+{% from "email/macro_images.html" import email_logo_data %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #eeeeee;
+            max-width: 600px;
+            -moz-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            margin-top: 0;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
+            padding: 0 0 1rem 1rem;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        h2 {
+            padding: 0 0 1rem 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="preheader" style="display: none">
+    {% block preheader %}{% endblock %}
+</div>
+<main style="background-color: white">
+    <img src="{{- email_logo_data() -}}" style="width: 100%">
+    <h2 style="font-weight: normal">{% block heading %}{% endblock %}</h2>
+    <p>{% block content %}{% endblock %}</p>
+    <div style="text-align: center; margin-bottom: 2rem">
+        <a href="{% block button_url %}{% endblock %}"
+           style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+            {% block button_label %}{% endblock %}
+        </a>
+    </div>
+    <p>If that doesn't work, copy and paste the following link in your browser's address bar:
+        {{ self.button_url() }}</p>
+    <p style="margin-top: 3rem">
+        Cheers,
+        <br>
+        Team LumiAsk
+    </p>
+</main>
+</body>
+</html>
+

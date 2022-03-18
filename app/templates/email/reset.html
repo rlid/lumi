@@ -1,47 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <title>Password Reset</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #eeeeee;
-            max-width: 600px;
-            -moz-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            -webkit-text-size-adjust: 100%;
-            -webkit-font-smoothing: antialiased;
-        }
+{% extends "email/base.html" %}
 
-        p {
-            font-size: 14px;
-            line-height: 1.5;
-        }
-    </style>
-</head>
-<body>
-<div class="preheader" style="display: none">
+{% block title %}
+    Password Reset
+{% endblock %}
+
+{% block preheader %}
     Follow the instructions to reset your password.
-</div>
-<main style="width: 100%">
-    <div style="padding: 1rem;background-color: white; border-radius:0.25rem">
-        <h2 style="font-weight: normal">You requested to reset your password.</h2>
-        <p>Please tap the button below to proceed with the password reset. If you have not requested a password reset
-            please ignore this message.</p>
-        <div style="text-align: center; margin: 2rem">
-            <a href="{{ url_for("auth.password_reset", token=token, _external=True) }}"
-               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-                Reset My Password
-            </a>
-        </div>
-        <p>If that doesn't work, copy and paste the following link in your browser's address bar:
-            {{ url_for("auth.password_reset", token=token, _external=True) }}</p>
-        <p style="margin-top: 3rem">
-            Cheers,
-            <br>
-            Team LumiAsk
-        </p>
-    </div>
-</main>
-</body>
-</html>
+{% endblock %}
+
+{% block heading %}
+    You requested to reset your password.
+{% endblock %}
+
+{% block content %}
+    Please tap the button below to proceed with the password reset.
+    If you have not requested a password reset, please discard this email.
+{% endblock %}
+
+{% block button_url %}
+    {{ url_for("auth.confirm", token=token, _external=True) }}
+{% endblock %}
+
+{% block button_label %}
+    Reset My Password
+{% endblock %}
