@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block button_url %}
-    {{ url_for("auth.confirm", token=token, _external=True) }}
+    {{ url_for("auth.password_reset", token=token, _external=True) }}
 {% endblock %}
 
 {% block button_label %}
