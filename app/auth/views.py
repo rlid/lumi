@@ -231,7 +231,7 @@ def password_reset_request():
                   category='info')
             return redirect(url_for('main.index'))
         flash(f'{form.email.data} is not associated with any account in our system.', category='danger')
-    return render_template('auth/reset_password.html', form=form)
+    return render_template('auth/reset_password_request.html', form=form)
 
 
 # intended user: is_authenticated no | signup_method email | email_verified n/a
@@ -259,11 +259,12 @@ def password_reset(token):
             flash('Your password has been updated.', category='success')
             current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
             session.pop('auth_reset')
+            # login_user(user, remember=False)
             return redirect(url_for('main.index'))
         else:
             flash('The password reset link is invalid or has expired.', category='danger')
             return redirect(url_for('auth.password_reset_request'))
-    return render_template('auth/change_password.html', form=form)
+    return render_template('auth/reset_password.html', form=form)
 
 
 def make_oauth_routes(oauth_provider, callback_methods=None):
