@@ -1,3 +1,7 @@
+{%- macro email_logo() -%}
+    {{ url_for('static', filename='logo-email.png', _external=True) }}
+{%- endmacro -%}
+
 {%- macro email_logo_data() -%}
 data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAABLAAAAEsCAYAAADTvUpQAAAAAXNSR0IArs4c6QAAAHhlWElmTU0A

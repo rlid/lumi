@@ -5,7 +5,7 @@ from app import db
 from app.auth.forms import LogInForm, SignUpForm
 from app.main import main
 from app.main.forms import FeedbackForm
-from app.models import Feedback
+from app.models import Feedback, Notification, Node
 
 
 @main.before_request
@@ -31,9 +31,9 @@ def index():
     return render_template('landing.html', login_form=login_form, signup_form=signup_form)
 
 
-# @main.route('/email')
-# def email():
-#     return render_template('email/notification.html', notification=Notification(message="Hello", node=Node(id='1')))
+@main.route('/email')
+def email():
+    return render_template('email/notification.html', notification=Notification(message="Hello", node=Node(id='1')))
 
 
 @main.route('/csp-report', methods=['POST'])

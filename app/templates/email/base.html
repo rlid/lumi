@@ -5,52 +5,65 @@
 <head>
     <title>{% block title %}{% endblock %}</title>
     <style>
+        .preheader {
+            display: none;
+            visibility: hidden;
+            mso-hide: all;
+            font-size: 1px;
+            line-height: 1px;
+            max-height: 0px;
+            max-width: 0px;
+            opacity: 0;
+            overflow: hidden;
+        }
+
         body {
+            background-color: whitesmoke;
             font-family: sans-serif;
-            background-color: #eeeeee;
             max-width: 600px;
             -moz-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
             -webkit-text-size-adjust: 100%;
             -webkit-font-smoothing: antialiased;
-            margin-top: 0;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
+            padding: 0;
         }
 
         p {
-            padding: 0 0 1rem 1rem;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        h2 {
-            padding: 0 0 1rem 1rem;
+        {#font-size: 14px;#} line-height: 1.5;
         }
     </style>
 </head>
 <body>
-<div class="preheader" style="display: none">
+<div class="preheader">
     {% block preheader %}{% endblock %}
 </div>
 <main style="background-color: white">
-    <img src="{{- email_logo_data() -}}" style="width: 100%">
-    <h2 style="font-weight: normal">{% block heading %}{% endblock %}</h2>
-    <p>{% block content %}{% endblock %}</p>
-    <div style="text-align: center; margin-bottom: 2rem">
-        <a href="{% block button_url %}{% endblock %}"
-           style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: #ffffff; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
-            {% block button_label %}{% endblock %}
-        </a>
+    <img src="{{- email_logo_data() -}}" style="display:block; width: 100%">
+    <div style="margin: auto;padding: 1rem 2rem 1rem 2rem">
+        <h2 style="font-weight: normal">{% block heading %}{% endblock %}</h2>
+        <p style="margin-bottom: 2rem">{% block content %}{% endblock %}</p>
+        <div style="text-align: center; margin-bottom: 2rem">
+            <a href="{% block button_url %}{% endblock %}"
+               style="display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1.1em; color: white; background-color: #198754; text-decoration: none; border-radius: 0.25rem;">
+                {% block button_label %}{% endblock %}
+            </a>
+        </div>
+        <p>If that doesn't work, copy and paste the following link in your browser's address bar:</p>
+        {{ self.button_url() }}
+        <p style="margin-top: 3rem">
+            Cheers,
+            <br>
+            Team LumiAsk
+        </p>
     </div>
-    <p>If that doesn't work, copy and paste the following link in your browser's address bar:
-        {{ self.button_url() }}</p>
-    <p style="margin-top: 3rem">
-        Cheers,
-        <br>
-        Team LumiAsk
-    </p>
 </main>
+<footer style="padding: 1rem 2rem">
+    <small style="color: gray">
+        If you no longer wish to receive these emails, please update your notification settings
+        <a href="{{ url_for('main.account') }}">here</a>.
+    </small>
+</footer>
 </body>
 </html>
 
