@@ -379,12 +379,12 @@ P_RATE_ENGAGE = 0.5
 P_ARCHIVE = 0.75
 N_TAGS = 50
 
-N_DAYS = 20
-N_USERS = 10
+N_DAYS = 50
+N_USERS = 20
 N_BAL = 1000
-P_PRIVATE = 1.0
+P_PRIVATE = 0.5
 
-app = create_app("AWS")
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 

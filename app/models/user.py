@@ -723,7 +723,7 @@ def _handle_success(engagement, fraction=1.0):
     asker = engagement.asker
     answerer = engagement.answerer
 
-    value_cent = _distribute_reward_cent(node=node, fraction=fraction)
+    value_cent = _distribute_reward_cent(engagement=engagement, fraction=fraction)
 
     asker.update_reputation(value_cent, success=True, dispute_lost=False)
     answerer.update_reputation(value_cent, success=True, dispute_lost=False)
@@ -858,7 +858,8 @@ def _pay_tip(engagement):
         )
 
 
-def _distribute_reward_cent(node, fraction):
+def _distribute_reward_cent(engagement, fraction):
+    node = engagement.node
     post = node.post
     if post.type == Post.TYPE_BUY:
         buyer = post.creator
@@ -882,7 +883,7 @@ def _distribute_reward_cent(node, fraction):
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
-    platform_fee = PlatformFee(amount_cent=platform_fee_cent)
+    platform_fee = PlatformFee(amount_cent=platform_fee_cent, engagement=engagement)
     db.session.add(platform_fee)
 
     sum_referrer_reward_cent = 0

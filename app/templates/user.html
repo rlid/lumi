@@ -66,30 +66,30 @@
         <div class="accordion-item bg-light">
             <h2 class="accordion-header">
                 <button class="accordion-button py-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accordionQA">
-                    Active Q&As
+                        data-bs-target="#accordionPosts">
+                    Q&As
                 </button>
             </h2>
-            <div id="accordionQA" class="accordion-collapse collapse show">
+            <div id="accordionPosts" class="accordion-collapse collapse show">
                 <div class="accordion-body">
                     {% set ns = namespace(empty=True) %}
-                    {% for node in nodes if node.post.type == Post.TYPE_BUY and not node.post.is_archived %}
-                        <small>
+                    <small>
+                        {% for node in nodes if not node.post.is_archived %}
                             {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}
-                        </small>
-                        {% set ns.empty = False %}
-                    {% endfor %}
-                    {% for node in nodes if node.post.type == Post.TYPE_SELL and not node.post.is_archived %}
-                        <small>
-                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}
-                        </small>
-                        {% set ns.empty = False %}
-                    {% endfor %}
-                    {% if ns.empty %}
-                        <small class="text-muted">
-                            None
-                        </small>
-                    {% endif %}
+                            {% set ns.empty = False %}
+                        {% endfor %}
+{#                        {% for node in nodes if node.post.type == Post.TYPE_BUY and not node.post.is_archived %}#}
+{#                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}#}
+{#                            {% set ns.empty = False %}#}
+{#                        {% endfor %}#}
+{#                        {% for node in nodes if node.post.type == Post.TYPE_SELL and not node.post.is_archived %}#}
+{#                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}#}
+{#                            {% set ns.empty = False %}#}
+{#                        {% endfor %}#}
+                        {% if ns.empty %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </small>
                 </div>
             </div>
         </div>
