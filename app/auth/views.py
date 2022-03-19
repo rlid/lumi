@@ -25,7 +25,7 @@ def login():
                     login_user(user, form.remember_me.data)
                     next_url = request.args.get('next')
                     if next_url is None or not next_url.startswith('/'):
-                        next_url = url_for('main.account')
+                        return url_for('main.index')
                     return redirect(next_url)
                 flash('Invalid username or password', category='danger')
             else:
@@ -37,7 +37,7 @@ def login():
     return render_template('auth/login.html', form=form, is_continue=request.args.get('next') is not None)
 
 
-@auth.route('/login/<user_id>')
+@auth.route('/login/<uuid:user_id>')
 def force_login(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     user.email_verified = True
@@ -45,7 +45,10 @@ def force_login(user_id):
     db.session.commit()
     login_user(user, False)
     flash('You have logged in.', category='success')
-    return redirect(url_for('main.browse'))
+    redirect_url = request.referrer
+    if redirect_url is None or not redirect_url.startswith(request.root_url):
+        return redirect(url_for('main.index'))
+    return redirect(redirect_url)
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all
@@ -54,7 +57,11 @@ def force_login(user_id):
 def remember():
     login_user(current_user, remember=True)
     flash('You will stay logged in on this device until you log out.', category='warning')
-    return redirect(url_for('main.index'))
+    redirect_url = request.referrer
+    print(redirect_url)
+    if redirect_url is None or not redirect_url.startswith(request.root_url):
+        return redirect(url_for('main.index'))
+    return redirect(redirect_url)
 
 
 # intended user: is_authenticated yes | signup_method all | email_verified all
@@ -78,10 +85,16 @@ def logout_all():
 
 # intended user: all | signup_method all | email_verified all
 @auth.route('/signup/<int:code_length>')
-def invite(code_length):
-    return redirect(url_for("auth.signup",
-                            code=InviteCode.generate(length=code_length,
-                                                     expiry_timedelta=timedelta(days=30)).code))
+def invite_code(code_length):
+    return redirect(
+        url_for(
+            "auth.signup",
+            code=InviteCode.generate(
+                length=code_length,
+                expiry_timedelta=timedelta(days=30)
+            ).code
+        )
+    )
 
 
 # intended user: is_authenticated no | signup_method email | email_verified n/a
@@ -107,9 +120,6 @@ def signup():
         flash(f'A confirmation email has been sent to {form.email.data}.',
               category="info")
         login_user(user, remember=False)
-        flash(f"You have logged in. " +
-              Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
-              category="success")
         return redirect(url_for("main.index"))
 
     code = request.args.get('code') or session.get('invite_code')
@@ -117,7 +127,7 @@ def signup():
         is_valid, invite_code, error_message = InviteCode.validate(code=code)
         form.invite_code.data = code
         if is_valid:
-            session["invite_code"] = code
+            session['invite_code'] = code
             if invite_code:
                 form.invite_code.render_kw = {'readonly': ''}
             else:
@@ -256,9 +266,6 @@ def password_reset(token):
             current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
             session.pop('auth_reset')
             login_user(user, remember=False)
-            flash(f"You have logged in. " +
-                  Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
-                  category="success")
             return redirect(url_for('main.index'))
         else:
             flash('The password reset link is invalid or has expired.', category='danger')
@@ -302,50 +309,46 @@ def make_oauth_routes(oauth_provider, callback_methods=None):
         userinfo = token.get("userinfo")
         # current_app.logger.debug(f"userinfo = {userinfo}")
 
-        if userinfo and userinfo.get("email_verified"):
-            email = userinfo["email"].lower()
-            user = User.query.filter_by(email=email).first()
-            if user is None:
-                if session.get("invite_code") is None:
-                    # new user and no invite_code in session
-                    # user must have clicked Signing in with Provider before signing up with the provider (as it is
-                    # impossible to click Sign up with Provider without a valid invite code at the time of writing)
-                    # TODO: review once invite code restriction is removed
-                    flash(f'{userinfo["email"]} is not associated with any account. Please sign up first.',
-                          category='danger')
-                    return redirect(url_for("auth.signup"))
-                is_valid, invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
-                if not is_valid:
-                    flash(error_message, category="danger")
-                    return redirect(url_for("auth.signup"))
-                user = User(email=email, email_verified=True, signup_method=oauth_provider.name)
-                db.session.add(user)
-                if invite_code:
-                    db.session.delete(invite_code)
-                db.session.commit()
-                session.pop("invite_code")
-                login_user(user, remember=False)
-                flash(f"You have signed up with {name_capitalized}. " +
-                      Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
-                      category="success")
-            else:
-                if user.signup_method == oauth_provider.name:
-                    login_user(user, remember=False)
-                    flash(f"You have logged in with {name_capitalized}. " +
-                          Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
-                          category="success")
-                else:
-                    flash(
-                        f'The account associated with {userinfo["email"]} does not support'
-                        f'Sign in with {name_capitalized}. Please use an alternative login method.',
-                        category="danger")
-                    return redirect(url_for("auth.login"))
-        else:
+        if not userinfo or not userinfo.get("email_verified"):
             flash(f"Your {name_capitalized} account does not have a verified email address.", category="danger")
             if session.get("invite_code"):
                 return redirect(url_for("auth.signup", code=session.get("invite_code")))
-            else:
+            return redirect(url_for("auth.signup"))
+
+        email = userinfo["email"].lower()
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            if session.get("invite_code") is None:
+                # new user and no invite_code in session
+                # user must have clicked Signing in with Provider before signing up with the provider (as it is
+                # impossible to click Sign up with Provider without a valid invite code at the time of writing)
+                # TODO: review once invite code restriction is removed
+                flash(f'{userinfo["email"]} is not associated with any account. Please sign up first.',
+                      category='danger')
                 return redirect(url_for("auth.signup"))
+            is_valid, invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
+            if not is_valid:
+                flash(error_message, category="danger")
+                return redirect(url_for("auth.signup"))
+            user = User(email=email, email_verified=True, signup_method=oauth_provider.name)
+            db.session.add(user)
+            if invite_code:
+                db.session.delete(invite_code)
+            db.session.commit()
+            session.pop("invite_code")
+
+        if user.signup_method != oauth_provider.name:
+            flash(
+                f'The account associated with {userinfo["email"]} does not support'
+                f'Sign in with {name_capitalized}. Please use an alternative login method.',
+                category="danger")
+            return redirect(url_for("auth.login"))
+
+        login_user(user, remember=False)
+        # for OAuth log in, this is the only place for the user to turn on Remember Me
+        flash(f"You have logged in with {name_capitalized}. " +
+              Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
+              category="success")
         return redirect(url_for("main.index"))
 
     auth.add_url_rule(f"/{oauth_provider.name}",

@@ -1,3 +1,5 @@
+import json
+
 from flask import render_template, redirect, flash, Markup, url_for, session, request, current_app
 from flask_login import login_required, current_user
 
@@ -26,7 +28,10 @@ def before_request():
             flash('Your access is restricted because your email address is not verified. ' +
                   Markup(f'<a href={url_for("auth.resend_confirmation")}>Click here</a> ') +
                   'to request another confirmation email.', category='warning')
-            return redirect(url_for('main.browse'))
+            redirect_url = request.referrer
+            if redirect_url is None or not redirect_url.startswith(request.root_url):
+                redirect(url_for('main.index'))
+            return redirect(redirect_url)
 
 
 @main.route('/')
@@ -42,6 +47,7 @@ def email():
 
 @main.route('/csp-report', methods=['POST'])
 def csp_report():
+    current_app.logger.warning(json.loads(request.data))
     return '', 200
 
 

@@ -22,7 +22,7 @@ def initdb():
     return {"success": True}, 200
 
 
-@main.route('/user/<user_id>')
+@main.route('/user/<uuid:user_id>')
 def user(user_id):
     u = User.query.filter_by(id=user_id).first_or_404()
     completed_engagements = Engagement.query.filter(
@@ -215,7 +215,7 @@ def view_node(node_id):
             Message=Message,
             feedback_form=feedback_form)
 
-    session['invite_code'] = node_id
+    session['invite_code'] = str(node_id)
     return render_template(
         "node_view_as_other.html",
         node=node,

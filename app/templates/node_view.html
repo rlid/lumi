@@ -42,7 +42,7 @@
 {% block mid_col %}
     {{ render_post_card(node, truncate_body=False, buttons=True) }}
     {#    {{ render_reward_info(node) }}#}
-    {% set current = namespace(engagement_id=-1, timestamp=none, section_id=none) %}
+    {% set current = namespace(engagement_id=-1, timestamp=none, section_counter=0) %}
     {% for message in messages_asc %}
         {% if message.engagement_id != current.engagement_id %}
             {# message is the initial one or it does not belong to the previous div, start a new div block #}
@@ -51,11 +51,11 @@
                 </div></div>
             {% endif %}
             {# now start a new div tag depending on the message #}
+            {% set current.section_counter = current.section_counter + 1 %}
             {% if message.engagement is none %}
                 {# message is not associated with any engagement, put in a plain div block #}
-                {% set current.section_id = "section" + message.id|string %}
                 <div class="px-3 mb-3">
-                <div id="{{ current.section_id }}">
+                <div id="section{{- current.section_counter -}}">
             {% elif message.engagement == engagement %}
                 {# message belongs to the currently active engagement #}
                 <div class="card border-success mb-3">
@@ -63,15 +63,13 @@
                     <b>Active Engagement</b> with
                     {{ render_user(node.creator if current_user != node.creator else node.post.creator, capitalize=False) }}
                 </div>
-                {% set current.section_id = "section" + message.id|string %}
                 <div class="card-body pt-0 pb-3">
-                <div id="{{ current.section_id }}">
+                <div id="section{{- current.section_counter -}}">
             {% else %}
                 {# message belongs to an engagement that is not currently active #}
-                {% set current.section_id = "section" + message.id|string %}
                 <div class="px-3 mb-3 {{ engagement_class(message.engagement) }}"
                         {{ engagement_style(message.engagement) }}>
-                <div id="{{ current.section_id }}">
+                <div id="section{{- current.section_counter -}}">
             {% endif %}
             {% set current.engagement_id = message.engagement_id %}
         {% endif %}
@@ -81,9 +79,9 @@
 
 {% if current.engagement_id == -1 %}
     {# no message, so need to create a div block #}
-    {% set current.section_id = "sectionNew" %}
+    {% set current.section_counter = current.section_counter + 1 %}
     <div class="px-3 mb-3">
-    <div id="{{ current.section_id }}">
+    <div id="section{{- current.section_counter -}}">
 {% endif %}
 {# before rendering the form, close the div tag for messages to display #}
 </div>
@@ -220,7 +218,7 @@
         </div>
     </div>
 
-    {{ socketio_script(current.section_id) }}
+    {{ socketio_script('section' ~ current.section_counter) }}
 {% endblock %}
 
 {% block right_col %}

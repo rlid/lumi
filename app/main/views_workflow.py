@@ -40,7 +40,7 @@ def new_post(is_private):
     return render_template("post_create_edit.html", form=form, title="Create Post", feedback_form=FeedbackForm())
 
 
-@main.route('/post/<post_id>/edit', methods=['GET', 'POST'])
+@main.route('/post/<uuid:post_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -85,7 +85,7 @@ def toggle_editor():
     return redirect(redirect_url)
 
 
-@main.route('/post/<post_id>/archive-toggle')
+@main.route('/post/<uuid:post_id>/archive-toggle')
 @login_required
 def toggle_archive_post(post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
@@ -102,7 +102,7 @@ def toggle_archive_post(post_id):
     return redirect(url_for('main.view_node', node_id=node.id))
 
 
-@main.route('/post/<post_id>/report', methods=['POST'])
+@main.route('/post/<uuid:post_id>/report', methods=['POST'])
 @login_required
 def report_post(post_id):
     form = ReportForm()
@@ -123,7 +123,7 @@ def report_post(post_id):
     return redirect(url_for('main.index'))
 
 
-@main.route('/node/<node_id>/share', methods=['GET', 'POST'])
+@main.route('/node/<uuid:node_id>/share', methods=['GET', 'POST'])
 @login_required
 def share_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
@@ -150,7 +150,7 @@ def share_node(node_id):
     return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
 
 
-@main.route('/node/<node_id>/request-engagement', methods=['POST'])
+@main.route('/node/<uuid:node_id>/request-engagement', methods=['POST'])
 @login_required
 def request_engagement(node_id):
     form = ConfirmForm()
@@ -193,7 +193,7 @@ def request_engagement(node_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
-@main.route('/engagement/<engagement_id>/cancel', methods=['POST'])
+@main.route('/engagement/<uuid:engagement_id>/cancel', methods=['POST'])
 @login_required
 def cancel_engagement(engagement_id):
     form = ConfirmForm()
@@ -212,7 +212,7 @@ def cancel_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
-@main.route('/engagement/<engagement_id>/accept', methods=['POST'])
+@main.route('/engagement/<uuid:engagement_id>/accept', methods=['POST'])
 @login_required
 def accept_engagement(engagement_id):
     form = ConfirmForm()
@@ -245,7 +245,7 @@ def accept_engagement(engagement_id):
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
-@main.route('/engagement/<engagement_id>/<int:is_success>', methods=['POST'])
+@main.route('/engagement/<uuid:engagement_id>/<int:is_success>', methods=['POST'])
 @login_required
 def rate_engagement(engagement_id, is_success):
     form = RatingForm()
