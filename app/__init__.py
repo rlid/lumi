@@ -12,6 +12,7 @@ from flask_qrcode import QRcode
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
+from utils.uuid_converter import UUIDConverter
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -63,6 +64,8 @@ def create_app(config_name):
         session_cookie_samesite='None'  # need this to be None for Sign in with Apple to work. See
         # https://www.bscotch.net/post/sign-in-with-apple-implementation-hurdles
     )
+
+    app.url_map.converters['uuid'] = UUIDConverter
 
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 

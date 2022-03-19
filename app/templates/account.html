@@ -85,7 +85,8 @@
                                             {{ render_engagement(engagement) }}
                                             {% set ns.empty = False %}
                                         {% endfor %}
-                                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                                        {% if ns.empty %}
+                                            <span class="text-muted">You have no active engagements on your Q&As.</span>{% endif %}
                                     </small>
                                 </div>
                             </div>
@@ -108,7 +109,8 @@
                                             {{ render_engagement(engagement) }}
                                             {% set ns.empty = False %}
                                         {% endfor %}
-                                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                                        {% if ns.empty %}
+                                            <span class="text-muted">You have no active engagements on others' Q&As.</span>{% endif %}
                                     </small>
                                 </div>
                             </div>
@@ -134,7 +136,7 @@
                             {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=4) }}
                             {% set ns.empty = False %}
                         {% endfor %}
-                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                        {% if ns.empty %}<p class="text-muted">You have no active Q&As.</p>{% endif %}
                     </small>
 
                     <div class="accordion accordion-flush">
@@ -154,7 +156,8 @@
                                             {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endfor %}
-                                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                                        {% if ns.empty %}
+                                            <span class="text-muted">You have no archived Q&As.</span>{% endif %}
                                     </small>
                                 </div>
                             </div>
@@ -180,7 +183,9 @@
                             {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=4) }}
                             {% set ns.empty = False %}
                         {% endfor %}
-                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                        {% if ns.empty %}
+                            <p class="text-muted">You are not participating in any Q&As by others that are active.</p>
+                        {% endif %}
                     </small>
 
                     <div class="accordion accordion-flush">
@@ -200,7 +205,9 @@
                                             {{ render_post_card(node, render_body=False, render_last_updated=True, truncate_body=True, buttons=False, tag_limit=4) }}
                                             {% set ns.empty = False %}
                                         {% endfor %}
-                                        {% if ns.empty %}<span class="text-muted">None</span>{% endif %}
+                                        {% if ns.empty %}
+                                            <span class="text-muted">You have not participated in any Q&As by others that are archived.</span>
+                                        {% endif %}
                                     </small>
                                 </div>
                             </div>

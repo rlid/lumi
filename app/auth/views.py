@@ -16,10 +16,6 @@ from utils import security_utils
 # intended user: is_authenticated no | signup_method email | email_verified all
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        flash('You have already logged in.', category='warning')
-        return redirect(url_for('main.index'))
-
     form = LogInForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -27,11 +23,10 @@ def login():
             if user.signup_method == "email":
                 if user.verify_password(form.password.data):
                     login_user(user, form.remember_me.data)
-                    redirect_url = request.args.get('next') or request.referrer
-                    if redirect_url is None or \
-                            not (redirect_url.startswith('/') or redirect_url.startswith(request.host_url)):
-                        redirect_url = url_for('main.account')
-                    return redirect(redirect_url)
+                    next_url = request.args.get('next')
+                    if next_url is None or not next_url.startswith('/'):
+                        next_url = url_for('main.account')
+                    return redirect(next_url)
                 flash('Invalid username or password', category='danger')
             else:
                 flash(f'The account associated with {form.email.data} does not support login via email and password. '
@@ -130,7 +125,6 @@ def signup():
         else:
             form.invite_code.errors = ['The invite code is invalid.']
 
-    print(code is not None)
     return render_template("auth/signup.html", form=form, has_invite_code=code is not None)
 
 
@@ -261,7 +255,10 @@ def password_reset(token):
             flash('Your password has been updated.', category='success')
             current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
             session.pop('auth_reset')
-            # login_user(user, remember=False)
+            login_user(user, remember=False)
+            flash(f"You have logged in. " +
+                  Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",
+                  category="success")
             return redirect(url_for('main.index'))
         else:
             flash('The password reset link is invalid or has expired.', category='danger')

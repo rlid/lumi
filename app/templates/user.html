@@ -76,7 +76,6 @@
                     <small>
                         {% for node in nodes if not node.post.is_archived %}
                             {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}
-                            {% set ns.empty = False %}
                         {% endfor %}
 {#                        {% for node in nodes if node.post.type == Post.TYPE_BUY and not node.post.is_archived %}#}
 {#                            {{ render_post_card(node, render_body=False, truncate_body=True, buttons=False, tag_limit=4) }}#}
@@ -87,7 +86,7 @@
 {#                            {% set ns.empty = False %}#}
 {#                        {% endfor %}#}
                         {% if ns.empty %}
-                            <span class="text-muted">None</span>
+                            <span class="text-muted">The user has no active Q&As.</span>
                         {% endif %}
                     </small>
                 </div>

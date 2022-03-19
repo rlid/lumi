@@ -94,13 +94,13 @@
         {{ render_form_modal(
             modal_id='modalLogin',
             modal_title='Log in',
-            modal_body=render_login_form(login_form)) }}
+            modal_body=render_login_form(login_form, action_url=url_for('auth.login'))) }}
     {% endif %}
     {% if signup_form %}
         {{ render_form_modal(
             modal_id='modalSignup',
             modal_title='Sign up',
-            modal_body=render_signup_form(signup_form)) }}
+            modal_body=render_signup_form(signup_form, action_url=url_for('auth.signup'))) }}
     {% endif %}
     {% if feedback_form %}
         {{ render_form_modal(

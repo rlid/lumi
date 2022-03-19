@@ -123,7 +123,7 @@ def browse():
     )
 
 
-@main.route('/node/<node_id>', methods=['GET', 'POST'])
+@main.route('/node/<uuid:node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()
     post = node.post
@@ -148,8 +148,8 @@ def view_node(node_id):
     if current_user.is_authenticated and (current_user != node.creator and current_user != post.creator):
         user_node = post.nodes.filter(Node.creator == current_user).first()
         if user_node is not None:
-            flash('You have already created your own unique referral link for this post. ' +
-                  'You are redirected to your own contribution page instead.', category='info')
+            # flash('You have already created your own unique referral link for this post. ' +
+            #       'You are redirected to your own contribution page instead.', category='info')
             return redirect(url_for('main.view_node', node_id=user_node.id))
 
     feedback_form = FeedbackForm()

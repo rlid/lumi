@@ -12,12 +12,17 @@ from app.models import Feedback, Notification, Node
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
-        if not current_user.email_verified \
-                and request.blueprint != 'auth' \
-                and request.endpoint != 'static' \
-                and request.endpoint != 'main.index' \
-                and request.endpoint != 'main.browse' \
-                and request.endpoint != 'main.account':
+        if request.blueprint == 'auth':
+            return
+        if request.endpoint == 'static':
+            return
+        if not current_user.email_verified and (
+                request.endpoint == 'main.post_options' or
+                request.endpoint == 'main.new_post' or
+                request.endpoint == 'main.request_engagement' or
+                request.endpoint == 'main.accept_engagement' or
+                request.endpoint == 'main.rate_engagement'
+        ):
             flash('Your access is restricted because your email address is not verified. ' +
                   Markup(f'<a href={url_for("auth.resend_confirmation")}>Click here</a> ') +
                   'to request another confirmation email.', category='warning')
