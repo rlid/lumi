@@ -69,10 +69,11 @@
             margin-bottom: 1rem;
         }
 
-        .footnote {
+        footer.footnote {
             color: gray;
             font-size: smaller;
             padding: 1rem 2rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -103,6 +104,9 @@
 <footer class="footnote">
     If you no longer wish to receive these emails, please update your notification settings
     <a href="{{ url_for('main.account') }}">here</a>.
+    <p>
+        &copy; 2022 <a href="{{ url_for('main.index') }}">{{ config["APP_NAME"] }}</a>
+    </p>
 </footer>
 </body>
 </html>

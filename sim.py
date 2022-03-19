@@ -384,7 +384,7 @@ N_USERS = 20
 N_BAL = 1000
 P_PRIVATE = 0.5
 
-app = create_app("DEV")
+app = create_app("AWS")
 app_context = app.app_context()
 app_context.push()
 
