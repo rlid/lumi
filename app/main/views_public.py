@@ -172,7 +172,7 @@ def view_node(node_id):
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
         if current_user.value_limit_cent < node.value_cent:
             flash('The value of the post exceeds your current limit. '
-                  f'You are not be able to {"request for" if current_user == node.creator else "accept"} engagements.',
+                  f'You are not be able to {"request" if current_user == node.creator else "accept"} engagements.',
                   category='warning')
 
         post = node.post
@@ -183,7 +183,7 @@ def view_node(node_id):
                 ((current_user == node.creator and post.creator.value_limit_cent < transaction_value_cent) or
                  (current_user == post.creator and node.creator.value_limit_cent < transaction_value_cent)):
             flash('The post value exceeds the current limit of the other user. This could be because a '
-                  'dispute involving the user occurred after the current request for engagement was made / accepted.',
+                  'dispute involving the user occurred after the current engagement was requested / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
 

@@ -162,17 +162,17 @@ def request_engagement(node_id):
         post = node.post
 
         if post.is_archived:
-            flash('Cannot request for engagement because the post is archived.', category='danger')
+            flash('Cannot request engagement because the post is archived.', category='danger')
             return redirect(url_for('main.view_node', node_id=node_id))
         if current_user == post.creator:
-            flash('Cannot request for engagement on your own post.', category='danger')
+            flash('Cannot request engagement on your own post.', category='danger')
             return redirect(url_for('main.view_node', node_id=node_id))
         if current_user.value_limit_cent < (
                 # value limit checks
                 # post.price_cent
                 node.value_cent
         ):
-            flash('You currently cannot request for engagement on posts worth more than $' +
+            flash('You currently cannot request engagement on posts worth more than $' +
                   f'{current_user.reward_limit:.2f}.', category='warning')
             return redirect(url_for('main.view_node', node_id=node_id))
         if post.type == Post.TYPE_SELL and \
@@ -227,7 +227,7 @@ def accept_engagement(engagement_id):
         if post.is_archived:
             flash('Cannot accept engagement because the post is archived.', category='danger')
         elif engagement.state != Engagement.STATE_REQUESTED:
-            flash('The request for engagement can no longer be accepted.', category='danger')
+            flash('The engagement request is already accepted.', category='danger')
         elif current_user != post.creator:
             flash('Only the original poster can accept the engagement.', category='danger')
         elif current_user.value_limit_cent < (

@@ -95,7 +95,7 @@
             for each successful engagement your referral leads to, or
             <p></p>
             {% if post.type == Post.TYPE_SELL %}
-                <b>Request for Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
+                <b>Request Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
@@ -107,7 +107,7 @@
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
+                <b>Request Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * node.sum_referrer_reward_cent) }} goes to the referrers</li>
@@ -131,7 +131,7 @@
             for each successful engagement your referral leads to, or
             <p></p>
             {% if post.type == Post.TYPE_SELL %}
-                <b>Request for Engagement</b> - you (the asker) pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
+                <b>Request Engagement</b> - you (the asker) pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>
@@ -143,7 +143,7 @@
                     </li>
                 </ul>
             {% else %}
-                <b>Request for Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
+                <b>Request Engagement</b> - the asker pays {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
                     <li>{{ '${0:.2f}'.format(0.01 * sum_referrer_reward_cent) }} goes to the referrers</li>

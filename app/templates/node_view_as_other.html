@@ -49,15 +49,15 @@
                 <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
                         data-bs-toggle="modal" data-bs-target="#modalRequest"
                         {% if not current_user.is_authenticated %}disabled{% endif %}>
-                    Request for Engagement
+                    Request Engagement
                 </button>
             </div>
         </form>
     </div>
     {{ render_confirm_form_modal(
         modal_id='modalRequest',
-        modal_title='Request for engagement?',
-        modal_body='You will send a request for the user user to accept.',
+        modal_title='Request engagement?',
+        modal_body='You will send an engagement request for the other user to accept.',
         form=confirm_request_form,
         action_url=url_for('main.request_engagement', node_id=node.id)) }}
 {% endblock %}
@@ -74,7 +74,7 @@
                 <li><b>Send</b> the poster a message to get something clarified, or to let him know how you / they may
                     help
                 </li>
-                <li><b>Request for Engagement</b> when you are ready to engage, and earn / pay a reward if the
+                <li><b>Request Engagement</b> when you are ready to engage, and earn / pay a reward if the
                     engagement is rated as successful(+) by both of you
                 </li>
                 <li>

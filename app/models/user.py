@@ -498,7 +498,7 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=post.creator,
             node=node,
-            message='A user sent you a request for engagement.',
+            message='A user sent you an engagement request.',
             email=True
         )
 
@@ -528,7 +528,7 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=post.creator,
             node=node,
-            message='A user cancelled a request for engagement.')
+            message='A user cancelled an engagement request.')
 
         if post.type == Post.TYPE_SELL:
             self.reserved_balance_cent -= node.value_cent
@@ -575,7 +575,7 @@ class User(UserMixin, db.Model):
         Notification.push(
             target=node.creator,
             node=node,
-            message='A user accepted your request for engagement.',
+            message='A user accepted your engagement request.',
             email=True
         )
 

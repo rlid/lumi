@@ -1,6 +1,7 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField, IntegerRangeField, EmailField
+from wtforms import SubmitField, StringField, DecimalField, RadioField, TextAreaField, IntegerRangeField, EmailField, \
+    BooleanField
 from wtforms.validators import InputRequired, NumberRange, Length
 from wtforms.validators import ValidationError
 
@@ -76,7 +77,13 @@ class ReportForm(FlaskForm):
 class FeedbackForm(FlaskForm):
     text = TextAreaField('Text', id='textareaFeedback', validators=[InputRequired()])
     email = EmailField('Email (Optional)', render_kw={"placeholder": "name@example.com"})
+    request_invite = BooleanField("Request an invite code", default=False)
     submit = SubmitField("Send")
+
+    def validate_email(self, field):
+        if self.request_invite.data:
+            if not field.data:
+                raise ValidationError(f'Please leave an email address where we can send the invite code to.')
 
 
 class ConfirmForm(FlaskForm):

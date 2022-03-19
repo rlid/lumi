@@ -100,7 +100,7 @@
                     <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
                             data-bs-toggle="modal" data-bs-target="#modalRequest"
                             {% if current_user.value_limit_cent < node.value_cent %}disabled{% endif %}>
-                        Request for Engagement
+                        Request Engagement
                     </button>
                 {% elif engagement_request is not none %}
                     <button type="button" class="btn btn-{{- button_class(current_user, node.post) -}}"
@@ -142,14 +142,14 @@
     </form>
     {{ render_confirm_form_modal(
         modal_id='modalRequest',
-        modal_title='Request for engagement?',
-        modal_body='You will send a request for the user user to accept.',
+        modal_title='Request engagement?',
+        modal_body='You will send an engagement request for the other user to accept.',
         form=confirm_request_form,
         action_url=url_for('main.request_engagement', node_id=node.id)) }}
     {{ render_confirm_form_modal(
         modal_id='modalCancel',
         modal_title='Cancel your request?',
-        modal_body='You can cancel your request for engagement if the other user has not accepted it.',
+        modal_body='You can cancel your engagement request if the other user has not accepted it.',
         form=confirm_cancel_form,
         action_url=url_for('main.cancel_engagement', engagement_id=engagement_request.id)) }}
     {{ render_confirm_form_modal(
@@ -228,12 +228,12 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guide on user interactions</h5>
             <ul class="small">
-                <li>Find out as much as necessary about each other before <b>Request for Engagement</b> or <b>Accept
+                <li>Find out as much as necessary about each other before <b>Request Engagement</b> or <b>Accept
                     Engagement</b>. Make sure you are comfortable with the other party's track record of past
                     engagements. Be wary of the answerer's proof of credentials, you are welcome to ask for more proof,
                     as long as it is relevant
                 </li>
-                <li><b>Request for Engagement</b> when you are ready to enter into an engagement and claim / pay the
+                <li><b>Request Engagement</b> when you are ready to enter into an engagement and claim / pay the
                     reward
                 </li>
                 <li>If the asker's account balance is not enough for the reward, a top-up will be required before the

@@ -106,7 +106,7 @@
         {{ render_form_modal(
             modal_id='modalFeedback',
             modal_title='Questions & Feedback',
-            modal_body=render_feedback_form(feedback_form)) }}
+            modal_body=render_feedback_form(feedback_form, current_user.is_authenticated)) }}
     {% endif %}
     <div class="modal fade py-5" tabindex="-1" id="modalWhatsNew">
         <div class="modal-dialog modal-dialog-centered">

@@ -99,10 +99,12 @@ def feedback():
 def contact():
     form = FeedbackForm()
     if form.validate_on_submit():
+        current_app.logger.info('----------------------------------------------------------------------')
         fb = Feedback(
             type='feedback',
             text=form.text.data,
-            email=form.email.data or (current_user.email if current_user.is_authenticated else None))
+            email=form.email.data or (current_user.email if current_user.is_authenticated else None),
+            request_invite=form.request_invite.data)
         db.session.add(fb)
         db.session.commit()
         send_email = current_app.config['EMAIL_SENDER']

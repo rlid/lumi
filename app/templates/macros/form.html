@@ -74,15 +74,12 @@
             {{ form.confirm_password(class_='form-control', style='border-radius: .5rem') }}
             {{ form.confirm_password.label() }}
         </div>
-        {{ form.submit(class_='btn btn-success w-100 mb-3') }}
+        {{ form.submit(class_='btn btn-success w-100') }}
     </form>
 
     {% if not has_invite_code %}
-        <p class="text-center text-muted">Need an invite code?
-            <a class="text-decoration-none" href="https://discord.gg/PC7mPwXYsY">Join our Discord</a> or follow us on
-            <a class="text-decoration-none" href="https://twitter.com/LumiQnA">Twitter</a> /
-            <a class="text-decoration-none" href="https://fb.me/LumiQA">Facebook</a> /
-            <a class="text-decoration-none" href="https://www.linkedin.com/company/knowbleltd">LinkedIn</a>.
+        <p class="text-center mt-3">
+            Need an invite code? Request one using our <a href="{{ url_for('main.contact') }}">feedback form</a>!
         </p>
     {% endif %}
 {% endmacro %}
@@ -152,7 +149,7 @@
 {% endmacro %}
 
 
-{% macro render_feedback_form(form) %}
+{% macro render_feedback_form(form, logged_in=False) %}
     <p>We'd love to hear from you! Contact us through any of the channels below, or leave a quick message using the
         feedback form. </p>
     <div class="row justify-content-evenly">
@@ -183,13 +180,28 @@
     <form action="{{ url_for('main.contact') }}" method="post">
         {{ form.hidden_tag() }}
         {{ form.text(
-            class_='form-control',
+            class_='form-control mb-3',
             rows=5,
-            placeholder="Please leave your feedback here...") }}
-        <div class="form-floating my-3">
-            {{ form.email(class_='form-control') }}
-            {{ form.email.label() }}
-        </div>
+            placeholder="Please leave your feedback here...",
+            style='border-radius: .5rem') }}
+
+        {% if not logged_in %}
+            <div class="form-floating mb-3">
+                {% if form.email.errors %}
+                    {{ form.email(class_='form-control is-invalid', style='border-radius: .5rem') }}
+                {% else %}
+                    {{ form.email(class_='form-control', style='border-radius: .5rem') }}
+                {% endif %}
+                {{ form.email.label() }}
+                {% for error in form.email.errors %}
+                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-check mb-3">
+                {{ form.request_invite(class_='form-check-input') }}
+                {{ form.request_invite.label(class_='form-check-label') }}
+            </div>
+        {% endif %}
         {{ form.submit(class_='btn btn-success w-100 mb-3') }}
     </form>
 {% endmacro %}

@@ -13,3 +13,4 @@ class Feedback(db.Model):
 
     text = db.Column(db.Text, nullable=False)
     email = db.Column(db.String(64))
+    request_invite = db.Column(db.Boolean, default=False)
