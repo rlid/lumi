@@ -19,6 +19,7 @@ class LogInForm(FlaskForm):
 
 
 class SignUpForm(FlaskForm):
+    hide_invite_code = False
     invite_code = StringField("Invite code", validators=[InputRequired()], render_kw={"placeholder": "Invite Code"})
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
     password = PasswordField("Password",
@@ -45,8 +46,8 @@ class SignUpForm(FlaskForm):
             raise ValidationError("The email address is already registered.")
 
     def validate_invite_code(self, field):
-        invite_code, error_message = InviteCode.validate(field.data)
-        if invite_code is None:
+        is_valid, invite_code, error_message = InviteCode.validate(field.data)
+        if not is_valid:
             raise ValidationError(error_message)
 
 

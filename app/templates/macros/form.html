@@ -1,8 +1,8 @@
-{% macro render_login_form(form) %}
+{% macro render_login_form(form, is_continue) %}
     <a class="btn btn-outline-dark w-100 mb-2" href="{{ url_for("auth.apple") }}">
-        <i class="bi bi-apple"></i> Sign in with Apple</a>
+        <i class="bi bi-apple"></i> {% if is_continue %}Continue{% else %}Sign in{% endif %} with Apple</a>
     <a class="btn btn-outline-danger w-100 my-2" href="{{ url_for("auth.google") }}">
-        <i class="bi bi-google"></i> Sign in with Google</a>
+        <i class="bi bi-google"></i> {% if is_continue %}Continue{% else %}Sign in{% endif %} with Google</a>
 
     <div class="separator my-3"><span class="text-muted"> Or </span></div>
     {# <hr class="my-3"> #}
@@ -35,16 +35,18 @@
 
 {% macro render_signup_form(form, has_invite_code=False) %}
     <a class="btn btn-outline-dark w-100 mb-2 {% if not has_invite_code %}disabled{% endif %}"
-       href="{{ url_for("auth.apple") }}"><i class="bi bi-apple"></i> Sign up with Apple</a>
+       href="{% if has_invite_code %}{{ url_for("auth.apple") }}{% else %}#{% endif %}">
+        <i class="bi bi-apple"></i> Sign up with Apple</a>
     <a class="btn btn-outline-danger w-100 my-2 {% if not has_invite_code %}disabled{% endif %}"
-       href="{{ url_for("auth.google") }}"><i class="bi bi-google"></i> Sign up with Google</a>
+       href="{% if has_invite_code %}{{ url_for("auth.google") }}{% else %}#{% endif %}">
+        <i class="bi bi-google"></i> Sign up with Google</a>
 
     <div class="separator my-3"><span class="text-muted"> Or </span></div>
     {# <hr class="my-3"> #}
 
     <form method="post" action="{{ url_for('auth.signup') }}">
         {{ form.hidden_tag() }}
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-3" {% if form.hide_invite_code %}style="display: none"{% endif %}>
             {% if form.invite_code.errors %}
                 {{ form.invite_code(class_='form-control is-invalid', style='border-radius: .5rem') }}
             {% else %}
@@ -74,11 +76,11 @@
             {{ form.confirm_password(class_='form-control', style='border-radius: .5rem') }}
             {{ form.confirm_password.label() }}
         </div>
-        {{ form.submit(class_='btn btn-success w-100') }}
+        {{ form.submit(class_='btn btn-success w-100 mb-3') }}
     </form>
 
     {% if not has_invite_code %}
-        <p class="text-center mt-3">
+        <p class="text-center">
             Need an invite code? Request one using our <a href="{{ url_for('main.contact') }}">feedback form</a>!
         </p>
     {% endif %}

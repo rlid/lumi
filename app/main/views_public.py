@@ -1,6 +1,6 @@
 import re
 
-from flask import render_template, redirect, flash, url_for, request, abort
+from flask import render_template, redirect, flash, url_for, request, session
 from flask_login import current_user
 from sqlalchemy import distinct, not_
 from sqlalchemy import func, desc, and_, or_
@@ -119,7 +119,6 @@ def browse():
         tags_in_filter=tags_in_filter,
         tags_not_in_filter_with_freq=tags_not_in_filter_query.all(),
         login_form=LogInForm(),
-        signup_form=SignUpForm(),
         feedback_form=FeedbackForm()
     )
 
@@ -133,6 +132,19 @@ def view_node(node_id):
         flash("The post is currently not available for viewing.", category='warning')
         return redirect(url_for('main.index'))
 
+    message_form = MessageForm()
+    if message_form.validate_on_submit():
+        # the Send button is disabled if current user is not authenticated, so either:
+        #  - the current_user is a valid and logged in, but has no nodes, or
+        #  - the current user is a valid and logged in, but created a node on another device, then send the message
+        #    before refreshing the page on this device
+        if not node.post.is_archived:
+            user_node = current_user.create_node(node)
+            current_user.create_message(user_node, message_form.text.data)
+        else:
+            flash("Cannot send message because the post is now archived.", category='danger')
+        return redirect(url_for('main.view_node', node_id=user_node.id))
+
     if current_user.is_authenticated and (current_user != node.creator and current_user != post.creator):
         user_node = post.nodes.filter(Node.creator == current_user).first()
         if user_node is not None:
@@ -140,6 +152,8 @@ def view_node(node_id):
                   'You are redirected to your own contribution page instead.', category='info')
             return redirect(url_for('main.view_node', node_id=user_node.id))
 
+    feedback_form = FeedbackForm()
+    report_form = ReportForm()
     if current_user == node.creator and current_user == post.creator:
         # TODO: experiment with not using group_by, process the Cartesian products in Python into a dict of
         #  node:message so the database is queried only once
@@ -163,10 +177,8 @@ def view_node(node_id):
             Post=Post,
             Engagement=Engagement,
             Message=Message,
-            feedback_form=FeedbackForm())
+            feedback_form=feedback_form)
 
-    report_form = ReportForm()
-    message_form = MessageForm()
     if current_user == node.creator or current_user == post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
@@ -174,7 +186,6 @@ def view_node(node_id):
             flash('The value of the post exceeds your current limit. '
                   f'You are not be able to {"request" if current_user == node.creator else "accept"} engagements.',
                   category='warning')
-
         post = node.post
         # value limit checks
         # transaction_value_cent = post.price_cent
@@ -186,7 +197,6 @@ def view_node(node_id):
                   'dispute involving the user occurred after the current engagement was requested / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
-
         rating_form = RatingForm()
         return render_template(
             "node_view.html",
@@ -203,16 +213,9 @@ def view_node(node_id):
             Post=Post,
             Engagement=Engagement,
             Message=Message,
-            feedback_form=FeedbackForm())
+            feedback_form=feedback_form)
 
-    if message_form.validate_on_submit():
-        # the Send button is disabled, so current_user is a valid and logged in, but has no nodes
-        if not node.post.is_archived:
-            user_node = current_user.create_node(node)
-            current_user.create_message(user_node, message_form.text.data)
-            return redirect(url_for('main.view_node', node_id=user_node.id))
-        else:
-            flash("Cannot send message because the post is now archived.", category='danger')
+    session['invite_code'] = node_id
     return render_template(
         "node_view_as_other.html",
         node=node,

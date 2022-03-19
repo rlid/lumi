@@ -7,5 +7,5 @@
 
 {% block content %}
     {{ super() }}
-    {{ render_login_form(form) }}
+    {{ render_login_form(form, is_continue=is_continue) }}
 {% endblock %}

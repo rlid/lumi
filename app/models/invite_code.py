@@ -1,8 +1,10 @@
 import secrets
 import string
+import uuid
 from datetime import datetime
 
 from app import db
+from app.models import Node
 
 _INVITE_CODE_CHARS = string.ascii_lowercase + string.digits
 
@@ -33,11 +35,26 @@ class InviteCode(db.Model):
     @staticmethod
     def validate(code):
         if code is None or code == '':
-            return None, f'The invite code "{code}" is invalid.'
+            return False, None, f'The invite code "{code}" is invalid.'
         invite_code = InviteCode.query.filter_by(code=code).first()
         if invite_code is None:
-            return None, f'The invite code "{code}" is invalid.'
+            try:
+                node_id = uuid.UUID(code)
+            except ValueError as e:
+                return False, None, f'The invite code "{code}" is invalid.'
+            node = Node.query.get(node_id)
+            if node:
+                return True, None, None
+            else:
+                return False, None, f'The invite code "{code}" is invalid.'
         elif datetime.utcnow() > invite_code.expiry:
-            return None, f'The invite code "{code}" has expired.'
+            return False, None, f'The invite code "{code}" has expired.'
         else:
-            return invite_code, None
+            return True, invite_code, None
+
+    @staticmethod
+    def delete(code):
+        invite_code = InviteCode.query.filter_by(code=code).first()
+        if invite_code is not None:
+            db.session.delete(invite_code)
+            db.session.commit()

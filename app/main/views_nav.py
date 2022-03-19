@@ -27,8 +27,7 @@ def before_request():
 @main.route('/')
 def index():
     login_form = LogInForm()
-    signup_form = SignUpForm()
-    return render_template('landing.html', login_form=login_form, signup_form=signup_form)
+    return render_template('landing.html', login_form=login_form)
 
 
 @main.route('/email')
@@ -99,7 +98,6 @@ def feedback():
 def contact():
     form = FeedbackForm()
     if form.validate_on_submit():
-        current_app.logger.info('----------------------------------------------------------------------')
         fb = Feedback(
             type='feedback',
             text=form.text.data,

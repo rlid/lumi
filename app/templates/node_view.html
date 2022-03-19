@@ -210,7 +210,7 @@
 </div>
     <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
         <div class="toast"
-             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
+             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: cyan" hidden>
             <div class="d-flex">
                 <div class="toast-body">
                     <small id="nodeToastText">{{ msg }}</small>
@@ -297,7 +297,7 @@
                 'message_sent',
                 {
                     node_id: "{{ node.id }}",
-                    engagement_id: {% if engagement is not none %}"{{ engagement.id }}"{% else %}'null'{% endif %},
+                    engagement_id: {% if engagement is not none %}"{{ engagement.id }}"{% else %}null{% endif %},
                     text: textField.value,
                 });
             textField.value = '';

@@ -39,7 +39,7 @@ def login():
                       category='danger')
         else:
             flash('Invalid username or password', category='danger')
-    return render_template('auth/login.html', form=form)
+    return render_template('auth/login.html', form=form, is_continue=request.args.get('next') is not None)
 
 
 @auth.route('/login/<user_id>')
@@ -100,9 +100,7 @@ def signup():
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(), password=form.password.data, signup_method='email')
         db.session.add(user)
-        invite_code = InviteCode.query.filter_by(code=form.invite_code.data).first()
-        db.session.delete(invite_code)
-        db.session.commit()
+        InviteCode.delete(form.invite_code.data)
         session.pop("invite_code")
         token = user.generate_token(action="confirm")
         send_email = current_app.config["EMAIL_SENDER"]
@@ -119,16 +117,20 @@ def signup():
               category="success")
         return redirect(url_for("main.index"))
 
-    code = request.args.get('code')
+    code = request.args.get('code') or session.get('invite_code')
     if code is not None:
-        invite_code, error_message = InviteCode.validate(code=code)
-        if invite_code is None:
-            flash(error_message, category="danger")
-            return redirect(url_for("auth.signup"))
-        session["invite_code"] = code
+        is_valid, invite_code, error_message = InviteCode.validate(code=code)
         form.invite_code.data = code
-        form.invite_code.render_kw = {'readonly': ''}
+        if is_valid:
+            session["invite_code"] = code
+            if invite_code:
+                form.invite_code.render_kw = {'readonly': ''}
+            else:
+                form.hide_invite_code = True
+        else:
+            form.invite_code.errors = ['The invite code is invalid.']
 
+    print(code is not None)
     return render_template("auth/signup.html", form=form, has_invite_code=code is not None)
 
 
@@ -315,13 +317,14 @@ def make_oauth_routes(oauth_provider, callback_methods=None):
                     flash(f'{userinfo["email"]} is not associated with any account. Please sign up first.',
                           category='danger')
                     return redirect(url_for("auth.signup"))
-                invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
-                if invite_code is None:
+                is_valid, invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
+                if not is_valid:
                     flash(error_message, category="danger")
                     return redirect(url_for("auth.signup"))
                 user = User(email=email, email_verified=True, signup_method=oauth_provider.name)
                 db.session.add(user)
-                db.session.delete(invite_code)
+                if invite_code:
+                    db.session.delete(invite_code)
                 db.session.commit()
                 session.pop("invite_code")
                 login_user(user, remember=False)
