@@ -184,8 +184,9 @@
 {% endmacro %}
 
 
-{% macro render_form_modal(modal_id, modal_title, modal_body, simple_format=False, extra_class=None) %}
-    <div class="modal fade" tabindex="-1" data-bs-backdrop="static" role="dialog" id="{{ modal_id }}">
+{% macro render_form_modal(modal_id, modal_title, modal_body, simple_format=False, extra_class=None, static_backdrop=False) %}
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}"
+         {% if static_backdrop %}data-bs-backdrop="static"{% endif %}>
         <div class="modal-dialog modal-dialog-centered {% if extra_class %}{{ extra_class }}{% endif %}"
              role="document">
             <div class="modal-content shadow bg-light" style="border-radius: 1rem">

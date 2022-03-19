@@ -170,7 +170,8 @@
                 tipping=True,
                 tipping_cap=[node.answerer_reward_cent, current_user.balance_available_cent]|min,
                 answerer_reward_cent=node.answerer_reward_cent),
-            simple_format=True
+            simple_format=True,
+            static_backdrop=True
         ) }}
         {{ render_form_modal(
             modal_id='modalRateMinus',
@@ -182,7 +183,8 @@
                 tipping=True,
                 tipping_cap=[(0.4 * node.answerer_reward_cent)|round, current_user.balance_available_cent]|min,
                 answerer_reward_cent=node.answerer_reward_cent),
-            simple_format=True
+            simple_format=True,
+            static_backdrop=True
             ) }}
     {% elif current_user == engagement.answerer %}
         {{ render_confirm_form_modal(
