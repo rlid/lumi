@@ -139,19 +139,19 @@
         </div>
     </form>
     {{ render_confirm_form_modal(
-        modal_id='modalRequest',
+        modal_id_suffix='Request',
         modal_title='Request engagement?',
         modal_body='You will send an engagement request for the other user to accept.',
         form=confirm_request_form,
         action_url=url_for('main.request_engagement', node_id=node.id)) }}
     {{ render_confirm_form_modal(
-        modal_id='modalCancel',
+        modal_id_suffix='Cancel',
         modal_title='Cancel your request?',
         modal_body='You can cancel your engagement request if the other user has not accepted it.',
         form=confirm_cancel_form,
         action_url=url_for('main.cancel_engagement', engagement_id=engagement_request.id)) }}
     {{ render_confirm_form_modal(
-        modal_id='modalAccept',
+        modal_id_suffix='Accept',
         modal_title='Accept the engagement?',
         modal_body='Please rate the engagement when you finish.',
         form=confirm_accept_form,
@@ -186,14 +186,14 @@
             ) }}
     {% elif current_user == engagement.answerer %}
         {{ render_confirm_form_modal(
-            modal_id='modalRatePlus',
+            modal_id_suffix='RatePlus',
             modal_title='Engagement successful',
             modal_body='The reward will be distributed if both users rate the engagement as successful.',
             form=rating_form,
             action_url=url_for('main.rate_engagement', engagement_id=engagement.id, is_success=1)
         ) }}
         {{ render_confirm_form_modal(
-            modal_id='modalRateMinus',
+            modal_id_suffix='RateMinus',
             modal_title='Engagement unsuccessful',
             modal_body='No reward will be distributed if either user rates the engagement as unsuccessful.',
             form=rating_form,
@@ -322,12 +322,12 @@
                     node_id: "{{ node.id }}",
                 });
         };
-        let btnRatePlus = document.getElementById('btnConfirm_modalRatePlus')
+        let btnRatePlus = document.getElementById('btnConfirmRatePlus')
         if (btnRatePlus) {
             btnRatePlus.onclick = rate_event_handler;
         }
         ;
-        let btnRateMinus = document.getElementById('btnConfirm_modalRateMinus')
+        let btnRateMinus = document.getElementById('btnConfirmRateMinus')
         if (btnRateMinus) {
             btnRateMinus.onclick = rate_event_handler;
         }
