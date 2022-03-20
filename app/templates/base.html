@@ -9,6 +9,7 @@
         {% block meta %}
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="app-version" content="{{ config["APP_VER"] }}">
             {{ conf.ios_meta(app_title=config["APP_NAME"]) }}
         {% endblock %}
         {% block link %}
@@ -90,4 +91,3 @@
 {% endblock %}
 </body>
 </html>
-<!-- {{ config["APP_VER"] }} -->
