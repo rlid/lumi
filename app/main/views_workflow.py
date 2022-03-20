@@ -105,7 +105,7 @@ def toggle_archive_post(post_id):
 @main.route('/post/<uuid:post_id>/report', methods=['POST'])
 @login_required
 def report_post(post_id):
-    form = ReportForm()
+    form = ReportForm(prefix='report')
 
     if form.validate_on_submit():
         post = Post.query.filter_by(id=post_id).first_or_404()
@@ -248,7 +248,7 @@ def accept_engagement(engagement_id):
 @main.route('/engagement/<uuid:engagement_id>/<int:is_success>', methods=['POST'])
 @login_required
 def rate_engagement(engagement_id, is_success):
-    form = RatingForm()
+    form = RatingForm(prefix='rating')
     if form.validate_on_submit():
         engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
         # if engagement.node.value_cent > current_user.value_limit_cent:

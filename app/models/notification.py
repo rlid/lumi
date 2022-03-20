@@ -67,7 +67,7 @@ class Notification(db.Model):
                 current_app.logger.warning(e)
             send_email = current_app.config["EMAIL_SENDER"]
             send_email(
-                sender='notification@lumiask.com',
+                sender='LumiAsk <notification@lumiask.com>',
                 recipient=target.email,
                 subject=message,
                 body_text=body_text,

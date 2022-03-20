@@ -56,7 +56,7 @@ def force_login(user_id):
 @login_required
 def remember():
     login_user(current_user, remember=True)
-    flash('You will stay logged in on this device until you log out.', category='warning')
+    # flash('You will stay logged in on this device until you log out.', category='warning')
     redirect_url = request.referrer
     if redirect_url is None or not redirect_url.startswith(request.root_url):
         return redirect(url_for('main.index'))
