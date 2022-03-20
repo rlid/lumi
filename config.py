@@ -24,7 +24,7 @@ class Config:
     # For Sign in with Apple, the client secret is dynamic - it is a JWT generated using a private key issued by Apple.
     # This variable stores the private key, and this convention is assumed by Authlib and auth_utils.ApplePrivateKeyJWT
 
-    FORCE_HTTPS = bool(os.environ.get('FORCE_HTTPS', False))
+    FORCE_HTTPS = os.environ.get('FORCE_HTTPS', '').lower() == 'true'
 
     GOOGLE_CLIENT_ID = os.environ.get(
         'GOOGLE_CLIENT_ID',
