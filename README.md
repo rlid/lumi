@@ -25,6 +25,14 @@
   - activate venv (so `python` can be found)
   - run `eb init`
   - run `eb create [env name]`, note the security groups created
+- Amazon RDS
+  - Create new database
+    - enable public access
+    - use the "default" security group
+    - add the group noted for the EB environment to the inbound rules of the default security group
+    - 
+- Cloudflare
+  - point set CNAME to the AWS URL
 
 ## Git
 

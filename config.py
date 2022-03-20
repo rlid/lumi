@@ -8,7 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    APP_VER = '20220320_1040'
+    APP_VER = '20220320_1420'
     APP_NAME = 'LumiAsk'
     GOOGLE_SERVER_METADATA_URL = 'https://accounts.google.com/.well-known/openid-configuration'
     APPLE_SERVER_METADATA_URL = 'https://appleid.apple.com/.well-known/openid-configuration'
