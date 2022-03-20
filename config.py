@@ -8,7 +8,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    APP_VER = '20220209_1100'
+    APP_VER = '20220320_1040'
     APP_NAME = 'LumiAsk'
     USE_SSL = False
 
