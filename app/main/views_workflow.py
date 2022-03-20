@@ -153,7 +153,7 @@ def share_node(node_id):
 @main.route('/node/<uuid:node_id>/request-engagement', methods=['POST'])
 @login_required
 def request_engagement(node_id):
-    form = ConfirmForm()
+    form = ConfirmForm(prefix='request')
     if form.validate_on_submit():
         node = Node.query.filter_by(id=node_id).first_or_404()
         post = node.post
@@ -196,7 +196,7 @@ def request_engagement(node_id):
 @main.route('/engagement/<uuid:engagement_id>/cancel', methods=['POST'])
 @login_required
 def cancel_engagement(engagement_id):
-    form = ConfirmForm()
+    form = ConfirmForm(prefix='cancel')
     if form.validate_on_submit():
         engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
         node = engagement.node
@@ -215,7 +215,7 @@ def cancel_engagement(engagement_id):
 @main.route('/engagement/<uuid:engagement_id>/accept', methods=['POST'])
 @login_required
 def accept_engagement(engagement_id):
-    form = ConfirmForm()
+    form = ConfirmForm(prefix='accept')
     if form.validate_on_submit():
         engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
         node = engagement.node

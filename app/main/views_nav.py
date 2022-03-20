@@ -106,7 +106,7 @@ def feedback():
 
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
-    form = FeedbackForm(prefix='contact')
+    form = FeedbackForm(prefix='feedback')
     if form.validate_on_submit():
         fb = Feedback(
             type='feedback',

@@ -15,7 +15,9 @@
 - `gcloud app logs tail -s default`
 
 ## AWS
-
+- CodeCommit
+  - for ~/.ssh/config: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html
+  - general info: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up.html?icmpid=docs_acc_console_connect_np#setting-up-compat
 - Install EB CLI
     - https://github.com/aws/aws-elastic-beanstalk-cli-setup
     - install virtualenv (macOS: `brew search virtualenv`)
