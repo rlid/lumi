@@ -4,7 +4,7 @@ from flask import render_template, redirect, flash, Markup, url_for, session, re
 from flask_login import login_required, current_user
 
 from app import db
-from app.auth.forms import LogInForm, SignUpForm
+from app.auth.forms import LogInForm
 from app.main import main
 from app.main.forms import FeedbackForm
 from app.models import Feedback, Notification, Node
@@ -36,8 +36,7 @@ def before_request():
 
 @main.route('/')
 def index():
-    login_form = LogInForm()
-    return render_template('landing.html', login_form=login_form)
+    return render_template('landing.html', login_form=LogInForm(prefix='login'))
 
 
 @main.route('/email')
@@ -101,13 +100,13 @@ def terms():
 
 @main.route('/feedback')
 def feedback():
-    form = FeedbackForm()
+    form = FeedbackForm(prefix='feedback')
     return render_template('contact.html', title="Questions & Feedback", form=form)
 
 
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
-    form = FeedbackForm()
+    form = FeedbackForm(prefix='contact')
     if form.validate_on_submit():
         fb = Feedback(
             type='feedback',

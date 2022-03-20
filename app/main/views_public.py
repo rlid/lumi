@@ -49,7 +49,7 @@ def user(user_id):
         nodes=nodes,
         completed_engagements=completed_engagements,
         title='User Profile',
-        feedback_form=FeedbackForm(),
+        feedback_form=FeedbackForm(prefix='feedback'),
         Post=Post,
         Engagement=Engagement
     )
@@ -118,8 +118,8 @@ def browse():
         root_nodes=root_nodes,
         tags_in_filter=tags_in_filter,
         tags_not_in_filter_with_freq=tags_not_in_filter_query.all(),
-        login_form=LogInForm(),
-        feedback_form=FeedbackForm()
+        login_form=LogInForm(prefix='login'),
+        feedback_form=FeedbackForm(prefix='feedback')
     )
 
 
@@ -132,7 +132,7 @@ def view_node(node_id):
         flash("The post is currently not available for viewing.", category='warning')
         return redirect(url_for('main.index'))
 
-    message_form = MessageForm()
+    message_form = MessageForm(prefix='message')
     if message_form.validate_on_submit():
         # the Send button is disabled if current user is not authenticated, so either:
         #  - the current_user is a valid and logged in, but has no nodes, or
@@ -152,8 +152,7 @@ def view_node(node_id):
             #       'You are redirected to your own contribution page instead.', category='info')
             return redirect(url_for('main.view_node', node_id=user_node.id))
 
-    feedback_form = FeedbackForm()
-    report_form = ReportForm()
+    feedback_form = FeedbackForm(prefix='feedback')
     if current_user == node.creator and current_user == post.creator:
         # TODO: experiment with not using group_by, process the Cartesian products in Python into a dict of
         #  node:message so the database is queried only once
@@ -179,6 +178,8 @@ def view_node(node_id):
             Message=Message,
             feedback_form=feedback_form)
 
+    report_form = ReportForm(prefix='report')
+    confirm_request_form = ConfirmForm(prefix='request')
     if current_user == node.creator or current_user == post.creator:
         engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
         engagement_request = node.engagements.filter(Engagement.state == Engagement.STATE_REQUESTED).first()
@@ -197,7 +198,6 @@ def view_node(node_id):
                   'dispute involving the user occurred after the current engagement was requested / accepted.',
                   category='warning')
         messages_asc = node.messages.order_by(Message.timestamp.asc()).all()
-        rating_form = RatingForm()
         return render_template(
             "node_view.html",
             node=node,
@@ -206,10 +206,10 @@ def view_node(node_id):
             messages_asc=messages_asc,
             message_form=message_form,
             report_form=report_form,
-            rating_form=rating_form,
-            confirm_request_form=ConfirmForm(),
-            confirm_cancel_form=ConfirmForm(),
-            confirm_accept_form=ConfirmForm(),
+            rating_form=RatingForm(prefix='rate'),
+            confirm_request_form=confirm_request_form,
+            confirm_cancel_form=ConfirmForm(prefix='cancel'),
+            confirm_accept_form=ConfirmForm(prefix='accept'),
             Post=Post,
             Engagement=Engagement,
             Message=Message,
@@ -220,7 +220,7 @@ def view_node(node_id):
         "node_view_as_other.html",
         node=node,
         message_form=message_form,
-        confirm_request_form=ConfirmForm(),
+        confirm_request_form=confirm_request_form,
         report_form=report_form,
         Post=Post,
-        feedback_form=FeedbackForm())
+        feedback_form=feedback_form)

@@ -28,6 +28,7 @@
                 {{ render_editor_form(form, type='mde') }}
                 <script>
                     const easyMDE = new EasyMDE({
+                        element: document.getElementById('post-body'),
                         toolbar: ["bold", "italic", "quote", "strikethrough", "link", "image", {# "upload-image", #}
                             "unordered-list", "ordered-list", "|",
                             "side-by-side", "preview", "guide"],

@@ -13,13 +13,13 @@ from utils.math import round_js
 @main.route('/post-options')
 @login_required
 def post_options():
-    return render_template("post_options.html", feedback_form=FeedbackForm())
+    return render_template("post_options.html", feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/post/<int:is_private>', methods=['GET', 'POST'])
 @login_required
 def new_post(is_private):
-    form = PostForm()
+    form = PostForm(prefix='post')
     if is_private == 1:
         form.referral_budget = 0.4  # Default for private mode
 
@@ -37,7 +37,7 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_create_edit.html", form=form, title="Create Post", feedback_form=FeedbackForm())
+    return render_template("post_create_edit.html", form=form, title="Create Post", feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/post/<uuid:post_id>/edit', methods=['GET', 'POST'])
@@ -48,7 +48,7 @@ def edit_post(post_id):
         flash('Cannot edit post that does not belong to you.', category='danger')
         abort(403)
 
-    form = PostForm()
+    form = PostForm(prefix='post')
     form.edit_mode = True
     if form.validate_on_submit():
         current_user.edit_post(post, title=form.title.data, body=form.body.data)
@@ -69,7 +69,7 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('post_create_edit.html', form=form, title="Edit Post", feedback_form=FeedbackForm())
+    return render_template('post_create_edit.html', form=form, title="Edit Post", feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -134,7 +134,7 @@ def share_node(node_id):
     else:
         user_node = node
 
-    form = ShareForm()
+    form = ShareForm(prefix='share')
     if form.validate_on_submit():
         if user_node.post.is_private and user_node.nodes_after_inc().count() == 1:
             user_node.referrer_reward_cent = round_js(
@@ -147,7 +147,7 @@ def share_node(node_id):
             flash('You cannot adjust your referral reward claim once someone has joined using your referrer\'s link.',
                   category='warning')
         return redirect(url_for('main.share_node', node_id=node_id))
-    return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm())
+    return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/node/<uuid:node_id>/request-engagement', methods=['POST'])
@@ -322,7 +322,7 @@ def account():
         Node=Node,
         Engagement=Engagement,
         title='Account',
-        feedback_form=FeedbackForm()
+        feedback_form=FeedbackForm(prefix='feedback')
     )
 
 
@@ -330,4 +330,4 @@ def account():
 @login_required
 def alerts():
     notifications = current_user.notifications.order_by(Notification.timestamp.desc())
-    return render_template('alerts.html', notifications=notifications, title='Alerts', feedback_form=FeedbackForm())
+    return render_template('alerts.html', notifications=notifications, title='Alerts', feedback_form=FeedbackForm(prefix='feedback'))

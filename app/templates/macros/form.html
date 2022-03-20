@@ -121,12 +121,14 @@
                 <div class="invalid-feedback" style="display: block;">{{ error }}</div>
             {% endfor %}
         </div>
-        <div class="form-floating mb-3">
-            {{ form.body(
-                class_='form-control',
-                style='display: none' if type == 'tui' else 'height: 15rem; border-radius: .5rem') }}
-            {% if type is none %}{{ form.body.label() }}{% endif %}
-        </div>
+        {% if type != 'mde' %}
+            <div class="form-floating mb-3" {% if type =='tui' %}style="display: none"{% endif %}>
+        {% endif %}
+        {{ form.body(class_='form-control', style='height: 15rem; border-radius: .5rem') }}
+        {% if type is none %}{{ form.body.label() }}{% endif %}
+        {% if type != 'mde' %}
+            </div>
+        {% endif %}
         <div class="mb-3" id="tui_editor"></div>
         {{ form.submit(class_='btn btn-success w-100') }}
     </form>

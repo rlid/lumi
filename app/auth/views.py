@@ -16,7 +16,7 @@ from utils import security_utils
 # intended user: is_authenticated no | signup_method email | email_verified all
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LogInForm()
+    form = LogInForm(prefix='login')
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is not None:
@@ -103,7 +103,7 @@ def signup():
         flash("You have already signed up.", category="warning")
         return redirect(url_for("main.index"))
 
-    form = SignUpForm()
+    form = SignUpForm(prefix='signup')
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(), password=form.password.data, signup_method='email')
         db.session.add(user)
@@ -185,7 +185,7 @@ def change_password():
               category='danger')
         return redirect(url_for("main.index"))
 
-    form = ChangePasswordForm()
+    form = ChangePasswordForm(prefix='change')
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
@@ -205,7 +205,7 @@ def password_reset_request():
         flash("You have already logged in. Please log out first to initiate password reset.", category="warning")
         return redirect(url_for('main.index'))
 
-    form = PasswordResetRequestForm()
+    form = PasswordResetRequestForm(prefix='reset-request')
     if form.validate_on_submit():
         email = form.email.data.lower()
         user = User.query.filter_by(email=email).first()
@@ -246,7 +246,7 @@ def password_reset(token):
         flash("You have already logged in. Please log out first to initiate password reset.", category="warning")
         return redirect(url_for('main.index'))
 
-    form = PasswordResetForm()
+    form = PasswordResetForm(prefix='reset')
     if form.validate_on_submit():
         site_rid_hash = session.get('auth_reset')
         # site_rid_hash is just site_rid at this point, hash it if it is not None:
