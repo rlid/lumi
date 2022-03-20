@@ -347,7 +347,7 @@
 {% macro sock_script(section_id) %}
     <script>
         const sock = new WebSocket(
-            {% if config['USE_SSL'] %}'wss://'{% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
+            {% if config['FORCE_HTTPS'] %}'wss://'{% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
         )
         ;
         sock.addEventListener('message', message => {

@@ -24,6 +24,7 @@
 - Using the EB CLI with AWS CodeCommit: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli-codecommit.html
   - activate venv (so `python` can be found)
   - run `eb init`
+  - run `eb create [env name]`, note the security groups created
 
 ## Git
 

@@ -43,7 +43,7 @@ csp = {
 }
 
 
-def create_app(config_name):
+def create_app(config_name='DEV'):
     app = Flask(__name__)
     app_config = config[config_name]
     app.config.from_object(app_config)
@@ -58,6 +58,7 @@ def create_app(config_name):
     qrcode.init_app(app)
     talisman.init_app(
         app,
+        force_https=app_config.FORCE_HTTPS,
         content_security_policy=csp,
         content_security_policy_report_only=True,
         content_security_policy_report_uri='/csp-report',
