@@ -25,7 +25,7 @@ def login():
                     login_user(user, form.remember_me.data)
                     next_url = request.args.get('next')
                     if next_url is None or not next_url.startswith('/'):
-                        return url_for('main.index')
+                        return redirect(url_for('main.index'))
                     return redirect(next_url)
                 flash('Invalid username or password', category='danger')
             else:

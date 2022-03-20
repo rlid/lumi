@@ -17,22 +17,29 @@
 ## AWS
 
 - Install EB CLI
-  - https://github.com/aws/aws-elastic-beanstalk-cli-setup
-  - install virtualenv (macOS: `brew search virtualenv`)
-  - deactivate any venv, then run `python ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py`
-  - add `eb` to PATH: `echo 'export PATH="/Users/rli/.ebcli-virtual-env/executables:$PATH"' >> ~/.zshrc && source ~/.zshrc` 
+    - https://github.com/aws/aws-elastic-beanstalk-cli-setup
+    - install virtualenv (macOS: `brew search virtualenv`)
+    - deactivate any venv, then run `python ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py`
+    - add `eb` to
+      PATH: `echo 'export PATH="/Users/rli/.ebcli-virtual-env/executables:$PATH"' >> ~/.zshrc && source ~/.zshrc`
 - Using the EB CLI with AWS CodeCommit: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli-codecommit.html
-  - activate venv (so `python` can be found)
-  - run `eb init`
-  - run `eb create [env name]`, note the security groups created
+    - activate venv (so `python` can be found)
+    - run `eb init`
+    - run `eb create [env name]`, note the security groups created
 - Amazon RDS
-  - Create new database
-    - enable public access
-    - use the "default" security group
-    - add the group noted for the EB environment to the inbound rules of the default security group
-    - 
+    - Create new database
+        - enable public access
+        - create a password for "postgres"
+        - create a database
+        - use the "default" security group
+        - add the group noted for the EB environment to the inbound rules of the default security group
 - Cloudflare
-  - point set CNAME to the AWS URL
+    - point set CNAME to the AWS URL
+- Elastic Beanstalk
+    - set the environment variables
+    - remember to set FORCE_HTTPS=true after Cloudflare is set up
+    - remember to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY which are loaded by AWS API directly (not through
+      Flask config)
 
 ## Git
 
