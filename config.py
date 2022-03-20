@@ -54,7 +54,7 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = '{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}'.format(
         server_type='postgresql',
         driver='pg8000',
-        username=os.environ.get('DB_USERNAME', 'lumi'),
+        username=os.environ.get('DB_USERNAME', 'postgres'),
         password=os.environ.get('DB_PASSWORD'),
         hostname=os.environ.get('DB_HOSTNAME', 'localhost'),
         port=os.environ.get('DB_PORT', '5432'),
@@ -66,23 +66,26 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = '{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}'.format(
         server_type='postgresql',
         driver='pg8000',
-        username=os.environ.get('DB_USERNAME', 'lumi'),
+        username=os.environ.get('DB_USERNAME', 'postgres'),
         password=os.environ.get('DB_PASSWORD'),
         hostname=os.environ.get('DB_HOSTNAME', 'localhost'),
         port=os.environ.get('DB_PORT', '5432'),
-        database=os.environ.get('DB_NAME', 'devdb'))
+        database=os.environ.get('DB_NAME', 'devdb')
+    )
 
 
 class GAEConfig(Config):
     APP_VER = 'GAE-' + Config.APP_VER
     SQLALCHEMY_DATABASE_URI = URL.create(
         drivername='postgresql+pg8000',
-        username='lumi',
+        username=os.environ.get('DB_USERNAME', 'postgres'),
         password=os.environ.get('DB_PASSWORD'),
-        database='devdb',
+        database=os.environ.get('DB_NAME', 'devdb'),
         query={'unix_sock': '{socket_path}/{instance_name}/.s.PGSQL.5432'.format(
             socket_path='/cloudsql',
-            instance_name='lumiask:europe-west2:devins')})
+            instance_name='lumiask:europe-west2:devins')
+        }
+    )
 
 
 class AWSConfig(Config):
@@ -90,11 +93,12 @@ class AWSConfig(Config):
     SQLALCHEMY_DATABASE_URI = '{server_type}+{driver}://{username}:{password}@{hostname}:{port}/{database}'.format(
         server_type='postgresql',
         driver='pg8000',
-        username=os.environ.get('DB_USERNAME', 'lumi'),
+        username=os.environ.get('DB_USERNAME', 'postgres'),
         password=os.environ.get('DB_PASSWORD'),
-        hostname=os.environ.get('DB_HOSTNAME', 'lumi-4.cikyf0stsfwt.eu-west-2.rds.amazonaws.com'),
+        hostname=os.environ.get('DB_HOSTNAME', 'lumi.cikyf0stsfwt.eu-west-2.rds.amazonaws.com'),
         port=os.environ.get('DB_PORT', '5432'),
-        database=os.environ.get('DB_NAME', 'devdb'))
+        database=os.environ.get('DB_NAME', 'devdb')
+    )
 
 
 config = {
