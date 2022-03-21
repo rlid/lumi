@@ -17,13 +17,13 @@ class PostForm(FlaskForm):
     # made the post:
     edit_mode = False
 
-    type = RadioField("Choose a type:",
-                      choices=[
-                          (Post.TYPE_BUY, "I have a question to ask or a task to perform"),
-                          (Post.TYPE_SELL, "(New) I want to answer questions or offering my service"),
-                      ],
-                      validators=[InputRequired()]
-                      )
+    is_asking = RadioField("Choose a type:",
+                        choices=[
+                            ('True', "I have a question to ask or a task to perform"),
+                            ('False', "(New) I want to answer questions or offering my service"),
+                        ],
+                        validators=[InputRequired()]
+                        )
     price = DecimalField("Price (USD - $)",
                          validators=[InputRequired(), NumberRange(min=1)],
                          render_kw={"placeholder": "Price"})
@@ -45,10 +45,10 @@ class PostForm(FlaskForm):
             # do not validate price in edit mode because user's current value limit might be lower than when he made the
             # post
             price_cent = round(100 * field.data)
-            if self.type.data == Post.TYPE_BUY:
+            if self.is_asking.data == 'True':
                 if current_user.value_limit_cent < price_cent:
                     raise ValidationError(f'Your current limit on buying price is ${current_user.reward_limit:.2f}.')
-            if self.type.data == Post.TYPE_SELL:
+            else:
                 value_cent = price_cent
                 value_cent += round(self.platform_fee * price_cent)
                 value_cent += round(self.referral_budget * price_cent)

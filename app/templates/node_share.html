@@ -19,8 +19,8 @@
             <script>
                 function copyLink() {
                     navigator.clipboard.writeText(document.getElementById("referrerLink").href);
-                    let toast = document.getElementById('nodeToast');
-                    let toastText = document.getElementById('nodeToastText');
+                    let toast = document.getElementById('manualToast');
+                    let toastText = document.getElementById('manualToastText');
                     toastText.innerHTML = "Link copied";
                     bootstrap.Toast.getOrCreateInstance(toast).show()
                     toast.hidden = false;
@@ -49,7 +49,7 @@
                             </h5>
                             {% set answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = node.rewards_for_next_node_cent() %}
                             <p class="card-text">
-                                {% if node.post.type == Post.TYPE_BUY %}
+                                {% if node.post.is_asking %}
                                     Help me on this topic and earn {{ '${0:.2f}'.format(0.01 * answerer_reward_cent) }}. Think someone can help? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every answer I accept through you (directly or indirectly). Follow this link for details.
                                 {% else %}
                                     Ask me anything on this topic for {{ '${0:.2f}'.format(0.01 * value_cent) }}. Think someone might be interested? Spread the word and earn up to {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }} for every question I answer through you (directly or indirectly). Follow this link for details.
@@ -115,18 +115,6 @@
                     </div>
                 </div>
             {% endif %}
-        </div>
-    </div>
-
-    <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
-        <div class="toast"
-             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: mediumspringgreen" hidden>
-            <div class="d-flex">
-                <div class="toast-body">
-                    <small id="nodeToastText">{{ msg }}</small>
-                </div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
         </div>
     </div>
 {% endblock %}

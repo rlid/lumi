@@ -24,9 +24,8 @@ def new_post(is_private):
         form.referral_budget = 0.4  # Default for private mode
 
     if form.validate_on_submit():
-        post_type = form.type.data
         price_cent = round(100 * form.price.data)
-        post = current_user.create_post(post_type=post_type, price_cent=price_cent,
+        post = current_user.create_post(is_asking=form.is_asking.data == 'True', price_cent=price_cent,
                                         title=form.title.data, body=form.body.data,
                                         is_private=(is_private == 1))
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
@@ -37,7 +36,8 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_create_edit.html", form=form, title="Create Post", feedback_form=FeedbackForm(prefix='feedback'))
+    return render_template("post_create_edit.html", form=form, title="Create Post",
+                           feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/post/<uuid:post_id>/edit', methods=['GET', 'POST'])
@@ -54,8 +54,8 @@ def edit_post(post_id):
         current_user.edit_post(post, title=form.title.data, body=form.body.data)
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
-    form.type.default = post.type
-    form.type.choices = [form.type.choices[0 if post.type == Post.TYPE_BUY else 1]]
+    form.is_asking.default = str(post.is_asking)
+    form.is_asking.choices = [form.is_asking.choices[0 if post.is_asking else 1]]
     form.process()
 
     form.price.data = 0.01 * post.price_cent
@@ -69,7 +69,8 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('post_create_edit.html', form=form, title="Edit Post", feedback_form=FeedbackForm(prefix='feedback'))
+    return render_template('post_create_edit.html', form=form, title="Edit Post",
+                           feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/toggle-editor', methods=['GET', 'POST'])
@@ -147,7 +148,8 @@ def share_node(node_id):
             flash('You cannot adjust your referral reward claim once someone has joined using your referrer\'s link.',
                   category='warning')
         return redirect(url_for('main.share_node', node_id=node_id))
-    return render_template('node_share.html', node=user_node, form=form, Post=Post, feedback_form=FeedbackForm(prefix='feedback'))
+    return render_template('node_share.html', node=user_node, form=form, Post=Post,
+                           feedback_form=FeedbackForm(prefix='feedback'))
 
 
 @main.route('/node/<uuid:node_id>/request-engagement', methods=['POST'])
@@ -172,7 +174,7 @@ def request_engagement(node_id):
             flash('You currently cannot request engagement on posts worth more than $' +
                   f'{current_user.reward_limit:.2f}.', category='warning')
             return redirect(url_for('main.view_node', node_id=node_id))
-        if post.type == Post.TYPE_SELL and \
+        if not post.is_asking and \
                 current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
             flash('Insufficient funds, please ' +
                   Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
@@ -209,6 +211,7 @@ def cancel_engagement(engagement_id):
             flash('Cannot cancel engagement because it has been accepted.', category='warning')
         else:
             current_user.cancel_engagement(engagement)
+
     return redirect(url_for('main.view_node', node_id=engagement.node_id))
 
 
@@ -235,7 +238,7 @@ def accept_engagement(engagement_id):
             flash('You currently cannot accept engagement on posts worth more than $' +
                   f'{current_user.reward_limit:.2f}.',
                   category='danger')
-        elif post.type == Post.TYPE_BUY and \
+        elif post.is_asking and \
                 current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
             flash('Insufficient funds, please ' +
                   Markup(f'<a href={url_for("main.account")}>top up</a> before you proceed.'), category='warning')
@@ -330,4 +333,5 @@ def account():
 @login_required
 def alerts():
     notifications = current_user.notifications.order_by(Notification.timestamp.desc())
-    return render_template('alerts.html', notifications=notifications, title='Alerts', feedback_form=FeedbackForm(prefix='feedback'))
+    return render_template('alerts.html', notifications=notifications, title='Alerts',
+                           feedback_form=FeedbackForm(prefix='feedback'))

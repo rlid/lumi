@@ -22,7 +22,7 @@ class BasicsTestCase(unittest.TestCase):
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
+        post = poster.create_post(is_asking=True, price_cent=500, title='')
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)
@@ -47,7 +47,7 @@ class BasicsTestCase(unittest.TestCase):
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='')
+        post = poster.create_post(is_asking=False, price_cent=500, title='')
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)
@@ -73,7 +73,7 @@ class BasicsTestCase(unittest.TestCase):
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='', is_private=True)
+        post = poster.create_post(is_asking=True, price_cent=500, title='', is_private=True)
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)
@@ -99,7 +99,7 @@ class BasicsTestCase(unittest.TestCase):
         other_user = User(email='other_user', total_balance_cent=1000)
         db.session.add_all([poster, referrer, other_user])
 
-        post = poster.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='', is_private=True)
+        post = poster.create_post(is_asking=False, price_cent=500, title='', is_private=True)
         root_node = post.nodes.all()[0]
         node = referrer.create_node(root_node)
         self.assertAlmostEqual(root_node.display_value(poster), 5)

@@ -28,6 +28,34 @@
                 {{ conf.google_analytics_js() }}
                 {{ conf.hotjar_js() }}
             {% endif %}
+            {% if current_user.is_authenticated %}
+                <script type="text/javascript" charset="utf-8">
+                    var socketUser = io('/user');
+                    socketUser.on('connect', () => {
+                        socketUser.emit(
+                            'join',
+                            {
+                                user_id: "{{ current_user.id }}"
+                            });
+                    });
+
+                    socketUser.on('render_notification', data => {
+                        let toast = document.getElementById('manualToast');
+                        let toastText = document.getElementById('manualToastText');
+                        toastText.innerHTML = data.html;
+                        bootstrap.Toast.getOrCreateInstance(toast).show()
+                        toast.hidden = false;
+
+                        if (data.count != null) {
+                            let badge = document.getElementById('badgeAlerts')
+                            badge.textContent = data.count;
+                            badge.hidden = false;
+                        }
+                    });
+
+
+                </script>
+            {% endif %}
         {% endblock %}
         {% block style %}
             <style>

@@ -56,7 +56,7 @@
             <button type="button" class="btn-close small mt-1 py-2 pe-1" data-bs-dismiss="alert"></button>
         </div>
         <div class="alert alert-success bg-white alert-dismissible fade show small py-2" role="alert">
-            {% if post.type == Post.TYPE_BUY %}
+            {% if post.is_asking %}
                 Upon successful engagement, you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }}, of which:
                 <ul class="mb-0">
                     <li>up to {{ '${0:.2f}'.format(0.01 * post.referral_budget_cent) }} goes to the referrers</li>
@@ -94,7 +94,7 @@
             {{ '${0:.2f}'.format(node.display_referrer_reward(current_user)) }}
             for each successful engagement your referral leads to, or
             <p></p>
-            {% if post.type == Post.TYPE_SELL %}
+            {% if not post.is_asking %}
                 <b>Request Engagement</b> - you pay {{ '${0:.2f}'.format(0.01 * node.value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
@@ -130,7 +130,7 @@
             {{ '${0:.2f}'.format(0.01 * max_referrer_reward_cent) }}
             for each successful engagement your referral leads to, or
             <p></p>
-            {% if post.type == Post.TYPE_SELL %}
+            {% if not post.is_asking %}
                 <b>Request Engagement</b> - you (the asker) pay {{ '${0:.2f}'.format(0.01 * value_cent) }} upon
                 successful engagement, of which:
                 <ul class="mb-0">
@@ -224,11 +224,11 @@
 
 
 {% macro text_area_style(user, post) %}
-    {%- if (user == post.creator and post.type == "asking") or
-            (user != post.creator and post.type == "answering") -%}
+    {%- if (user == post.creator and post.is_asking) or
+            (user != post.creator and not post.is_asking) -%}
         background-color: rgba(13, 202, 240, 0.05);border-color: #0dcaf0;height: 5rem
-    {%- elif (user == post.creator and post.type == "answering") or
-            (user != post.creator and post.type == "asking") -%}
+    {%- elif (user == post.creator and not post.is_asking) or
+            (user != post.creator and post.is_asking) -%}
         background-color: rgba(255, 193, 7, 0.05);border-color: #ffc107;height: 5rem
     {%- else -%}
         background-color: red
@@ -237,11 +237,11 @@
 
 
 {% macro button_class(user, post) %}
-    {%- if (user == post.creator and post.type == "asking") or
-            (user != post.creator and post.type == "answering") -%}
+    {%- if (user == post.creator and post.is_asking) or
+            (user != post.creator and not post.is_asking) -%}
         info
-    {%- elif (user == post.creator and post.type == "answering") or
-            (user != post.creator and post.type == "asking") -%}
+    {%- elif (user == post.creator and not post.is_asking) or
+            (user != post.creator and post.is_asking) -%}
         warning
     {%- else -%}
         danger

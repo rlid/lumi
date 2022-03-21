@@ -166,8 +166,11 @@
             <i class="bi {{ icon }}"></i><br>{% endif %}
             {% if text %} {{ text|safe }} {% endif %}
         </a>
-        {% if badge_text %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">{{ badge_text }}</span>
+        {% if badge_text is not none %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger"
+                  id="badge{{ text }}" {% if not badge_text %}hidden{% endif %}>
+            {{ badge_text }}
+            </span>
         {% endif %}
     </li>
 {% endmacro %}

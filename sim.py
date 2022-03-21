@@ -44,7 +44,7 @@ def sim_random():
     for day in range(N_DAYS):
         for user in users:
             if random.uniform(0, 1) < P_POST:
-                post = user.create_post(post_type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
+                post = user.create_post(is_asking=random.choice([True, False]),
                                         price_cent=100 * random.randint(1, 5),
                                         title=faker.text(100),
                                         body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
@@ -144,16 +144,16 @@ def sim_reset():
     u5 = User(email='5', total_balance_cent=10000)
     users = [u1, u2, u3, u4, u5]
     db.session.add_all(users)
-    p1b = u1.create_post(post_type=Post.TYPE_BUY, price_cent=100, title='')
-    p1s = u1.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='')
-    p2b = u2.create_post(post_type=Post.TYPE_BUY, price_cent=200, title='')
-    p2s = u2.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
-    p3b = u3.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
-    p3s = u3.create_post(post_type=Post.TYPE_SELL, price_cent=300, title='')
-    p4b = u4.create_post(post_type=Post.TYPE_BUY, price_cent=400, title='')
-    p4s = u4.create_post(post_type=Post.TYPE_SELL, price_cent=200, title='')
-    p5b = u5.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
-    p5s = u5.create_post(post_type=Post.TYPE_SELL, price_cent=100, title='')
+    p1b = u1.create_post(is_asking=True, price_cent=100, title='')
+    p1s = u1.create_post(is_asking=False, price_cent=500, title='')
+    p2b = u2.create_post(is_asking=True, price_cent=200, title='')
+    p2s = u2.create_post(is_asking=False, price_cent=400, title='')
+    p3b = u3.create_post(is_asking=True, price_cent=300, title='')
+    p3s = u3.create_post(is_asking=False, price_cent=300, title='')
+    p4b = u4.create_post(is_asking=True, price_cent=400, title='')
+    p4s = u4.create_post(is_asking=False, price_cent=200, title='')
+    p5b = u5.create_post(is_asking=True, price_cent=500, title='')
+    p5s = u5.create_post(is_asking=False, price_cent=100, title='')
     posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
     for day in range(10):
@@ -174,7 +174,7 @@ def sim_reset():
 def sim_existing():
     u1 = User.query.get('6590d9ea-6208-4365-b3cb-5decea456b52')
     u2 = User.query.get('660d1e1e-6d1e-42a4-b2db-96287dcfb8f2')
-    p = u1.create_post(post_type=Post.TYPE_SELL, price_cent=610, title=faker.text(100))
+    p = u1.create_post(is_asking=False, price_cent=610, title=faker.text(100))
     n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
     e = u2.create_engagement(n)
     u1.accept_engagement(e)
@@ -223,14 +223,14 @@ def sim_all(n_days=50,
             if random.uniform(0, 1) < p_post:
                 value_cent = random.randint(100, user.value_limit_cent)
                 if random.uniform(0, 1) < p_private:
-                    post = user.create_post(post_type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
+                    post = user.create_post(is_asking=random.choice([True, False]),
                                             price_cent=value_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))),
                                             is_private=True,
                                             referral_budget_cent=round(0.4 * value_cent))
                 else:
-                    post = user.create_post(post_type=random.choice([Post.TYPE_BUY, Post.TYPE_SELL]),
+                    post = user.create_post(is_asking=random.choice([True, False]),
                                             price_cent=value_cent,
                                             title=faker.text(100),
                                             body='\n'.join(faker.text(100) for i in range(random.randint(2, 5))))
@@ -278,22 +278,22 @@ def sim_all(n_days=50,
                     Post, Post.id == Node.post_id
                 ).filter(
                     Node.parent_id.is_not(None),
-                    Node.state == Node.STATE_CHAT,
                     Post.is_archived.is_not(True),
                     Node.value_cent <= user.value_limit_cent
                 ).all()
                 if len(nodes) > 0:
                     node = random.choice(nodes)
-                    if node.post.type == Post.TYPE_SELL and user.balance_available_cent < node.value_cent:
-                        top_up_cent = 1000 * int(1 + (node.value_cent - user.balance_available_cent) / 1000)
-                        user.total_balance_cent += top_up_cent
-                        sum_top_up_cent += top_up_cent
-                        print(f'Account topped up by {0.01 * top_up_cent:g}')
-                    engagement = user.create_engagement(node)
-                    print('Engagement requested')
-                    if random.uniform(0, 1) < p_cancel_given_request:
-                        user.cancel_engagement(engagement)
-                        print('Engagement cancelled')
+                    if node.current_engagement is None:
+                        if not node.post.is_asking and user.balance_available_cent < node.value_cent:
+                            top_up_cent = 1000 * int(1 + (node.value_cent - user.balance_available_cent) / 1000)
+                            user.total_balance_cent += top_up_cent
+                            sum_top_up_cent += top_up_cent
+                            print(f'Account topped up by {0.01 * top_up_cent:g}')
+                        engagement = user.create_engagement(node)
+                        print('Engagement requested')
+                        if random.uniform(0, 1) < p_cancel_given_request:
+                            user.cancel_engagement(engagement)
+                            print('Engagement cancelled')
 
             engagement_requests = user.engagements_received.join(
                 Node, Node.id == Engagement.node_id,
@@ -308,7 +308,7 @@ def sim_all(n_days=50,
                 node = engagement_request.node
                 post = node.post
                 if random.uniform(0, 1) < p_accept_given_request:
-                    if post.type == Post.TYPE_BUY and user.balance_available_cent < node.value_cent:
+                    if post.is_asking and user.balance_available_cent < node.value_cent:
                         top_up_cent = 1000 * int(1 + (node.value_cent - user.balance_available_cent) / 1000)
                         user.total_balance_cent += top_up_cent
                         sum_top_up_cent += top_up_cent
@@ -384,7 +384,7 @@ N_USERS = 20
 N_BAL = 1000
 P_PRIVATE = 0.5
 
-app = create_app("AWS")
+app = create_app("DEV")
 app_context = app.app_context()
 app_context.push()
 
@@ -392,7 +392,8 @@ db.drop_all()
 db.create_all()
 
 sum_initial_platform_fee = sum([fee.amount for fee in PlatformFee.query.all()])
-sum_initial_balance, sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL, p_private=P_PRIVATE)
+sum_initial_balance, sum_top_up_cent = sim_all(n_days=N_DAYS, n_users=N_USERS, initial_balance_cent=N_BAL,
+                                               p_private=P_PRIVATE)
 # sim_random()
 # sim_reset()
 # sim_existing()

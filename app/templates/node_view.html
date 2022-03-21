@@ -206,18 +206,6 @@
     </div>
 {% endif %}
 </div>
-    <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
-        <div class="toast"
-             id="nodeToast" role="alert" data-bs-autohide="false" style="background-color: cyan" hidden>
-            <div class="d-flex">
-                <div class="toast-body">
-                    <small id="nodeToastText">{{ msg }}</small>
-                </div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
     {{ socketio_script('section' ~ current.section_counter) }}
 {% endblock %}
 
@@ -279,9 +267,9 @@
 
 {% macro socketio_script(section_id) %}
     <script type="text/javascript" charset="utf-8">
-        var socket = io();
-        socket.on('connect', () => {
-            socket.emit(
+        var socketNode = io('/node');
+        socketNode.on('connect', () => {
+            socketNode.emit(
                 'join',
                 {
                     node_id: "{{ node.id }}"
@@ -291,8 +279,8 @@
         document.getElementById('formMessage').onsubmit = event => {
             event.preventDefault();
             const textField = document.getElementById('textareaMessage');
-            socket.emit(
-                'message_sent',
+            socketNode.emit(
+                'send_message',
                 {
                     node_id: "{{ node.id }}",
                     engagement_id: {% if engagement is not none %}"{{ engagement.id }}"{% else %}null{% endif %},
@@ -300,45 +288,12 @@
                 });
             textField.value = '';
         };
-        socket.on('processed_message_sent', message => {
+
+        socketNode.on('render_message', message => {
             let template = document.createElement('template');
             template.innerHTML = message.html
-            let nChildElement = template.content.childElementCount
-            document.getElementById("{{ section_id }}").appendChild(template.content.firstElementChild)
-            if (nChildElement > 1) {
-                document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
-            }
+            document.getElementById("{{ section_id }}").appendChild(template.content)
             flask_moment_render_all();
-            {#document.getElementById('message'+message.id).scrollIntoView(false);#}
-            {#document.getElementById('message'+message.id).scrollIntoViewIfNeeded(true);#}
-            {#let message_form = document.getElementById('formMessage')#}
-            {#message_form.scrollTop = message_form.scrollHeight;#}
-        });
-
-        let rate_event_handler = event => {
-            socket.emit(
-                'engagement_rated',
-                {
-                    node_id: "{{ node.id }}",
-                });
-        };
-        let btnRatePlus = document.getElementById('btnConfirmRatePlus')
-        if (btnRatePlus) {
-            btnRatePlus.onclick = rate_event_handler;
-        }
-        ;
-        let btnRateMinus = document.getElementById('btnConfirmRateMinus')
-        if (btnRateMinus) {
-            btnRateMinus.onclick = rate_event_handler;
-        }
-        ;
-        socket.on('notify_node', message => {
-            let toast = document.getElementById('nodeToast');
-            let toastText = document.getElementById('nodeToastText');
-            toastText.innerHTML = message.html;
-            bootstrap.Toast.getOrCreateInstance(toast).show()
-            toast.hidden = false;
-            {#location.reload();#}
         });
     </script>
 {% endmacro %}
@@ -347,7 +302,8 @@
 {% macro sock_script(section_id) %}
     <script>
         const sock = new WebSocket(
-            {% if config['FORCE_HTTPS'] %}'wss://'{% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
+            {% if config['FORCE_HTTPS'] %}'wss://'
+                {% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
         )
         ;
         sock.addEventListener('message', message => {

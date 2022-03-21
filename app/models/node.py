@@ -5,10 +5,7 @@ from sqlalchemy import event, select, case, and_, asc, desc
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
-from app.models import Message, Post, Notification
-
-
-# Contribution Node
+from app.models import Message, Notification, Engagement
 
 
 class Node(db.Model):
@@ -33,6 +30,7 @@ class Node(db.Model):
 
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     post_id = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'), nullable=False)
+    post_id_if_root = db.Column(UUID(as_uuid=True), db.ForeignKey('posts.id'))
 
     # sum of all referrer rewards if an engagement is successful on this node
     # sum_referrer_reward_cent = db.Column(db.Integer, nullable=False)
@@ -57,8 +55,15 @@ class Node(db.Model):
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
+    current_engagement = db.relationship('Engagement',
+                                         backref=db.backref('node_if_current'),
+                                         foreign_keys=[Engagement.node_id_if_current],
+                                         lazy='immediate',
+                                         uselist=False)
+
     engagements = db.relationship('Engagement',
                                   backref=db.backref('node'),
+                                  foreign_keys=[Engagement.node_id],
                                   lazy='dynamic',
                                   cascade='all, delete-orphan')
 
@@ -74,13 +79,13 @@ class Node(db.Model):
             return 0.01 * post.price_cent
 
         if user == self.creator:
-            if post.type == Post.TYPE_BUY:
+            if post.is_asking:
                 return 0.01 * self.answerer_reward_cent
             else:
                 return 0.01 * self.value_cent
 
         answerer_reward_cent, sum_referrer_reward_cent, value_cent, max_referrer_reward_cent = self.rewards_for_next_node_cent()
-        if post.type == Post.TYPE_BUY:
+        if post.is_asking:
             return 0.01 * answerer_reward_cent
         else:
             return 0.01 * value_cent
@@ -118,7 +123,7 @@ class Node(db.Model):
         value_cent = self.value_cent
         answerer_reward_cent = self.answerer_reward_cent
         sum_referrer_reward_cent = self._sum_referrer_reward_inc_cent()  # for existing referrers
-        if post.type == Post.TYPE_BUY:
+        if post.is_asking:
             if post.is_private:
                 answerer_reward_cent -= self.referrer_reward_cent
             else:

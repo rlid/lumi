@@ -1,148 +1,91 @@
-from flask import render_template, url_for, current_app
-from flask_login import login_required, current_user
-from flask_socketio import emit, join_room, disconnect
-from simple_websocket import ConnectionClosed
-from sqlalchemy import func, and_, event
+import uuid
 
-from app import db, socketio, sock
-from app.models.user import Node, Message
+from flask import render_template, current_app
+from flask_login import current_user
+from flask_socketio import emit, join_room, disconnect, Namespace
+from sqlalchemy import func
 
-
-@socketio.on('connect')
-def connect():
-    if not current_user.is_authenticated:
-        return False
+from app import db, socketio
+from app.models import Notification, Engagement
+from app.models.user import Node, Message, User
 
 
-@socketio.on('join')
-def on_join(data):
-    node_id = data['node_id']
-    node = Node.query.get(node_id)
-    if current_user == node.creator or current_user == node.post.creator:
-        join_room(node_id)
-        current_app.logger.info(f'{current_user} has joined the chat.')
-        # emit('notify_node', {'html': f'{current_user} has joined the chat.'}, to=node_id)
-    else:
-        disconnect()
+class NodeNamespace(Namespace):
+    def on_connect(self):
+        if not current_user.is_authenticated:
+            disconnect()
 
-
-@socketio.on('message_sent')
-def handle_message_sent(message):
-    node = Node.query.get(message['node_id'])
-
-    if current_user != node.creator and current_user != node.post.creator:
-        disconnect()
-        return
-    if node.post.is_archived and message['engagement_id'] is None:
-        emit('notify_node', {'html': 'Cannot send message because the post is now archived.'}, to=message['node_id'])
-        disconnect()
-        return
-
-    # last_timestamp = db.session.query(
-    #     func.max(Message.timestamp).label('max_timestamp')
-    # ).filter(Message.node_id == node.id).first().max_timestamp
-    # last_message = node.messages.filter(Message.timestamp == last_timestamp).first()
-
-    sub_query = db.session.query(
-        func.max(Message.timestamp).label('max_timestamp')
-    ).filter(Message.node_id == node.id).subquery()
-    last_message = node.messages.join(
-        sub_query, Message.timestamp == sub_query.c.max_timestamp
-    ).first()
-
-    message = current_user.create_message(node, message['text'])
-
-    new_section = last_message is None or message.engagement_id != last_message.engagement_id
-    html = render_template('message.html',
-                           message=message,
-                           viewer=current_user,
-                           last_timestamp=last_message.timestamp if last_message is not None else None,
-                           gap_in_seconds=60,  # this is from the last message SENT, not rendered, as that info is not
-                           # available here. TODO: try to match the logic for existing messages
-                           Message=Message)
-    emit('processed_message_sent',
-         {
-             'id': str(message.id),
-             'html': html,
-             'new_section': new_section
-         },
-         to=str(node.id))
-
-
-@socketio.on('engagement_rated')
-def handle_engagement_rated(message):
-    emit('notify_node', {
-        'html': 'The other user has rated this engagement - please '
-                '<a href="{node_url}" onclick="location.reload()">refresh</a> to see the updates.'.format(
-                    node_url=url_for('main.view_node', node_id=message['node_id']))},
-         to=message['node_id'])
-
-
-# Disabled for now because they cannot handle account balance checks
-# TODO: implement these as toast notification using flask-sock and SQLAlchemy after_insert event
-# @socketio.on('engagement_requested')
-# def handle_engagement_requested(message):
-#     emit('processed_engagement_requested', {
-#         'html': 'Your received an engagement request - please <a href="{node_url}">refresh</a> this page.'.format(
-#             node_url=url_for('main.view_node', node_id=message['node_id'])
-#         )},
-#          to=message['node_id'])
-
-# @socketio.on('engagement_accepted')
-# def handle_engagement_accepted(message):
-#     emit('processed_engagement_accepted', {
-#         'html': 'Your engagement request is accepted - please <a href="{node_url}">refresh</a> this page.'.format(
-#             node_url=url_for('main.view_node', node_id=message['node_id'])
-#         )},
-#          to=message['node_id'])
-
-
-@sock.route('/sock/node/<node_id>')
-@login_required
-def sock_to_node(ws, node_id):
-    node = Node.query.get(node_id)
-    if current_user == node.creator or current_user == node.post.creator:
-        Message.message_listeners.append((current_user.id, ws))
-        current_app.logger.info(f'{current_user} connected to node {node_id}')
-        while True:
-            text = ws.receive()
-            current_user.create_message(node, text)
-    else:
-        ws.close()
-
-
-@event.listens_for(Message, 'after_insert')
-def emit_after_insert(mapper, connection, message):
-    closed_connections = []
-    for user_id, user_sock in Message.message_listeners:
-        # TODO: remove closed sockets
-        if user_id == message.node.creator_id or user_id == message.node.post.creator_id:
-            last_timestamp = db.session.query(
-                func.max(Message.timestamp).label('max_timestamp')
-            ).filter(
-                and_(
-                    Message.node_id == message.node_id,
-                    Message.timestamp < message.timestamp
-                )
-            ).first().max_timestamp
-            html = render_template('message.html',
-                                   message=message,
-                                   viewer=current_user,
-                                   last_timestamp=last_timestamp,
-                                   gap_in_seconds=60,
-                                   # this is from the last message SENT, not rendered, as that info is not
-                                   # available here. TODO: try to match the logic for existing messages
-                                   Message=Message)
-            current_app.logger.info(f'Pushing message to user {user_id}')
-            try:
-                user_sock.send(html)
-            except ConnectionClosed as e:
-                current_app.logger.info(f'A Connection for user {user_id} is closed')
-                closed_connections.append((user_id, user_sock))
-
-    for c in closed_connections:
+    def on_join(self, data):
+        node_id_str = data['node_id']
         try:
-            Message.message_listeners.remove(c)
-            current_app.logger.info(f'A listener for user {c[0]} is removed')
+            node_id = uuid.UUID(node_id_str)
         except ValueError as e:
             current_app.logger.exception(e)
+            return
+
+        node = Node.query.get(node_id)
+        if node is None or (current_user != node.creator and current_user != node.post.creator):
+            return
+
+        join_room(node_id_str)
+        current_app.logger.info(f'{current_user} has joined Node room {node_id_str}.')
+
+    def on_send_message(self, data):
+        node_id_str = data['node_id']
+        node = Node.query.get(node_id_str)
+        post = node.post
+        if post.is_archived and (
+                node.current_engagement is None or node.current_engagement.state != Engagement.STATE_ENGAGED
+        ):
+            emit('render_notification',
+                 {'html': 'Cannot send message because the post is now archived.'},
+                 to=str(current_user.id),
+                 namespace='/user')
+            return
+
+        last_timestamp = None
+        sub_query = db.session.query(
+            func.max(Message.timestamp).label('max_timestamp')
+        ).filter(Message.node_id == node.id).subquery()
+        last_message = node.messages.join(
+            sub_query, Message.timestamp == sub_query.c.max_timestamp
+        ).first()
+        if last_message is not None:
+            last_timestamp = last_message.timestamp
+
+        message = current_user.create_message(node, data['text'])
+        new_section = last_message is None or message.engagement_id != last_message.engagement_id
+        html = render_template('message.html',
+                               message=message,
+                               viewer=current_user,
+                               last_timestamp=last_timestamp,
+                               gap_in_seconds=60,
+                               # this is from the last message SENT, not rendered, as that info is not
+                               # available here. TODO: try to match the logic for existing messages
+                               Message=Message)
+        emit('render_message',
+             {
+                 'id': str(message.id),
+                 'html': html,
+                 'new_section': new_section
+             },
+             to=str(node.id))
+
+
+class UserNamespace(Namespace):
+    def on_connect(self):
+        if not current_user.is_authenticated:
+            disconnect()
+
+    def on_join(self, data):
+        user_id_str = data['user_id']
+
+        if str(current_user.id) != user_id_str:
+            return
+
+        join_room(user_id_str)
+        current_app.logger.info(f'{current_user} has joined User room {user_id_str}.')
+
+
+socketio.on_namespace(UserNamespace('/user'))
+socketio.on_namespace(NodeNamespace('/node'))

@@ -79,10 +79,10 @@ def webhook():
             payment_intent.succeeded = True
             payment_intent.creator.total_balance_cent += stripe_payment_intent.amount
             db.session.add(payment_intent)
-            db.session.commit()
 
+            db.session.commit()
             Notification.push(
-                target=payment_intent.creator,
+                target_user=payment_intent.creator,
                 message=f'You topped up your account by ${0.01 * stripe_payment_intent.amount:.2f}.',
                 email=True
             )

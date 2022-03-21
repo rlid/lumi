@@ -7,8 +7,6 @@ from app import db
 
 
 class Message(db.Model):
-    message_listeners = []
-
     TYPE_CHAT = 100
     TYPE_REQUEST = 200
     TYPE_ACCEPT = 300

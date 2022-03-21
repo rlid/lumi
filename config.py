@@ -13,6 +13,7 @@ class Config:
     GOOGLE_SERVER_METADATA_URL = 'https://accounts.google.com/.well-known/openid-configuration'
     APPLE_SERVER_METADATA_URL = 'https://appleid.apple.com/.well-known/openid-configuration'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SOCK_SERVER_OPTIONS = {'ping_interval': 25}
     SITE_RID_NBYTES = 32
     SITE_RID_HASH_DIGEST_SIZE = 32
 

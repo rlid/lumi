@@ -37,7 +37,6 @@ def user(user_id):
         Post, Post.id == Node.post_id
     ).filter(
         Node.parent_id.is_(None),
-        Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
         Post.is_private.is_not(True),
         Post.is_archived.is_not(True)
     ).order_by(
@@ -69,7 +68,6 @@ def browse():
         ).filter(
             Node.parent_id.is_(None),
             PostTag.tag_id.in_(tag_ids_to_filter),
-            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
             Post.is_private.is_not(True),
             Post.is_archived.is_not(True)
         ).group_by(
@@ -83,7 +81,6 @@ def browse():
             Post, Post.id == Node.post_id
         ).filter(
             Node.parent_id.is_(None),
-            Post.type.in_([Post.TYPE_BUY, Post.TYPE_SELL]),
             Post.is_private.is_not(True),
             Post.is_archived.is_not(True)
         )
@@ -108,13 +105,8 @@ def browse():
     )
 
     root_nodes = post_query.order_by(Node.last_updated.desc()).all()
-    # sticky_posts = []
-    # if not tag_ids_to_filter:
-    #     sticky_posts = Post.query.filter_by(type=Post.TYPE_ANNOUNCEMENT).order_by(Post.last_updated.desc()).all()
-
     return render_template(
         "index.html",
-        # sticky_posts=sticky_posts,
         root_nodes=root_nodes,
         tags_in_filter=tags_in_filter,
         tags_not_in_filter_with_freq=tags_not_in_filter_query.all(),

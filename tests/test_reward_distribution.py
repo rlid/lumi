@@ -28,7 +28,7 @@ class BasicsTestCase(unittest.TestCase):
         u4 = User(email='4', total_balance_cent=1000)
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
-        p = u1.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
+        p = u1.create_post(is_asking=True, price_cent=500, title='')
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
         n = u3.create_node(n)
         n = u4.create_node(n)
@@ -50,7 +50,7 @@ class BasicsTestCase(unittest.TestCase):
         u4 = User(email='4', total_balance_cent=1000)
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
-        p = u1.create_post(post_type=Post.TYPE_SELL, price_cent=200, title='')
+        p = u1.create_post(is_asking=False, price_cent=200, title='')
         n = u2.create_node(p.nodes.filter(Node.creator == u1).first())
         n = u3.create_node(n)
         n = u4.create_node(n)
@@ -73,7 +73,7 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
         p = u1.create_post(
-            post_type=Post.TYPE_BUY,
+            is_asking=True,
             price_cent=500,
             title='',
             is_private=True)
@@ -99,7 +99,7 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=1000)
         db.session.add_all([u1, u2, u3, u4, u5])
         p = u1.create_post(
-            post_type=Post.TYPE_SELL,
+            is_asking=False,
             price_cent=300,
             title='',
             is_private=True,
@@ -126,7 +126,7 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=10000)
         db.session.add_all([u1, u2, u3, u4, u5])
 
-        p1 = u1.create_post(post_type=Post.TYPE_BUY, price_cent=400, title='')
+        p1 = u1.create_post(is_asking=True, price_cent=400, title='')
         n12 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
         e = u2.create_engagement(n12)
         u1.accept_engagement(e)
@@ -163,7 +163,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertEqual(u1.value_limit_cent, 700)
         self.assertEqual(u4.value_limit_cent, 200)
 
-        p2 = u2.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
+        p2 = u2.create_post(is_asking=True, price_cent=300, title='')
         n23 = u3.create_node(p2.nodes.filter(Node.creator == u2).first())
         e = u3.create_engagement(n23)
         u2.accept_engagement(e)
@@ -182,7 +182,7 @@ class BasicsTestCase(unittest.TestCase):
         u3 = User(email='3', total_balance_cent=10000)
         db.session.add_all([u1, u2, u3])
 
-        p1 = u1.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
+        p1 = u1.create_post(is_asking=False, price_cent=400, title='')
         n12 = u2.create_node(p1.nodes.filter(Node.creator == u1).first())
         e = u2.create_engagement(n12)
         u1.accept_engagement(e)
@@ -210,7 +210,7 @@ class BasicsTestCase(unittest.TestCase):
         u1.rate_engagement(e, True)
         u3.rate_engagement(e, True)
 
-        p2 = u2.create_post(post_type=Post.TYPE_BUY, price_cent=500, title='')
+        p2 = u2.create_post(is_asking=True, price_cent=500, title='')
         n23 = u3.create_node(p2.nodes.filter(Node.creator == u2).first())
         e = u3.create_engagement(n23)
         u2.accept_engagement(e)
@@ -236,7 +236,7 @@ class BasicsTestCase(unittest.TestCase):
         db.session.add_all([u1, u2, u3, u4, u5])
 
         p1 = u1.create_post(
-            post_type=Post.TYPE_SELL,
+            is_asking=False,
             price_cent=300,
             title='',
             is_private=True)
@@ -291,16 +291,16 @@ class BasicsTestCase(unittest.TestCase):
         u5 = User(email='5', total_balance_cent=1000)
         users = [u1, u2, u3, u4, u5]
         db.session.add_all(users)
-        p1b = u1.create_post(post_type=Post.TYPE_BUY, price_cent=100, title='')
-        p1s = u1.create_post(post_type=Post.TYPE_SELL, price_cent=500, title='')
-        p2b = u2.create_post(post_type=Post.TYPE_BUY, price_cent=200, title='')
-        p2s = u2.create_post(post_type=Post.TYPE_SELL, price_cent=400, title='')
-        p3b = u3.create_post(post_type=Post.TYPE_BUY, price_cent=300, title='')
-        p3s = u3.create_post(post_type=Post.TYPE_SELL, price_cent=300, is_private=True, title='')
-        p4b = u4.create_post(post_type=Post.TYPE_BUY, price_cent=400, is_private=True, title='')
-        p4s = u4.create_post(post_type=Post.TYPE_SELL, price_cent=200, is_private=True, title='')
-        p5b = u5.create_post(post_type=Post.TYPE_BUY, price_cent=500, is_private=True, title='')
-        p5s = u5.create_post(post_type=Post.TYPE_SELL, price_cent=100, is_private=True, title='')
+        p1b = u1.create_post(is_asking=True, price_cent=100, title='')
+        p1s = u1.create_post(is_asking=False, price_cent=500, title='')
+        p2b = u2.create_post(is_asking=True, price_cent=200, title='')
+        p2s = u2.create_post(is_asking=False, price_cent=400, title='')
+        p3b = u3.create_post(is_asking=True, price_cent=300, title='')
+        p3s = u3.create_post(is_asking=False, price_cent=300, is_private=True, title='')
+        p4b = u4.create_post(is_asking=True, price_cent=400, is_private=True, title='')
+        p4s = u4.create_post(is_asking=False, price_cent=200, is_private=True, title='')
+        p5b = u5.create_post(is_asking=True, price_cent=500, is_private=True, title='')
+        p5s = u5.create_post(is_asking=False, price_cent=100, is_private=True, title='')
         posts = [p1b, p1s, p2b, p2s, p3b, p3s, p4b, p4s, p5b, p5s]
 
         random = Random(1)
@@ -314,8 +314,8 @@ class BasicsTestCase(unittest.TestCase):
                         node = user.create_node(parent_node)
                     if user.value_limit_cent >= node.value_cent and \
                             post.creator.value_limit_cent >= node.value_cent and (
-                            (post.type == Post.TYPE_BUY and post.creator.balance_available_cent > node.value_cent) or
-                            (post.type == Post.TYPE_SELL and node.creator.balance_available_cent > node.value_cent)):
+                            (post.is_asking and post.creator.balance_available_cent > node.value_cent) or
+                            (not post.is_asking and node.creator.balance_available_cent > node.value_cent)):
                         engagement = user.create_engagement(node)
                         post.creator.accept_engagement(engagement)
                         user.rate_engagement(engagement, True if random.uniform(0, 1) < 0.9 else False)

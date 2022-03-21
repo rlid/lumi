@@ -25,6 +25,7 @@ class Engagement(db.Model):
     tip_cent = db.Column(db.Integer, default=0, nullable=False)
 
     node_id = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'), nullable=False)
+    node_id_if_current = db.Column(UUID(as_uuid=True), db.ForeignKey('nodes.id'))
 
     asker_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     answerer_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)

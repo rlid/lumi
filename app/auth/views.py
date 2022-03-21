@@ -85,15 +85,12 @@ def logout_all():
 # intended user: all | signup_method all | email_verified all
 @auth.route('/signup/<int:code_length>')
 def invite_code(code_length):
-    return redirect(
-        url_for(
-            "auth.signup",
-            code=InviteCode.generate(
-                length=code_length,
-                expiry_timedelta=timedelta(days=30)
-            ).code
-        )
+    ic = InviteCode.generate(
+        length=code_length,
+        expiry_timedelta=timedelta(days=30)
     )
+    db.session.commit()
+    return redirect(url_for("auth.signup", code=ic.code))
 
 
 # intended user: is_authenticated no | signup_method email | email_verified n/a

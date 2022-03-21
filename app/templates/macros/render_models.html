@@ -36,18 +36,18 @@
 {% endmacro %}
 
 {% macro render_card(node, above_title=None, after_title=None, card_text=None, card_footer=None,
-    style_map={'asking':'info', 'answering':'warning'}) %}
+    style_map={True:'info', False:'warning'}) %}
     {% set post = node.post %}
-    <div class="card mb-3 {{ style_map[post.type] }}">
+    <div class="card mb-3 {{ style_map[post.is_asking] }}">
         <div class="card-body pt-2 pb-{%- if card_text -%}2{% else %}0{% endif %}">
             {% if above_title %}
                 {{ above_title }}
             {% endif %}
             <div class="card-title">
                 <div class="btn-group btn-group-sm buy-sell" role="group">
-                    <a href="{{ url_for("main.browse", tags=post.type) }}"
-                       class="btn btn-{{- style_map[post.type] }}">
-                        {{ post.type.capitalize() }}
+                    <a href="{{ url_for("main.browse", tags='asking' if post.is_asking else 'answering') }}"
+                       class="btn btn-{{- style_map[post.is_asking] }}">
+                        {{ 'Asking' if post.is_asking else 'Answering' }}
                     </a>
                     <button type="button" class="btn btn-secondary" disabled>
                         {{ "$%.2f"|format(node.display_value(current_user)) }}
@@ -230,9 +230,9 @@
         {% if message.type >= Message.TYPE_REQUEST %}
               bg-light border-0
         {% elif message.creator == message.node.post.creator %}
-            {% if message.node.post.type == 'asking' %}info10{% else %}warning10{% endif %}
+            {% if message.node.post.is_asking %}info10{% else %}warning10{% endif %}
         {% else %}
-            {% if message.node.post.type == 'answering' %}info10{% else %}warning10{% endif %}
+            {% if not message.node.post.is_asking %}info10{% else %}warning10{% endif %}
         {% endif %}
         "
                                              style="max-width:

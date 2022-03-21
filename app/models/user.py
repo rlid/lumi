@@ -114,8 +114,8 @@ class User(UserMixin, db.Model):
                                       cascade="all, delete-orphan")
 
     notifications = db.relationship("Notification",
-                                    backref=db.backref('target'),
-                                    foreign_keys=[Notification.target_id],
+                                    backref=db.backref('target_user'),
+                                    foreign_keys=[Notification.target_user_id],
                                     lazy="dynamic",
                                     cascade="all, delete-orphan")
 
@@ -264,8 +264,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, post_type, price_cent, title, body='', is_private=False, referral_budget_cent=None):
-
+    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -282,13 +281,13 @@ class User(UserMixin, db.Model):
                 referral_budget_cent = round(0.2 * price_cent)  # Default is 20% of the post value in public mode
 
         platform_fee_cent = round(0.1 * price_cent)  # Default is 10% of the post value
-        if post_type == Post.TYPE_BUY:
+        if is_asking:
             value_cent = price_cent
         else:
             value_cent = price_cent + platform_fee_cent
 
         post = Post(creator=self,
-                    type=post_type,
+                    is_asking=is_asking,
                     price_cent=price_cent,
                     platform_fee_cent=platform_fee_cent,
                     is_private=is_private,
@@ -297,7 +296,7 @@ class User(UserMixin, db.Model):
                     body=('m' if self.use_markdown else 's') + body)
         db.session.add(post)
 
-        self._add_tag(post, post_type.capitalize())
+        self._add_tag(post, 'Asking' if is_asking else 'Answering')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('asking', 'answering')]
 
         if is_private:
@@ -341,7 +340,7 @@ class User(UserMixin, db.Model):
 
         # reset all post tags
         [db.session.delete(post_tag) for post_tag in post.post_tags]
-        self._add_tag(post, post.type.capitalize())
+        self._add_tag(post, 'Asking' if post.is_asking else 'Answering')
         [self._add_tag(post, name) for name in tag_names if name.lower() not in ('asking', 'answering')]
 
         db.session.commit()
@@ -390,15 +389,14 @@ class User(UserMixin, db.Model):
         if node is None:
             node = self._create_node(parent_node=parent_node, referrer_reward_cent=referrer_reward_cent)
             db.session.add(node)
-
-            Notification.push(
-                target=post.creator,
-                node=node,
-                message='A user created a contribution point on your post.'
-            )
-
             post.ping(datetime.utcnow())
+
             db.session.commit()
+            Notification.push(
+                target_user=node.post.creator,
+                node=node,
+                message='A user shared your post.'
+            )
         return node
 
     def _create_node(self, parent_node, referrer_reward_cent=None):
@@ -424,6 +422,7 @@ class User(UserMixin, db.Model):
 
     def create_message(self, node, text):
         post = node.post
+        engagement = node.current_engagement
         if self != node.creator and self != post.creator:
             raise InvalidActionError(
                 'Cannot create message because the user is not the post creator or the node creator'
@@ -431,27 +430,29 @@ class User(UserMixin, db.Model):
         if node.parent is None:
             raise InvalidActionError('Cannot create message on root node')
 
-        engagement = node.engagements.filter(Engagement.state == Engagement.STATE_ENGAGED).first()
-        if engagement is None and post.is_archived:
+        if post.is_archived and (engagement is None or engagement.state != Engagement.STATE_ENGAGED):
             raise InvalidActionError('Cannot create message because the post is archived')
-        message = Message(creator=self, node=node, engagement=engagement, text=text)
+        if engagement and engagement.state == Engagement.STATE_ENGAGED:
+            message = Message(creator=self, node=node, engagement=engagement, text=text)
+        else:
+            message = Message(creator=self, node=node, text=text)
         db.session.add(message)
 
         self.ping()
         db.session.add(self)
 
-        Notification.push(
-            target=node.creator if self != node.creator else post.creator,
-            node=node,
-            message='A user sent you a message.',
-            email=engagement is not None
-        )
-
         if engagement is not None:
             engagement.ping(datetime.utcnow())
         else:
             node.ping(datetime.utcnow())
+
         db.session.commit()
+        Notification.push(
+            target_user=node.creator if self != node.creator else post.creator,
+            node=node,
+            message='A user sent you a message.',
+            email=node.current_engagement and node.current_engagement.state == Engagement.STATE_ENGAGED
+        )
         return message
 
     def create_payment_intent(self, stripe_session_id, stripe_payment_intent_id):
@@ -474,7 +475,7 @@ class User(UserMixin, db.Model):
             raise InvalidActionError('Cannot create engagement because the user is not the node creator')
         if self == post.creator:
             raise InvalidActionError('Cannot create engagement because the user cannot be the post creator')
-        if node.state != Node.STATE_CHAT:
+        if node.current_engagement is not None:
             raise InvalidActionError('Cannot create engagement because an uncompleted engagement already exists')
         # value limit checks
         # if self.value_limit_cent < post.price_cent:
@@ -482,10 +483,10 @@ class User(UserMixin, db.Model):
         if self.value_limit_cent < node.value_cent:
             raise InvalidActionError(
                 'Cannot create engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_SELL and self.balance_available_cent < node.value_cent:
+        if not post.is_asking and self.balance_available_cent < node.value_cent:
             raise InsufficientFundsError('Cannot create engagement as asker due to insufficient funds')
 
-        if post.type == Post.TYPE_BUY:
+        if post.is_asking:
             engagement = Engagement(node=node, sender=self, receiver=post.creator,
                                     asker=post.creator, answerer=self)
         else:
@@ -495,20 +496,19 @@ class User(UserMixin, db.Model):
             db.session.add(self)
         db.session.add(engagement)
 
+        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
+        db.session.add(message)
+
+        node.current_engagement = engagement
+        node.ping(datetime.utcnow())
+
+        db.session.commit()
         Notification.push(
-            target=post.creator,
+            target_user=post.creator,
             node=node,
             message='A user sent you an engagement request.',
             email=True
         )
-
-        message = Message(creator=self, node=node, type=Message.TYPE_REQUEST, text=f'Engagement requested')
-        db.session.add(message)
-
-        node.state = Node.STATE_REQUESTED
-        node.ping(datetime.utcnow())
-        db.session.commit()
-
         return engagement
 
     def cancel_engagement(self, engagement):
@@ -525,12 +525,7 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
-        Notification.push(
-            target=post.creator,
-            node=node,
-            message='A user cancelled an engagement request.')
-
-        if post.type == Post.TYPE_SELL:
+        if not post.is_asking:
             self.reserved_balance_cent -= node.value_cent
             db.session.add(self)
 
@@ -541,10 +536,14 @@ class User(UserMixin, db.Model):
                           text=f'Engagement cancelled')
         db.session.add(message)
 
-        node.state = Node.STATE_CHAT
+        node.current_engagement = None
         node.ping(datetime.utcnow())
 
         db.session.commit()
+        Notification.push(
+            target_user=post.creator,
+            node=node,
+            message='A user cancelled an engagement request.')
 
     def accept_engagement(self, engagement):
         node = engagement.node
@@ -561,23 +560,16 @@ class User(UserMixin, db.Model):
         if self.value_limit_cent < node.value_cent:
             raise InvalidActionError(
                 'Cannot accept engagement because the post reward exceeds the reward limit of the user')
-        if post.type == Post.TYPE_BUY and self.balance_available_cent < node.value_cent:
+        if post.is_asking and self.balance_available_cent < node.value_cent:
             raise InsufficientFundsError('Cannot accept engagement as asker due to insufficient funds')
 
-        if post.type == Post.TYPE_BUY:
+        if post.is_asking:
             self.reserved_balance_cent += node.value_cent
             db.session.add(self)
 
         engagement.state = Engagement.STATE_ENGAGED
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
-
-        Notification.push(
-            target=node.creator,
-            node=node,
-            message='A user accepted your engagement request.',
-            email=True
-        )
 
         message = Message(creator=self,
                           node=node,
@@ -586,10 +578,15 @@ class User(UserMixin, db.Model):
                           text=f'Engagement accepted')
         db.session.add(message)
 
-        node.state = Node.STATE_ENGAGED
         node.ping(datetime.utcnow())
 
         db.session.commit()
+        Notification.push(
+            target_user=node.creator,
+            node=node,
+            message='A user accepted your engagement request.',
+            email=True
+        )
 
     def rate_engagement(self, engagement, is_success, tip_cent=0):
         node = engagement.node
@@ -633,13 +630,6 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
-        Notification.push(
-            target=asker if self != asker else answerer,
-            node=node,
-            message='A user rated an engagement with you.',
-            email=True
-        )
-
         message = Message(creator=self,
                           node=node,
                           engagement=engagement,
@@ -649,7 +639,14 @@ class User(UserMixin, db.Model):
 
         if engagement.rating_by_asker != 0 and engagement.rating_by_answerer != 0:
             _finalise_engagement(engagement)
+
         db.session.commit()
+        Notification.push(
+            target_user=asker if self != asker else answerer,
+            node=node,
+            message='A user rated an engagement with you.',
+            email=True
+        )
 
     def reputation_if_dispute_lost(self, value_cent):
         m_x = math.exp(-abs(value_cent) * REP_DECAY)
@@ -752,7 +749,7 @@ def _finalise_engagement(engagement):
         _handle_non_success(engagement)
 
     engagement.state = Engagement.STATE_COMPLETED
-    engagement.node.state = Node.STATE_CHAT
+    engagement.node.current_engagement = None
 
 
 def _handle_non_success(engagement):
@@ -844,14 +841,14 @@ def _pay_tip(engagement):
         db.session.add(answerer)
 
         Notification.push(
-            target=asker,
+            target_user=asker,
             node=engagement.node,
             message=f'You paid ${0.01 * tip_cent:.2f} tip.',
             email=True
         )
 
         Notification.push(
-            target=answerer,
+            target_user=answerer,
             node=engagement.node,
             message=f'You earned ${0.01 * tip_cent:.2f} tip.',
             email=True
@@ -861,7 +858,7 @@ def _pay_tip(engagement):
 def _distribute_reward_cent(engagement, fraction):
     node = engagement.node
     post = node.post
-    if post.type == Post.TYPE_BUY:
+    if post.is_asking:
         buyer = post.creator
         seller = node.creator
     else:
@@ -876,7 +873,7 @@ def _distribute_reward_cent(engagement, fraction):
     db.session.add(buyer)
 
     Notification.push(
-        target=buyer,
+        target_user=buyer,
         node=node,
         message=f'You paid ${0.01 * value_cent:.2f} as asker.',
         email=True
@@ -898,7 +895,7 @@ def _distribute_reward_cent(engagement, fraction):
             sum_referrer_reward_cent += referrer_reward_cent
 
             Notification.push(
-                target=referrer,
+                target_user=referrer,
                 node=node,
                 message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.',
                 email=True
@@ -920,7 +917,7 @@ def _distribute_reward_cent(engagement, fraction):
             sum_referrer_reward_cent += referrer_reward_cent
 
             Notification.push(
-                target=referrer,
+                target_user=referrer,
                 node=node,
                 message=f'You earned ${0.01 * referrer_reward_cent:.2f} as referrer.',
                 email=True
@@ -932,7 +929,7 @@ def _distribute_reward_cent(engagement, fraction):
     db.session.add(seller)
 
     Notification.push(
-        target=seller,
+        target_user=seller,
         node=node,
         message=f'You earned ${0.01 * answerer_reward_cent:.2f} as answerer.',
         email=True

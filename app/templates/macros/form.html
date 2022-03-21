@@ -91,8 +91,8 @@
     <form method="post" {% if type == 'tui' %}onsubmit="DoSubmit(){% endif %}">
         {{ form.hidden_tag() }}
         <div class="mb-3">
-            {{ form.type.label(class_='form-label') }}
-            {% for item in form.type %}
+            {{ form.is_asking.label(class_='form-label') }}
+            {% for item in form.is_asking %}
                 <div class="form-check">
                     {{ item(class_='form-check-input') }}
                     {{ item.label(class_='form-check-label') }}

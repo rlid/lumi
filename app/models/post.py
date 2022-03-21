@@ -9,15 +9,12 @@ from sqlalchemy import event
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
-from app.models import PostTag
+from app.models import PostTag, Node
 from utils.markdown_ext import DelExtension
 
 
 class Post(db.Model):
     __tablename__ = 'posts'
-
-    TYPE_BUY = 'asking'
-    TYPE_SELL = 'answering'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
@@ -26,7 +23,7 @@ class Post(db.Model):
 
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
-    type = db.Column(db.String(16), nullable=False)
+    is_asking = db.Column(db.Boolean, nullable=False)
     price_cent = db.Column(db.Integer, nullable=False)
     platform_fee_cent = db.Column(db.Integer, nullable=False)
 
@@ -46,8 +43,15 @@ class Post(db.Model):
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
+    root_node = db.relationship('Node',
+                                backref=db.backref('post_if_root'),
+                                foreign_keys=[Node.post_id_if_root],
+                                lazy='immediate',
+                                uselist=False)
+
     nodes = db.relationship('Node',
                             backref=db.backref('post'),
+                            foreign_keys=[Node.post_id],
                             lazy='dynamic',
                             cascade='all, delete-orphan')
 
@@ -62,7 +66,7 @@ class Post(db.Model):
         db.session.add(self)
 
     def __repr__(self):
-        return f'<p{self.id}>creator={self.creator},type={self.type}</p{self.id}>'
+        return f'<p{self.id}>creator={self.creator}</p{self.id}>'
 
     @property
     def root_node(self):

@@ -29,7 +29,6 @@ class InviteCode(db.Model):
         while invite_code.code in codes:
             invite_code = InviteCode(length=length, expiry_timedelta=expiry_timedelta)
         db.session.add(invite_code)
-        db.session.commit()
         return invite_code
 
     @staticmethod

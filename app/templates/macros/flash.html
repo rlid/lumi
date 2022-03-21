@@ -41,21 +41,29 @@
                              'info':'background-color: cyan;',
                              'warning':'background-color: yellow;',
                              'danger':'background-color: pink;'}) %}
-{#                              'success':'background-color: #c9dfd6;',#}
-{#                             'info':'background-color: #c7ebf3;',#}
-{#                             'warning':'background-color: #f5eac6;',#}
-{#                             'danger':'background-color: #eecfd3;'}) -%}#}
+    {#                              'success':'background-color: #c9dfd6;',#}
+    {#                             'info':'background-color: #c7ebf3;',#}
+    {#                             'warning':'background-color: #f5eac6;',#}
+    {#                             'danger':'background-color: #eecfd3;'}) -%}#}
     {% with messages = messages or get_flashed_messages(with_categories=True) -%}
-        <div class="toast-container fixed-top ms-auto" style="top:4.75rem;right:1%">
+        <div class="toast-container fixed-top ms-auto" style="top:4.5rem;right:1%">
+            <div class="toast rounded-pill" role="alert" data-bs-autohide="false" id="manualToast" hidden>
+                <div class="d-flex">
+                    <div class="toast-body px-4 py-2">
+                        <span id="manualToastText">{{ msg }}</span>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
             {% if messages -%} {# don't output anything if there are no messages #}
                 {% for cat, msg in messages %}
                     <div class="toast" role="alert" data-bs-delay="10000"
                          style="{{ category_map[cat] }}">
                         <div class="d-flex">
-                            <div class="toast-body">
+                            <div class="toast-body py-2">
                                 {{ msg }}
                             </div>
-                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
                         </div>
                     </div>
                 {%- endfor -%}
