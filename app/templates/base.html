@@ -89,8 +89,8 @@
             </main>
         {% endblock %}
         {% if session.get('allow_cookie') is none %}
-            <div class="toast-container fixed-bottom ms-auto"
-                 style="bottom:{{- 4.5 if current_user.is_authenticated else 4 -}}rem;right:1%">
+            <div class="toast-container fixed-bottom mx-auto"
+                 style="bottom:{{- 4.5 if current_user.is_authenticated else 4 -}}rem">
                 <div class="toast" role="alert" data-bs-delay="10000"
                      data-bs-autohide="false"
                      style="background-color: #ffffff">
