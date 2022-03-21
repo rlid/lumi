@@ -37,7 +37,7 @@ class Notification(db.Model):
         html = ''
         try:
             html = Markup('<a class="text-decoration-none" href=' + (
-                url_for("main.account", node_id=node.id) if node is None else
+                url_for("main.account") if node is None else
                 url_for("main.view_node", node_id=node.id)) + f'>{message}</a>')
         except RuntimeError as e:
             current_app.logger.debug(e)
