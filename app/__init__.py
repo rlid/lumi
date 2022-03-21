@@ -4,7 +4,6 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_mobility import Mobility
 from flask_moment import Moment
-from flask_sock import Sock
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
@@ -22,7 +21,6 @@ oauth = OAuth()
 moment = Moment()
 mobility = Mobility()
 socketio = SocketIO()
-sock = Sock()
 qrcode = QRcode()
 talisman = Talisman()
 
@@ -90,5 +88,4 @@ def create_app(config_name='DEV'):
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
-    sock.init_app(app)
     return app

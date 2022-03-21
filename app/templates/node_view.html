@@ -297,31 +297,3 @@
         });
     </script>
 {% endmacro %}
-
-
-{% macro sock_script(section_id) %}
-    <script>
-        const sock = new WebSocket(
-            {% if config['FORCE_HTTPS'] %}'wss://'
-                {% else %}'ws://'{% endif %} + location.host + '/sock/node/{{ node.id }}'
-        )
-        ;
-        sock.addEventListener('message', message => {
-            let template = document.createElement('template');
-            template.innerHTML = message.data
-            let nChildElement = template.content.childElementCount
-            document.getElementById("{{ section_id }}").appendChild(template.content.firstElementChild)
-            if (nChildElement > 1) {
-                document.getElementById("{{ section_id }}").appendChild(template.content.lastElementChild)
-            }
-            flask_moment_render_all();
-            {#document.getElementById('formMessage').scrollIntoView(false);#}
-        });
-        document.getElementById('formMessage').onsubmit = event => {
-            event.preventDefault();
-            const textField = document.getElementById('textareaMessage');
-            sock.send(textField.value);
-            textField.value = '';
-        };
-    </script>
-{% endmacro %}
