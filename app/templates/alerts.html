@@ -14,14 +14,16 @@
             <span class="badge rounded-pill text-dark"
                   style="font-weight: normal;background-color: {% if is_read %}#e9ecef{% else %}#caebe1{% endif %}">
             {{ moment(notification.timestamp).calendar() }}</span>
-            {% if notification.node_id %}
-                <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
-                   class="small text-decoration-none text-dark">
-                    {{ notification.message }}
-                </a>
-            {% else %}
-                <span class="small text-dark">{{ notification.message }}</span>
-            {% endif %}
+
+            <a href="
+                {% if notification.node_id %}
+                    {{ url_for('main.view_node', node_id=notification.node_id) }}
+                {% else %}
+                    {{ url_for('main.account') }}
+                {% endif %}"
+               class="small text-decoration-none text-dark">
+                {{ notification.message }}
+            </a>
         </p>
         {% if ns.node_id != notification.node_id %}
             {% if notification.node_id %}

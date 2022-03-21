@@ -391,6 +391,7 @@ class User(UserMixin, db.Model):
             db.session.add(node)
             post.ping(datetime.utcnow())
 
+            db.session.flush()  # flush to get the id of the node just created
             Notification.push(
                 target_user=node.post.creator,
                 node=node,
