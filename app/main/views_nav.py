@@ -114,7 +114,7 @@ def contact():
             email=form.email.data or (current_user.email if current_user.is_authenticated else None),
             request_invite=form.request_invite.data)
         db.session.add(fb)
-        db.session.commit()
+        db.session.commit()  # OK
         send_email = current_app.config['EMAIL_SENDER']
         send_email(
             sender='feedback@lumiask.com',

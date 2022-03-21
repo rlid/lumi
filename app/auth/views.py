@@ -42,7 +42,7 @@ def force_login(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     user.email_verified = True
     db.session.add(user)
-    db.session.commit()
+    db.session.commit()  # OK
     login_user(user, False)
     flash('You have logged in.', category='success')
     redirect_url = request.referrer
@@ -89,7 +89,7 @@ def invite_code(code_length):
         length=code_length,
         expiry_timedelta=timedelta(days=30)
     )
-    db.session.commit()
+    db.session.commit()  # OK
     return redirect(url_for("auth.signup", code=ic.code))
 
 
@@ -104,9 +104,10 @@ def signup():
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(), password=form.password.data, signup_method='email')
         db.session.add(user)
-        InviteCode.delete(form.invite_code.data)
         session.pop("invite_code")
+        InviteCode.delete(form.invite_code.data)
         token = user.generate_token(action="confirm")
+        db.session.commit()  # OK
         send_email = current_app.config["EMAIL_SENDER"]
         send_email(
             sender='LumiAsk <welcome@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
@@ -145,7 +146,7 @@ def confirm(token):
     if current_user.verify_token(token, action='confirm'):
         current_user.email_verified = True
         db.session.add(current_user)
-        db.session.commit()
+        db.session.commit()  # OK
         flash("Your email address has been verified.", category="success")
     else:
         flash("The confirmation link is invalid or has expired.", category="danger")
@@ -162,6 +163,7 @@ def resend_confirmation():
         return redirect(url_for("main.index"))
 
     token = current_user.generate_token(action="confirm")
+    db.session.commit()  # OK
     send_email = current_app.config["EMAIL_SENDER"]
     send_email(
         sender='LumiAsk <welcome@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
@@ -187,7 +189,7 @@ def change_password():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
             db.session.add(current_user)
-            db.session.commit()
+            db.session.commit()  # OK
             flash('Your password has been updated.', category='success')
             return redirect(url_for('main.index'))
         else:
@@ -223,6 +225,7 @@ def password_reset_request():
                     site_rid,
                     digest_size=Config.SITE_RID_HASH_DIGEST_SIZE
                 ))
+            db.session.commit()  # OK
             send_email = current_app.config["EMAIL_SENDER"]
             send_email(
                 sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Reset your password',
@@ -257,13 +260,14 @@ def password_reset(token):
         if is_verified:
             user.password = form.password.data
             db.session.add(user)
-            db.session.commit()
+            db.session.commit()  # OK
             flash('Your password has been updated.', category='success')
             current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
             session.pop('auth_reset')
             login_user(user, remember=False)
             return redirect(url_for('main.index'))
         else:
+            db.session.commit()  # OK
             flash('The password reset link is invalid or has expired.', category='danger')
             return redirect(url_for('auth.password_reset_request'))
     return render_template('auth/reset_password.html', form=form)
@@ -330,7 +334,7 @@ def make_oauth_routes(oauth_provider, callback_methods=None):
             db.session.add(user)
             if invite_code:
                 db.session.delete(invite_code)
-            db.session.commit()
+            db.session.commit()  # OK
             session.pop("invite_code")
 
         if user.signup_method != oauth_provider.name:

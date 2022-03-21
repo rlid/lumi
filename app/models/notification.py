@@ -26,12 +26,6 @@ class Notification(db.Model):
 
     message = db.Column(db.String(256), nullable=False)
 
-    def read(self):
-        self.is_read = True
-        db.session.add(self)
-        db.session.commit()
-        return self.message
-
     @staticmethod
     def push(target_user, message, node=None, email=False):
         notification = Notification(
@@ -90,5 +84,4 @@ class Notification(db.Model):
             notification.email_timestamp = current_time
 
         db.session.add(notification)
-        db.session.commit()
         return notification

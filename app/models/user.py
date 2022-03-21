@@ -143,6 +143,7 @@ class User(UserMixin, db.Model):
 
     def generate_token(self, action, site_rid_hash=None, seconds_to_exp=_TOKEN_SECONDS_TO_EXPIRY):
         server_token = SingleUseToken.generate(timedelta_to_expiry=timedelta(seconds=seconds_to_exp))
+        db.session.flush()
         return authlib_ext.jws_compact_serialize_timed(
             payload={action: self.id.hex,
                      'server_token': server_token.id.hex,
@@ -243,7 +244,6 @@ class User(UserMixin, db.Model):
     def ping(self):
         self.last_seen = datetime.utcnow()
         db.session.add(self)
-        db.session.commit()
 
     def _add_tag(self, post, name):
         tag = Tag.query.get(name.lower())
@@ -391,12 +391,12 @@ class User(UserMixin, db.Model):
             db.session.add(node)
             post.ping(datetime.utcnow())
 
-            db.session.commit()
             Notification.push(
                 target_user=node.post.creator,
                 node=node,
                 message='A user shared your post.'
             )
+            db.session.commit()
         return node
 
     def _create_node(self, parent_node, referrer_reward_cent=None):
@@ -446,13 +446,13 @@ class User(UserMixin, db.Model):
         else:
             node.ping(datetime.utcnow())
 
-        db.session.commit()
         Notification.push(
             target_user=node.creator if self != node.creator else post.creator,
             node=node,
             message='A user sent you a message.',
             email=node.current_engagement and node.current_engagement.state == Engagement.STATE_ENGAGED
         )
+        db.session.commit()
         return message
 
     def create_payment_intent(self, stripe_session_id, stripe_payment_intent_id):
@@ -502,13 +502,13 @@ class User(UserMixin, db.Model):
         node.current_engagement = engagement
         node.ping(datetime.utcnow())
 
-        db.session.commit()
         Notification.push(
             target_user=post.creator,
             node=node,
             message='A user sent you an engagement request.',
             email=True
         )
+        db.session.commit()
         return engagement
 
     def cancel_engagement(self, engagement):
@@ -539,11 +539,11 @@ class User(UserMixin, db.Model):
         node.current_engagement = None
         node.ping(datetime.utcnow())
 
-        db.session.commit()
         Notification.push(
             target_user=post.creator,
             node=node,
             message='A user cancelled an engagement request.')
+        db.session.commit()
 
     def accept_engagement(self, engagement):
         node = engagement.node
@@ -580,13 +580,13 @@ class User(UserMixin, db.Model):
 
         node.ping(datetime.utcnow())
 
-        db.session.commit()
         Notification.push(
             target_user=node.creator,
             node=node,
             message='A user accepted your engagement request.',
             email=True
         )
+        db.session.commit()
 
     def rate_engagement(self, engagement, is_success, tip_cent=0):
         node = engagement.node
@@ -640,13 +640,13 @@ class User(UserMixin, db.Model):
         if engagement.rating_by_asker != 0 and engagement.rating_by_answerer != 0:
             _finalise_engagement(engagement)
 
-        db.session.commit()
         Notification.push(
             target_user=asker if self != asker else answerer,
             node=node,
             message='A user rated an engagement with you.',
             email=True
         )
+        db.session.commit()
 
     def reputation_if_dispute_lost(self, value_cent):
         m_x = math.exp(-abs(value_cent) * REP_DECAY)

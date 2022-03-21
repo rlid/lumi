@@ -22,7 +22,6 @@ class SingleUseToken(db.Model):
     def generate(timedelta_to_expiry):
         token = SingleUseToken(expiry_timedelta=timedelta_to_expiry)
         db.session.add(token)
-        db.session.commit()
         current_app.logger.info(f'Created {token}.')
         return token
 
@@ -35,11 +34,9 @@ class SingleUseToken(db.Model):
             return False
         elif datetime.utcnow() > token.expiry:
             db.session.delete(token)
-            db.session.commit()
             current_app.logger.info(f'Deleted {token}.')
             return False
         else:
             db.session.delete(token)
-            db.session.commit()
             current_app.logger.info(f'Deleted {token}.')
             return True

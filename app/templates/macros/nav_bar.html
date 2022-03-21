@@ -168,7 +168,7 @@
         </a>
         {% if badge_text is not none %}
             <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger"
-                  id="badge{{ text }}" {% if not badge_text %}hidden{% endif %}>
+                  id="badge{{ text }}" {% if active or not badge_text %}hidden{% endif %}>
             {{ badge_text }}
             </span>
         {% endif %}

@@ -56,4 +56,3 @@ class InviteCode(db.Model):
         invite_code = InviteCode.query.filter_by(code=code).first()
         if invite_code is not None:
             db.session.delete(invite_code)
-            db.session.commit()

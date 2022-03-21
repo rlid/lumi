@@ -17,10 +17,10 @@
             {% if notification.node_id %}
                 <a href="{{ url_for('main.view_node', node_id=notification.node_id) }}"
                    class="small text-decoration-none text-dark">
-                    {{ notification.read() }}
+                    {{ notification.message }}
                 </a>
             {% else %}
-                <span class="small text-dark">{{ notification.read() }}</span>
+                <span class="small text-dark">{{ notification.message }}</span>
             {% endif %}
         </p>
         {% if ns.node_id != notification.node_id %}

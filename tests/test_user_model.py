@@ -39,7 +39,6 @@ class UserModelTestCase(unittest.TestCase):
     def test_valid_tokens(self):
         u = User(email="a@a")
         db.session.add(u)
-        db.session.commit()
         token1 = u.generate_token(action="dummy")
         self.assertTrue(u.verify_token(token1, action="dummy"))
         token2 = u.generate_token(action="dummy", seconds_to_exp=60)
@@ -49,7 +48,6 @@ class UserModelTestCase(unittest.TestCase):
         u1 = User(email="a@a")
         u2 = User(email="b@b")
         db.session.add_all([u1, u2])
-        db.session.commit()
 
         token1 = u1.generate_token(action="dummy", seconds_to_exp=1)
         time.sleep(2)

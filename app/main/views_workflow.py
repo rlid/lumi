@@ -78,7 +78,7 @@ def edit_post(post_id):
 def toggle_editor():
     current_user.use_markdown = not current_user.use_markdown
     db.session.add(current_user)
-    db.session.commit()
+    db.session.commit()  # OK
 
     redirect_url = request.referrer
     if redirect_url is None or not redirect_url.startswith(request.root_url):
@@ -132,6 +132,7 @@ def share_node(node_id):
         user_node = node.post.nodes.filter(Node.creator == current_user).first()
         if user_node is None:
             user_node = current_user.create_node(node)
+            return redirect(url_for('main.share_node', node_id=user_node.id))
     else:
         user_node = node
 
@@ -141,7 +142,7 @@ def share_node(node_id):
             user_node.referrer_reward_cent = round_js(
                 0.01 * form.percentage.data * user_node.parent.remaining_referral_budget_cent)
             db.session.add(user_node)
-            db.session.commit()
+            db.session.commit()  # OK
             flash(f'Your referral reward claim is adjusted to ${0.01 * user_node.referrer_reward_cent:.2f}',
                   category='info')
         else:
@@ -332,6 +333,11 @@ def account():
 @main.route('/alerts')
 @login_required
 def alerts():
-    notifications = current_user.notifications.order_by(Notification.timestamp.desc())
-    return render_template('alerts.html', notifications=notifications, title='Alerts',
+    notifications = current_user.notifications
+    html = render_template('alerts.html',
+                           notifications=notifications.order_by(Notification.timestamp.desc()),
+                           title='Alerts',
                            feedback_form=FeedbackForm(prefix='feedback'))
+    notifications.update({Notification.is_read: True})
+    db.session.commit()  # OK
+    return html
