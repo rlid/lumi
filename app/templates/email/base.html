@@ -1,112 +1,57 @@
-{# experimental - does not look very nice #}
 {% from "email/macro_images.html" import email_logo_data %}
 
 <!doctype html>
 <html lang="en">
 <head>
     <title>{% block title %}{% endblock %}</title>
-    <style>
-        div.pre-header {
-            display: none;
-            visibility: hidden;
-            mso-hide: all;
-            font-size: 1px;
-            line-height: 1px;
-            max-height: 0;
-            max-width: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-
-        body {
-            background-color: whitesmoke;
-            font-family: sans-serif;
-            max-width: 600px;
-            -moz-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            -webkit-text-size-adjust: 100%;
-            -webkit-font-smoothing: antialiased;
-            margin: 0 auto;
-            padding: 0;
-        }
-
-        main {
-            background-color: white;
-        }
-
-        img {
-            display: block;
-            width: 100%;
-        }
-
-        div.custom-padding {
-            margin: auto;
-            padding: 1rem 2rem 1rem 2rem;
-        }
-
-        div.text-center {
-            text-align: center;
-        }
-
-        h2 {
-            font-weight: normal;
-        }
-
-        p {
-            line-height: 1.5;
-        }
-
-        a.button {
-            display: inline-block;
-            padding: 12px 24px;
-            font-weight: bold;
-            font-size: 1.25rem;
-            color: white;
-            background-color: #198754;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        footer.footnote {
-            color: gray;
-            font-size: smaller;
-            padding: 1rem 2rem;
-            text-align: center;
-        }
-    </style>
 </head>
-<body>
-<div class="pre-header">
+<!--email-->
+<body style="margin: 0;-moz-text-size-adjust: 100%;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;-webkit-font-smoothing: antialiased;">
+<!--email preheader-->
+<div class="preheader"
+     style="display: none;visibility: hidden;mso-hide: all;font-size: 1px;line-height: 1px;max-height: 0;max-width: 0;opacity: 0;overflow: hidden;">
     {% block preheader %}{% endblock %}
 </div>
-<main>
-    <img src="{{- email_logo_data() -}}">
-    <div class="custom-padding">
-        <h2>{% block heading %}{% endblock %}</h2>
-        <p>{% block content %}{% endblock %}</p>
-        <div class="text-center">
-            <a class="button" href="{% block button_url %}{% endblock %}">
-                {% block button_label %}{% endblock %}
-            </a>
-        </div>
-        <p>If that doesn't work, copy and paste the following link in your browser's address bar:</p>
-        <p>{{ self.button_url() }}</p>
-        <br>
-        <p>
-            Cheers,
+<!--email view-->
+<div style="font-family: sans-serif;line-height: 1.5;">
+    <!--email body-->
+    <div style="background-color: white;max-width: 600px;margin: 0 auto;">
+        <!--email logo-->
+        <img src="{{- email_logo_data() -}}" style="display: block;width: 100%;">
+        <!--email content-->
+        <div style="padding: 1rem 2rem;">
+            <!--email heading-->
+            <h2 style="font-weight: normal;">{% block heading %}{% endblock %}</h2>
+            <p>{% block content %}{% endblock %}</p>
+            <!--email call-to-action-->
+            <div style="text-align: center;">
+                <!--email button-->
+                <a href="{% block button_url %}{% endblock %}"
+                   style="display: inline-block;margin: 1rem 0;padding: 0.75rem 1.5rem;font-weight: bold;font-size: 1.25rem;color: white;background-color: #198754;text-decoration: none;border-radius: 0.5rem;">
+                    {% block button_label %}{% endblock %}
+                </a>
+            </div>
+            <p>If that doesn't work, copy and paste the following link in your browser's address bar:</p>
+            <!--email link-->
+            <p><a style="word-break: break-all; max-width: 100%" href="{{ self.button_url() }}">{{ self.button_url() }}</a></p>
             <br>
-            Team LumiAsk
-        </p>
+            <p>
+                Cheers,
+                <br>
+                Team LumiAsk
+            </p>
+        </div>
+        <!--email footer-->
+        <div style="background-color: whitesmoke;color: gray;font-size: smaller;text-align: center;padding: 1px 2rem;">
+            <p>
+                If you no longer wish to receive these emails, you can change your email preferences
+                <a href="{{ url_for('main.account') }}">here</a>.
+            </p>
+            <p>
+                &copy;2022 <a href="{{ url_for('main.index') }}">{{ config["APP_NAME"] }}</a>
+            </p>
+        </div>
     </div>
-</main>
-<footer class="footnote">
-    If you no longer wish to receive these emails, please update your notification settings
-    <a href="{{ url_for('main.account') }}">here</a>.
-    <p>
-        &copy; 2022 <a href="{{ url_for('main.index') }}">{{ config["APP_NAME"] }}</a>
-    </p>
-</footer>
+</div>
 </body>
 </html>
