@@ -220,38 +220,40 @@
     {% endif %}
 
     <div {# id="message{{- message.id }}" #} class="card my-3 small
-        {% if message.type >= Message.TYPE_REQUEST %}
+        {% if message.type != Message.TYPE_CHAT %}
             mx-auto text-center
         {% elif message.creator == message.node.creator %}
             ms-auto
         {% elif message.creator == message.node.post.creator %}
             me-auto
         {% endif %}
-        {% if message.type >= Message.TYPE_REQUEST %}
+        {% if message.type != Message.TYPE_CHAT %}
               bg-light border-0
         {% elif message.creator == message.node.post.creator %}
             {% if message.node.post.is_asking %}info10{% else %}warning10{% endif %}
         {% else %}
             {% if not message.node.post.is_asking %}info10{% else %}warning10{% endif %}
         {% endif %}
-        "
-                                             style="max-width:
-                                                     {% if message.type >= Message.TYPE_REQUEST %}
-                                                         80%
-                                                     {% else %}
-                                                         90%
-                                                     {% endif %};
-                                                     {% if message.type < Message.TYPE_REQUEST %}
-                                                         border-radius: 1rem;
-                                                         {% if message.creator == message.node.creator %}
-                                                             border-bottom-right-radius: 0;
-                                                         {% elif message.creator == message.node.post.creator %}
-                                                             border-bottom-left-radius: 0;
-                                                         {% endif %}
-                                                     {% endif %}">
-        <div class="card-body py-1 {% if message.type >= Message.TYPE_REQUEST %}text-muted{% else %}text-dark{% endif %}">
+        " style="max-width:
+            {% if message.type != Message.TYPE_CHAT %}
+                80%
+            {% else %}
+                90%
+            {% endif %};
+            {% if message.type == Message.TYPE_CHAT %}
+                border-radius: 1rem;
+                {% if message.creator == message.node.creator %}
+                    border-bottom-right-radius: 0;
+                {% elif message.creator == message.node.post.creator %}
+                    border-bottom-left-radius: 0;
+                {% endif %}
+            {% endif %}">
+        <div class="card-body py-1 {% if message.type != Message.TYPE_CHAT %}text-muted{% else %}text-dark{% endif %}">
             {{ message.text }}
-            {% if message.type in (Message.TYPE_REQUEST, Message.TYPE_CANCEL, Message.TYPE_ACCEPT, Message.TYPE_RATE) %}
+            {% if message.type == Message.TYPE_SHARE %}
+                with
+                {{ render_user(message.node.creator if current_user != message.node.creator else message.node.post.creator, capitalize=False) }}
+            {% elif message.type != Message.TYPE_CHAT %}
                 by {{ render_user(message.creator, capitalize=False) }}
             {% endif %}
         </div>

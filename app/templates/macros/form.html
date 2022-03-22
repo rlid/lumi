@@ -1,7 +1,7 @@
 {% macro render_login_form(form, is_continue, action_url=None) %}
-    <a class="btn btn-outline-dark w-100 mb-2" href="{{ url_for("auth.apple") }}">
+    <a class="btn btn-outline-dark w-100 mb-2 rounded-pill" href="{{ url_for("auth.apple") }}">
         <i class="bi bi-apple"></i> {% if is_continue %}Continue{% else %}Sign in{% endif %} with Apple</a>
-    <a class="btn btn-outline-danger w-100 my-2" href="{{ url_for("auth.google") }}">
+    <a class="btn btn-outline-danger w-100 my-2 rounded-pill" href="{{ url_for("auth.google") }}">
         <i class="bi bi-google"></i> {% if is_continue %}Continue{% else %}Sign in{% endif %} with Google</a>
 
     <div class="separator my-3"><span class="text-muted"> Or </span></div>
@@ -34,10 +34,10 @@
 
 
 {% macro render_signup_form(form, has_invite_code=False, action_url=None) %}
-    <a class="btn btn-outline-dark w-100 mb-2 {% if not has_invite_code %}disabled{% endif %}"
+    <a class="btn btn-outline-dark w-100 mb-2 rounded-pill {% if not has_invite_code %}disabled{% endif %}"
        href="{% if has_invite_code %}{{ url_for("auth.apple") }}{% else %}#{% endif %}">
         <i class="bi bi-apple"></i> Sign up with Apple</a>
-    <a class="btn btn-outline-danger w-100 my-2 {% if not has_invite_code %}disabled{% endif %}"
+    <a class="btn btn-outline-danger w-100 my-2 rounded-pill {% if not has_invite_code %}disabled{% endif %}"
        href="{% if has_invite_code %}{{ url_for("auth.google") }}{% else %}#{% endif %}">
         <i class="bi bi-google"></i> Sign up with Google</a>
 

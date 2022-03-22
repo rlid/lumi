@@ -228,7 +228,7 @@ def accept_engagement(engagement_id):
         if post.is_archived:
             flash('Cannot accept engagement because the post is archived.', category='danger')
         elif engagement.state != Engagement.STATE_REQUESTED:
-            flash('The engagement request is already accepted.', category='danger')
+            flash('The engagement request can no longer be accepted.', category='danger')
         elif current_user != post.creator:
             flash('Only the original poster can accept the engagement.', category='danger')
         elif current_user.value_limit_cent < (

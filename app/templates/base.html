@@ -89,26 +89,30 @@
             </main>
         {% endblock %}
         {% if session.get('allow_cookie') is none %}
-            <div class="toast-container fixed-bottom mx-auto"
-                 style="bottom:{{- 4.5 if current_user.is_authenticated else 4 -}}rem">
-                <div class="toast" role="alert" data-bs-delay="10000"
-                     data-bs-autohide="false"
-                     style="background-color: #ffffff">
+            {% if request.MOBILE %}
+                <div class="toast-container fixed-bottom mx-auto" style="bottom:{{ 4.5 if current_user.is_authenticated else 4 }}rem">
+            {% else %}
+                <div class="toast-container fixed-bottom ms-auto" style="bottom:{{ 4.5 if current_user.is_authenticated else 3.75 }}rem; right: 0.75rem">
+            {% endif %}
 
-                    <div class="toast-header bg-light"><strong class="me-auto">Cookie Notice</strong>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body pt-2"><p class="mb-1">This site only uses essential cookies by default. We’d
-                        also like to use analytics cookies so we can measure and improve the performance of our site. Do
-                        you want to allow analytics cookies?</p>
-                        <div style="font-size:1.1rem">
-                            <a class="badge btn-success text-decoration-none" href=/allow_cookie/1>Accept</a>
-                            <a class="badge btn-success text-decoration-none" href=/allow_cookie/0>Reject</a>
-                            <a class="badge btn-success text-decoration-none" href=/cookie>Learn More</a>
-                        </div>
+            <div class="toast" role="alert" data-bs-delay="10000"
+                 data-bs-autohide="false"
+                 style="background-color: #ffffff">
+
+                <div class="toast-header bg-light"><strong class="me-auto">Cookie Notice</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body pt-2"><p class="mb-1">This site only uses essential cookies by default. We’d
+                    also like to use analytics cookies so we can measure and improve the performance of our site. Do
+                    you want to allow analytics cookies?</p>
+                    <div style="font-size:1.1rem">
+                        <a class="badge btn-success text-decoration-none" href=/allow_cookie/1>Accept</a>
+                        <a class="badge btn-success text-decoration-none" href=/allow_cookie/0>Reject</a>
+                        <a class="badge btn-success text-decoration-none" href=/cookie>Learn More</a>
                     </div>
                 </div>
             </div>
+        </div>
         {% endif %}
         <footer>
             {% block footer %}

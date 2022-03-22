@@ -389,9 +389,13 @@ class User(UserMixin, db.Model):
         if node is None:
             node = self._create_node(parent_node=parent_node, referrer_reward_cent=referrer_reward_cent)
             db.session.add(node)
+            db.session.flush()  # flush to get the id of the node just created
+
+            message = Message(creator=self, node=node, type=Message.TYPE_SHARE, text=f'Start a conversation')
+            db.session.add(message)
+
             post.ping(datetime.utcnow())
 
-            db.session.flush()  # flush to get the id of the node just created
             Notification.push(
                 target_user=node.post.creator,
                 node=node,

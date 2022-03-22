@@ -7,12 +7,13 @@ from app import db
 
 
 class Message(db.Model):
-    TYPE_CHAT = 100
-    TYPE_REQUEST = 200
-    TYPE_ACCEPT = 300
-    TYPE_RATE = 400
-    TYPE_COMPLETE = 500
-    TYPE_CANCEL = 600
+    TYPE_SHARE = 100
+    TYPE_CHAT = 200
+    TYPE_REQUEST = 300
+    TYPE_ACCEPT = 400
+    TYPE_RATE = 500
+    TYPE_COMPLETE = 600
+    TYPE_CANCEL = 700
 
     __tablename__ = 'messages'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
