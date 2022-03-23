@@ -46,8 +46,6 @@ class User(UserMixin, db.Model):
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     signup_method = db.Column(db.String(16), default='email', nullable=False)
 
-    use_markdown = db.Column(db.Boolean, default=False, nullable=False)
-
     # 16-byte UUID is 32-char hex string
     # length of separator = 1
     # base64 encoding of n bytes = ~1.3 * n, rounded to 1.5 for safety
@@ -264,7 +262,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None):
+    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None, use_markdown=False):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -293,7 +291,7 @@ class User(UserMixin, db.Model):
                     is_private=is_private,
                     referral_budget_cent=referral_budget_cent,
                     title=title,
-                    body=('m' if self.use_markdown else 's') + body)
+                    body=('m' if use_markdown else 's') + body)
         db.session.add(post)
 
         self._add_tag(post, 'Asking' if is_asking else 'Answering')
@@ -319,7 +317,7 @@ class User(UserMixin, db.Model):
 
         return post
 
-    def edit_post(self, post, title, body):
+    def edit_post(self, post, title, body, use_markdown=False):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -330,7 +328,7 @@ class User(UserMixin, db.Model):
         tag_names = [name[2:] for name in re.findall(r'\\#\w+', body)]
 
         post.title = title
-        post.body = ('m' if self.use_markdown else 's') + body
+        post.body = ('m' if use_markdown else 's') + body
 
         post.ping(datetime.utcnow())
         db.session.add(post)

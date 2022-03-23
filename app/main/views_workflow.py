@@ -1,4 +1,4 @@
-from flask import render_template, redirect, flash, url_for, Markup, request, abort, current_app
+from flask import render_template, redirect, flash, url_for, Markup, request, abort, current_app, session
 from flask_login import login_required, current_user
 from sqlalchemy import and_, or_
 
@@ -10,26 +10,27 @@ from app.models.user import Post, Node, Engagement
 from utils.math import round_js
 
 
-@main.route('/post-options')
-@login_required
-def post_options():
-    return render_template("post_options.html", feedback_form=FeedbackForm(prefix='feedback'))
-
-
 @main.route('/post', methods=['GET', 'POST'])
 @login_required
 def new_post():
     form = PostForm(prefix='post')
+    use_markdown = session.get('use_markdown', False)
     if form.validate_on_submit():
         price_cent = round(100 * form.price.data)
-        post = current_user.create_post(is_asking=form.is_asking.data == 'True', price_cent=price_cent,
-                                        title=form.title.data, body=form.body.data,
-                                        is_private=form.is_private.data)
+        post = current_user.create_post(
+            is_asking=form.is_asking.data == 'True',
+            price_cent=price_cent,
+            title=form.title.data,
+            body=form.body.data,
+            is_private=form.is_private.data,
+            use_markdown=use_markdown
+        )
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
     return render_template("post_create_edit.html",
                            form=form,
                            title="Create Post",
+                           use_markdown=use_markdown,
                            feedback_form=FeedbackForm(prefix='feedback'))
 
 
@@ -43,8 +44,9 @@ def edit_post(post_id):
 
     form = PostForm(prefix='post')
     form.edit_mode = True
+    use_markdown = session.get('use_markdown', False)
     if form.validate_on_submit():
-        current_user.edit_post(post, title=form.title.data, body=form.body.data)
+        current_user.edit_post(post, title=form.title.data, body=form.body.data, use_markdown=use_markdown)
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
     form.is_asking.default = str(post.is_asking)
@@ -59,19 +61,18 @@ def edit_post(post_id):
 
     form.title.data = post.title
     form.body.data = post.body[1:].replace('\\#', '#')
+
     return render_template('post_create_edit.html',
                            form=form,
                            title="Edit Post",
+                           use_markdown=use_markdown,
                            feedback_form=FeedbackForm(prefix='feedback'))
 
 
-@main.route('/editor/<editor_type>', methods=['GET'])
+@main.route('/change-editor/<int:use_markdown>')
 @login_required
-def toggle_editor(editor_type):
-    current_user.use_markdown = editor_type == 'Markdown'
-    db.session.add(current_user)
-    db.session.commit()  # OK
-
+def change_editor(use_markdown):
+    session['use_markdown'] = use_markdown
     redirect_url = request.referrer
     if redirect_url is None or not redirect_url.startswith(request.root_url):
         redirect_url = url_for('main.index')

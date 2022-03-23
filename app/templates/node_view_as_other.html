@@ -66,25 +66,45 @@
 {% block right_col %}
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title text-muted">Think you can help or know someone who can?</h5>
+            <h5 class="card-title text-muted">
+                {% if node.post.is_asking %}
+                    Think you can help or know someone who can?
+                {% else %}
+                    Think you or someone else might be interested?
+                {% endif %}
+            </h5>
             {% if not current_user.is_authenticated %}
-                <p class="small"><a href="{{ url_for('auth.login') }}">Log in</a> to contribute and earn rewards.</p>
+                <p class="small">
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                    or
+                    <a href="{{ url_for('auth.login') }}">log in</a>
+                    to participate and earn rewards.</p>
             {% endif %}
             <ul class="small">
-                <li><b>Send</b> the OP a message to get something clarified, or to let him know how you / they may
-                    help
+                <li><b>Send</b> the OP a message to get something clarified
+                    {%- if node.post.is_asking -%}
+                        , or to let him know how you / they may help.
+                    {%- else -%}
+                        .
+                    {% endif %}
                 </li>
-                <li><b>Request Engagement</b> when you are ready to engage, and earn / pay a reward if the
-                    engagement is rated as successful(+) by both of you
+                <li class="mt-2"><b>Request Engagement</b> when you are ready to engage, and
+                    {% if node.post.is_asking %}earn the reward{% else %}pay the reward{% endif %}
+                    if the engagement is rated as successful(+) by both of you.
                 </li>
-                <li>
+                <li class="mt-2">
                     <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none">
                         <b>Share</b>
                     </a>
-                    it on social media / online communities or invite a friend to help.
-                    The answerer is encouraged to reward you as the referrer. <strong>Make sure to use the
-                    Share button to generate your unique invite link</strong></li>
-                <li>Feel free to spread the word but <b>please follow the rules of each community and don't spam</b>.
+                    it on social media / online communities or invite a friend to participate, and get rewarded as a
+                    referrer.
+                    <strong>Make sure to use the Share button to generate your unique invite link</strong>.
+                </li>
+                <li class="mt-2">Feel free to spread the word but <b>please follow the rules of each online community
+                    and don't spam</b>.
+                </li>
+                <li class="mt-2">
+                    <a class="btn btn-sm btn-link text-decoration-none px-0" href="{{ url_for('main.faq') }}">FAQ</a>
                 </li>
             </ul>
         </div>
