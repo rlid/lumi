@@ -94,8 +94,8 @@
             {{ form.is_asking.label(class_='form-label') }}
             {% for item in form.is_asking %}
                 <div class="form-check">
-                    {{ item(class_='form-check-input') }}
-                    {{ item.label(class_='form-check-label') }}
+                    {{ item(class_='form-check-input', style='width: 1.25rem; height: 1.25rem; position: relative; bottom: 0.1rem') }}
+                    {{ item.label(class_='form-check-label ms-1') }}
                 </div>
             {% endfor %}
         </div>
