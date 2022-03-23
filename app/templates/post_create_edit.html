@@ -122,7 +122,13 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guide to Posting</h5>
             <ul class="small">
-                <li><strong>Reward</strong> is how much you would offer to someone for answering your question, or how
+                <li>You can choose between a
+                    <a href={{ url_for('main.toggle_editor', editor_type='simple') }}>plain text editor</a>
+                    or a
+                    <a href={{ url_for('main.toggle_editor', editor_type='Markdown') }}>Markdown editor</a>.
+                </li>
+                <li class="mt-2"><strong>Reward</strong> is how much you would offer to someone for answering your
+                    question, or how
                     much you want to be awarded by answering a question, depending on the type of your post.
                 </li>
                 <li class="mt-2">Consider adding "#" to keywords to make them <b>#hashtags</b> so your post is easier to

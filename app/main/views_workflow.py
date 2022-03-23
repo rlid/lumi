@@ -27,12 +27,6 @@ def new_post():
                                         is_private=form.is_private.data)
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
-    if current_user.use_markdown:
-        flash('Don\'t like Markdown? Switch to ' +
-              Markup(f'<a href={url_for("main.toggle_editor")}>simple editor</a>'), category='info')
-    else:
-        flash('Need more formatting options? Try the ' +
-              Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
     return render_template("post_create_edit.html",
                            form=form,
                            title="Create Post",
@@ -65,22 +59,16 @@ def edit_post(post_id):
 
     form.title.data = post.title
     form.body.data = post.body[1:].replace('\\#', '#')
-    if current_user.use_markdown:
-        flash('Don\'t like Markdown? Switch to ' +
-              Markup(f'<a href={url_for("main.toggle_editor")}>simple editor</a>'), category='info')
-    else:
-        flash('Need more formatting options? Try the ' +
-              Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
     return render_template('post_create_edit.html',
                            form=form,
                            title="Edit Post",
                            feedback_form=FeedbackForm(prefix='feedback'))
 
 
-@main.route('/toggle-editor', methods=['GET', 'POST'])
+@main.route('/editor/<editor_type>', methods=['GET'])
 @login_required
-def toggle_editor():
-    current_user.use_markdown = not current_user.use_markdown
+def toggle_editor(editor_type):
+    current_user.use_markdown = editor_type == 'Markdown'
     db.session.add(current_user)
     db.session.commit()  # OK
 
