@@ -16,18 +16,15 @@ def post_options():
     return render_template("post_options.html", feedback_form=FeedbackForm(prefix='feedback'))
 
 
-@main.route('/post/<int:is_private>', methods=['GET', 'POST'])
+@main.route('/post', methods=['GET', 'POST'])
 @login_required
-def new_post(is_private):
+def new_post():
     form = PostForm(prefix='post')
-    if is_private == 1:
-        form.referral_budget = 0.4  # Default for private mode
-
     if form.validate_on_submit():
         price_cent = round(100 * form.price.data)
         post = current_user.create_post(is_asking=form.is_asking.data == 'True', price_cent=price_cent,
                                         title=form.title.data, body=form.body.data,
-                                        is_private=(is_private == 1))
+                                        is_private=form.is_private.data)
         return redirect(url_for('main.view_node', node_id=post.root_node.id))
 
     if current_user.use_markdown:
@@ -36,7 +33,9 @@ def new_post(is_private):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template("post_create_edit.html", form=form, title="Create Post",
+    return render_template("post_create_edit.html",
+                           form=form,
+                           title="Create Post",
                            feedback_form=FeedbackForm(prefix='feedback'))
 
 
@@ -59,7 +58,10 @@ def edit_post(post_id):
     form.process()
 
     form.price.data = 0.01 * post.price_cent
-    form.price.render_kw = {"readonly": None}
+    form.price.render_kw = {'readonly': 'readonly'}
+
+    form.is_private.data = post.is_private
+    form.is_private.render_kw = {'disabled': 'disabled'}
 
     form.title.data = post.title
     form.body.data = post.body[1:].replace('\\#', '#')
@@ -69,7 +71,9 @@ def edit_post(post_id):
     else:
         flash('Need more formatting options? Try the ' +
               Markup(f'<a href={url_for("main.toggle_editor")}>Markdown editor</a>'), category='info')
-    return render_template('post_create_edit.html', form=form, title="Edit Post",
+    return render_template('post_create_edit.html',
+                           form=form,
+                           title="Edit Post",
                            feedback_form=FeedbackForm(prefix='feedback'))
 
 

@@ -8,7 +8,7 @@
 
 {% block mid_col %}
     {{ render_post_card(node, buttons=True) }}
-{#    {{ render_reward_info(node) }}#}
+    {#    {{ render_reward_info(node) }}#}
     {% for node, last_timestamp in nodes %}
         {% set messages = node.messages_ordered(order_desc=True) %}
         <div class="card mb-3
@@ -61,20 +61,40 @@
         <div class="card-body">
             <h5 class="card-title text-muted">Guide for poster</h5>
             <ul class="small">
-                <li>You can add / remove <b>hashtags</b> by <b>editing</b> your post, adding appropriate hashtags
-                    might get you connected to someone faster
+                <li class="mt-2">
+                    {% if node.post.is_private %}
+                        Your post is in private mode - you need to <strong>
+                        <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none">
+                            share
+                        </a></strong>
+                        it with your friends or on social media and other online communities to kick off the process.
+                    {% else %}
+                        <strong>
+                            <a href="{{ url_for('main.share_node', node_id=node.id) }}" class="text-decoration-none">
+                                Share
+                            </a></strong>
+                        your post with your friends or on social media and other online communities to broaden its
+                        reach.
+                    {% endif %}
                 </li>
-                <li>Consider editing your post if there are multiple enquiries seeking similar clarifications</li>
-                <li>You can mark your post as <b>done</b> to stop messaging from others via the post, but active
-                    engagements are not affected until they are rated by both parties
+                <li class="mt-2">You can <b>edit</b> your post to add / remove #hashtags, adding appropriate
+                    hashtags might get you connected to someone faster.
                 </li>
-                <li>You can accept <b>multiple active engagements</b> at the same time as the asker or answerer, e.g.
-                    you want to hear from different perspectives / a second opinion to cross-check the answers, but as
-                    an asker you should be prepared to pay the reward for each successful engagement when you accept
+                <li class="mt-2">Consider editing your post if there are multiple people seeking similar
+                    clarifications.
                 </li>
-                <li>Interactions with the most recent message will be displayed first</li>
+                <li class="mt-2">You can <b>archive</b> your post to stop receiving messages from others via the post,
+                    but active engagements are not affected until they are rated by both parties.
+                </li>
+                <li class="mt-2">You can accept <b>multiple active engagements</b> at the same time as the asker or
+                    answerer, e.g. you want to hear from different perspectives / a second opinion to cross-check the
+                    answers, but as an asker you should be prepared to pay the reward for each successful engagement
+                    when you accept.
+                </li>
+                <li class="mt-2">
+                    <a class="btn btn-sm btn-link text-decoration-none px-0" href="{{ url_for('main.faq') }}">FAQ</a>
+                </li>
             </ul>
         </div>
     </div>
-    {{ super() }}
 {% endblock %}

@@ -130,8 +130,57 @@
             </div>
         {% endif %}
         <div class="mb-3" id="tui_editor"></div>
+        <div class="form-check form-switch mb-3">
+            {{ form.is_private(class_='form-check-input', role='switch') }}
+            {{- form.is_private.label(class_='form-check-label') -}}
+            <sup>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none px-0" data-bs-toggle="modal"
+                        data-bs-target="#modalMode">
+                    What's this?
+                </button>
+            </sup>
+        </div>
         {{ form.submit(class_='btn btn-success w-100') }}
     </form>
+    <div class="modal fade" id="modalMode" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Public vs. Private mode</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body small">
+                    <strong>Public</strong>
+                    <ul>
+                        <li class="mt-1">Your post is listed publicly, just like how it works on a traditional online
+                            forum.
+                        </li>
+                        <li class="mt-1">Up to 20% of the reward you set for your post are awarded to referrers leading
+                            to a successful engagement.
+                        </li>
+                    </ul>
+                    <strong>Private</strong>
+                    <ul>
+                        <li class="mt-1">Your post is not listed publicly - it lives on and travels through your (and
+                            your friends, and your friends' friends'...) social networks.
+                        </li>
+                        <li class="mt-1">This feature relies on <strong>you</strong> to send a link to your post to your
+                            friends or online communities to kick off the process.
+                        </li>
+                        <li class="mt-1">
+                            Up to 40% of the reward you set for your post are awarded to referrers leading to a
+                            successful engagement.
+                        </li>
+                    </ul>
+                    <p>
+                        Consider using private mode if your question is easily answered by the right person (e.g. if you
+                        are looking for someone to share a specific experience), but might require more effort to search
+                        beyond your immediate network of friends and active members of online communities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endmacro %}
 
 

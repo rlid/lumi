@@ -5,7 +5,7 @@ Other users contribute in 3 ways:
  - bringing the question to someone else’s attention
  - request to engage with the OP
 
-By accepting the request, the engagement will be open until 24 hours after either party rated the engagement as successful / unsuccessful. The other party will be able to rate in the last 24-hr window, not rated is regarded as unsuccessful after the deadline.
+By accepting the request, the engagement will be open until 24 hours after either party rated the engagement as successful / unsuccessful. The other user will be able to rate in the last 24-hr window, not rated is regarded as unsuccessful after the deadline.
 
 Reward will be released only if the initiator rated the engagement as successful.
 

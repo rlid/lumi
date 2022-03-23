@@ -319,7 +319,7 @@ class User(UserMixin, db.Model):
 
         return post
 
-    def edit_post(self, post, title, body, is_private=None, referral_budget_cent=None):
+    def edit_post(self, post, title, body):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -331,10 +331,7 @@ class User(UserMixin, db.Model):
 
         post.title = title
         post.body = ('m' if self.use_markdown else 's') + body
-        if is_private is not None:
-            post.is_private = is_private
-        if referral_budget_cent is not None:
-            post.referral_budget_cent = referral_budget_cent
+
         post.ping(datetime.utcnow())
         db.session.add(post)
 
@@ -635,11 +632,14 @@ class User(UserMixin, db.Model):
         engagement.ping(datetime.utcnow())
         db.session.add(engagement)
 
+        tip_text = ''
+        if self == asker and tip_cent > 0:
+            tip_text = f' with a tip of ${0.01 * tip_cent:.2f}'
         message = Message(creator=self,
                           node=node,
                           engagement=engagement,
                           type=Message.TYPE_RATE,
-                          text=f'Engagement rated {"+" if is_success else "-"}')
+                          text=f'Engagement rated {"+" if is_success else "-"}' + tip_text)
         db.session.add(message)
 
         if engagement.rating_by_asker != 0 and engagement.rating_by_answerer != 0:

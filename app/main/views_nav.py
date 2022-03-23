@@ -19,7 +19,6 @@ def before_request():
         if request.endpoint == 'static':
             return
         if not current_user.email_verified and (
-                request.endpoint == 'main.post_options' or
                 request.endpoint == 'main.new_post' or
                 request.endpoint == 'main.request_engagement' or
                 request.endpoint == 'main.accept_engagement' or
