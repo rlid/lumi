@@ -211,3 +211,7 @@ Apple iPhone 13 Pro Max
     height: 2rem;
     border-radius: 2rem;
 }
+
+.form-check-input:checked {
+    border-color: #198754;
+}
