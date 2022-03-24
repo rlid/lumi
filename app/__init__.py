@@ -8,6 +8,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
 from flask_qrcode import QRcode
+from flask_minify import Minify
 
 from config import config
 from utils.authlib_ext import ApplePrivateKeyJWT
@@ -23,6 +24,7 @@ mobility = Mobility()
 socketio = SocketIO()
 qrcode = QRcode()
 talisman = Talisman()
+minify = Minify()
 
 csp = {
     'default-src': [
@@ -54,6 +56,7 @@ def create_app(config_name='DEV'):
     mobility.init_app(app)
     socketio.init_app(app)
     qrcode.init_app(app)
+    minify.init_app(app)
     talisman.init_app(
         app,
         force_https=app_config.FORCE_HTTPS,
