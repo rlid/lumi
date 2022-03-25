@@ -215,3 +215,7 @@ Apple iPhone 13 Pro Max
 .form-check-input:checked {
     border-color: #198754;
 }
+
+.form-control {
+    border-radius: 0.5rem;
+}
