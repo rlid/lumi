@@ -4,3 +4,11 @@
 - Find someone who know how to troubleshoot a particular washing machine
 - Find someone who knows how to deal with a particular error message
 - Confirm if a baby water bottle leaks when upside down
+
+Paid survey
+- Ask: what will motivate you to tap into your network to help someone?
+  - Help a friend? Good cause?
+  - Monetary reward? If so, how much?
+  - Special situation only
+  - Other
+- 

@@ -232,10 +232,13 @@ def password_reset_request():
                 body_text=render_template('email/reset.txt', token=token),
                 body_html=render_template('email/reset.html', token=token)
             )
-            flash(f'An email with instructions to reset your password has been sent to {form.email.data}.',
+            flash(f'We will send the password reset instructions to {form.email.data}'
+                  ' if there is an account associated with this email.',
                   category='info')
             return redirect(url_for('main.index'))
-        flash(f'{form.email.data} is not associated with any account in our system.', category='danger')
+        flash(f'We will send the password reset instructions to {form.email.data}'
+              ' if there is an account associated with this email.',
+              category='info')
     return render_template('auth/reset_password_request.html', form=form)
 
 
