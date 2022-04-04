@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
+from app.models import Transaction
 
 
 class Engagement(db.Model):
@@ -44,9 +45,11 @@ class Engagement(db.Model):
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
-    platform_fee = db.relationship('PlatformFee',
+    transactions = db.relationship("Transaction",
                                    backref=db.backref('engagement'),
-                                   uselist=False)
+                                   foreign_keys=[Transaction.engagement_id],
+                                   lazy="dynamic",
+                                   cascade="all, delete-orphan")
 
     def ping(self, utcnow):
         self.last_updated = utcnow

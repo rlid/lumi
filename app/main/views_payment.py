@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.main import main
-from app.models import Notification
+from app.models import Notification, Transaction
 from app.models.payment import PaymentIntent
 
 
@@ -77,8 +77,12 @@ def webhook():
         payment_intent = PaymentIntent.query.filter_by(stripe_payment_intent_id=stripe_payment_intent.id).first()
         if payment_intent is not None and not payment_intent.succeeded:
             payment_intent.succeeded = True
-            payment_intent.creator.total_balance_cent += stripe_payment_intent.amount
             db.session.add(payment_intent)
+            Transaction.add(
+                transaction_type=Transaction.TYPE_TOP_UP,
+                amount_cent=stripe_payment_intent.amount,
+                user=payment_intent.creator,
+                payment_intent=payment_intent)
 
             Notification.push(
                 target_user=payment_intent.creator,

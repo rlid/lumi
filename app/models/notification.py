@@ -33,6 +33,7 @@ class Notification(db.Model):
             node=node,
             message=message
         )
+        db.session.add(notification)
 
         html = ''
         try:
@@ -83,5 +84,4 @@ class Notification(db.Model):
                 body_html=body_html)
             notification.email_timestamp = current_time
 
-        db.session.add(notification)
         return notification

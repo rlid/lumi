@@ -33,7 +33,7 @@ class Config:
 
     FORCE_HTTPS = os.environ.get('FORCE_HTTPS', '').lower() == 'true'
 
-    SECRET_KEY = os.environ.get('SECRET_KEY', '')  # environment variable
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'DUMMY_SECRET_KEY')  # environment variable
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')  # environment variable
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')  # environment variable
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')  # environment variable

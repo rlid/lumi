@@ -3,8 +3,8 @@ from app.models.comment import Comment
 from app.models.post_tag import PostTag
 from app.models.post_tag import Tag
 from app.models.message import Message
+from app.models.transaction import Transaction
 from app.models.engagement import Engagement
-from app.models.platform_fee import PlatformFee
 from app.models.notification import Notification
 from app.models.feedback import Feedback
 from app.models.node import Node

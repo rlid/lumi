@@ -16,3 +16,7 @@ class PaymentIntent(db.Model):
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), nullable=False)
 
     succeeded = db.Column(db.Boolean, default=False, nullable=False)
+
+    transaction = db.relationship('Transaction',
+                                  backref=db.backref('payment_intent'),
+                                  uselist=False)

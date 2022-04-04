@@ -10,8 +10,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
-from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, PlatformFee, Notification, \
-    Feedback
+from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Message, Notification, \
+    Feedback, Transaction
 from app.models.errors import InvalidActionError, RewardDistributionError, InsufficientFundsError
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
@@ -116,6 +116,12 @@ class User(UserMixin, db.Model):
                                     foreign_keys=[Notification.target_user_id],
                                     lazy="dynamic",
                                     cascade="all, delete-orphan")
+
+    transactions = db.relationship("Transaction",
+                                   backref=db.backref('user'),
+                                   foreign_keys=[Transaction.user_id],
+                                   lazy="dynamic",
+                                   cascade="all, delete-orphan")
 
     @property
     def password(self):
@@ -262,7 +268,8 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None, use_markdown=False):
+    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None,
+                    use_markdown=False):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
         body = body.replace('\r\n', '\n')  # standardise new lines as '\n'
@@ -836,12 +843,21 @@ def _pay_tip(engagement):
     asker = engagement.asker
     answerer = engagement.answerer
     if tip_cent > 0:
-        asker.total_balance_cent -= tip_cent
         asker.reserved_balance_cent -= tip_cent
-        answerer.total_balance_cent += tip_cent
 
-        db.session.add(asker)
-        db.session.add(answerer)
+        Transaction.add(
+            transaction_type=Transaction.TYPE_ASKER_TIP_PAYMENT,
+            amount_cent=-tip_cent,
+            user=asker,
+            engagement=engagement
+        )
+
+        Transaction.add(
+            transaction_type=Transaction.TYPE_ANSWERER_TIP,
+            amount_cent=tip_cent,
+            user=answerer,
+            engagement=engagement
+        )
 
         Notification.push(
             target_user=asker,
@@ -872,8 +888,13 @@ def _distribute_reward_cent(engagement, fraction):
     value_cent = node.value_cent
     buyer.reserved_balance_cent -= value_cent
     value_cent = round(fraction * value_cent)
-    buyer.total_balance_cent -= value_cent
-    db.session.add(buyer)
+
+    Transaction.add(
+        transaction_type=Transaction.TYPE_ASKER_REWARD_PAYMENT,
+        amount_cent=-value_cent,
+        user=buyer,
+        engagement=engagement
+    )
 
     Notification.push(
         target_user=buyer,
@@ -883,8 +904,11 @@ def _distribute_reward_cent(engagement, fraction):
     )
 
     platform_fee_cent = round(fraction * post.platform_fee_cent)
-    platform_fee = PlatformFee(amount_cent=platform_fee_cent, engagement=engagement)
-    db.session.add(platform_fee)
+    Transaction.add(
+        transaction_type=Transaction.TYPE_PLATFORM_FEE,
+        amount_cent=platform_fee_cent,
+        engagement=engagement
+    )
 
     sum_referrer_reward_cent = 0
     nodes = node.nodes_before_inc().all()  # all nodes including buyers and sellers
@@ -893,8 +917,12 @@ def _distribute_reward_cent(engagement, fraction):
         for node in referrer_nodes:
             referrer = node.creator
             referrer_reward_cent = round(fraction * node.referrer_reward_cent)
-            referrer.total_balance_cent += referrer_reward_cent
-            db.session.add(referrer)
+            Transaction.add(
+                transaction_type=Transaction.TYPE_REFERRER_REWARD,
+                amount_cent=referrer_reward_cent,
+                user=referrer,
+                engagement=engagement
+            )
             sum_referrer_reward_cent += referrer_reward_cent
 
             Notification.push(
@@ -915,8 +943,12 @@ def _distribute_reward_cent(engagement, fraction):
             referrer_reward_cent = round(
                 0.5 * (total_referrer_reward_cent_cap - sum_referrer_reward_cent)
             )
-            referrer.total_balance_cent += referrer_reward_cent
-            db.session.add(referrer)
+            Transaction.add(
+                transaction_type=Transaction.TYPE_REFERRER_REWARD,
+                amount_cent=referrer_reward_cent,
+                user=referrer,
+                engagement=engagement
+            )
             sum_referrer_reward_cent += referrer_reward_cent
 
             Notification.push(
@@ -928,7 +960,12 @@ def _distribute_reward_cent(engagement, fraction):
 
     # the seller gets everything left
     answerer_reward_cent = value_cent - platform_fee_cent - sum_referrer_reward_cent
-    seller.total_balance_cent += answerer_reward_cent
+    Transaction.add(
+        transaction_type=Transaction.TYPE_ANSWERER_REWARD,
+        amount_cent=answerer_reward_cent,
+        user=seller,
+        engagement=engagement
+    )
     db.session.add(seller)
 
     Notification.push(

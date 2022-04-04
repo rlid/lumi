@@ -4,7 +4,7 @@ import unittest
 from random import Random
 
 from app import create_app, db
-from app.models import User, Post, Node, PlatformFee
+from app.models import User, Node, Transaction
 from app.models.user import REP_DECAY, REP_I_DECAY
 
 
@@ -323,5 +323,5 @@ class BasicsTestCase(unittest.TestCase):
 
         initial_balance = 5 * 10.0
         final_balance = sum([u.total_balance for u in users])
-        platform_fees = sum([fee.amount for fee in PlatformFee.query.all()])
+        platform_fees = sum([fee.amount for fee in Transaction.query.filter_by(type=Transaction.TYPE_PLATFORM_FEE).all()])
         self.assertAlmostEqual(initial_balance - final_balance, platform_fees)

@@ -2,7 +2,7 @@ import logging
 import os
 
 from app import create_app, db, socketio
-from app.models import PlatformFee, User, Post, Node, Engagement, PostTag, Tag, Message, Feedback
+from app.models import Transaction, User, Post, Node, Engagement, PostTag, Tag, Message, Feedback
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'DEFAULT')
 app.logger.setLevel(logging.INFO)
@@ -18,7 +18,7 @@ def make_shell_context():
         PostTag=PostTag,
         Tag=Tag,
         Message=Message,
-        PlatformFee=PlatformFee,
+        Transaction=Transaction,
         Feedback=Feedback
     )
 

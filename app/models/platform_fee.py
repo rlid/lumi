@@ -18,7 +18,3 @@ class PlatformFee(db.Model):
     @property
     def amount(self):
         return 0.01 * self.amount_cent
-
-    @amount.setter
-    def amount(self, value):
-        self.amount_cent = round(100 * value)

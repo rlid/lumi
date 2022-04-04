@@ -37,7 +37,7 @@ message = Mail(
     plain_text_content=body_text,
     html_content=body_html)
 try:
-    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    sg = SendGridAPIClient('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')
     response = sg.send(message)
     print(response.status_code)
     print(response.body)
