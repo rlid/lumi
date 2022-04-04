@@ -113,8 +113,7 @@
                                 <div class="accordion-body">
                                     <ol>
                                         <li>Make a post - set a topic (something you are knowledgeable about) and set a
-                                            reward that you
-                                            want to receive after successfully answering a question
+                                            reward that you want to receive after successfully answering a question
                                         </li>
                                         <li>Chat with anyone interested in the topic and provide clarifications if
                                             needed
@@ -161,52 +160,24 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header" id="qAnswerQuality">
-                <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseAnswerQuality">
-                    How do you ensure the quality of answers?
+            <h2 class="accordion-header" id="qFeedback">
+                <button class="accordion-button {% if anchor_id != 'qFeedback' %}collapsed{% endif %} bg-light"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseFeedback">
+                    How do I give feedback?
                 </button>
             </h2>
-            <div id="collapseAnswerQuality" class="accordion-collapse collapse">
+            <div id="collapseFeedback"
+                 class="accordion-collapse collapse {% if anchor_id == 'qFeedback' %}show{% endif %}">
                 <div class="accordion-body">
-                    <p>We are constantly exploring new ideas to promote responsible behavior, maintain and improve the
-                        quality user-generated contents, and help users to assess the trustworthiness of others. Our
-                        current recommendations are as follows:</p>
-                    <ol>
-                        <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because the
-                            answer can be verified by yourself once enough proof is presented by the answerer (e.g. you
-                            ask for a coupon code and the one given by the answerer works), or because the answerer
-                            convinced you of their credentials through proof (e.g. you want to know about a university
-                            and the answerer showed you his ID with sensitive information redacted), or because you are
-                            prepared to enter into multiple engagements to cross-check the answers.
-                        </li>
-                        <li>Make sure to check out the other user's track record of past engagements before entering
-                            into an engagement. While it does not prevent someone from giving poor answers, the need to
-                            maintain a good track record should deter people from entering into engagements
-                            opportunistically.
-                        </li>
-                        <li>Please consider <strong>tipping</strong> particularly helpful answerers as a way to
-                            encourage answerers to respond with high quality answers.
-                        </li>
-                        <li>Each user has a reward limit and they cannot participate in any posts with a reward higher
-                            than their reward limit. The limit is reduced aggressively for users on a bad run of
-                            engagements, and you will be warned if their limit is reduced after they entered into
-                            engagement with you.
-                        </li>
-                        <li>In addition to rating the engagement, please report to us particularly poor interactions or
-                            deliberate misinformation.
-                        </li>
-                    </ol>
-                    <p>Please remember that like any platform powered by user‐generated contents, you are ultimately
-                        responsible for verifying the information provided to you and deciding whether to rely on it.
-                        You should always exercise caution when interacting with strangers on the internet and be wary
-                        of proof. You are encouraged to ask for more proof if you find what is provided to you is
-                        insufficient.</p>
-                    <p>Developing effective strategies to maintain and improve the quality of user-generated contents
-                        and holding the sources accountable is one of the main motivations for us to create the
-                        platform, and it will always remain an area of active research and development for us. We would
-                        like to work very closely with our users, so if you have any ideas please
-                        <a href="{{ url_for('main.contact') }}">get in touch</a>!</p>
+                    <p>
+                        Thank you so much for helping us create a better product for you! You can contact us through any
+                        of the channels listed on our <a href="{{ url_for('main.contact') }}">contact page</a>.
+                    </p>
+                    <p>
+                        If you prefer to have a conversation in real time, feel free to use WhatsApp or the live chat
+                        functionality available on most social media platforms.
+                    </p>
                 </div>
             </div>
         </div>
@@ -234,7 +205,6 @@
                 </div>
             </div>
         </div>
-
 
         <div class="accordion-item">
             <h2 class="accordion-header" id="qAfterSubmission">
@@ -586,6 +556,42 @@
             <h2 class="accordion-header" id="qReputation">
                 <button class="accordion-button collapsed bg-light border-top" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseReputation">
+                    How does my reputation matter?
+                </button>
+            </h2>
+            <div id="collapseReputation" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <p>Your reputation on the platform is modeled based on your track record of past engagements.
+                        Generally speaking, your reputation strengthens as you successfully complete engagements on the
+                        platform, and weakens as you lose disputes.</p>
+                    <p>It affects you as a user of the platform mainly in the following ways:</p>
+                    <ul>
+                        <li>
+                            Because users are advised to always check out the reputation and track record of the other
+                            user before entering into an engagement, a poor track record will directly influence their
+                            decision on whether to enter into an engagement with you.
+                        </li>
+                        <li class="mt-2">
+                            It determines the maximum value of reward you can offer or receive in a Q&A. You might not
+                            be able to participate in Q&As with meaningful reward if your reputation is too low.
+                        </li>
+                        <li class="mt-2">
+                            It is used to settle disputes. In the event of a dispute, the user with a stronger
+                            reputation will win the dispute and the user with a weaker reputation will have their
+                            reputation negatively impacted following the dispute.
+                        </li>
+                    </ul>
+                    <p>Note that even if an asker loses a dispute, the reward will not be paid to the answerer, but the
+                        asker will soon lose the ability to post Q&As with meaningful reward if their track record is
+                        consistently poor.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="qReputation">
+                <button class="accordion-button collapsed bg-light border-top" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseReputation">
                     How do I protect my reputation?
                 </button>
             </h2>
@@ -595,21 +601,21 @@
                         <li>First and foremost, the best way to protect your reputation is to act courteously and
                             honestly towards each other. After all, your reputation is reflected through your actions.
                         </li>
-                        <li class="mt-3">Always check the other user's track record before requesting for or accepting an engagement.
-                            By requesting for or accepting an engagement, you are putting your reputation on the line
-                            because you are giving the other user the permission to influence it by rating the
-                            engagement with you.
+                        <li class="mt-3">Always check the other user's track record before requesting for or accepting
+                            an engagement. By requesting for or accepting an engagement, you are putting your reputation
+                            on the line because you are giving the other user the permission to influence it by rating
+                            the engagement with you.
                         </li>
-                        <li class="mt-3">Don't be afraid to rate an engagement differently from the other user if it is your honest
-                            assessment. You are helping the community by providing your honest feedback on the other
-                            user, and you are very likely to win in the automatic dispute resolution if you have always
-                            acted responsibly. As long as you are not consistently getting into disputes with other
-                            users, there is no need to worry about reputational damage.
+                        <li class="mt-3">Don't be afraid to rate an engagement differently from the other user if it is
+                            your honest assessment. You are helping the community by providing your honest feedback on
+                            the other user, and you are very likely to win in the automatic dispute resolution if you
+                            have always acted responsibly. As long as you are not consistently getting into disputes
+                            with other users, there is no need to worry about reputational damage.
                         </li>
-                        <li class="mt-3">For potential disputes in grey area, consider the value of reward lost vs. the likelihood of
-                            damage to your reputation. If necessary, you could protect your reputation by rating the
-                            engagement as successful when you are the asker / unsuccessful when you are the answerer.
-                            This is mostly relevant for new users who do not have a track record yet.
+                        <li class="mt-3">For potential disputes in grey area, consider the value of reward lost vs. the
+                            likelihood of damage to your reputation. If necessary, you could protect your reputation by
+                            rating the engagement as successful when you are the asker / unsuccessful when you are the
+                            answerer. This is mostly relevant for new users who do not have a track record yet.
                         </li>
                     </ul>
                 </div>
@@ -619,6 +625,57 @@
 
         <h4>Other</h4>
         <div class="accordion-item">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="qAnswerQuality">
+                    <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseAnswerQuality">
+                        How do you ensure the quality of answers?
+                    </button>
+                </h2>
+                <div id="collapseAnswerQuality" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <p>We are constantly exploring new ideas to promote responsible behavior, maintain and improve
+                            the quality user-generated contents, and help users to assess the trustworthiness of others.
+                            Our current recommendations are as follows:</p>
+                        <ol>
+                            <li>Ask questions that you will know if an answer is satisfactory when given, e.g. because
+                                the answer can be verified by yourself once enough proof is presented by the answerer
+                                (e.g. you ask for a coupon code and the one given by the answerer works), or because the
+                                answerer convinced you of their credentials through proof (e.g. you want to know about a
+                                university and the answerer showed you his ID with sensitive information redacted), or
+                                because you are prepared to enter into multiple engagements to cross-check the answers.
+                            </li>
+                            <li class="mt-2">Make sure to check out the other user's track record of past engagements
+                                before entering into an engagement. While it does not prevent someone from giving poor
+                                answers, the need to maintain a good track record should deter people from entering into
+                                engagements opportunistically.
+                            </li>
+                            <li class="mt-2">Please consider <strong>tipping</strong> particularly helpful answerers as
+                                a way to encourage answerers to respond with high quality answers.
+                            </li>
+                            <li class="mt-2">Each user has a reward limit and they cannot participate in any posts with
+                                a reward higher than their reward limit. The limit is reduced aggressively for users on
+                                a bad run of engagements, and you will be warned if their limit is reduced after they
+                                entered into engagement with you.
+                            </li>
+                            <li class="mt-2">In addition to rating the engagement, please report to us particularly poor
+                                interactions or deliberate misinformation.
+                            </li>
+                        </ol>
+                        <p>Please remember that like any platform powered by user‐generated contents, you are ultimately
+                            responsible for verifying the information provided to you and deciding whether to rely on
+                            it. You should always exercise caution when interacting with strangers on the internet and
+                            be wary of proof. You are encouraged to ask for more proof if you find what is provided to
+                            you is insufficient.</p>
+                        <p>Developing effective strategies to maintain and improve the quality of user-generated
+                            contents and holding the sources accountable is one of the main motivations for us to create
+                            the platform, and it will always remain an area of active research and development for us.
+                            We would like to work very closely with our users, so if you have any ideas please
+                            <a href="{{ url_for('main.contact') }}">get in touch</a>!</p>
+                    </div>
+                </div>
+            </div>
+
             <h2 class="accordion-header" id="qDoesItWork">
                 <button class="accordion-button collapsed bg-light border-top" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseDoesItWork">
@@ -641,28 +698,6 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header" id="qFeedback">
-                <button class="accordion-button {% if anchor_id != 'qFeedback' %}collapsed{% endif %} bg-light"
-                        type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseFeedback">
-                    How do I give feedback?
-                </button>
-            </h2>
-            <div id="collapseFeedback"
-                 class="accordion-collapse collapse {% if anchor_id == 'qFeedback' %}show{% endif %}">
-                <div class="accordion-body">
-                    We value your feedback highly and you can contact us through any of the following channels -
-                    <a href="mailto:info@lumiask.com">Email</a>,
-                    <a href="http://192.168.0.8:8080/whatsapp">WhatsApp</a>,
-                    <a href="https://discord.gg/PC7mPwXYsY">Discord</a>,
-                    <a href="https://twitter.com/LumiQnA">Twitter</a>,
-                    <a href="https://fb.me/LumiQA">Facebook</a>,
-                    <a href="https://www.linkedin.com/company/knowbleltd">LinkedIn</a>.
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
             <h2 class="accordion-header" id="qNewQuestion">
                 <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseNewQuestion">
@@ -671,16 +706,18 @@
             </h2>
             <div id="collapseNewQuestion" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    You can contact us through any of the following communication channels -
-                    <a href="mailto:info@lumiask.com">Email</a>,
-                    <a href="http://192.168.0.8:8080/whatsapp">WhatsApp</a>,
-                    <a href="https://discord.gg/PC7mPwXYsY">Discord</a>,
-                    <a href="https://twitter.com/LumiQnA">Twitter</a>,
-                    <a href="https://fb.me/LumiQA">Facebook</a>,
-                    <a href="https://www.linkedin.com/company/knowbleltd">LinkedIn</a>.
+                    <p>
+                        We'd be delighted to answer any questions you have. Please drop us a line using the contact form
+                        on our <a href="{{ url_for('main.contact') }}">contact page</a>.
+                    </p>
+                    <p>
+                        If you prefer to have a conversation in real time, feel free to use WhatsApp or the live chat
+                        functionality available on most social media platforms.
+                    </p>
                 </div>
             </div>
         </div>
+
     </div>
     <div class="text-center my-3">
         <a href="javascript:window.scrollTo(0, 0)">Back to Top</a>

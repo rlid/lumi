@@ -152,12 +152,10 @@
 {# only visible if screen width is visible_from or more #}
 {% macro render_nav_item_bottom(endpoint=None, text=None, icon=None, visible_from=None, link=None, badge_text=None, alt=None, extra_class="", onclick=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
-    <li class="btn-secondary position-relative text-center px-0 py-0 rounded-0
-        {{ extra_class }}
+    <li class="btn-secondary position-relative text-center px-0 py-0 rounded-0 {{ extra_class }}
         {% if text %}btn-sm{% else %}btn-lg my-auto{% endif %}
         {% if active %}active{% endif %}
-        {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}
-        ">
+        {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}">
         <a href="{% if link is not none %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}"
            class="nav-link text-white"
            {% if alt %}title="{{ alt }}" alt="{{ alt }}"{% endif %}

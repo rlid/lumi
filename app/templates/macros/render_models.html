@@ -19,17 +19,17 @@
 {# tags_in_filter should contain all the ACTIVE tags on the current page #}
 {% macro render_tag(tag, tags_in_filter=[], freq=None, extra_class="", ignore_ids=['asking', 'answering']) %}
     {% if tag.id not in ignore_ids %}
-        <a class="badge rounded-pill border text-decoration-none
-        bg-{{- 'info' if tag.id == 'asking' else ('warning' if tag.id == 'answering' else 'light') }}
-        text-dark {{ extra_class }}" href="
-        {% if tag in tags_in_filter %}
+        <a class="badge rounded-pill border text-decoration-none text-dark {{ extra_class }}
+        bg-{{- 'info' if tag.id == 'asking' else ('warning' if tag.id == 'answering' else 'light') }}"
+           href="
+        {%- if tag in tags_in_filter -%}
             {# if the tag is already active, the link will remove the tag from the filter #}
-            {{ url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) }}
-        {% else %}
+            {{- url_for("main.browse", tags=tags_in_filter|select('ne', tag)|join('+', attribute='name')) -}}
+        {%- else -%}
             {# if the tag is not in the active filter, the link will add it #}
-            {{ url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) }}
-        {% endif %}
-        ">#{{ tag.name }} {% if freq %}
+            {{- url_for("main.browse", tags=([tag] + tags_in_filter)|join('+', attribute='name')) -}}
+        {%- endif -%}
+        ">#{{- tag.name -}} {% if freq %}
             <span class="badge bg-secondary opacity-75 rounded-pill">{{ freq }}</span>{% endif %}
         </a>
     {% endif %}

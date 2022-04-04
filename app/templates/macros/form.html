@@ -10,15 +10,15 @@
     <form method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
         {{ form.hidden_tag() }}
         <div class="form-floating mb-3">
-            {{ form.email(class_='form-control', style='border-radius: .5rem') }}
+            {{ form.email(class_='form-control') }}
             {{ form.email.label() }}
         </div>
         <div class="form-floating mb-3">
-            {{ form.password(class_='form-control', style='border-radius: .5rem') }}
+            {{ form.password(class_='form-control') }}
             {{ form.password.label() }}
         </div>
         <div class="form-check mb-3">
-            {{ form.remember_me(class_='form-check-input') }}
+            {{ form.remember_me(class_='form-check-input me-2', style='height: 1.5rem; width: 1.5rem; position: relative; bottom: 0.25rem;') }}
             {{ form.remember_me.label(class_='form-check-label') }}
         </div>
         {{ form.submit(class_='btn btn-success w-100') }}
@@ -48,9 +48,9 @@
         {{ form.hidden_tag() }}
         <div class="form-floating mb-3" {% if form.hide_invite_code %}style="display: none"{% endif %}>
             {% if form.invite_code.errors %}
-                {{ form.invite_code(class_='form-control is-invalid', style='border-radius: .5rem') }}
+                {{ form.invite_code(class_='form-control is-invalid') }}
             {% else %}
-                {{ form.invite_code(class_='form-control', style='border-radius: .5rem') }}
+                {{ form.invite_code(class_='form-control') }}
             {% endif %}
             {{ form.invite_code.label() }}
             {% for error in form.invite_code.errors %}
@@ -59,9 +59,9 @@
         </div>
         <div class="form-floating mb-3">
             {% if form.email.errors %}
-                {{ form.email(class_='form-control is-invalid', style='border-radius: .5rem') }}
+                {{ form.email(class_='form-control is-invalid') }}
             {% else %}
-                {{ form.email(class_='form-control', style='border-radius: .5rem') }}
+                {{ form.email(class_='form-control') }}
             {% endif %}
             {{ form.email.label() }}
             {% for error in form.email.errors %}
@@ -69,11 +69,11 @@
             {% endfor %}
         </div>
         <div class="form-floating mb-3">
-            {{ form.password(class_='form-control', style='border-radius: .5rem') }}
+            {{ form.password(class_='form-control') }}
             {{ form.password.label() }}
         </div>
         <div class="form-floating mb-3">
-            {{ form.confirm_password(class_='form-control', style='border-radius: .5rem') }}
+            {{ form.confirm_password(class_='form-control') }}
             {{ form.confirm_password.label() }}
         </div>
         {{ form.submit(class_='btn btn-success w-100 mb-3') }}
@@ -101,9 +101,9 @@
         </div>
         <div class="form-floating mb-3">
             {% if form.price.errors %}
-                {{ form.price(class_='form-control is-invalid', style='border-radius: .5rem;') }}
+                {{ form.price(class_='form-control is-invalid') }}
             {% else %}
-                {{ form.price(class_='form-control', style='border-radius: .5rem;') }}
+                {{ form.price(class_='form-control') }}
             {% endif %}
             {{ form.price.label() }}
             {% for error in form.price.errors %}
@@ -112,9 +112,9 @@
         </div>
         <div class="form-floating mb-3">
             {% if form.title.errors %}
-                {{ form.title(class_='form-control is-invalid', style='border-radius: .5rem;') }}
+                {{ form.title(class_='form-control is-invalid') }}
             {% else %}
-                {{ form.title(class_='form-control', style='border-radius: .5rem;') }}
+                {{ form.title(class_='form-control') }}
             {% endif %}
             {{ form.title.label() }}
             {% for error in form.title.errors %}
@@ -124,7 +124,7 @@
         {% if type != 'mde' %}
             <div class="form-floating mb-3" {% if type =='tui' %}style="display: none"{% endif %}>
         {% endif %}
-        {{ form.body(class_='form-control', style='height: 15rem; border-radius: .5rem;') }}
+        {{ form.body(class_='form-control', style='height: 15rem;') }}
         {% if type is none %}{{ form.body.label() }}{% endif %}
         {% if type != 'mde' %}
             </div>
@@ -216,7 +216,7 @@
             <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">
                 <i class="bi bi-discord"></i> Discord
             </a></p>
-            <p><a href="http://192.168.0.8:8080/whatsapp" class="text-decoration-none text-success">
+            <p><a href="{{ url_for('main.whatsapp') }}" class="text-decoration-none text-success">
                 <i class="bi bi-whatsapp"></i> WhatsApp
             </a></p>
             <p><a href="mailto:info@lumiask.com" class="text-decoration-none text-success">
@@ -241,15 +241,14 @@
         {{ form.text(
             class_='form-control mb-3',
             rows=5,
-            placeholder="Please leave your feedback here...",
-            style='border-radius: .5rem') }}
+            placeholder="Please leave your feedback here...") }}
 
         {% if not logged_in %}
             <div class="form-floating mb-3">
                 {% if form.email.errors %}
-                    {{ form.email(class_='form-control is-invalid', style='border-radius: .5rem') }}
+                    {{ form.email(class_='form-control is-invalid') }}
                 {% else %}
-                    {{ form.email(class_='form-control', style='border-radius: .5rem') }}
+                    {{ form.email(class_='form-control') }}
                 {% endif %}
                 {{ form.email.label() }}
                 {% for error in form.email.errors %}
@@ -257,7 +256,7 @@
                 {% endfor %}
             </div>
             <div class="form-check mb-3">
-                {{ form.request_invite(class_='form-check-input') }}
+                {{ form.request_invite(class_='form-check-input me-2', style='height: 1.5rem; width: 1.5rem; position: relative; bottom: 0.25rem;') }}
                 {{ form.request_invite.label(class_='form-check-label') }}
             </div>
         {% endif %}

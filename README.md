@@ -40,7 +40,7 @@
 - Elastic Beanstalk
     - set the environment variables
     - remember to set FORCE_HTTPS=true after Cloudflare is set up
-    - remember to set SEND_GRID_API_KEY, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY which are not loaded through Flask
+    - remember to set SENDGRID_API_KEY, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY which are not loaded through Flask
       config
 
 ## Git
