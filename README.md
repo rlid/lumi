@@ -20,8 +20,8 @@
   - general info: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up.html?icmpid=docs_acc_console_connect_np#setting-up-compat
 - Install EB CLI
     - https://github.com/aws/aws-elastic-beanstalk-cli-setup
-    - install virtualenv (macOS: `brew search virtualenv`)
-    - deactivate any venv, then run `python ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py`
+    - install virtualenv (macOS: `brew install virtualenv`)
+    - deactivate any venv, then run `python[3.x] ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py`
     - add `eb` to
       PATH: `echo 'export PATH="/Users/rli/.ebcli-virtual-env/executables:$PATH"' >> ~/.zshrc && source ~/.zshrc`
 - Using the EB CLI with AWS CodeCommit: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli-codecommit.html
