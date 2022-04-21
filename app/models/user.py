@@ -28,6 +28,7 @@ class User(UserMixin, db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     last_seen = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+    is_online = db.Column(db.Boolean, default=False, nullable=False)
 
     adjective = db.Column(db.String(20))
 

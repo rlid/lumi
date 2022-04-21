@@ -76,6 +76,16 @@ class UserNamespace(Namespace):
     def on_connect(self):
         if not current_user.is_authenticated:
             disconnect()
+        if not current_user.is_online:
+            current_user.is_online = True
+            db.session.add(current_user)
+            db.session.commit()
+
+    def on_disconnect(self):
+        if current_user.is_authenticated and current_user.is_online:
+            current_user.is_online = False
+            db.session.add(current_user)
+            db.session.commit()
 
     def on_join(self, data):
         user_id_str = data['user_id']

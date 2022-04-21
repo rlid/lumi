@@ -2,8 +2,8 @@ asn1crypto==1.5.1
 Authlib==1.0.1
 bidict==0.22.0
 bleach==5.0.0
-boto3==1.21.37
-botocore==1.24.37
+boto3==1.21.44
+botocore==1.24.44
 certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.12
@@ -11,7 +11,7 @@ click==8.1.2
 cryptography==36.0.2
 dnspython==1.16.0
 eventlet==0.30.2
-Faker==13.3.4
+Faker==13.3.5
 Flask==2.1.1
 Flask-Login==0.6.0
 Flask-Minify==0.39
@@ -33,7 +33,7 @@ jsmin==3.0.1
 lesscpy==0.15.0
 Markdown==3.3.6
 MarkupSafe==2.1.1
-pg8000==1.24.1
+pg8000==1.26.0
 Pillow==9.1.0
 ply==3.11
 pycparser==2.21
@@ -50,7 +50,7 @@ sendgrid==6.9.7
 six==1.16.0
 SQLAlchemy==1.4.35
 starkbank-ecdsa==2.0.3
-stripe==2.71.0
+stripe==2.73.0
 urllib3==1.26.9
 webencodings==0.5.1
 Werkzeug==2.1.1
