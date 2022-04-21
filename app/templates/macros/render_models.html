@@ -6,7 +6,7 @@
         {{- "You" if capitalize else "you" -}}
     {%- else -%}
         {{- ("A " if capitalize else "a ") + (user.adjective + " user" if user.adjective else "user") -}}
-        {% if user.is_online %}<sup style="color: springgreen">&#9679;</sup>{% endif %}
+        {% if user.is_online %}<sup style="color: springgreen">&#11044;</sup>{% endif %}
     {%- endif -%}
 {%- endmacro -%}
 
