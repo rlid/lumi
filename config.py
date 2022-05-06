@@ -45,6 +45,12 @@ class Config:
     STRIPE_PRICE_10 = os.environ.get('STRIPE_PRICE_10', 'price_1KWkE2GoAMQGbjHHKOP6j5Be')
     STRIPE_PRICE_20 = os.environ.get('STRIPE_PRICE_20', 'price_1KWkEhGoAMQGbjHHdwIdNHvO')
 
+    URL_NODE_TRIAL = os.environ.get('URL_NODE_TRIAL', '0')
+    URL_NODE_EXPERT = os.environ.get('URL_NODE_EXPERT', '1')
+    URL_NODE_CREATOR = os.environ.get('URL_NODE_CREATOR', '2')
+    URL_NODE_REVIEWER = os.environ.get('URL_NODE_REVIEWER', '3')
+    URL_NODE_FREELANCER = os.environ.get('URL_NODE_FREELANCER', '')
+
     @staticmethod
     def init_app(app):
         pass
