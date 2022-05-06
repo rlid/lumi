@@ -7,20 +7,21 @@
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
             <p class="lead">LumiAsk helps people connect with each other to engage in Q&A and casual services.</p>
-            <h3 class="mt-5">Ask a question</h3>
+            <h2 class="mt-5">Ask a question</h2>
             <p class="lead">Do you have a question that Google struggles to answer, and your Reddit post or Discord
                 message are not getting much traction? Give us a try and see how much further some extra incentives will
                 take you.</p>
             <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_TRIAL']) }}" class="btn btn-success btn-lg">
                 Try for free with $5 to spend</a>
 
-            <h3 class="mt-5">Contribute and earn $ reward</h3>
+            <h2 class="mt-5">Contribute and earn $ reward</h2>
             <p class="lead">Would you like to help with other people's questions and earn some reward in the process?
                 You could be rewarded for contributions as simple as spreading the word!</p>
-            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg">See open questions & requests</a>
+            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">See open questions & requests</a>
 
-            <p class="lead mt-5">If you fit one of the descriptions below, please get in touch - we have something
-                special planned for you!</p>
+            <hr>
+            <p class="lead mt-5">By the way, if you fit one of the descriptions below, please get in touch - we have
+                something special planned for you!</p>
             <div class="row mt-4">
                 {% if config['URL_NODE_CREATOR'] %}
                     <div class="col-auto mb-3">
@@ -47,8 +48,9 @@
                         <div class="h-100 p-4 bg-secondary rounded">
                             <h3>Do you have a hobby?</h3>
                             <p>Are you particularly knowledgeable about something and actively helping newbies in an
-                                online community? Let them know you are on {{ config["APP_NAME"] }} and give them
-                                another way to show you their appreciation.</p>
+                                online community? Give them a way to engage with you privately on a topic that might not
+                                look great otherwise (e.g. asking a question that is already asked a million times!).
+                            </p>
                             <button class="btn btn-dark" type="button">I'm interested - what's next?</button>
                         </div>
                     </div>
