@@ -33,7 +33,7 @@
                             <p>Are you particularly knowledgeable about something and actively helping newbies in an
                                 online community? Give them a way to engage with you privately on questions that might
                                 not interest the wider community (e.g. something that has been answered a million times
-                                already - we have all been there!).
+                                already - we have all been there!) or requires more effort to help.
                             </p>
                             <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_EXPERT']) }}"
                                class="btn btn-dark">I'm interested - what's next?</a>
@@ -53,7 +53,7 @@
                 {% endif %}
                 {% if config['URL_NODE_REVIEWER'] %}
                     <div class="col-auto mb-3">
-                        <div class="h-100 p-4 bg-secondary rounded">
+                        <div class="h-100 p-4 bg-danger rounded">
                             <h3>Are you a product reviewer?</h3>
                             <p>Do you get lots of questions from your audience? Let them know you are
                                 on {{ config["APP_NAME"] }} to answer any questions they have.</p>
