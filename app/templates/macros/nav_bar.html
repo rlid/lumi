@@ -19,7 +19,7 @@
 {% macro render_navbar(current_user=None) %}
     <nav class="navbar fixed-top navbar-expand navbar-dark bg-dark pb-0">
         <div class="container-fluid">
-            <a class="navbar-brand h1" href="{{ url_for('main.index') }}">
+            <a class="navbar-brand h1" href="{{ url_for('main.landing') }}">
                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="32" height="32"
                      class="d-inline-block align-text-bottom">{{ config["APP_NAME"][1:] }}</a>
             <ul class="navbar-nav">
