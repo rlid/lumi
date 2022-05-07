@@ -6,7 +6,10 @@
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">LumiAsk helps people connect with each other to engage in Q&A and casual services.</p>
+            <p class="lead">LumiAsk is a Q&A and casual service hosting and discovery platform. We help you host paid
+                Q&A sessions as the questioner or answerer, and find the right people to engage with you on your topic
+                of interest.
+            </p>
             <h2 class="mt-5">Ask a question</h2>
             <p class="lead">Do you have a question that Google struggles to answer, and your Reddit post or Discord
                 message are not getting much traction? Give us a try and see how much further some extra incentives will
@@ -23,9 +26,23 @@
             <p class="lead mt-5">By the way, if you fit one of the descriptions below, please get in touch - we have
                 something special planned for you!</p>
             <div class="row mt-4">
+                {% if config['URL_NODE_EXPERT'] %}
+                    <div class="col-auto mb-3">
+                        <div class="h-100 p-4 bg-info rounded">
+                            <h3>Do you have a hobby with a vibrant online community?</h3>
+                            <p>Are you particularly knowledgeable about something and actively helping newbies in an
+                                online community? Give them a way to engage with you privately on questions that have
+                                been answered a million times already (or anything else that might not interest the
+                                wider community), for a price!
+                            </p>
+                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_EXPERT']) }}"
+                               class="btn btn-dark">I'm interested - what's next?</a>
+                        </div>
+                    </div>
+                {% endif %}
                 {% if config['URL_NODE_CREATOR'] %}
                     <div class="col-auto mb-3">
-                        <div class="h-100 p-4 bg-info rounded-3">
+                        <div class="h-100 p-4 bg-warning rounded-3">
                             <h3>Are you a content creator?</h3>
                             <p>Are some of your supporters not yet comfortable with a Patreon subscription? Let them ask
                                 the questions here and earn something on a per-engagement basis.</p>
@@ -36,25 +53,11 @@
                 {% endif %}
                 {% if config['URL_NODE_REVIEWER'] %}
                     <div class="col-auto mb-3">
-                        <div class="h-100 p-4 bg-warning rounded">
+                        <div class="h-100 p-4 bg-secondary rounded">
                             <h3>Are you a product reviewer?</h3>
                             <p>Do you get lots of questions from your audience? Let them know you are
                                 on {{ config["APP_NAME"] }} to answer any questions they have.</p>
                             <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_REVIEWER']) }}"
-                               class="btn btn-dark">I'm interested - what's next?</a>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if config['URL_NODE_EXPERT'] %}
-                    <div class="col-auto mb-3">
-                        <div class="h-100 p-4 bg-secondary rounded">
-                            <h3>Do you have a hobby?</h3>
-                            <p>Are you particularly knowledgeable about something and actively helping newbies in an
-                                online community? Give them a way to engage with you privately on a topic that might not
-                                look great in a public space (e.g. asking a question that is already answered a million
-                                times - we have all been there!).
-                            </p>
-                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_EXPERT']) }}"
                                class="btn btn-dark">I'm interested - what's next?</a>
                         </div>
                     </div>
