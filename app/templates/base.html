@@ -23,8 +23,8 @@
             {{ conf.socketio_js() }}
             {{ flash.flash_toast_js() }}
             {{ moment.include_moment() }}
-            {{ conf.smalltalk_js() }}
             {% if session.get('allow_cookie') %}
+                {{ conf.smalltalk_js() }}
                 {{ conf.google_analytics_js() }}
                 {{ conf.hotjar_js() }}
             {% endif %}

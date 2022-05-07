@@ -14,12 +14,12 @@ from app.models.user import Post, Node, Engagement
 from app.models.user import User, PostTag, Tag
 
 
-@main.route("/initdb")
-def initdb():
-    db.session.remove()
-    db.drop_all()
-    db.create_all()
-    return {"success": True}, 200
+# @main.route("/initdb")
+# def initdb():
+#     db.session.remove()
+#     db.drop_all()
+#     db.create_all()
+#     return {"success": True}, 200
 
 
 @main.route('/user/<uuid:user_id>')

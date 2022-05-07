@@ -35,6 +35,14 @@ def before_request():
 
 @main.route('/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.browse'))
+    else:
+        return redirect(url_for('main.landing'))
+
+
+@main.route('/landing')
+def landing():
     return render_template('landing.html', login_form=LogInForm(prefix='login'))
 
 
@@ -70,13 +78,11 @@ def whatsapp():
 
 
 @main.route('/faq')
-@login_required
 def faq():
     return render_template('docs/faq.html', title='FAQs')
 
 
 @main.route('/faq/<anchor_id>')
-@login_required
 def faq_anchor(anchor_id):
     return render_template('docs/faq.html', title='FAQs', anchor_id=anchor_id)
 
@@ -92,7 +98,6 @@ def cookie():
 
 
 @main.route('/terms')
-@login_required
 def terms():
     return render_template('docs/terms.html', title='Terms & Conditions')
 
