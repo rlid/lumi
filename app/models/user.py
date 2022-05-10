@@ -402,7 +402,8 @@ class User(UserMixin, db.Model):
             Notification.push(
                 target_user=node.post.creator,
                 node=node,
-                message='A user shared your post.'
+                message='A user shared your post.',
+                email=True  # TODO: default to false if there are too many emails
             )
             db.session.commit()
         return node
@@ -458,7 +459,8 @@ class User(UserMixin, db.Model):
             target_user=node.creator if self != node.creator else post.creator,
             node=node,
             message='A user sent you a message.',
-            email=node.current_engagement and node.current_engagement.state == Engagement.STATE_ENGAGED
+            email=True  # TODO: change condition if there are too many emails
+            # email=node.current_engagement and node.current_engagement.state == Engagement.STATE_ENGAGED
         )
         db.session.commit()
         return message
