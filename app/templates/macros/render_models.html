@@ -48,7 +48,7 @@
                 <div class="btn-group btn-group-sm buy-sell" role="group">
                     <a href="{{ url_for("main.browse", tags='asking' if post.is_asking else 'answering') }}"
                        class="btn btn-{{- style_map[post.is_asking] }}">
-                        {{ 'Asking' if post.is_asking else 'Answering' }}
+                        {{ 'Questioner' if post.is_asking else 'Answerer' }}
                     </a>
                     <button type="button" class="btn btn-secondary" disabled>
                         {{ "$%.2f"|format(node.display_value(current_user)) }}
