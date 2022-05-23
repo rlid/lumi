@@ -1,5 +1,7 @@
 import math
 import re
+import secrets
+import string
 import uuid
 from datetime import datetime, timedelta
 
@@ -16,6 +18,7 @@ from app.models.errors import InvalidActionError, RewardDistributionError, Insuf
 from app.models.payment import PaymentIntent
 from utils import security_utils, authlib_ext
 
+_SHORT_CODE_LENGTH = 4
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
 REP_I_DECAY = 0.1
@@ -41,6 +44,7 @@ class User(UserMixin, db.Model):
     sum_i = db.Column(db.Float, default=0.0, nullable=False)
     sum_abs_i = db.Column(db.Float, default=0.0, nullable=False)
 
+    short_code = db.Column(db.String(16), index=True, unique=True)
     email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
 
@@ -123,6 +127,18 @@ class User(UserMixin, db.Model):
                                    foreign_keys=[Transaction.user_id],
                                    lazy="dynamic",
                                    cascade="all, delete-orphan")
+
+    @staticmethod
+    def generate_short_code():
+        short_codes = [short_code for short_code, in db.session.query(User.short_code).all()]
+        short_code = None
+        while short_code is None or short_code in short_codes:
+            short_code = ''.join(
+                secrets.choice(
+                    string.ascii_letters if i % 2 == 0 else string.digits
+                ) for i in range(_SHORT_CODE_LENGTH)
+            )
+        return short_code
 
     @property
     def password(self):

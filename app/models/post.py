@@ -1,3 +1,5 @@
+import secrets
+import string
 import uuid
 from datetime import datetime
 
@@ -11,6 +13,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from app import db
 from app.models import PostTag, Node
 from utils.markdown_ext import DelExtension
+
+_SHORT_CODE_LENGTH = 4
 
 
 class Post(db.Model):
@@ -34,6 +38,7 @@ class Post(db.Model):
     is_reported = db.Column(db.Boolean, default=False, nullable=False)
     report_reason = db.Column(db.Text, default='')
 
+    short_code = db.Column(db.String(16), index=True, unique=True)
     title = db.Column(db.String(100), nullable=False)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
@@ -67,6 +72,18 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'<p{self.id}>creator={self.creator}</p{self.id}>'
+
+    @staticmethod
+    def generate_short_code():
+        short_codes = [short_code for short_code, in db.session.query(Post.short_code).all()]
+        short_code = None
+        while short_code is None or short_code in short_codes:
+            short_code = ''.join(
+                secrets.choice(
+                    string.ascii_letters if i % 2 == 0 else string.digits
+                ) for i in range(_SHORT_CODE_LENGTH)
+            )
+        return short_code
 
     @property
     def root_node(self):

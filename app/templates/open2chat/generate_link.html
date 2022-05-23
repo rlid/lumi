@@ -1,0 +1,24 @@
+{% extends "open2chat/base.html" %}
+{% from "macros/form.html" import render_login_form %}
+
+{% block title %}
+    Generate My Link
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <form class="mb-3" method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
+        {{ form.hidden_tag() }}
+        <label for="email" class="form-label">Email address to receive chat notifications(*):</label>
+        <div class="mb-3">
+            {{ form.email(class_='form-control') }}
+        </div>
+        <label for="username" class="form-label">Your shareable link:</label>
+        <div class="input-group mb-3">
+            <span class="input-group-text">https://Open2.Chat/</span>
+            {{ form.username(class_='form-control', placeholder='username') }}
+        </div>
+        {{ form.submit(class_='btn btn-success w-100') }}
+    </form>
+    <p>(*) Your email address will not be shared with the chat initiator.</p>
+{% endblock %}
