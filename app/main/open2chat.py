@@ -9,12 +9,12 @@ from app.models import User
 class GenerateLinkForm(FlaskForm):
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
     # We will send you the generated link, and notify you when there is a chat request. Your email address is not shared with anyone.
-    username = StringField("Open2.Chat/", validators=[InputRequired()])
+    username = StringField(
+        "Open2.Chat/",
+        validators=[InputRequired(), Length(min=4)]
+    )
     # Optional - leave it blank and we will generate a short link for you to share
-    topic = StringField(
-        "Topics",
-        validators=[InputRequired(), Length(min=4, message='Username must be at least 8 characters long.')],
-        render_kw={"placeholder": "Topics"})
+    topic = StringField("Topics", validators=[InputRequired()], render_kw={"placeholder": "Topics"})
     # Optional - list a couple of topics you are knowledgeable about, we will use this info to help other users to
     # connect with you
     submit = SubmitField("Generate")
@@ -47,5 +47,6 @@ class AnswerForm(FlaskForm):
 
 @main.route('/generate')
 def generate():
-    form = GenerateLinkForm()
-    return render_template('open2chat/generate_link.html', form=form)
+    form_gen_link = GenerateLinkForm()
+    form_gen_link.username.data = User.generate_short_code()
+    return render_template('open2chat/landing.html', form_gen_link=form_gen_link)

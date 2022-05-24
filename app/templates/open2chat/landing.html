@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block body_bg %}bg-dark{% endblock %}
+
+{% block main %}
+    <main class="my-auto py-5 bg-dark text-light">
+        <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
+            <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
+            <p class="lead">{{ config['APP_NAME'] }} helps you find the right people to chat with on your topic of
+                interest.
+            </p>
+            <h2 class="mt-5">Need help with something specific?</h2>
+            <p class="lead">Enter a specific topic you want to know more about, or a description of the ideal person for
+                this topic, and we will help you find a relevant person to chat with.</p>
+            <div class="input-group mb-3">
+                <textarea class="form-control" rows="3"
+                          placeholder="A neighbourhood / school / company / product / service / hobby / game...">
+                </textarea>
+                <button class="btn btn-success" type="button">Get Matched</button>
+            </div>
+
+            <h2 class="mt-5">Receive $ reward for replying to messages</h2>
+            <p class="lead">Do you ever post/comment on online communities or social media, review stuff on
+                Amazon/Google? If you are a "casual/occasional" content creator, you might have the knowledge or
+                experience that are valuable to someone else. Give them a chance to message you and receive a $ reward
+                when you reply.</p>
+            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Generate Your Own Open2Chat Link</a>
+
+
+            <h2 class="mt-5">Earn $ reward by replying to messages</h2>
+            <p class="lead">Would you like to help with others' topics and earn some reward in the process?
+                You could be rewarded for contributions as simple as spreading the word!</p>
+            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Register </a>
+
+            <hr>
+            <p class="lead mt-5">Are you a "casual" content creator?</p>
+            <div class="row mt-4">
+                {% if config['URL_NODE_EXPERT'] %}
+                    <div class="col-auto mb-3">
+                        <div class="h-100 p-4 bg-info rounded">
+                            <h3>Do you have a hobby with an active online community?</h3>
+                            <p>Are you particularly knowledgeable about something and actively helping newbies in an
+                                online community? Give them a way to engage with you privately on questions that might
+                                not interest the wider community (e.g. something that has been answered a million times
+                                already - we have all been there!) or requires more effort to answer.
+                            </p>
+                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_EXPERT']) }}"
+                               class="btn btn-dark">I'm interested - what's next?</a>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if config['URL_NODE_CREATOR'] %}
+                    <div class="col-auto mb-3">
+                        <div class="h-100 p-4 bg-warning rounded-3">
+                            <h3>Are you a content creator?</h3>
+                            <p>Are some of your supporters not yet comfortable committing to a Patreon subscription? No
+                                matter how small you are or how infrequent you publish content, as long you have a
+                                handful of interested viewers, you can start earning an income by answering their
+                                questions.</p>
+                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_CREATOR']) }}"
+                               class="btn btn-dark">I'm interested - what's next?</a>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if config['URL_NODE_REVIEWER'] %}
+                    <div class="col-auto mb-3">
+                        <div class="h-100 p-4 bg-danger rounded">
+                            <h3>Are you a product reviewer?</h3>
+                            <p>Do you get lots of questions from your audience? Whether you review products or
+                                services, professionally or casually (even reviews on Amazon and Google counts!), let
+                                them know you are on {{ config["APP_NAME"] }} to answer any questions they have.</p>
+                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_REVIEWER']) }}"
+                               class="btn btn-dark">I'm interested - what's next?</a>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if config['URL_NODE_FREELANCER'] %}
+                    <div class="col-auto mb-3">
+                        <div class="h-100 p-4 bg-primary rounded">
+                            <h3>Are you a freelancer?</h3>
+                            <p>Or do you want to try your hands at freelancing but there are too many hurdles to jump
+                                through. Start small on LumiAsk and let others help you find clients.</p>
+                            <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_FREELANCER']) }}"
+                               class="btn btn-dark">I'm interested - what's next?</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+{% endblock %}
