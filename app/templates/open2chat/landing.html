@@ -9,25 +9,26 @@
             <p class="lead">{{ config['APP_NAME'] }} helps you find the right people to chat with on your topic of
                 interest.
             </p>
-            <h2 class="mt-5">Need help with something specific?</h2>
-            <p class="lead">Enter a specific topic you want to know more about, or a description of the ideal person for
-                this topic, and we will help you find a relevant person to chat with.</p>
+            <h2 class="mt-5">Need help with something?</h2>
+            <p class="lead">Tell us a very specific topic you want to know more about, or describe the ideal person for
+                this topic, and we will match you up with someone to help.</p>
             <div class="input-group mb-3">
                 <textarea class="form-control" rows="3"
-                          placeholder="A neighbourhood / school / company / product / service / hobby / game...">
-                </textarea>
+                          placeholder="A neighbourhood / school / company / product / service / hobby / game..."></textarea>
                 <button class="btn btn-success" type="button">Get Matched</button>
             </div>
 
             <h2 class="mt-5">Receive $ reward for replying to messages</h2>
-            <p class="lead">Do you ever post/comment on online communities or social media, review stuff on
-                Amazon/Google? If you are a "casual/occasional" content creator, you might have the knowledge or
-                experience that are valuable to someone else. Give them a chance to message you and receive a $ reward
-                when you reply.</p>
-            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Generate Your Own Open2Chat Link</a>
+            <p class="lead">Anyone might have specific knowledge or experience that are valuable to someone else.</p>
+            <p class="lead">
+                If you are already discoverable as a "casual" content creator (if you have a profile on
+                LinkedIn/Facebook, if you occasionally post in online communities or social media, or if you have ever
+                written reviews on Amazon/Google), we enable you to receive a tip whenever you reply to someone's
+                message.</p>
+            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Get an Open2Chat Link</a>
 
 
-            <h2 class="mt-5">Earn $ reward by replying to messages</h2>
+            <h2 class="mt-5">Join our network of super helpful </h2>
             <p class="lead">Would you like to help with others' topics and earn some reward in the process?
                 You could be rewarded for contributions as simple as spreading the word!</p>
             <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Register </a>
