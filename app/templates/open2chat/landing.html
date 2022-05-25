@@ -8,24 +8,26 @@
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
             <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are
                 not always easy to find with a search or helpfully discussed in online communities.</p>
-            {#            <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are#}
-            {#                often not nicely indexed by Google or helpfully discussed on Reddit.</p>#}
             <p class="lead">We make them easier to discover and rewarding to share.</p>
-            <h2 class="mt-5">Interested in something?</h2>
+
+            <h2 style="margin-top: 5rem">Interested in something?</h2>
             <p class="lead">Tell us something specific you want to find out more about or need help with, or describe
                 the ideal person for your topic, and we will match you up with someone to chat with 1-on-1.</p>
-            <div class="input-group" style="margin-bottom: 5rem">
-                <textarea class="form-control" rows="3"
-                          placeholder="A neighbourhood / school / company / product / service..."></textarea>
-                <button class="btn btn-success" type="button">Get Matched</button>
-            </div>
+            <form method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
+                {{ form.hidden_tag() }}
+                <div class="input-group">
+                    {{ form.topic(class_='form-control', rows=3, placeholder='A neighbourhood / school / company / product / service...') }}
+                    {{ form.submit(class_='btn btn-success') }}
+                </div>
+            </form>
 
-            <h2 class="mt-5">Contribute and earn $ reward</h2>
-            <p class="lead">Earn $1-$20 by helping others with their topics, or up to 40% of that by introducing someone to
+            <h2 style="margin-top: 5rem">Contribute and earn $ reward</h2>
+            <p class="lead">Earn $1-$20 by helping others with their topics, or up to 40% of that by introducing someone
+                to
                 help.</p>
             <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Browse open topics</a>
 
-            <h2 class="mt-5">PS: A "tip jar" for non-creators</h2>
+            <h2 style="margin-top: 5rem">PS: A "tip jar" for non-creators</h2>
             <p class="lead">How it works -
             <ol class="lead">
                 <li>create your tip jar link and share on your online profiles</li>
