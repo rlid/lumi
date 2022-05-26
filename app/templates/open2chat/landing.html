@@ -2,37 +2,67 @@
 
 {% block body_bg %}bg-dark{% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        function setPlaceholder(topicValue) {
+            let placeholderValue = "";
+            let footnoteValue = "";
+            if (topicValue == 1) {
+                placeholderValue = "Name of the place and what you want to know";
+                footnoteValue = "Doing due diligence for the new home you are looking to buy/rent? Or just travelling? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood/block.";
+            } else if (topicValue == 2) {
+                placeholderValue = "Name of the company and what you want to know";
+                footnoteValue = "Trying to research a company before an upcoming job interview? Got a few job offers and can't decide which one to choose? Chat with someone who has been through the interview process or someone who works there."
+            } else if (topicValue == 3) {
+                placeholderValue = "Name of the school and what you want to know";
+                footnoteValue = "Applying to a school and need tips on the application and interview process? Want to find out about specific elements of a program or the opinions from current students? Chat with a current student or someone who has been through the process.";
+            } else if (topicValue == 4) {
+                placeholderValue = "Name or description of the product/service and what you want to know";
+                footnoteValue = "Interested in a product but don't have all the info you need to make a purchase decision? Can't decide between 2 similarly featured services? Get specific advice and perspective from a current user.";
+            } else if (topicValue == 5) {
+                placeholderValue = "Description of your problem or what you are trying to achieve";
+                footnoteValue = "(Coming soon) Link your Stack Overflow question and hope for the best!";
+            } else if (topicValue == 6) {
+                placeholderValue = "Description of your problem or what you are trying to achieve";
+                footnoteValue = "(Experimental) Need help with something? Let us know and we will find someone to help.";
+            } else if (topicValue == 7) {
+                placeholderValue = "Description of what you are looking for or the ideal person to chat with";
+                footnoteValue = "Looking for something not listed above? Let us know and we will try to help.";
+            }
+            document.getElementById("details").placeholder = placeholderValue;
+            document.getElementById("footnote").innerText = footnoteValue;
+        }
+    </script>
+{% endblock %}
+
+
 {% block main %}
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are
-                not always easy to find online.</p>
+            <p class="lead">Everyone has specific knowledge or experience that others find valuable, yet they are not
+                always easy to find online.</p>
             <p class="lead">We make them easier to discover and rewarding to share.</p>
 
             <h2 style="margin-top: 5rem">Interested in something?</h2>
-            <p class="lead">We will match you up with the most relevant person we can find for your chosen topic to chat
-                with 1-on-1.</p>
+            <p class="lead my-3">We will match you up with the most relevant person we can find to chat with 1-on-1.</p>
             <form method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
                 {{ form.hidden_tag() }}
-                <select class="form-select form-select-lg mb-3">
+                <select class="form-select form-select-lg mb-3" id="selectTopic" onchange="setPlaceholder(this.value)">
                     <option selected>Choose a topic</option>
-                    <option value="1">Neighbourhood</option>
-                    {# doing due deligience before buying a your home? #}
-                    <option value="2">Employer / Workplace</option>
-                    {# got a few job offers and can't decide which one to choose? #}
-                    <option value="3">School / College</option>
-                    {# applying to a school and looking for tips from someone who has gong through the process #}
-                    <option value="4">Product / Service</option>
-                    {# want to speak with an existing user of a product / service before pulling the trigger?  #}
-                    <option value="5">Problem Solving - Coding & DevOp</option>
-                    {#  #}
+                    <option value="1">Place and Neighbourhood</option>
+                    <option value="2">Company and Workplace</option>
+                    <option value="3">School and College</option>
+                    <option value="4">Product or Service</option>
                     <option value="6">Problem Solving - General</option>
+                    <option value="5" disabled>Problem Solving - Coding & DevOps</option>
                     <option value="7">Other</option>
-                    {# looking for someone to share a specific knowledge or experience not listed above #}
+                    {#  #}
                 </select>
+                <p class="my-3 text-muted" id="footnote"></p>
                 <div class="input-group input-group-lg">
-                    {{ form.topic(class_='form-control', rows=3, placeholder='Details of what you are looking for...') }}
+                    {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
                     {{ form.submit(class_='btn btn-success') }}
                 </div>
             </form>
