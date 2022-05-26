@@ -7,16 +7,32 @@
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
             <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are
-                not always easy to find with a search or helpfully discussed in online communities.</p>
+                not always easy to find online.</p>
             <p class="lead">We make them easier to discover and rewarding to share.</p>
 
             <h2 style="margin-top: 5rem">Interested in something?</h2>
-            <p class="lead">Tell us something specific you want to find out more about or need help with, or describe
-                the ideal person for your topic, and we will match you up with someone to chat with 1-on-1.</p>
+            <p class="lead">We will match you up with the most relevant person we can find for your chosen topic to chat
+                with 1-on-1.</p>
             <form method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
                 {{ form.hidden_tag() }}
-                <div class="input-group">
-                    {{ form.topic(class_='form-control', rows=3, placeholder='A neighbourhood / school / company / product / service...') }}
+                <select class="form-select form-select-lg mb-3">
+                    <option selected>Choose a topic</option>
+                    <option value="1">Neighbourhood</option>
+                    {# doing due deligience before buying a your home? #}
+                    <option value="2">Employer / Workplace</option>
+                    {# got a few job offers and can't decide which one to choose? #}
+                    <option value="3">School / College</option>
+                    {# applying to a school and looking for tips from someone who has gong through the process #}
+                    <option value="4">Product / Service</option>
+                    {# want to speak with an existing user of a product / service before pulling the trigger?  #}
+                    <option value="5">Problem Solving - Coding & DevOp</option>
+                    {#  #}
+                    <option value="6">Problem Solving - General</option>
+                    <option value="7">Other</option>
+                    {# looking for someone to share a specific knowledge or experience not listed above #}
+                </select>
+                <div class="input-group input-group-lg">
+                    {{ form.topic(class_='form-control', rows=3, placeholder='Details of what you are looking for...') }}
                     {{ form.submit(class_='btn btn-success') }}
                 </div>
             </form>

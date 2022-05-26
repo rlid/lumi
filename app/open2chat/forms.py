@@ -5,7 +5,7 @@ from wtforms.validators import InputRequired, Length
 
 class SearchForm(FlaskForm):
     topic = TextAreaField(validators=[InputRequired(), Length(min=10, max=100)])
-    submit = SubmitField("Get Matched")
+    submit = SubmitField("  Go  ")
 
 
 class GenerateLinkForm(FlaskForm):
