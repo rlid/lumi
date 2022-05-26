@@ -43,11 +43,11 @@
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
             <p class="lead">Everyone has specific knowledge or experience that someone else might find valuable, yet
                 they are not always easy to find online.</p>
-            <p class="lead">We make them easier to discover and rewarding to share.</p>
+            <p class="lead">We make them easy to discover and rewarding to share.</p>
 
             <h2 style="margin-top: 5rem">Interested in something?</h2>
             <p class="lead my-3">We will match you up with the most relevant person we can find to chat with 1-on-1.</p>
-            <form method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
+            <form method="post" action="{{ url_for('open2chat.save_request') }}">
                 {{ form.hidden_tag() }}
                 <select class="form-select form-select-lg mb-3" id="selectTopic" onchange="setPlaceholder(this.value)">
                     <option selected>Choose a topic</option>

@@ -1,11 +1,22 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, BooleanField, TextAreaField
-from wtforms.validators import InputRequired, Length
+from wtforms.validators import InputRequired, Length, ValidationError
+
+from app.models import User
 
 
-class SearchForm(FlaskForm):
+class PostForm(FlaskForm):
     details = TextAreaField(validators=[InputRequired(), Length(min=10, max=100)])
     submit = SubmitField("  Go  ")
+
+
+class SignUpForm(FlaskForm):
+    email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
+    submit = SubmitField("Continue")
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError("The email address is already registered. Please sign in to continue.")
 
 
 class GenerateLinkForm(FlaskForm):

@@ -8,15 +8,15 @@
                 {% block content %}
                     <div class="pt-4 mb-4">
                         <h3 class="fw-bold mb-0">
-{#                            {% if request.MOBILE %}#}
+                            {% if request.MOBILE %}
                                 <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
                                      width="30" height="30"
                                      class="d-inline-block align-text-top">
-{#                            {% else %}#}
-{#                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"#}
-{#                                     width="36" height="36"#}
-{#                                     class="d-inline-block align-text-top">#}
-{#                            {% endif %}#}
+                            {% else %}
+                                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}"
+                                     width="36" height="36"
+                                     class="d-inline-block align-text-top">
+                            {% endif %}
                             {% block title %}Title{% endblock %}
                         </h3>
                     </div>
