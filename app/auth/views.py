@@ -21,8 +21,16 @@ def login():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is not None:
             if user.signup_method == "email":
+                if user.password_hash is None:
+                    flash('Please finish setting up your account by resetting your password.', category='warning')
+                    return redirect(url_for('auth.password_reset_request', email=user.email))
                 if user.verify_password(form.password.data):
                     login_user(user, form.remember_me.data)
+
+                    temporary_request_id = session.get('temporary_request_id')
+                    if temporary_request_id is not None:
+                        return redirect(url_for('v2.save_request', temporary_request_id=temporary_request_id))
+
                     next_url = request.args.get('next')
                     if next_url is None or not next_url.startswith('/'):
                         return redirect(url_for('main.index'))
@@ -34,6 +42,8 @@ def login():
                       category='danger')
         else:
             flash('Invalid username or password', category='danger')
+
+    form.email.data = request.args.get('email')
     return render_template('auth/login.html', form=form, is_continue=request.args.get('next') is not None)
 
 
@@ -104,7 +114,7 @@ def signup():
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(), password=form.password.data, signup_method='email')
         db.session.add(user)
-        session.pop("invite_code")
+        session.pop("invite_code", None)
         InviteCode.delete(form.invite_code.data)
         token = user.generate_token(action="confirm")
         db.session.commit()  # OK
@@ -239,6 +249,8 @@ def password_reset_request():
         flash(f'We will send the password reset instructions to {form.email.data}'
               ' if there is an account associated with this email.',
               category='info')
+
+    form.email.data = request.args.get('email')
     return render_template('auth/reset_password_request.html', form=form)
 
 
@@ -266,8 +278,13 @@ def password_reset(token):
             db.session.commit()  # OK
             flash('Your password has been updated.', category='success')
             current_app.logger.info(f"site_rid [{session.get('auth_reset')}] is deleted.")
-            session.pop('auth_reset')
+            session.pop('auth_reset', None)
             login_user(user, remember=False)
+
+            temporary_request_id = session.get('temporary_request_id')
+            if temporary_request_id is not None:
+                return redirect(url_for('v2.save_request', temporary_request_id=temporary_request_id))
+
             return redirect(url_for('main.index'))
         else:
             db.session.commit()  # OK
@@ -321,26 +338,10 @@ def make_oauth_routes(oauth_provider, callback_methods=None):
         email = userinfo["email"].lower()
         user = User.query.filter_by(email=email).first()
         if user is None:
-            if session.get("invite_code") is None:
-                # new user and no invite_code in session
-                # user must have clicked Signing in with Provider before signing up with the provider (as it is
-                # impossible to click Sign up with Provider without a valid invite code at the time of writing)
-                # TODO: review once invite code restriction is removed
-                flash(f'{userinfo["email"]} is not associated with any account. Please sign up first.',
-                      category='danger')
-                return redirect(url_for("auth.signup"))
-            is_valid, invite_code, error_message = InviteCode.validate(code=session.get("invite_code"))
-            if not is_valid:
-                flash(error_message, category="danger")
-                return redirect(url_for("auth.signup"))
             user = User(email=email, email_verified=True, signup_method=oauth_provider.name)
             db.session.add(user)
-            if invite_code:
-                db.session.delete(invite_code)
             db.session.commit()  # OK
-            session.pop("invite_code")
-
-        if user.signup_method != oauth_provider.name:
+        elif user.signup_method != oauth_provider.name:
             flash(
                 f'The account associated with {userinfo["email"]} does not support'
                 f'Sign in with {name_capitalized}. Please use an alternative login method.',
@@ -348,6 +349,11 @@ def make_oauth_routes(oauth_provider, callback_methods=None):
             return redirect(url_for("auth.login"))
 
         login_user(user, remember=False)
+
+        temporary_request_id = session.get('temporary_request_id')
+        if temporary_request_id is not None:
+            return redirect(url_for('v2.save_request', temporary_request_id=temporary_request_id))
+
         # for OAuth log in, this is the only place for the user to turn on Remember Me
         flash(f"You have logged in with {name_capitalized}. " +
               Markup(f'<a href={url_for("auth.remember")}>Click here</a>') + " to turn on Remember Me.",

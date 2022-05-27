@@ -91,7 +91,7 @@ def create_app(config_name='DEV'):
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
-    from .open2chat import open2chat as open2chat_blueprint
-    app.register_blueprint(open2chat_blueprint, url_prefix='/open2chat')
+    from .v2 import v2 as v2_blueprint
+    app.register_blueprint(v2_blueprint, url_prefix='/v2')
 
     return app

@@ -4,7 +4,7 @@
 {% block mid_col %}
     <div class="bg-white border rounded p-4 mb-3">
         <h5 class="card-title mb-4">Share this post using your unique invite link below:</h5>
-        {% set node_url = url_for('main.view_node', node_id=node.id, _external=True) %}
+        {% set node_url = url_for('main.view_node_shortener', node_short_code=node.short_code, _external=True) %}
         <div class="text-center my-3">
             <p>
                 <a href="{{ node_url }}">

@@ -10,7 +10,7 @@
             let footnoteValue = "";
             if (topicValue == 1) {
                 placeholderValue = "Name of the place and what you want to know";
-                footnoteValue = "Doing due diligence for the new home you are looking to buy/rent? Or just travelling? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood/block.";
+                footnoteValue = "Doing due diligence for the new home you are looking to buy/rent? Planning a holiday? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood/block.";
             } else if (topicValue == 2) {
                 placeholderValue = "Name of the company/division and what you want to know";
                 footnoteValue = "Trying to research a company before an upcoming job interview? Got a few job offers and can't decide which one to choose? Chat with someone who has been through the interview process or someone who works there."
@@ -41,13 +41,14 @@
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">Everyone has specific knowledge or experience that someone else might find valuable, yet
-                they are not always easy to find online.</p>
+            <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are
+                not always easy to find online.</p>
             <p class="lead">We make them easy to discover and rewarding to share.</p>
 
             <h2 style="margin-top: 5rem">Interested in something?</h2>
-            <p class="lead my-3">We will match you up with the most relevant person we can find to chat with 1-on-1.</p>
-            <form method="post" action="{{ url_for('open2chat.save_request') }}">
+            <p class="lead my-3">We will find the most relevant person for you to chat with 1-on-1. You set the price,
+                and pay only if you are happy with the answer.</p>
+            <form method="post">
                 {{ form.hidden_tag() }}
                 <select class="form-select form-select-lg mb-3" id="selectTopic" onchange="setPlaceholder(this.value)">
                     <option selected>Choose a topic</option>
@@ -68,10 +69,10 @@
             </form>
 
             <h2 style="margin-top: 5rem">Contribute and earn $ reward</h2>
-            <p class="lead">Earn $1-$20 by helping others with their topics, or up to 40% of that by introducing someone
+            <p class="lead">Earn $5-$50 by helping others with their topics, or up to 40% of that by introducing someone
                 to
                 help.</p>
-            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Browse open topics</a>
+            <a href="https://forms.gle/ameZhRUVvHfADJqQ6" class="btn btn-success btn-lg mb-5">Register your interest</a>
 
             <h2 style="margin-top: 5rem">PS: A "tip jar" for non-creators</h2>
             <p class="lead">How it works -

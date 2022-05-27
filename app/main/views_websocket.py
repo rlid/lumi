@@ -76,6 +76,7 @@ class UserNamespace(Namespace):
     def on_connect(self):
         if not current_user.is_authenticated:
             disconnect()
+            return
         if not current_user.is_online:
             current_user.is_online = True
             db.session.add(current_user)

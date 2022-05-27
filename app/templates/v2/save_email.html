@@ -1,0 +1,32 @@
+{% extends "v2/ack_request.html" %}
+{% from "macros/form.html" import render_login_form %}
+
+{% block user_content %}
+    <p>Please leave an email address to receive progress updates from us(*).</p>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-floating mb-3">
+            {% if form.email.errors %}
+                {{ form.email(class_='form-control is-invalid') }}
+            {% else %}
+                {{ form.email(class_='form-control') }}
+            {% endif %}
+            {{ form.email.label() }}
+            {% for error in form.email.errors %}
+                <div class="invalid-feedback" style="display: block;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {{ form.submit(class_='btn btn-success w-100 mb-3') }}
+    </form>
+
+    <div class="separator mb-3"><span class="text-muted"> Or </span></div>
+
+    <a class="btn btn-outline-dark w-100 mb-3 rounded-pill"
+       href="{{ url_for("auth.apple") }}">
+        <i class="bi bi-apple"></i> Continue with Apple</a>
+    <a class="btn btn-outline-danger w-100 mb-4 rounded-pill"
+       href="{{ url_for("auth.google") }}">
+        <i class="bi bi-google"></i> Continue with Google</a>
+
+    <hr>
+{% endblock %}

@@ -35,10 +35,7 @@ def before_request():
 
 @main.route('/')
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.browse'))
-    else:
-        return redirect(url_for('main.landing'))
+    return redirect(url_for('v2.landing'))
 
 
 @main.route('/landing')

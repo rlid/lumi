@@ -14,10 +14,6 @@ class SignUpForm(FlaskForm):
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})
     submit = SubmitField("Continue")
 
-    def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
-            raise ValidationError("The email address is already registered. Please sign in to continue.")
-
 
 class GenerateLinkForm(FlaskForm):
     email = EmailField("Email address", validators=[InputRequired()], render_kw={"placeholder": "name@example.com"})

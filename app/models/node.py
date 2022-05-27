@@ -1,3 +1,5 @@
+import secrets
+import string
 import uuid
 from datetime import datetime
 
@@ -6,6 +8,8 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
 from app.models import Message, Notification, Engagement
+
+_SHORT_CODE_NBYTES = 4
 
 
 class Node(db.Model):
@@ -25,6 +29,8 @@ class Node(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+
+    short_code_internal = db.Column(db.String(16), index=True, unique=True)
 
     state = db.Column(db.Integer, default=STATE_CHAT, nullable=False)
 
@@ -72,6 +78,22 @@ class Node(db.Model):
                                     foreign_keys=[Notification.node_id],
                                     lazy="dynamic",
                                     cascade="all, delete-orphan")
+
+    @staticmethod
+    def generate_short_code():
+        short_codes = [short_code for short_code, in db.session.query(Node.short_code_internal).all()]
+        short_code = None
+        while short_code is None or short_code in short_codes:
+            short_code = secrets.token_urlsafe(_SHORT_CODE_NBYTES)
+        return short_code
+
+    @property
+    def short_code(self):
+        if self.short_code_internal is None:
+            self.short_code_internal = Node.generate_short_code()
+            db.session.add(self)
+            db.session.commit()
+        return self.short_code_internal
 
     def display_value(self, user):
         post = self.post

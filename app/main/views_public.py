@@ -115,6 +115,12 @@ def browse():
     )
 
 
+@main.route('/<node_short_code>')
+def view_node_shortener(node_short_code):
+    node = Node.query.filter_by(short_code_internal=node_short_code).first_or_404()
+    return redirect(url_for('main.view_node', node_id=node.id))
+
+
 @main.route('/node/<uuid:node_id>', methods=['GET', 'POST'])
 def view_node(node_id):
     node = Node.query.filter_by(id=node_id).first_or_404()

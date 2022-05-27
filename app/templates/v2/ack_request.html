@@ -1,0 +1,26 @@
+{% extends "v2/base.html" %}
+{% from "macros/form.html" import render_login_form %}
+
+{% block title %}
+    Request received
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+
+    {% block user_content %}
+        <p>You can view or edit the details at
+            <a href="{{ url_for('main.view_node_shortener', node_short_code=node.short_code) }}">
+                {{ url_for('main.view_node_shortener', node_short_code=node.short_code, _external=True) }}</a>.
+        </p>
+    {% endblock %}
+
+    <h5 class="my-4">What happens next:</h5>
+    <ol>
+        <li>You will receive an email once we have found someone to engage with you.</li>
+        <li>Top up your account if necessary (to pay for the reward).</li>
+        <li>Have a chat with the other user on your chosen topic.</li>
+        <li>Release the reward if you are satisfied with their response (otherwise you get a refund).
+        </li>
+    </ol>
+{% endblock %}
