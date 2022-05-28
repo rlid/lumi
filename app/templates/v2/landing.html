@@ -71,14 +71,16 @@
                     {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
                     {{ form.submit(class_='btn btn-success') }}
                 </div>
-                {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
-                {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
-                {% for subfield in form.reward %}
-                    {{ subfield(class_='btn-check') }}
-                    {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
-                {% endfor %}
-                <p class="small text-muted">As a rough guide, we recommend $5 or more for a 5-minute chat, i.e. a
-                    minimum of $1 per effective minute spent.</p>
+                <div class="mx-1">
+                    {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
+                    {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
+                    {% for subfield in form.reward %}
+                        {{ subfield(class_='btn-check') }}
+                        {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
+                    {% endfor %}
+                    <p class="small text-muted">As a rough guide, we recommend $5 or more for a 5-minute chat, i.e. a
+                        minimum of $1 per effective minute spent.</p>
+                </div>
             </form>
 
             <h2 style="margin-top: 4rem">Contribute and earn $ reward</h2>
