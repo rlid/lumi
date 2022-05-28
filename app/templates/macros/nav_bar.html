@@ -36,18 +36,20 @@
 {#                </li>#}
                 <li class="nav-item">
                     {% if feedback_form %}
-                        <button type="button" class="btn border-0 nav-link text-nowrap d-none d-md-block"
+                        <button type="button" class="btn border-0 nav-link text-nowrap d-none d-sm-block"
                                 data-bs-toggle="modal" data-bs-target="#modalFeedback">
                             <i class="bi bi-pencil-square"></i> Feedback
                         </button>
                     {% else %}
-                        <a class="nav-link text-nowrap d-none d-md-block
+                        <a class="nav-link text-nowrap d-none d-sm-block
                         {% if request.endpoint and request.endpoint == 'main.feedback' %}active{% endif %}"
                            href="{{ url_for('main.feedback') }}">
                             <i class="bi bi-pencil-square"></i> Feedback
                         </a>
                     {% endif %}
                 </li>
+{#                {{ render_nav_item("main.about", "About", "bi-info-circle", visible_from="sm") }}#}
+
             </ul>
             <ul class="navbar-nav ms-auto mb-2">
                 <li class="nav-item">
@@ -184,9 +186,9 @@
                         icon="bi-arrow-90deg-left",
                         extra_class="me-auto") }}
                 {% endif %}
+                {{ render_nav_item_bottom("main.index", "Home", "bi-house-fill") }}
                 {{ render_nav_item_bottom("main.alerts", "Alerts", "bi-bell", badge_text=current_user.num_unread_notifications, extra_class="hide-340") }}
 {#                {{ render_nav_item_bottom("main.browse", "Browse", "bi-search") }}#}
-                {{ render_nav_item_bottom("main.index", "Home", "bi-house-fill") }}
 {#                {{ render_nav_item_bottom("main.engagements", "Chats", "bi-chat-square-text", extra_class="hide-414") }}#}
 {#                {{ render_nav_item_bottom("main.saved", "Saved", "bi-bookmark-check", visible_from="sm") }}#}
                 {{ render_nav_item_bottom("main.account", "&nbsp&nbspMe&nbsp&nbsp", "bi-person-circle", visible_from="sm") }}
