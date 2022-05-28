@@ -71,17 +71,19 @@
                     {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
                     {{ form.submit(class_='btn btn-success') }}
                 </div>
-                <div class="px-1">
-                    {{ form.reward.label(class_='lead') }}<span class="lead">: $</span><span id="valueBox" class="lead">5</span>
-                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}
-                    <p class="small text-muted">As a rough guide, we recommend $5 or more for a 5-minute chat, i.e. $1
-                        per effective minute spent as a baseline.</p>
-                </div>
+                {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
+                {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
+                {% for subfield in form.reward %}
+                    {{ subfield(class_='btn-check') }}
+                    {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
+                {% endfor %}
+                <p class="small text-muted">As a rough guide, we recommend $5 or more for a 5-minute chat, i.e. a
+                    minimum of $1 per effective minute spent.</p>
             </form>
 
             <h2 style="margin-top: 4rem">Contribute and earn $ reward</h2>
-            <p class="lead">Earn $1-$50 per request (a minimum of $60 per effective hour spent) by helping others with
-                their topics, or up to 40% of that by introducing someone to help.</p>
+            <p class="lead">Earn $5-$50 per request by helping others with their topics, or up to 40% of that by
+                introducing someone to help.</p>
             <a href="https://forms.gle/W9SLbgUNBLg2kUZo7" class="btn btn-success btn-lg mb-5">Register your interest</a>
 
             <h2 style="margin-top: 5rem">PS: A "tip jar" for non-creators</h2>

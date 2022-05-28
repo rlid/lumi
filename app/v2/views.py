@@ -25,13 +25,13 @@ def landing():
             post = current_user.create_post(
                 is_asking=True,
                 is_private=True,
-                price_cent=100 * form.reward.data,
+                price_cent=100 * int(form.reward.data[1:]),
                 title=form.details.data)
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('v2.ack_request', post_id=post.id))
         else:
-            temporary_request = TemporaryRequest(details=form.details.data, reward_cent=100 * form.reward.data)
+            temporary_request = TemporaryRequest(details=form.details.data, reward_cent=100 * int(form.reward.data[1:]))
             db.session.add(temporary_request)
             db.session.commit()
             return redirect(url_for('v2.save_email', temporary_request_id=temporary_request.id))

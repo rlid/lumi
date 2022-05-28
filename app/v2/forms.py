@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, SubmitField, BooleanField, TextAreaField, IntegerRangeField
+from wtforms import StringField, EmailField, SubmitField, BooleanField, TextAreaField, IntegerRangeField, RadioField
 from wtforms.validators import InputRequired, Length, ValidationError
 
 from app.models import User
@@ -7,7 +7,8 @@ from app.models import User
 
 class PostForm(FlaskForm):
     details = TextAreaField(validators=[InputRequired(), Length(min=10, max=100)])
-    reward = IntegerRangeField('Reward')
+    # reward = IntegerRangeField('Reward')
+    reward = RadioField('Reward: ', choices=['$5', '$10', '$20', '$50'], validators=[InputRequired()])
     submit = SubmitField("  Go  ")
 
 
