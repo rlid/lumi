@@ -41,14 +41,14 @@ class PostForm(FlaskForm):
     def validate_price(self, field):
         # value limit checks
         # if current_user.value_limit_cent < 100 * field.data:
-        #     raise ValidationError(f'Your current price limit is {current_user.reward_limit:.2f}.')
+        #     raise ValidationError(f'Your current price limit is {current_user.value_limit:.2f}.')
         if not self.edit_mode:
             # do not validate price in edit mode because user's current value limit might be lower than when he made the
             # post
             price_cent = round(100 * field.data)
             if self.is_asking.data == 'True':
                 if current_user.value_limit_cent < price_cent:
-                    raise ValidationError(f'Your current limit is ${current_user.reward_limit:.2f}.')
+                    raise ValidationError(f'Your current limit is ${current_user.value_limit:.2f}.')
             else:
                 m_platform_fee = 0.1  # Default
                 m_referral = 0.4 if self.is_private.data else 0.2  # Default
@@ -58,7 +58,7 @@ class PostForm(FlaskForm):
                 if current_user.value_limit_cent < value_cent:
                     raise ValidationError(
                         'Your current limit on selling price is ' +
-                        f'${0.01 * int(100 * current_user.reward_limit / (1 + m_platform_fee + m_referral)):.2f}.'
+                        f'${0.01 * int(100 * current_user.value_limit / (1 + m_platform_fee + m_referral)):.2f}.'
                     )
 
 

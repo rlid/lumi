@@ -166,7 +166,7 @@ def request_engagement(node_id):
                 node.value_cent
         ):
             flash('You currently cannot request engagement on posts worth more than $' +
-                  f'{current_user.reward_limit:.2f}.', category='warning')
+                  f'{current_user.value_limit:.2f}.', category='warning')
             return redirect(url_for('main.view_node', node_id=node_id))
         if not post.is_asking and \
                 current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
@@ -230,7 +230,7 @@ def accept_engagement(engagement_id):
                 node.value_cent
         ):
             flash('You currently cannot accept engagement on posts worth more than $' +
-                  f'{current_user.reward_limit:.2f}.',
+                  f'{current_user.value_limit:.2f}.',
                   category='danger')
         elif post.is_asking and \
                 current_user.total_balance_cent - current_user.reserved_balance_cent < node.value_cent:
@@ -250,7 +250,7 @@ def rate_engagement(engagement_id, is_success):
         engagement = Engagement.query.filter_by(id=engagement_id).first_or_404()
         # if engagement.node.value_cent > current_user.value_limit_cent:
         #     flash('You currently cannot rate engagement on posts worth more than $' +
-        #           f'{current_user.reward_limit:.2f}.', category='warning')
+        #           f'{current_user.value_limit:.2f}.', category='warning')
 
         if current_user == engagement.asker:
             tip_cent = form.tip_cent.data

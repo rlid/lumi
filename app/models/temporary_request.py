@@ -12,3 +12,4 @@ class TemporaryRequest(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
 
     details = db.Column(db.String(100), nullable=False)
+    reward_cent = db.Column(db.Integer, nullable=False)

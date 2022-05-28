@@ -5,12 +5,16 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
+        function showValue(newValue) {
+            document.getElementById("valueBox").innerText = newValue;
+        }
+
         function setPlaceholder(topicValue) {
             let placeholderValue = "";
             let footnoteValue = "";
             if (topicValue == 1) {
                 placeholderValue = "Name of the place and what you want to know";
-                footnoteValue = "Doing due diligence for the new home you are looking to buy/rent? Planning a holiday? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood/block.";
+                footnoteValue = "Doing due diligence for the new home you are looking to buy/rent? Planning a holiday? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood.";
             } else if (topicValue == 2) {
                 placeholderValue = "Name of the company/division and what you want to know";
                 footnoteValue = "Trying to research a company before an upcoming job interview? Got a few job offers and can't decide which one to choose? Chat with someone who has been through the interview process or someone who works there."
@@ -22,10 +26,10 @@
                 footnoteValue = "Interested in a product but don't have all the info you need to make a purchase decision? Can't decide between 2 similarly featured services? Get specific advice and perspective from a current user.";
             } else if (topicValue == 5) {
                 placeholderValue = "Description of your problem or what you are trying to achieve";
-                footnoteValue = "(Coming soon) Link your Stack Overflow question and hope for the best!";
+                footnoteValue = "Need help with something? Let us know and we will find someone to help.";
             } else if (topicValue == 6) {
                 placeholderValue = "Description of your problem or what you are trying to achieve";
-                footnoteValue = "(Experimental) Need help with something? Let us know and we will find someone to help.";
+                footnoteValue = "(Coming soon) Link your Stack Overflow question and hope for the best!";
             } else if (topicValue == 7) {
                 placeholderValue = "Description of what you are looking for or the ideal person for the topic";
                 footnoteValue = "Looking for something not listed above? Let us know and we will try to help.";
@@ -41,13 +45,15 @@
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">Everyone has specific knowledge or experience that others may find valuable, yet they are
-                not always easy to find online.</p>
-            <p class="lead">We make them easy to discover and rewarding to share.</p>
+            <p class="lead">LumiAsk is a search platform for highly personal knowledge and experience.</p>
+            <p class="lead">We all have unique knowledge, opinions and experience that others may find valuable, yet
+                they are not always easy to find, and we are not often aware of who needs them.</p>
+            <p class="lead">We make them easier to discover and rewarding to share.</p>
 
-            <h2 style="margin-top: 5rem">Interested in something?</h2>
-            <p class="lead my-3">We will find the most relevant person for you to chat with 1-on-1. You set the price,
-                and pay only if you are happy with the answer.</p>
+            <h2 style="margin-top: 4rem">Interested in something?</h2>
+            <p class="lead my-3">We will match you up with a relevant person to have a quick chat with 1-on-1. You set
+                the price, and pay only if you
+                are satisfied with the answer.</p>
             <form method="post">
                 {{ form.hidden_tag() }}
                 <select class="form-select form-select-lg mb-3" id="selectTopic" onchange="setPlaceholder(this.value)">
@@ -55,24 +61,28 @@
                     <option value="1">Place and Neighbourhood</option>
                     <option value="2">Company and Workplace</option>
                     <option value="3">School and College</option>
-                    <option value="4">Product or Service</option>
-                    <option value="6">Problem Solving - General</option>
-                    <option value="5" disabled>Problem Solving - Coding & DevOps</option>
+                    <option value="4">Product and Service</option>
+                    <option value="5">Advice and Problem Solving - General</option>
+                    <option value="6" disabled>Advice and Problem Solving - Coding & DevOps</option>
                     <option value="7">Other</option>
-                    {#  #}
                 </select>
                 <p class="my-3 text-muted" id="footnote"></p>
-                <div class="input-group input-group-lg">
+                <div class="input-group input-group-lg mb-3">
                     {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
                     {{ form.submit(class_='btn btn-success') }}
                 </div>
+                <div class="px-1">
+                    {{ form.reward.label(class_='lead') }}<span class="lead">: $</span><span id="valueBox" class="lead">5</span>
+                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}
+                    <p class="small text-muted">As a rough guide, we recommend $5 or more for a 5-minute chat, i.e. $1
+                        per effective minute spent as a baseline.</p>
+                </div>
             </form>
 
-            <h2 style="margin-top: 5rem">Contribute and earn $ reward</h2>
-            <p class="lead">Earn $5-$50 by helping others with their topics, or up to 40% of that by introducing someone
-                to
-                help.</p>
-            <a href="https://forms.gle/ameZhRUVvHfADJqQ6" class="btn btn-success btn-lg mb-5">Register your interest</a>
+            <h2 style="margin-top: 4rem">Contribute and earn $ reward</h2>
+            <p class="lead">Earn $1-$50 per request (a minimum of $60 per effective hour spent) by helping others with
+                their topics, or up to 40% of that by introducing someone to help.</p>
+            <a href="https://forms.gle/W9SLbgUNBLg2kUZo7" class="btn btn-success btn-lg mb-5">Register your interest</a>
 
             <h2 style="margin-top: 5rem">PS: A "tip jar" for non-creators</h2>
             <p class="lead">How it works -

@@ -1,3 +1,5 @@
+import math
+
 from flask import render_template, session, redirect, url_for, flash
 from flask_login import current_user, login_user, login_required
 
@@ -20,16 +22,25 @@ def landing():
     form = PostForm()
     if form.validate_on_submit():
         if current_user.is_authenticated:
-            post = current_user.create_post(is_asking=True, is_private=True, price_cent=500, title=form.details.data)
+            post = current_user.create_post(
+                is_asking=True,
+                is_private=True,
+                price_cent=100 * form.reward.data,
+                title=form.details.data)
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('v2.ack_request', post_id=post.id))
         else:
-            temporary_request = TemporaryRequest(details=form.details.data)
+            temporary_request = TemporaryRequest(details=form.details.data, reward_cent=100 * form.reward.data)
             db.session.add(temporary_request)
             db.session.commit()
             return redirect(url_for('v2.save_email', temporary_request_id=temporary_request.id))
-    return render_template("v2/landing.html", form=form)
+
+    return render_template(
+        "v2/landing.html",
+        form=form,
+        max_reward=math.floor(current_user.value_limit) if current_user.is_authenticated else User.DEFAULT_VALUE_LIMIT
+    )
 
 
 @v2.route('/ack-request/<uuid:post_id>')
@@ -40,7 +51,11 @@ def ack_request(post_id):
 
 
 def _save_request(user, temporary_request, price_cent=500):
-    post = user.create_post(is_asking=True, is_private=True, price_cent=price_cent, title=temporary_request.details)
+    post = user.create_post(
+        is_asking=True,
+        is_private=True,
+        price_cent=temporary_request.reward_cent,
+        title=temporary_request.details)
     db.session.add(post)
     db.session.delete(temporary_request)
     session.pop('temporary_request_id', None)

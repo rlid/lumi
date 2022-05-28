@@ -21,6 +21,7 @@ from utils import security_utils, authlib_ext
 _SHORT_CODE_LENGTH = 4
 _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
+
 REP_I_DECAY = 0.1
 # normalise to $10 (1000c), i.e. counter metric and value metric would be equivalent if every engagement is $10
 REP_DECAY = REP_I_DECAY / 1000
@@ -28,6 +29,9 @@ REP_DECAY = REP_I_DECAY / 1000
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
+
+    DEFAULT_VALUE_LIMIT = 10  # $10
+
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     last_seen = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
@@ -37,7 +41,7 @@ class User(UserMixin, db.Model):
 
     total_balance_cent = db.Column(db.Integer, default=0, nullable=False)
     reserved_balance_cent = db.Column(db.Integer, default=0, nullable=False)
-    value_limit_cent = db.Column(db.Integer, default=500, nullable=False)
+    value_limit_cent = db.Column(db.Integer, default=100 * DEFAULT_VALUE_LIMIT, nullable=False)
 
     sum_x = db.Column(db.Float, default=0.0, nullable=False)
     sum_abs_x = db.Column(db.Float, default=0.0, nullable=False)
@@ -234,7 +238,7 @@ class User(UserMixin, db.Model):
         return 0.01 * self.reserved_balance_cent
 
     @property
-    def reward_limit(self):
+    def value_limit(self):
         return 0.01 * self.value_limit_cent
 
     @property
@@ -688,7 +692,7 @@ class User(UserMixin, db.Model):
 
         return sum_x / sum_abs_x, sum_i / sum_abs_i
 
-    def update_reward_limit(self, value_cent, success, dispute_lost):
+    def update_value_limit(self, value_cent, success, dispute_lost):
         if success:
             r = self.reputation
             if r > 0.8:
@@ -741,7 +745,7 @@ class User(UserMixin, db.Model):
             self.sum_i += 1 if success else -1
             self.sum_abs_i += 1
 
-        self.update_reward_limit(value_cent, success, dispute_lost)
+        self.update_value_limit(value_cent, success, dispute_lost)
 
 
 def _handle_success(engagement, fraction=1.0):
