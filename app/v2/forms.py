@@ -1,11 +1,22 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, SubmitField, BooleanField, TextAreaField, IntegerRangeField, RadioField
-from wtforms.validators import InputRequired, Length, ValidationError
-
-from app.models import User
+from wtforms import StringField, EmailField, SubmitField, BooleanField, TextAreaField, RadioField, SelectField
+from wtforms.validators import InputRequired, Length
 
 
 class PostForm(FlaskForm):
+    topic = SelectField('Choose a topic',
+                        choices=[
+                            ('', 'Choose a topic'),
+                            (1, 'Place and Neighbourhood'),
+                            (2, 'Company and Workplace'),
+                            (3, 'School and College'),
+                            (4, 'Product and Service'),
+                            (5, 'Advice and Problem Solving - General'),
+                            # (6, 'Advice and Problem Solving - Coding & DevOps'),
+                            (7, 'Other'),
+                        ],
+                        validators=[InputRequired()])
+
     details = TextAreaField(validators=[InputRequired(), Length(min=10, max=100)])
     # reward = IntegerRangeField('Reward')
     reward = RadioField('Reward: ', choices=['$5', '$10', '$20', '$50'], validators=[InputRequired()])

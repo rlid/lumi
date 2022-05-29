@@ -20,6 +20,7 @@ def generate():
 @v2.route('/', methods=['GET', 'POST'])
 def landing():
     form = PostForm()
+    print(form.topic.data)
     if form.validate_on_submit():
         if current_user.is_authenticated:
             post = current_user.create_post(

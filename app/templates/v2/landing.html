@@ -43,71 +43,77 @@
 
 {% block main %}
     <main class="my-auto py-5 bg-dark text-light">
-        <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
-            <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">LumiAsk is a search platform for highly personal knowledge and experience.</p>
-            <p class="lead">We all have specific knowledge, opinions and experience that others may find valuable, yet
-                they are not always easy to find, and we are not often aware of who needs them.</p>
-            <p class="lead">We make them easier to discover and rewarding to share.</p>
+        <div class="mx-auto p-3" style="max-width: 45rem">
+            <div class="mt-5">
+                <h1 class="display-5 fw-bold text-center mb-4">Get insight from the right people</h1>
+                <p class="lead">Choose a topic, and we will match you up with a relevant person to have a quick chat
+                    with 1-on-1. You set the price, and pay only if you are happy with the result.</p>
+                <form method="post">
+                    {{ form.hidden_tag() }}
+                    {{ form.topic(class_='form-select form-select-lg mb-3', onchange='setPlaceholder(this.value)') }}
+                    <p class="text-muted" id="footnote"></p>
+                    <div class="input-group input-group-lg mb-3">
+                        {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
+                        {{ form.submit(class_='btn btn-success') }}
+                    </div>
+                    <div class="mx-1">
+                        {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
+                        {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
+                        {% for subfield in form.reward %}
+                            {{ subfield(class_='btn-check') }}
+                            {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
+                        {% endfor %}
+                        <p class="small text-muted mt-2">Higher rewards are unlocked as you complete more searches
+                            on
+                            the platform. As a rough guide, please budget $1 (or more for harder questions) per
+                            effective minute spent by your match, e.g. $5 for a 5-minute chat or shorter.</p>
+                    </div>
+                </form>
+            </div>
 
-            <h2 style="margin-top: 4rem">Looking for something?</h2>
-            <p class="lead my-3">We will match you up with a relevant person to have a quick chat with 1-on-1. You set
-                the price, and pay only if you are happy with the result.</p>
-            <form method="post">
-                {{ form.hidden_tag() }}
-                <select class="form-select form-select-lg mb-3" id="selectTopic" onchange="setPlaceholder(this.value)">
-                    <option selected>Choose a topic</option>
-                    <option value="1">Place and Neighbourhood</option>
-                    <option value="2">Company and Workplace</option>
-                    <option value="3">School and College</option>
-                    <option value="4">Product and Service</option>
-                    <option value="5">Advice and Problem Solving - General</option>
-                    <option value="6" disabled>Advice and Problem Solving - Coding & DevOps</option>
-                    <option value="7">Other</option>
-                </select>
-                <p class="my-3 text-muted" id="footnote"></p>
-                <div class="input-group input-group-lg mb-3">
-                    {{ form.details(class_='form-control', rows=3, placeholder='Details') }}
-                    {{ form.submit(class_='btn btn-success') }}
-                </div>
-                <div class="mx-1">
-                    {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
-                    {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
-                    {% for subfield in form.reward %}
-                        {{ subfield(class_='btn-check') }}
-                        {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
-                    {% endfor %}
-                    <p class="small text-muted mt-2">Higher rewards are unlocked as you complete more searches on the
-                        platform. As a rough guide, please budget at least $1 per effective minute spent by your match,
-                        e.g. $5 for a 5-minute chat or shorter.</p>
-                </div>
-            </form>
+            <div style="margin-top: 10rem">
+                <h1 class="display-5 fw-bold text-center mb-4">Our mission</h1>
+                <p class="lead">LumiAsk is a search platform for highly personal knowledge and experience.</p>
+                <p class="lead">We all have specific knowledge, opinions and experience that others may find valuable,
+                    yet they are not always easy to find, and we are not often aware of who needs them.</p>
+                <p class="lead">We make them easier to discover and rewarding to share.</p>
+            </div>
 
-            <h2 style="margin-top: 4rem">Contribute and earn $ reward</h2>
-            <p class="lead">Earn $5-$50 per search, equivalent $60/hour or more based on our pricing guidelines, by
-                sharing your own knowledge or experience, or up to 40% of that by inviting the right people to help.
-            </p>
-            <a href="https://forms.gle/zzXPFrtZSdgkoJXR8" class="btn btn-success btn-lg mb-5">Register your interest</a>
+            <div style="margin-top: 10rem">
+                <h1 class="display-5 fw-bold text-center mb-4">Join us</h1>
+                <p class="lead">Earn $5-$50 per search by sharing your own knowledge or experience that typically takes
+                    5-10 minutes, or up to 40% of that by inviting the right people to help.
+                </p>
+                <p class="text-center">
+                    <a href="https://forms.gle/zzXPFrtZSdgkoJXR8" class="btn btn-success btn-lg">
+                        Register your interest</a>
+                </p>
+            </div>
 
-            <h2 style="margin-top: 5rem">PS: A "tip jar" for non-creators</h2>
-            <p class="lead">How it works -
-            <ol class="lead">
-                <li>create your tip jar link and share on your online profiles</li>
-                <li>others click the link to send you a message and a "tip"</li>
-                <li>you claim the tip by responding to the message</li>
-            </ol>
-            </p>
-            <p class="lead">If you match any of the following descriptions:</p>
-            <ul class="lead">
-                <li>you occasionally (or regularly) post or comment in online communities</li>
-                <li>you have written reviews on Amazon, Google or other review websites</li>
-                <li>you have a profile set up on LinkedIn, Facebook or other social media</li>
-            </ul>
-            <p class="lead">
-                then you are already discoverable as a "casual" content creator, and you are uniquely positioned to
-                share your specific knowledge and experience on-demand.
-            </p>
-            <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg mb-5">Generate your "tip jar" link</a>
+            <div style="margin-top: 10rem">
+                <h1 class="display-6 fw-bold text-center mb-4">PS: A "tip jar" for non-creators</h1>
+                <p class="lead">How it works -
+                <ol class="lead">
+                    <li>create your tip jar link and share on your online profiles</li>
+                    <li>others click the link to send you a message and a "tip"</li>
+                    <li>you claim the tip by responding to the message</li>
+                </ol>
+                </p>
+                <p class="lead">If you match any of the following descriptions:</p>
+                <ul class="lead">
+                    <li>you occasionally (or regularly) post or comment in online communities</li>
+                    <li>you have written reviews on Amazon, Google or other review websites</li>
+                    <li>you have a profile set up on LinkedIn, Facebook or other social media</li>
+                </ul>
+                <p class="lead">
+                    then you are already discoverable as a "casual" content creator, and you are uniquely positioned to
+                    share your specific knowledge and experience on-demand.
+                </p>
+                <p class="text-center">
+                    <a href="{{ url_for('main.browse') }}" class="btn btn-success btn-lg">Generate your "tip jar" link
+                    </a>
+                </p>
+            </div>
         </div>
     </main>
 {% endblock %}
