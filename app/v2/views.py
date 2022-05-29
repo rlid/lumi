@@ -10,29 +10,32 @@ from app.v2.forms import GenerateLinkForm, PostForm, SignUpForm
 from app.v2 import v2
 
 
-@v2.route('/generate')
-def generate():
+@v2.route('/open2chat')
+def open2chat():
     form = GenerateLinkForm()
     form.username.data = User.generate_short_code()
-    return render_template('v2/generate_link.html', form=form)
+    return render_template('v2/open2chat.html', form=form)
 
 
 @v2.route('/', methods=['GET', 'POST'])
 def landing():
     form = PostForm()
-    print(form.topic.data)
     if form.validate_on_submit():
         if current_user.is_authenticated:
             post = current_user.create_post(
                 is_asking=True,
                 is_private=True,
                 price_cent=100 * int(form.reward.data[1:]),
+                topic=form.topic.data,
                 title=form.details.data)
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('v2.ack_request', post_id=post.id))
         else:
-            temporary_request = TemporaryRequest(details=form.details.data, reward_cent=100 * int(form.reward.data[1:]))
+            temporary_request = TemporaryRequest(
+                topic=form.topic.data,
+                details=form.details.data,
+                reward_cent=100 * int(form.reward.data[1:]))
             db.session.add(temporary_request)
             db.session.commit()
             return redirect(url_for('v2.save_email', temporary_request_id=temporary_request.id))
@@ -56,6 +59,7 @@ def _save_request(user, temporary_request, price_cent=500):
         is_asking=True,
         is_private=True,
         price_cent=temporary_request.reward_cent,
+        topic=temporary_request.topic,
         title=temporary_request.details)
     db.session.add(post)
     db.session.delete(temporary_request)

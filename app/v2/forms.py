@@ -8,10 +8,10 @@ class PostForm(FlaskForm):
                         choices=[
                             ('', 'Choose a topic'),
                             (1, 'Place and Neighbourhood'),
-                            (2, 'Company and Workplace'),
+                            (2, 'Company and Profession'),
                             (3, 'School and College'),
                             (4, 'Product and Service'),
-                            (5, 'Advice and Problem Solving - General'),
+                            (5, 'Advice and Problem Solving'),
                             # (6, 'Advice and Problem Solving - Coding & DevOps'),
                             (7, 'Other'),
                         ],

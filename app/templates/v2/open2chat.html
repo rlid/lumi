@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block body_bg %}bg-dark{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        function showValue(newValue) {
+            document.getElementById("valueBox").innerText = newValue;
+        }
+
+        function setPlaceholder(topicValue) {
+            let placeholderValue = "";
+            let footnoteValue = "";
+            if (topicValue == 1) {
+                placeholderValue = "Name of the place and what you want to know";
+                footnoteValue = "Planning a holiday? Doing due diligence for the new home you are looking to buy/rent? Get answers to your specific questions and perspectives from someone who lives in the neighbourhood.";
+            } else if (topicValue == 2) {
+                placeholderValue = "Name of the company/division and what you want to know";
+                footnoteValue = "Preparing for an upcoming job interview? Got a few job offers and can't decide which one to choose? Chat with someone who has been through the interview process or someone who works at the company."
+            } else if (topicValue == 3) {
+                placeholderValue = "Name of the school/faculty/program and what you want to know";
+                footnoteValue = "Applying to a school and need tips on the application and interview process? Want to find out about specific elements of a program or opinions of current students? Chat with a current student or someone who has been through the process.";
+            } else if (topicValue == 4) {
+                placeholderValue = "Name or description of the product/service and what you want to know";
+                footnoteValue = "Interested in a product but don't have all the info you need to pull the trigger? Can't decide between 2 similarly featured services? Get specific advice and perspective from a current owner/user.";
+            } else if (topicValue == 5) {
+                placeholderValue = "Description of your problem or what you are trying to achieve";
+                footnoteValue = "Need advice or help with something? Let us know and we will find someone to help.";
+            } else if (topicValue == 6) {
+                placeholderValue = "Description of your problem or what you are trying to achieve";
+                footnoteValue = "(Coming soon) Link your Stack Overflow question and hope for the best!";
+            } else if (topicValue == 7) {
+                placeholderValue = "Description of what you are looking for or the ideal person for the topic";
+                footnoteValue = "Looking for something not listed above? Let us know and we will try to help.";
+            }
+            document.getElementById("details").placeholder = placeholderValue;
+            document.getElementById("footnote").innerText = footnoteValue;
+        }
+    </script>
+{% endblock %}
+
+
+{% block main %}
+    <main class="py-5 text-light">
+        <div class="mx-auto p-3" style="max-width: 45rem">
+            <div class="mt-5">
+                <h1 class="display-6 fw-bold mb-4">An online "tip jar" with a twist</h1>
+                <p class="lead">Make yourself available for quick questions (with "tips") on your social profile, and
+                    claim the "tip" when you respond to the message!</p>
+
+                {#                <h2 class="mt-5 mb-4">Let others know you are open to chat</h2>#}
+                {#                <span class="lead">Do you</span>#}
+                {#                <ul class="lead">#}
+                {#                    <li>occasionally share your thoughts and life on social media?</li>#}
+                {#                    <li>post or comment in online communities from time to time?</li>#}
+                {#                    <li>ever write review on Amazon, Google or other review websites?</li>#}
+                {#                </ul>#}
+                {#                <p class="lead">#}
+                {#                    If the answer to some of the above is yes, then chances are someone might have read your content and#}
+                {#                    know that a chat with you would be really helpful for them, and a chance to ask follow-up questions#}
+                {#                    would really benefit them.#}
+                {#                </p>#}
+
+                <div class="mt-5 border mx-auto px-{%- if request.MOBILE %}4{%- else %}5{% endif %} py-3"
+                     style="border-radius: 1rem; max-width: 30rem">
+                    <h4>Generate your "tip jar"</h4>
+
+                    <form class="my-3" method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
+                        {{ form.hidden_tag() }}
+                        <label for="username" class="form-label">Your shareable link:</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">https://Open2.Chat/</span>
+                            {{ form.username(class_='form-control', placeholder='YourName') }}
+                        </div>
+                        <label for="email" class="form-label">Email address to receive chat
+                            notifications(*):</label>
+                        <div class="mb-3">
+                            {{ form.email(class_='form-control') }}
+                        </div>
+                        {{ form.submit(class_='btn btn-success w-100') }}
+                    </form>
+                    <p class="small text-muted">(*) Your email address will NOT be shared with message senders.</p>
+                </div>
+
+
+                <div>
+                    <h2 class="mt-5 mb-4">How it works</h2>
+                    <ol class="lead">
+                        <li>create your own "tip jar" link and share on your online profiles</li>
+                        <li>others click the link to send you a message and a "tip"</li>
+                        <li>you claim the tip by responding to the message</li>
+                    </ol>
+                    <p class="lead">And that's it, just a simple tip jar with slightly more benefit for the tippers. Now
+                        the question is, will it get you more tips in the jar?</p>
+                </div>
+
+                <div>
+                    <h2 class="mt-5 mb-4">Who is it for?</h2>
+                    <p class="lead">If you are not actively creating and monetizing your content as a creator, you
+                        probably don't expect to be tipped for the stuff you posted online.</p>
+                    <p class="lead">But from time to time, there are people who read your content by chance, and you
+                        just happen to be their ideal person (and the only one they could find) to chat about something
+                        interesting related to your content.</p>
+                    <p class="lead">Most will probably not message you as it is a pretty awkward thing to do, and you
+                        might not appreciate random questions from strangers.</p>
+                    <p class="lead">This link should make the experience better for both of you - you get to help
+                        strangers and get tipped, and they get to reach you in a less awkward way and show their
+                        appreciation for your time and kindness.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

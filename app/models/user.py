@@ -289,7 +289,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return post_tag
 
-    def create_post(self, is_asking, price_cent, title, body='', is_private=False, referral_budget_cent=None,
+    def create_post(self, is_asking, price_cent, title, topic=0, body='', is_private=False, referral_budget_cent=None,
                     use_markdown=False):
         title = title.strip()
         body = body.replace('<br>', '')  # remove <br> added by Toast UI
@@ -318,6 +318,7 @@ class User(UserMixin, db.Model):
                     platform_fee_cent=platform_fee_cent,
                     is_private=is_private,
                     referral_budget_cent=referral_budget_cent,
+                    topic=topic,
                     title=title,
                     body=('m' if use_markdown else 's') + body)
         db.session.add(post)
