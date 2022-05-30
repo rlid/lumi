@@ -45,7 +45,7 @@
     <main class="py-5 text-light">
         <div class="mx-auto p-3" style="max-width: 45rem">
             <div class="mt-5">
-                <h1 class="display-6 fw-bold mb-4">An online "tip jar" with a twist</h1>
+                <h1 class="display-6 fw-bold mb-4">An "tip jar" with a twist</h1>
                 <p class="lead">Make yourself available for quick questions (with "tips") on your social profile, and
                     claim the "tip" when you respond to the message!</p>
 
@@ -64,7 +64,7 @@
 
                 <div class="mt-5 border mx-auto px-{%- if request.MOBILE %}4{%- else %}5{% endif %} py-3"
                      style="border-radius: 1rem; max-width: 30rem">
-                    <h4>Generate your "tip jar"</h4>
+                    <h4>Generate your AMA "tip jar"</h4>
 
                     <form class="my-3" method="post" {% if action_url %}action="{{ action_url }}{% endif %}">
                         {{ form.hidden_tag() }}
@@ -87,7 +87,7 @@
                 <div>
                     <h2 class="mt-5 mb-4">How it works</h2>
                     <ol class="lead">
-                        <li>create your own "tip jar" link and share on your online profiles</li>
+                        <li>create your own AMA "tip jar"</li>
                         <li>others click the link to send you a message and a "tip"</li>
                         <li>you claim the tip by responding to the message</li>
                     </ol>
@@ -96,17 +96,21 @@
                 </div>
 
                 <div>
-                    <h2 class="mt-5 mb-4">Who is it for?</h2>
-                    <p class="lead">If you are not actively creating and monetizing your content as a creator, you
-                        probably don't expect to be tipped for the stuff you posted online.</p>
+                    <h2 class="mt-5 mb-4">Who is it for<sup>(*)</sup>?</h2>
+                    <p class="lead">If you are like most of us, you are not using social media for business reasons, and
+                        you probably don't expect to be tipped for the stuff you post and share.</p>
                     <p class="lead">But from time to time, there are people who read your content by chance, and you
                         just happen to be their ideal person (and the only one they could find) to chat about something
                         interesting related to your content.</p>
-                    <p class="lead">Most will probably not message you as it is a pretty awkward thing to do, and you
-                        might not appreciate random questions from strangers.</p>
+                    <p class="lead">Most will probably not message you as it is pretty awkward to do, and you might not
+                        appreciate random questions from strangers.</p>
                     <p class="lead">This link should make the experience better for both of you - you get to help
                         strangers and get tipped, and they get to reach you in a less awkward way and show their
                         appreciation for your time and kindness.</p>
+                    <p class="small text-muted">(*) Who this is NOT for: if you are looking to grow a following and
+                        drive up engagements on social media, you probably don't want a roadblock like this between you
+                        and your audience!</p>
+                    </p>
                 </div>
             </div>
         </div>
