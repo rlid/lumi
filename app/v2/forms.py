@@ -20,7 +20,7 @@ class PostForm(FlaskForm):
     details = TextAreaField(validators=[InputRequired(), Length(min=10, max=100)])
     # reward = IntegerRangeField('Reward')
     reward = RadioField('Reward: ', choices=['$5', '$10', '$20', '$50'], validators=[InputRequired()])
-    submit = SubmitField("  Go  ")
+    submit = SubmitField(" Go ")
 
 
 class SignUpForm(FlaskForm):
