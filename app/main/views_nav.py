@@ -69,11 +69,6 @@ def reset_cookie():
     return redirect(url_for('main.index'))
 
 
-@main.route('/whatsapp')
-def whatsapp():
-    return redirect('https://api.whatsapp.com/send?phone=+447774523701', code=302)
-
-
 @main.route('/faq')
 def faq():
     return render_template('docs/faq.html', title='FAQs')
