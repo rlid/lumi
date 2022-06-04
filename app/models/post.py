@@ -35,7 +35,7 @@ class Post(db.Model):
     report_reason = db.Column(db.Text, default='')
 
     topic = db.Column(db.Integer, nullable=False)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(256), nullable=False)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
 
