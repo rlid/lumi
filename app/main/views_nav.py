@@ -113,8 +113,8 @@ def contact():
         db.session.commit()  # OK
         send_email = current_app.config['EMAIL_SENDER']
         send_email(
-            sender='feedback@lumiask.com',
-            recipient='support@lumiask.com',
+            sender='system@lumiask.com',
+            recipient='feedback@lumiask.com',
             subject='Feedback received',
             body_text=f'{fb.email}\n{fb.text}'
         )

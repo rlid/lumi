@@ -344,6 +344,17 @@ class User(UserMixin, db.Model):
         db.session.add(node)
         db.session.commit()
 
+        send_email = current_app.config["EMAIL_SENDER"]
+        send_email(
+            sender='system@lumiask.com',
+            recipient='request@lumiask.com',
+            subject='Request received',
+            body_text=f'User: {self.email}\n'
+                      f'Topic: {post.topic}\n'
+                      f'Details: {post.title}\n'
+                      f'Price: ${0.01 * post.price_cent}'
+        )
+
         return post
 
     def edit_post(self, post, title, body, use_markdown=False):

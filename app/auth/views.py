@@ -120,7 +120,7 @@ def signup():
         db.session.commit()  # OK
         send_email = current_app.config["EMAIL_SENDER"]
         send_email(
-            sender='LumiAsk <welcome@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
+            sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
             body_text=render_template('email/confirm.txt', token=token),
             body_html=render_template('email/confirm.html', token=token)
         )
@@ -176,7 +176,7 @@ def resend_confirmation():
     db.session.commit()  # OK
     send_email = current_app.config["EMAIL_SENDER"]
     send_email(
-        sender='LumiAsk <welcome@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
+        sender='LumiAsk <support@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
         body_text=render_template('email/confirm.txt', token=token),
         body_html=render_template('email/confirm.html', token=token)
     )

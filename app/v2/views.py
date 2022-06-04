@@ -56,7 +56,7 @@ def ack_request(post_id):
     return render_template('v2/ack_request.html', node=post.root_node)
 
 
-def _save_request(user, temporary_request, price_cent=500):
+def _save_request(user, temporary_request):
     post = user.create_post(
         is_asking=True,
         is_private=True,

@@ -106,8 +106,8 @@ def report_post(post_id):
         current_user.report(post, form.text.data)
         send_email = current_app.config["EMAIL_SENDER"]
         send_email(
-            sender='report@lumiask.com',
-            recipient='support@lumiask.com',
+            sender='system@lumiask.com',
+            recipient='report@lumiask.com',
             subject='Report received',
             body_text=f'{current_user}\n{post}\n{form.text.data}'
         )
