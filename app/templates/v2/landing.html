@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block body_bg %}bg-dark{% endblock %}
+{% block body_bg %}bg-dark text-light{% endblock %}
 
 {% block scripts %}
     {{ super() }}
@@ -42,13 +42,15 @@
 
 
 {% block main %}
-    <main class="py-5 text-light">
+    <main class="py-5">
         <div class="mx-auto p-3" style="max-width: 45rem">
             <div class="d-flex" style="min-height: 80vh;align-items: center">
                 <div>
-                    <h1 class="display-5 fw-bold text-center mb-4">Get insight from the right people</h1>
-                    <p class="lead">Choose a topic, and we will match you up with a relevant person to have a quick chat
-                        with 1-on-1. You set the price, and pay only if you find the chat helpful.</p>
+                    <h1 class="display-5 fw-bold text-center mb-4 lh-sm">Insight for <span
+                            class="bg-info rounded px-2">you <i>only</i></span>, from the <span
+                            class="bg-warning rounded px-2"><i>right</i> people</span></h1>
+                    <p class="lead">Choose a topic, and we will match you up with a <u>relevant</u> person to have a
+                        <u>quick</u> chat with 1-on-1. You set the price, and pay only if you find the chat helpful.</p>
                     <form method="post">
                         {{ form.hidden_tag() }}
                         {{ form.topic(class_='form-select form-select-lg mb-3', onchange='setPlaceholder(this.value)') }}
@@ -58,14 +60,24 @@
                             {{ form.submit(class_='btn btn-success') }}
                         </div>
                         <div class="mx-1">
-                            {{ form.reward.label(class_='lead') }}{# <span class="lead">: $</span><span id="valueBox" class="lead">5</span> #}
-                            {#                    {{ form.reward(class_='form-range slider mt-1', min=1, max=max_reward, value=5, step=1, oninput='showValue(this.value)') }}#}
-                            {% for subfield in form.reward %}
-                                {{ subfield(class_='btn-check') }}
-                                {{ subfield.label(class_='btn btn-outline-success mx-1 my-1' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
-                            {% endfor %}
-                            <p class="small text-muted my-2">As a rough guide, please budget $1 or more per effective
-                                minute spent by your match, e.g. $5 for a 5-minute chat or shorter.</p>
+                            <div class="row">
+                                <div class="col-auto mt-1">
+                                    {{ form.reward.label(class_='lead') }}
+                                </div>
+                                <div class="col">
+                                    {% for subfield in form.reward %}
+                                        {{ subfield(class_='btn-check') }}
+                                        {% if subfield.label.text[1:]|int == 0 %}
+                                            {{ subfield.label(class_='btn btn-outline-success mx-1 mb-2', text='Flexible') }}
+                                        {% else %}
+                                            {{ subfield.label(class_='btn btn-outline-success mx-1 mb-2' + (' disabled' if subfield.label.text[1:]|int > max_reward else '')) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="small text-muted my-1">Please budget $1 or more per effective minute spent by your
+                                match, e.g. $5 for a 5-minute chat or shorter, or let your match suggest a price by
+                                choosing "Flexible".</p>
                             <p class="small text-muted">You will be able to offer higher rewards as you complete more
                                 searches on the platform.</p>
                         </div>
@@ -78,30 +90,33 @@
                     <div id="divFAQ"></div>
                     <div style="margin-top: 10rem">
                         <h1 class="display-5 fw-bold text-center mb-4">FAQ</h1>
-                        <h5 class="mt-4">How long does it take to find a match?</h5>
-                        <p class="text-muted">We currently aim to find a relevant match for your topic within 24 hours.
-                            We are constantly expanding the network and improving our algorithm to make it quicker. You
-                            may also consider offering a larger reward to speed it up.
-                        </p>
+                        <h5 class="mt-5">How long does it take to find a match?</h5>
+                        <p class="text-muted">Currently, we aim to have someone ready to engage with you within 24
+                            hours. If you already have in mind an ideal person to chat with, you can send them a request
+                            link and ask for paid help directly.</p>
+                        <p class="text-muted">We are constantly expanding our network of friendly contributors and
+                            improving our matching algorithm to make it quicker. If you are interested in sharing your
+                            wisdoms and helping others, please consider <a href="https://forms.gle/zzXPFrtZSdgkoJXR8">
+                                joining us</a>!</p>
 
-                        <h5 class="mt-4">When is payment taken?</h5>
+                        <h5 class="mt-5">When is payment taken?</h5>
                         <p class="text-muted">You'll be asked to top up your account before you can engage with your
                             match. The funds will not leave your account unless you rate the engagement successful. You
-                            can get a full refund when you cancel the search.</p>
+                            can get a full refund when you cancel the search without a successful engagement.</p>
 
-                        <h5 class="mt-4">What information about me is shared with my match?</h5>
-                        <p class="text-muted">Just the details of the search you provided. In particular, your email
-                            address is not shared with your match. You and your match will remain mutually anonymous to
-                            each other.</p>
+                        <h5 class="mt-5">What information about me is shared with my match?</h5>
+                        <p class="text-muted">Just the details of the search you provided and your trustworthiness
+                            rating derived from your past activities on the platform. Your email address is not shared
+                            with your match. You and your match will remain mutually anonymous to each other.</p>
 
-                        <h5 class="mt-4">Can I use a different channel to communicate with my match?</h5>
-                        <p class="text-muted">Yes if both of you are comfortable and agree to use something else. Just
-                            remember to come back and rate your engagement.</p>
+                        <h5 class="mt-5">How can I be sure my match is who they claim to be?</h5>
+                        <p class="text-muted">Your match's credential will be checked by our contributors during
+                            onboarding and if applicable, by other users who engaged with your match on relevant
+                            searches in the past. You can also ask for any proof your match is willing to share.</p>
 
-                        <h5 class="mt-4">How can I be sure my match is who they claim to be?</h5>
-                        <p class="text-muted">Your match's credential will be checked by our contributors and if
-                            applicable, by other users who engaged with your match on relevant searches in the past. We
-                            can also provide any proof your match is willing to share at your request.</p>
+                        <h5 class="mt-5">Can I use a different channel to communicate with my match?</h5>
+                        <p class="text-muted">Yes if both of you are comfortable and agree to use a 3rd party messaging
+                            app (you will lose some privacy). Just remember to come back and rate your engagement.</p>
                     </div>
 
                     <div id="divAbout" style="margin-top: 10rem">
@@ -113,11 +128,11 @@
                         </p>
                         <p class="lead">Our platform makes them easier to discover and rewarding to share.</p>
                     </div>
-                    <div style="margin-top: 10rem">
+                    <div id="divJoin" style="margin-top: 10rem">
                         <h1 class="display-5 fw-bold text-center mb-4">Join us</h1>
-                        <p class="lead">Help others by sharing what you know and get compensated for your time. Each
-                            request is worth $5-$50 and typically takes no more than 5-10 minutes for the right person
-                            to fulfill.
+                        <p class="lead">Help others by sharing your wisdom and get compensated for your time, on topics
+                            that are most relevant for you. Each request is worth $5-$50 and typically takes no more
+                            than 5-10 minutes of a right person's time.
                         </p>
                         <p class="lead">
                             You can also help by tapping into your network and invite the right person to help, and earn
