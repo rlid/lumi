@@ -24,7 +24,7 @@
             {{ flash.flash_toast_js() }}
             {{ moment.include_moment() }}
             {% if session.get('allow_cookie') %}
-{#                {{ conf.smalltalk_js() }}#}
+                {{ conf.smalltalk_js() }}
                 {{ conf.google_analytics_js() }}
                 {{ conf.hotjar_js() }}
             {% endif %}
