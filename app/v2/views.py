@@ -4,6 +4,7 @@ from flask import render_template, session, redirect, url_for, flash
 from flask_login import current_user, login_user, login_required
 
 from app import db
+from app.main.forms import FeedbackForm
 from app.models import User, TemporaryRequest, Post, Node
 from app.v2.forms import GenerateLinkForm, PostForm, SignUpForm
 
@@ -43,6 +44,7 @@ def landing():
     return render_template(
         "v2/landing.html",
         form=form,
+        feedback_form=FeedbackForm(prefix='feedback'),
         max_reward=math.floor(current_user.value_limit) if current_user.is_authenticated else User.DEFAULT_VALUE_LIMIT
     )
 

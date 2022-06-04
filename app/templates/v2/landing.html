@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block body_bg %}bg-dark text-light{% endblock %}
+{% block body_bg %}bg-dark{% endblock %}
 
 {% block scripts %}
     {{ super() }}
@@ -42,13 +42,13 @@
 
 
 {% block main %}
-    <main class="py-5">
+    <main class="py-5 text-light">
         <div class="mx-auto p-3" style="max-width: 45rem">
-            <div class="d-flex" style="min-height: 80vh;align-items: center">
+            <div class="d-flex" style="min-height: 90vh;align-items: center">
                 <div>
-                    <h1 class="display-5 fw-bold text-center mb-4 lh-sm">Insight <span
-                            class="bg-info rounded px-2"><i>tailored</i> to you</span>, from the <span
-                            class="bg-warning rounded px-2"><i>right</i> people</span></h1>
+                    <h1 class="display-5 fw-bold text-center mb-4 lh-sm">Insight <span class="bg-info rounded px-2">
+                        <i>tailored</i> to you</span>, from the <span class="bg-warning rounded px-2"><i>right</i>
+                        people</span></h1>
                     <p class="lead">Choose a topic, and we will match you up with a <u>relevant</u> person to have a
                         <u>quick</u> chat with 1-on-1. You set the price, and pay only if you find the chat helpful.</p>
                     <form method="post">
