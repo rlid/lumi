@@ -22,8 +22,8 @@ body_html = """<html>
 </html>
             """
 # send_email(
-#     sender='sender@lumiask.com',
-#     recipient='recipient@lumiask.com',
+#     sender='sender@knowble.com',
+#     recipient='recipient@knowble.com',
 #     subject="Amazon SES Test (SDK for Python)",
 #     body_text=body_text,
 #     body_html=body_html
@@ -31,8 +31,8 @@ body_html = """<html>
 
 
 message = Mail(
-    from_email='sender@lumiask.com',
-    to_emails='recipient@lumiask.com',
+    from_email='sender@knowble.com',
+    to_emails='recipient@knowble.com',
     subject='Sending with Twilio SendGrid is Fun',
     plain_text_content=body_text,
     html_content=body_html)

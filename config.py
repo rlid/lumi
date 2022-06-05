@@ -8,8 +8,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    APP_VER = '20220411_1030'
-    APP_NAME = 'LumiAsk'
+    APP_VER = '20220605_2045'
+    APP_NAME = 'Knowble'
     GOOGLE_SERVER_METADATA_URL = 'https://accounts.google.com/.well-known/openid-configuration'
     APPLE_SERVER_METADATA_URL = 'https://appleid.apple.com/.well-known/openid-configuration'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -90,7 +90,7 @@ class GAEConfig(Config):
         database=os.environ.get('DB_NAME', 'devdb'),
         query={'unix_sock': '{socket_path}/{instance_name}/.s.PGSQL.5432'.format(
             socket_path='/cloudsql',
-            instance_name='lumiask:europe-west2:devins')
+            instance_name='project_name:europe-west2:devins')
         }
     )
 

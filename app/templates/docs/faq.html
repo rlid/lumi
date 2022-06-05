@@ -24,12 +24,12 @@
             <h2 class="accordion-header" id="qWhat">
                 <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseWhat">
-                    What is LumiAsk?
+                    What is {{ config['APP_NAME'] }}?
                 </button>
             </h2>
             <div id="collapseWhat" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    <p>LumiAsk is a search platform for highly personal knowledge and experience.</p>
+                    <p>{{ config['APP_NAME'] }} is a search platform for highly personal knowledge and experience.</p>
                     <p>We all have specific knowledge, opinions and experience that others may find valuable, yet
                         they are not always easy to find, and we are not often aware of who needs them.</p>
                     <p>We make them easier to discover and rewarding to share.</p>
@@ -699,11 +699,11 @@
             <div id="collapseDoesItWork" class="accordion-collapse collapse">
                 <div class="accordion-body">
                     <p>You should probably always start with a more conventional method, e.g. a Google search, asking
-                        friends or an online community, and there is no reason to use LumiAsk if you can get the answer
+                        friends or an online community, and there is no reason to use {{ config['APP_NAME'] }} if you can get the answer
                         more easily. But there are times when your question is so specific that no one seems to care
                         without some extra incentive, and you want something that reaches a little deeper than your own
                         social circle, and go beyond the active users of a community.</p>
-                    <p>In any case, we believe that LumiAsk has its place as a tool for finding specific knowledge, and
+                    <p>In any case, we believe that {{ config['APP_NAME'] }} has its place as a tool for finding specific knowledge, and
                         it should be an option for everyone to consider when the results from more conventional methods
                         are less than satisfactory.</p>
                 </div>
@@ -740,7 +740,7 @@
 {% block hide_left_col %}
     <div class="mb-5">
         <h4>General</h4>
-        <p><a href="#qWhat" class="text-decoration-none">What is LumiAsk?</a></p>
+        <p><a href="#qWhat" class="text-decoration-none">What is {{ config['APP_NAME'] }}?</a></p>
         <p><a href="#qHow" class="text-decoration-none">How does it work?</a></p>
         <p><a href="#qPayment" class="text-decoration-none">When is payment taken?</a></p>
         <p><a href="#qAnswerQuality" class="text-decoration-none">How do you ensure the quality of answers?</a>

@@ -8,7 +8,7 @@
         <div class="text-center my-3">
             <p>
                 <a href="{{ node_url }}">
-                    <img src="{{ qrcode(node_url, error_correction='H', icon_img='android-chrome-192x192-sq.png') }}"
+                    <img src="{{ qrcode(node_url, error_correction='H', icon_img='android-chrome-192x192.png') }}"
                          width="256" height="256">
                 </a>
             </p>
@@ -39,7 +39,7 @@
             <div class="card">
                 <div class="row g-0">
                     <div class="col-sm-4">
-                        <img src="{{ url_for('static', filename='logo.svg', _external=True) }}"
+                        <img src="{{ url_for('static', filename='logo.png', _external=True) }}"
                              class="img-fluid w-100 h-100">
                     </div>
                     <div class="col-sm-8">

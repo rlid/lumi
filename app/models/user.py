@@ -346,8 +346,8 @@ class User(UserMixin, db.Model):
 
         send_email = current_app.config["EMAIL_SENDER"]
         send_email(
-            sender='system@lumiask.com',
-            recipient='request@lumiask.com',
+            sender='system@knowble.com',
+            recipient='request@knowble.com',
             subject='Request received',
             body_text=f'User: {self.email}\n'
                       f'Topic: {post.topic}\n'

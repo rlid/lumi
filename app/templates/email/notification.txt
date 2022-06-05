@@ -12,4 +12,4 @@ This notification is regarding your account. Please visit the link below to view
 {% endif %}
 
 Cheers,
-Team LumiAsk
+Team {{ config['APP_NAME'] }}

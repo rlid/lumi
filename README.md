@@ -8,7 +8,7 @@
 ## Database
 
 - `gcloud beta sql connect devins`
-- `./cloud_sql_proxy -instances=lumiask:europe-west2:devins=tcp:9470`
+- `./cloud_sql_proxy -instances=project_name:europe-west2:devins=tcp:9470`
 
 ## Google Cloud
 

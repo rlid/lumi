@@ -6,7 +6,7 @@
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">Welcome to {{ config['APP_NAME'] }}</h1>
-            <p class="lead">LumiAsk helps you host paid Q&A as either the questioner or the answerer, and find the right
+            <p class="lead">{{ config['APP_NAME'] }} helps you host paid Q&A as either the questioner or the answerer, and find the right
                 people to engage with you on your topic of interest.
             </p>
             <p class="lead">You can get set up in less than a minute, and we will take care of everything else and let
@@ -72,7 +72,7 @@
                         <div class="h-100 p-4 bg-primary rounded">
                             <h3>Are you a freelancer?</h3>
                             <p>Or do you want to try your hands at freelancing but there are too many hurdles to jump
-                                through. Start small on LumiAsk and let others help you find clients.</p>
+                                through. Start small on {{ config['APP_NAME'] }} and let others help you find clients.</p>
                             <a href="{{ url_for('main.view_node', node_id=config['URL_NODE_FREELANCER']) }}"
                                class="btn btn-dark">I'm interested - what's next?</a>
                         </div>

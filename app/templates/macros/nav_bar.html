@@ -20,8 +20,8 @@
     <nav class="navbar fixed-top navbar-expand navbar-dark bg-dark pb-0">
         <div class="container-fluid">
             <a class="navbar-brand h1" href="{{ url_for('main.index') }}">
-                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="32" height="32"
-                     class="d-inline-block align-text-bottom">{{ config["APP_NAME"][1:] }}</a>
+                <img src="{{ url_for('static', filename='apple-touch-icon.png') }}" width="30" height="30"
+                     class="d-inline-block align-text-bottom"> {{ config["APP_NAME"] }}</a>
             <ul class="navbar-nav">
                 {#                {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}#}
                 {#                {{ render_nav_item("main.new_post", "Post", "bi-plus-square", visible_from="sm") }}#}
@@ -211,12 +211,11 @@
                         <img src="{{ url_for('static', filename='stripe.svg') }}" height="32">
                     </a>
                 </li>
-                {{ render_nav_item_bottom(link="mailto:info@lumiask.com", icon="bi-envelope-fill") }}
+                {{ render_nav_item_bottom(link="mailto:info@knowble.com", icon="bi-envelope-fill") }}
                 {{ render_nav_item_bottom(link="https://wa.me/message/AV5JKHRXNIK3G1", icon="bi-whatsapp") }}
-                {#                {{ render_nav_item_bottom(link="https://twitter.com/LumiQnA", icon="bi-twitter", extra_class="hide-340") }}#}
+                {#                {{ render_nav_item_bottom(link="https://twitter.com/KnowbleCEN", icon="bi-twitter", extra_class="hide-340") }}#}
                 {#                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord", extra_class="hide-340") }}#}
-                {#                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord", extra_class="hide-340") }}#}
-                {#                {{ render_nav_item_bottom(link="https://fb.me/LumiQA", icon="bi-facebook") }}#}
+                {#                {{ render_nav_item_bottom(link="https://fb.me/KnowbleCEN", icon="bi-facebook") }}#}
                 {#                {{ render_nav_item_bottom(link="https://www.linkedin.com/company/knowbleltd", icon="bi-linkedin") }}#}
                 {#                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord") }}#}
             {% endif %}

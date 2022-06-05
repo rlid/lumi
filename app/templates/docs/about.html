@@ -6,7 +6,8 @@
     <main class="my-auto py-5 bg-dark text-light">
         <div class="mx-auto mt-5 p-3" style="max-width: 45rem">
             <h1 class="display-5 fw-bold mb-3">About Us</h1>
-            <p class="lead">LumiAsk is a search platform for highly personal knowledge and experience.</p>
+            <p class="lead">{{ config['APP_NAME'] }} is a search platform for highly personal knowledge and experience.
+            </p>
             <p class="lead">We all have specific knowledge, opinions and experience that others may find valuable, yet
                 they are not always easy to find, and we are not often aware of who needs them.
             </p>
@@ -18,8 +19,8 @@
 {% endblock %}
 
 {#{% block mid_col %}#}
-{#    <h3>About LumiAsk</h3>#}
-{#    <p>LumiAsk, or perhaps more appropriately named "RyanAsks" at the moment considering its user base, was originally#}
+{#    <h3>About {{ config['APP_NAME'] }}</h3>#}
+{#    <p>{{ config['APP_NAME'] }}, or perhaps more appropriately named "RyanAsks" at the moment considering its user base, was originally#}
 {#        envisaged by one of its founders, as a tool for himself to get more traction on the questions he asked#}
 {#        on#}
 {#        online#}
@@ -52,7 +53,7 @@
 {#    </ul>#}
 {#    <p>Can something be done to make it easier to find very specific information, and maybe generalise it to the#}
 {#        discovery of casual, unindexed knowledge and services? That is what we want to find out with#}
-{#        LumiAsk.</p>#}
+{#        {{ config['APP_NAME'] }}.</p>#}
 {#    <p>We hope you find the above ramblings somewhat luminous, and welcome you to join us on the journey by#}
 {#        becoming a user.</p>#}
 {#{% endblock %}#}

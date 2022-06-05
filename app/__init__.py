@@ -29,7 +29,7 @@ minify = Minify()
 csp = {
     'default-src': [
         '\'unsafe-inline\' \'self\' data:',
-        'wss://lumiask.com',
+        'wss://knowble.com',
         '*.jsdelivr.net',
         '*.cloudflare.com',
         '*.unpkg.com',

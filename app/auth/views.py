@@ -120,7 +120,7 @@ def signup():
         db.session.commit()  # OK
         send_email = current_app.config["EMAIL_SENDER"]
         send_email(
-            sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Confirm your LumiAsk account',
+            sender='Knowble <support@knowble.com>', recipient=user.email, subject='Confirm your Knowble account',
             body_text=render_template('email/confirm.txt', token=token),
             body_html=render_template('email/confirm.html', token=token)
         )
@@ -176,7 +176,7 @@ def resend_confirmation():
     db.session.commit()  # OK
     send_email = current_app.config["EMAIL_SENDER"]
     send_email(
-        sender='LumiAsk <support@lumiask.com>', recipient=current_user.email, subject='Confirm your LumiAsk account',
+        sender='Knowble <support@knowble.com>', recipient=current_user.email, subject='Confirm your Knowble account',
         body_text=render_template('email/confirm.txt', token=token),
         body_html=render_template('email/confirm.html', token=token)
     )
@@ -238,7 +238,7 @@ def password_reset_request():
             db.session.commit()  # OK
             send_email = current_app.config["EMAIL_SENDER"]
             send_email(
-                sender='LumiAsk <support@lumiask.com>', recipient=user.email, subject='Reset your password',
+                sender='Knowble <support@knowble.com>', recipient=user.email, subject='Reset your password',
                 body_text=render_template('email/reset.txt', token=token),
                 body_html=render_template('email/reset.html', token=token)
             )

@@ -7,4 +7,4 @@ We have received a request to reset your password. Please visit the link below t
 If you have not requested a password reset please ignore this message.
 
 Cheers,
-Team LumiAsk
+Team {{ config['APP_NAME'] }}

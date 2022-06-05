@@ -1,11 +1,11 @@
 {% extends "email/base.html" %}
 
 {% block title %}
-    Confirm your LumiAsk account
+    Confirm your {{ config['APP_NAME'] }} account
 {% endblock %}
 
 {% block preheader %}
-    Welcome to LumiAsk! You are just one step away from activating your account.
+    Welcome to {{ config['APP_NAME'] }}! You are just one step away from activating your account.
 {% endblock %}
 
 {% block heading %}
@@ -14,7 +14,7 @@
 
 {% block content %}
     Please tap the button below to verify your email address.
-    If you did not create an account with <a href="https://lumiask.com">LumiAsk</a>, please discard this email.
+    If you did not create an account with <a href="https://knowble.com">{{ config['APP_NAME'] }}</a>, please discard this email.
 {% endblock %}
 
 {% block button_url %}
