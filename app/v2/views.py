@@ -1,4 +1,5 @@
 import math
+import secrets
 
 from flask import render_template, session, redirect, url_for, flash
 from flask_login import current_user, login_user, login_required
@@ -20,6 +21,10 @@ def open2chat():
 
 @v2.route('/', methods=['GET', 'POST'])
 def landing():
+    ab_test_tag = session.get('ab_test')
+    if ab_test_tag is None:
+        session['ab_test'] = secrets.choice(('LandingDarkMode:D', 'LandingDarkMode:L'))
+
     form = PostForm()
     if form.validate_on_submit():
         if current_user.is_authenticated:
@@ -29,6 +34,7 @@ def landing():
                 price_cent=100 * int(form.reward.data[1:]),
                 topic=form.topic.data,
                 title=form.details.data)
+            post.ab_test_tag = session.get('ab_test')
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('v2.ack_request', post_id=post.id))
@@ -37,6 +43,7 @@ def landing():
                 topic=form.topic.data,
                 details=form.details.data,
                 reward_cent=100 * int(form.reward.data[1:]))
+            temporary_request.ab_test_tag = session.get('ab_test')
             db.session.add(temporary_request)
             db.session.commit()
             return redirect(url_for('v2.save_email', temporary_request_id=temporary_request.id))
@@ -63,6 +70,7 @@ def _save_request(user, temporary_request):
         price_cent=temporary_request.reward_cent,
         topic=temporary_request.topic,
         title=temporary_request.details)
+    post.ab_test_tag = temporary_request.ab_test_tag
     db.session.add(post)
     db.session.delete(temporary_request)
     session.pop('temporary_request_id', None)

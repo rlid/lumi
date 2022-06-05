@@ -14,3 +14,5 @@ class TemporaryRequest(db.Model):
     topic = db.Column(db.Integer, nullable=False)
     details = db.Column(db.String(256), nullable=False)
     reward_cent = db.Column(db.Integer, nullable=False)
+
+    ab_test_tag = db.Column(db.String(64))

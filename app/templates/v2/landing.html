@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block body_bg %}bg-dark{% endblock %}
+{% block body_bg %}{% if session.get('ab_test') == 'LandingDarkMode:D' %}bg-dark{% else %}bg-light{% endif %}{% endblock %}
 
 {% block scripts %}
     {{ super() }}
@@ -42,7 +42,7 @@
 
 
 {% block main %}
-    <main class="py-5 text-light">
+    <main class="py-5 {% if session.get('ab_test') == 'LandingDarkMode:D' %}text-light{% else %}text-dark{% endif %}">
         <div class="mx-auto p-3" style="max-width: 45rem">
             <div class="d-flex" style="min-height: 90vh;align-items: center">
                 <div>
@@ -51,7 +51,7 @@
                         <i>tailored</i> to you</span>, from the <span class="bg-warning rounded px-2 pb-1"><i>right</i>
                         people</span></h1>
                     <p class="lead">Choose a topic, and we will match you up with a relevant person to have a quick chat
-                        with 1-on-1. You set the price, and pay only if you find the chat helpful.</p>
+                        with 1-on-1. You pay after the chat, and only if you find it helpful.</p>
                     <form method="post">
                         {{ form.hidden_tag() }}
                         {{ form.topic(class_='form-select form-select-lg mb-3', onchange='setPlaceholder(this.value)') }}

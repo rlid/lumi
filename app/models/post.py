@@ -39,6 +39,8 @@ class Post(db.Model):
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
 
+    ab_test_tag = db.Column(db.String(64))
+
     comments = db.relationship('Comment',
                                backref=db.backref('post'),
                                lazy='dynamic',
