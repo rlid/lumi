@@ -209,59 +209,66 @@
 
 
 {% macro render_feedback_form(form, logged_in=False) %}
-    <p>We'd love to hear from you! Contact us through any of the channels below, or leave a quick message using the
-        feedback form. </p>
-    <div class="row justify-content-evenly">
-        <div class="col-auto">
-            <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">
-                <i class="bi bi-discord"></i> Discord
-            </a></p>
-            <p><a href="https://wa.me/message/AV5JKHRXNIK3G1" class="text-decoration-none text-success">
-                <i class="bi bi-whatsapp"></i> WhatsApp
-            </a></p>
-            <p><a href="mailto:info@knowble.com" class="text-decoration-none text-success">
-                <i class="bi bi-envelope-fill"></i> Email
-            </a></p>
-        </div>
-        <div class="col-auto">
-            <p><a href="https://twitter.com/KnowbleCEN" class="text-decoration-none text-success">
-                <i class="bi bi-twitter"></i> Twitter
-            </a></p>
-            <p><a href="https://fb.me/KnowbleCEN" class="text-decoration-none text-success">
-                <i class="bi bi-facebook"></i> Facebook
-            </a></p>
-            <p><a href="https://www.linkedin.com/company/knowbleltd" class="text-decoration-none text-success">
-                <i class="bi bi-linkedin"></i> LinkedIn
-            </a></p>
-        </div>
+    <p>Questions or feedback? We'd love to hear from you! You can contact us through one of the channels below. </p>
+    <div class="text-center">
+        <p><a href="mailto:info@knowble.com" class="text-decoration-none text-success">
+            <i class="bi bi-envelope"></i> info@knowble.com</a></p>
+        <p><a href="https://forms.gle/GGcgce8tHG6JXAkt7" target="_blank" class="text-decoration-none text-success">
+            <i class="bi bi-card-text"></i> Feedback Form</a></p>
+        <p><a href="https://wa.me/message/AV5JKHRXNIK3G1" class="text-decoration-none text-success">
+            <i class="bi bi-whatsapp"></i> WhatsApp</a></p>
     </div>
-    <hr class="mt-2 mb-4">
-    <form action="{{ url_for('main.contact') }}" method="post">
-        {{ form.hidden_tag() }}
-        {{ form.text(
-            class_='form-control mb-3',
-            rows=5,
-            placeholder="Please leave your feedback here...") }}
-
-        {% if not logged_in %}
-            <div class="form-floating mb-3">
-                {% if form.email.errors %}
-                    {{ form.email(class_='form-control is-invalid') }}
-                {% else %}
-                    {{ form.email(class_='form-control') }}
-                {% endif %}
-                {{ form.email.label() }}
-                {% for error in form.email.errors %}
-                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>
-                {% endfor %}
-            </div>
-            <div class="form-check mb-3">
-                {{ form.request_invite(class_='form-check-input me-2', style='height: 1.5rem; width: 1.5rem; position: relative; bottom: 0.25rem;') }}
-                {{ form.request_invite.label(class_='form-check-label') }}
-            </div>
-        {% endif %}
-        {{ form.submit(class_='btn btn-success w-100 mb-3') }}
-    </form>
+    {#    <div class="row justify-content-evenly">#}
+    {#        <div class="col-auto">#}
+    {#            <p><a href="https://discord.gg/PC7mPwXYsY" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-discord"></i> Discord#}
+    {#            </a></p>#}
+    {#            <p><a href="https://wa.me/message/AV5JKHRXNIK3G1" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-whatsapp"></i> WhatsApp#}
+    {#            </a></p>#}
+    {#            <p><a href="mailto:info@knowble.com" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-envelope-fill"></i> Email#}
+    {#            </a></p>#}
+    {#        </div>#}
+    {#        <div class="col-auto">#}
+    {#            <p><a href="https://twitter.com/KnowbleSearch" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-twitter"></i> Twitter#}
+    {#            </a></p>#}
+    {#            <p><a href="https://fb.me/KnowbleSearch" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-facebook"></i> Facebook#}
+    {#            </a></p>#}
+    {#            <p><a href="https://www.linkedin.com/company/knowbleltd" class="text-decoration-none text-success">#}
+    {#                <i class="bi bi-linkedin"></i> LinkedIn#}
+    {#            </a></p>#}
+    {#        </div>#}
+    {#    </div>#}
+    {#    <hr class="mt-2 mb-4">#}
+    {#    <form action="{{ url_for('main.contact') }}" method="post">#}
+    {#        {{ form.hidden_tag() }}#}
+    {#        {{ form.text(#}
+    {#            class_='form-control mb-3',#}
+    {#            rows=5,#}
+    {#            placeholder="Please leave your feedback here...") }}#}
+    {##}
+    {#        {% if not logged_in %}#}
+    {#            <div class="form-floating mb-3">#}
+    {#                {% if form.email.errors %}#}
+    {#                    {{ form.email(class_='form-control is-invalid') }}#}
+    {#                {% else %}#}
+    {#                    {{ form.email(class_='form-control') }}#}
+    {#                {% endif %}#}
+    {#                {{ form.email.label() }}#}
+    {#                {% for error in form.email.errors %}#}
+    {#                    <div class="invalid-feedback" style="display: block;">{{ error }}</div>#}
+    {#                {% endfor %}#}
+    {#            </div>#}
+    {#            <div class="form-check mb-3">#}
+    {#                {{ form.request_invite(class_='form-check-input me-2', style='height: 1.5rem; width: 1.5rem; position: relative; bottom: 0.25rem;') }}#}
+    {#                {{ form.request_invite.label(class_='form-check-label') }}#}
+    {#            </div>#}
+    {#        {% endif %}#}
+    {#        {{ form.submit(class_='btn btn-success w-100 mb-3') }}#}
+    {#    </form>#}
 {% endmacro %}
 
 

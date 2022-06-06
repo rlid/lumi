@@ -1,11 +1,11 @@
 {% from "macros/utils.html" import render_form_modal %}
 {% from "macros/form.html" import render_login_form, render_signup_form, render_feedback_form %}
 
-{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, visible_from=None) %}
+{% macro render_nav_item(endpoint=None, text=None, icon=None, link=None, highlight_active=True, visible_from=None) %}
     {% set active = True if request.endpoint and request.endpoint == endpoint else False %}
     <li class="nav-item">
         <a class="nav-link text-nowrap rounded
-            {% if active %}active{% endif %}
+            {% if highlight_active and active %}active{% endif %}
             {% if visible_from %}d-none d-{{ visible_from }}-block{% endif %}"
                 {#           style="padding-top: 11px;padding-bottom: 11px"#}
            href="{% if link %}{{ link }}{% else %}{{ url_for(endpoint, **kwargs) }}{% endif %}">
@@ -25,39 +25,33 @@
             <ul class="navbar-nav">
                 {#                {{ render_nav_item("main.browse", "Explore", "bi-search", visible_from="sm") }}#}
                 {#                {{ render_nav_item("main.new_post", "Post", "bi-plus-square", visible_from="sm") }}#}
-                {#                {{ render_nav_item("main.faq", "FAQ", "bi-signpost-split", visible_from="sm") }}#}
-                {#{{ render_nav_item("main.guidelines", "Community Guidelines", "bi-book", visible_from="lg") }}#}
-                {#{{ render_nav_item("main.feedback", text="Feedback", icon="bi-pencil-square", visible_from="md") }}#}
+                {#{{ render_nav_item("main.contact", text="Feedback", icon="bi-pencil-square", visible_from="md") }}#}
                 {#                <li class="nav-item">#}
                 {#                    <button type="button" class="btn border-0 nav-link text-nowrap d-none d-md-block"#}
                 {#                            data-bs-toggle="modal" data-bs-target="#modalWhatsNew">#}
                 {#                        <i class="bi bi-magic"></i> What's New#}
                 {#                    </button>#}
                 {#                </li>#}
-                <li class="nav-item">
-                    <a class="nav-link text-nowrap rounded d-none d-sm-block"
-                       href="{{ url_for('v2.landing', _anchor='divFAQ') }}">
-                        <i class="bi-signpost-split"></i> FAQ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-nowrap rounded d-none d-sm-block"
-                       href="{{ url_for('v2.landing', _anchor='divAbout') }}">
-                        <i class="bi-info-circle"></i> About Us</a>
-                </li>
+                {{ render_nav_item("v2.landing", "FAQ", "bi-signpost-split",
+                    highlight_active=False, visible_from="sm", _anchor='divFAQ') }}
+                {{ render_nav_item("v2.landing", "About", "bi-info-circle",
+                    highlight_active=False, visible_from="sm", _anchor='divAbout') }}
                 <li class="nav-item">
                     {% if feedback_form %}
                         <button type="button" class="btn border-0 nav-link text-nowrap d-none d-sm-block"
                                 data-bs-toggle="modal" data-bs-target="#modalFeedback">
-                            <i class="bi bi-pencil-square"></i> Feedback
+                            <i class="bi bi-pencil-square"></i> Contact
                         </button>
                     {% else %}
                         <a class="nav-link text-nowrap d-none d-sm-block
-                        {% if request.endpoint and request.endpoint == 'main.feedback' %}active{% endif %}"
-                           href="{{ url_for('main.feedback') }}">
-                            <i class="bi bi-pencil-square"></i> Feedback
+                        {% if request.endpoint and request.endpoint == 'main.contact' %}active{% endif %}"
+                           href="{{ url_for('main.contact') }}">
+                            <i class="bi bi-pencil-square"></i> Contact
                         </a>
                     {% endif %}
                 </li>
+                {{ render_nav_item("main.privacy", "Privacy", "bi-camera-video-off", visible_from="md") }}
+                {{ render_nav_item("main.terms", "Terms", "bi-file-text", visible_from="md") }}
                 {# {{ render_nav_item("v2.open2chat", "AMA Tip Jar", "bi-piggy-bank", visible_from="sm") }}#}
                 {# {{ render_nav_item("main.about", "About Us", "bi-info-circle", visible_from="sm") }}#}
             </ul>
@@ -117,7 +111,7 @@
     {% if feedback_form %}
         {{ render_form_modal(
             modal_id='modalFeedback',
-            modal_title='Questions & Feedback',
+            modal_title='Contact & Support',
             modal_body=render_feedback_form(feedback_form, current_user.is_authenticated)) }}
     {% endif %}
     <div class="modal fade py-5" tabindex="-1" id="modalWhatsNew">
@@ -213,9 +207,9 @@
                 </li>
                 {{ render_nav_item_bottom(link="mailto:info@knowble.com", icon="bi-envelope-fill") }}
                 {{ render_nav_item_bottom(link="https://wa.me/message/AV5JKHRXNIK3G1", icon="bi-whatsapp") }}
-                {#                {{ render_nav_item_bottom(link="https://twitter.com/KnowbleCEN", icon="bi-twitter", extra_class="hide-340") }}#}
+                {#                {{ render_nav_item_bottom(link="https://twitter.com/KnowbleSearch", icon="bi-twitter", extra_class="hide-340") }}#}
                 {#                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord", extra_class="hide-340") }}#}
-                {#                {{ render_nav_item_bottom(link="https://fb.me/KnowbleCEN", icon="bi-facebook") }}#}
+                {#                {{ render_nav_item_bottom(link="https://fb.me/KnowbleSearch", icon="bi-facebook") }}#}
                 {#                {{ render_nav_item_bottom(link="https://www.linkedin.com/company/knowbleltd", icon="bi-linkedin") }}#}
                 {#                {{ render_nav_item_bottom(link="https://discord.gg/PC7mPwXYsY", icon="bi-discord") }}#}
             {% endif %}
@@ -268,7 +262,7 @@
                         Cookie Policy
                     </a></p>
                     {#                    <p><a class="text-decoration-none text-muted"#}
-                    {#                          href="{{ url_for('main.feedback') }}">#}
+                    {#                          href="{{ url_for('main.contact') }}">#}
                     {#                        Feedback#}
                     {#                    </a></p>#}
                 </div>

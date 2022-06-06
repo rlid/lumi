@@ -94,12 +94,6 @@ def terms():
     return render_template('docs/terms.html', title='Terms & Conditions')
 
 
-@main.route('/feedback')
-def feedback():
-    form = FeedbackForm(prefix='feedback')
-    return render_template('contact.html', title="Questions & Feedback", form=form)
-
-
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = FeedbackForm(prefix='feedback')
@@ -125,7 +119,7 @@ def contact():
         else:
             return redirect('main.contact')
 
-    return render_template('contact.html', title="Contact Us", form=form)
+    return render_template('contact.html', title="Contact & Support", form=form)
 
 
 @main.route('/engagements')
