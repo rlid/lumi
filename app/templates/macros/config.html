@@ -46,6 +46,33 @@
 {% endmacro %}
 
 
+{% macro google_tag_manager_js() %}
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        });
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-P4TV3PP');</script>
+    <!-- End Google Tag Manager -->
+{% endmacro %}
+
+{% macro google_tag_manager_body_js() %}
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P4TV3PP"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+{% endmacro %}
+
 {% macro google_analytics_js() %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config['GOOGLE_ANALYTICS_MEASUREMENT_ID'] }}">
 

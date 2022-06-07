@@ -23,6 +23,7 @@
             {{ conf.socketio_js() }}
             {{ flash.flash_toast_js() }}
             {{ moment.include_moment() }}
+            {{ conf.google_tag_manager_js() }}
             {% if session.get('allow_cookie') %}
                 {{ conf.google_analytics_js() }}
                 {{ conf.smalltalk_js() }}
@@ -72,6 +73,7 @@
     {% endblock %}
 </head>
 <body class="d-flex h-100 {% block body_bg %}bg-light{% endblock %}">
+{{ conf.google_tag_manager_body_js() }}
 {% block body %}
     <div class="d-flex w-100 h-100 p-3 mx-auto flex-column">
         <header>
