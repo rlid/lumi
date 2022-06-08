@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block body_bg %}{% if session.get('ab_test') == 'LandingDarkMode:D' %}bg-dark{% else %}bg-light{% endif %}{% endblock %}
+{% block body_bg %}{% if session.get('ab_test') == 'LandingDarkMode:D' %}bg-dark{% else %}bg-light
+{% endif %}{% endblock %}
 
 {% block scripts %}
     {{ super() }}
@@ -46,10 +47,7 @@
         <div class="mx-auto p-3" style="max-width: 45rem">
             <div class="d-flex" style="min-height: 90vh;align-items: center">
                 <div>
-                    <h1 class="display-5 fw-bold text-center mb-4 lh-base">Get <span
-                            class="bg-info rounded px-2 pb-1">
-                        <i>tailored</i> answers</span>, from the <span class="bg-warning rounded px-2 pb-1"><i>right</i>
-                        people</span></h1>
+                    <h1 class="display-5 fw-bold text-center mb-4 lh-base">Get tailored answers from the right people</h1>
                     <p class="lead">Choose a topic, and we will match you up with a relevant person to have a quick chat
                         with 1-on-1. You pay after the chat, and only if you find it helpful.</p>
                     <form method="post">
@@ -76,7 +74,8 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            <p class="small text-muted my-1">Please budget $1 or more per effective minute spent by your
+                            <p class="small text-muted">No credit card required to search.</p>
+                            <p class="small text-muted">Please budget $1 or more per effective minute spent by your
                                 match, e.g. $5 for a 5-minute chat or shorter, or let your match suggest a price by
                                 choosing "Flexible".</p>
                             <p class="small text-muted">You will be able to offer higher rewards as you complete more
@@ -91,19 +90,19 @@
                     <div id="divFAQ"></div>
                     <div style="margin-top: 10rem">
                         <h1 class="display-5 fw-bold text-center mb-4">FAQ</h1>
+                        <h5 class="mt-5">When is payment taken?</h5>
+                        <p class="text-muted">You'll be asked to top up your account before you can engage with your
+                            match. The funds will only leave your account if you rate the engagement successful. You can
+                            get a full refund when you cancel the search without a successful engagement.</p>
+
                         <h5 class="mt-5">How long does it take to find a match?</h5>
-                        <p class="text-muted">Currently, it can take a few hours to a few days depending on the
-                            specificity of your question. If you already have in mind an ideal person to answer your
-                            question, you can also send them a request link and ask for paid help directly.</p>
+                        <p class="text-muted">It varies from a few minutes to a few hours depending on the search
+                            details. If you already have in mind an ideal person to answer your question, you can also
+                            send them a request link and ask for paid help directly.</p>
                         <p class="text-muted">We are constantly expanding our network of helpful contributors and
                             improving our matching algorithm to make it quicker. If you are interested in sharing your
                             wisdoms and helping others, please consider
                             <a href="https://forms.gle/RpJsdPCoSr1KmJQP7">joining us</a>!</p>
-
-                        <h5 class="mt-5">When is payment taken?</h5>
-                        <p class="text-muted">You'll be asked to top up your account before you can engage with your
-                            match. The funds will only leave your account if you rate the engagement successful. You
-                            can get a full refund when you cancel the search without a successful engagement.</p>
 
                         <h5 class="mt-5">What information about me is shared with my match?</h5>
                         <p class="text-muted">Just the search details you provided and your trustworthiness rating
