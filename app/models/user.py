@@ -30,7 +30,7 @@ REP_DECAY = REP_I_DECAY / 1000
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
-    DEFAULT_VALUE_LIMIT = 10  # $10
+    DEFAULT_VALUE_LIMIT = 5  # $10
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
