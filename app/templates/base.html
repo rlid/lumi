@@ -25,9 +25,11 @@
             {{ moment.include_moment() }}
             {{ conf.google_tag_manager_js() }}
             {% if session.get('allow_cookie') %}
+                {{ conf.smalltalk_js() }}
+            {% endif %}
+            {% if session.get('allow_cookie', True) %}
                 {{ conf.google_analytics_js() }}
                 {{ conf.hotjar_js() }}
-                {{ conf.smalltalk_js() }}
             {% endif %}
             {% if current_user.is_authenticated %}
                 <script type="text/javascript" charset="utf-8">
