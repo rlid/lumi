@@ -94,4 +94,7 @@ def create_app(config_name='DEV'):
     from .v2 import v2 as v2_blueprint
     app.register_blueprint(v2_blueprint, url_prefix='/v2')
 
+    from .v3 import v3 as v3_blueprint
+    app.register_blueprint(v3_blueprint, url_prefix='/v3')
+
     return app

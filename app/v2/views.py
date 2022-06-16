@@ -6,10 +6,10 @@ from flask_login import current_user, login_user, login_required
 
 from app import db
 from app.main.forms import FeedbackForm
-from app.models import User, TemporaryRequest, Post, Node
-from app.v2.forms import GenerateLinkForm, PostForm, SignUpForm
-
+from app.models import User, Post
 from app.v2 import v2
+from app.v2.models import TemporaryRequest
+from app.v2.forms import GenerateLinkForm, PostForm, SignUpForm
 
 
 @v2.route('/open2chat')

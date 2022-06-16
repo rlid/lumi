@@ -1,6 +1,7 @@
 import math
 import re
 import secrets
+import statistics
 import string
 import uuid
 from datetime import datetime, timedelta
@@ -16,6 +17,7 @@ from app.models import SingleUseToken, Node, Post, Engagement, PostTag, Tag, Mes
     Feedback, Transaction
 from app.models.errors import InvalidActionError, RewardDistributionError, InsufficientFundsError
 from app.models.payment import PaymentIntent
+from app.v3.models import Rating
 from utils import security_utils, authlib_ext
 
 _SHORT_CODE_LENGTH = 4
@@ -23,6 +25,7 @@ _REMEMBER_ME_ID_NBYTES = 8
 _TOKEN_SECONDS_TO_EXPIRY = 600
 
 REP_I_DECAY = 0.1
+AGREE_DECAY = 0.6
 # normalise to $10 (1000c), i.e. counter metric and value metric would be equivalent if every engagement is $10
 REP_DECAY = REP_I_DECAY / 1000
 
@@ -59,6 +62,14 @@ class User(UserMixin, db.Model):
     # length of separator = 1
     # base64 encoding of n bytes = ~1.3 * n, rounded to 1.5 for safety
     remember_me_id = db.Column(db.String(32 + 1 + int(1.5 * _REMEMBER_ME_ID_NBYTES)))
+
+    state_agree = db.Column(db.Float)
+    p_agree = db.Column(db.Float, default=0.5)
+
+    ratings = db.relationship('Rating',
+                              backref=db.backref('creator'),
+                              lazy='dynamic',
+                              cascade='all, delete-orphan')
 
     posts = db.relationship('Post',
                             backref=db.backref('creator'),
@@ -131,6 +142,55 @@ class User(UserMixin, db.Model):
                                    foreign_keys=[Transaction.user_id],
                                    lazy="dynamic",
                                    cascade="all, delete-orphan")
+
+    def p_agree_if_lost(self, lost_rating, m_i):
+        ps = [rating.s_agree /
+              (rating.s_agree + rating.s_disagree + (1 / m_i if rating == lost_rating else 0))
+              for rating in self.ratings]
+        r_min = min(ps)
+        r_median = statistics.median(ps)
+        return math.sqrt(r_min * r_median)
+
+    def rate_product(self, product, score, review=None):
+        rating = product.ratings.filter_by(creator=self).first()
+        if rating is None:
+            m_i = math.exp(-AGREE_DECAY * self.p_agree)
+            for other_rating in product.ratings:
+                # p_agree_before_update = None
+                update_other_user = False
+                if (other_rating.score == 2 and score > 0) or (other_rating.score == -2 and score < 0):
+                    # ratings agree -> increment the other user's agreeability
+                    other_rating.s_agree = 1 + m_i * other_rating.s_agree
+                    other_rating.s_disagree *= m_i
+                    update_other_user = True
+                    db.session.add(other_rating)
+                if (other_rating.score == 2 and score < 0) or (other_rating.score == -2 and score > 0):
+                    # other_rating disagrees -> compare agreeability and update agreeability accordingly
+                    other_user = other_rating.creator
+                    if other_user.p_agree_if_lost(lost_rating=other_rating, m_i=m_i) <= self.p_agree:
+                        # other_user loses -> increment the other user's disagreeability
+                        other_rating.s_agree *= m_i
+                        other_rating.s_disagree = 1 + m_i * other_rating.s_disagree
+                        update_other_user = True
+                    else:
+                        # other_user wins -> keep their agreeability, decay its strength
+                        other_rating.s_agree *= m_i
+                        other_rating.s_disagree *= m_i
+                    db.session.add(other_rating)
+
+                # time to update user agreeability
+                if update_other_user:  # TODO: maybe take the current rating agreeability as user agreeability if it's the same as the last updated rating for the user, otherwise take min(rating agreeability, user agreeability) in which case user agreeability is from another rating
+                    other_user = other_rating.creator
+                    ps = [rating.s_agree / (rating.s_agree + rating.s_disagree) for rating in other_user.ratings]
+                    r_min = min(ps)
+                    r_median = statistics.median(ps)
+                    other_user.p_agree = math.sqrt(r_min * r_median)
+                    db.session.add(other_user)
+
+            rating = Rating(creator=self, product=product, score=score, review=review)
+            db.session.add(rating)
+        else:
+            current_app.logger.warning(f'{product} is already rated by {self}.')
 
     @staticmethod
     def generate_short_code():

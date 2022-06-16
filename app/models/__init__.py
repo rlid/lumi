@@ -12,4 +12,3 @@ from app.models.post import Post
 from app.models.invite_code import InviteCode
 from app.models.user import User
 from app.models.payment import PaymentIntent
-from app.models.temporary_request import TemporaryRequest
